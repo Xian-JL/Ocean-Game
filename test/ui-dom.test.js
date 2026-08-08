@@ -255,7 +255,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "deploy-v0.2",
+    stage: "postlaunch-v0.3",
     protocolVersion: "1.2",
   });
 

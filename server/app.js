@@ -2,10 +2,12 @@
 
 const path = require("node:path");
 const http = require("node:http");
+const { randomUUID } = require("node:crypto");
 const express = require("express");
 const { Server } = require("socket.io");
 const { InMemoryRoomService } = require("./game/room-service");
 const { SocketGameGateway } = require("./socket/game-gateway");
+const { OperationalTelemetry } = require("./operations/telemetry");
 
 const PUBLIC_DIRECTORY = path.resolve(__dirname, "..", "public");
 
@@ -55,6 +57,8 @@ function allowSameOriginRequest(request, callback) {
 }
 
 function createOceanServer(options = {}) {
+  const clock = options.nowMs ?? Date.now;
+  const startedAtMs = options.startedAtMs ?? clock();
   const nowIso =
     typeof options.now === "function"
       ? options.now
@@ -66,10 +70,20 @@ function createOceanServer(options = {}) {
     playerIdFactory: options.playerIdFactory,
     reconnectTokenFactory: options.reconnectTokenFactory,
     randomDeploymentFactory: options.randomDeploymentFactory,
+    maxRooms: options.maxRooms,
+    closedRoomRetentionMs: options.closedRoomRetentionMs,
+    finishedRoomRetentionMs: options.finishedRoomRetentionMs,
   });
+  const telemetry = options.telemetry ?? new OperationalTelemetry({ nowIso });
+  let io = null;
 
   const app = express();
   app.disable("x-powered-by");
+  app.use((_request, response, next) => {
+    telemetry.increment("httpRequests");
+    response.setHeader("X-Request-Id", randomUUID());
+    next();
+  });
   app.use((_request, response, next) => {
     for (const [name, value] of Object.entries(SECURITY_HEADERS)) {
       response.setHeader(name, value);
@@ -83,8 +97,51 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ok",
       service: "ocean",
-      stage: "deploy-v0.2",
+      stage: "postlaunch-v0.3",
       socketProtocol: "1.2",
+      timestamp: nowIso(),
+    });
+  });
+
+  app.get("/api/status", (_request, response) => {
+    response.setHeader("Cache-Control", "no-store");
+    response.status(200).json({
+      status: "ok",
+      service: "ocean",
+      stage: "postlaunch-v0.3",
+      socketProtocol: "1.2",
+      uptimeSeconds: Math.max(0, Math.floor((clock() - startedAtMs) / 1000)),
+      connections: io?.engine?.clientsCount ?? 0,
+      ...roomService.getOperationsSnapshot(),
+      timestamp: nowIso(),
+    });
+  });
+
+  app.get("/api/ready", (_request, response) => {
+    response.setHeader("Cache-Control", "no-store");
+    response.status(200).json({
+      status: "ready",
+      service: "ocean",
+      stage: "postlaunch-v0.3",
+      timestamp: nowIso(),
+    });
+  });
+
+  app.get("/api/metrics", (_request, response) => {
+    response.setHeader("Cache-Control", "no-store");
+    const memory = process.memoryUsage();
+    response.status(200).json({
+      status: "ok",
+      service: "ocean",
+      stage: "postlaunch-v0.3",
+      uptimeSeconds: Math.max(0, Math.floor((clock() - startedAtMs) / 1000)),
+      memoryMb: {
+        rss: Math.round(memory.rss / 1024 / 1024),
+        heapUsed: Math.round(memory.heapUsed / 1024 / 1024),
+      },
+      connections: io?.engine?.clientsCount ?? 0,
+      rooms: roomService.getOperationsSnapshot(),
+      ...telemetry.snapshot(),
       timestamp: nowIso(),
     });
   });
@@ -98,7 +155,7 @@ function createOceanServer(options = {}) {
   );
 
   const httpServer = http.createServer(app);
-  const io = new Server(httpServer, {
+  io = new Server(httpServer, {
     allowRequest: options.allowRequest ?? allowSameOriginRequest,
     serveClient: true,
   });
@@ -106,7 +163,9 @@ function createOceanServer(options = {}) {
     io,
     roomService,
     nowIso,
+    nowMs: clock,
     logger: options.logger,
+    telemetry,
     timerSweepMs: options.timerSweepMs,
     phasePresentationMs: options.phasePresentationMs,
     setTimeoutFn: options.setTimeoutFn,
@@ -122,6 +181,7 @@ function createOceanServer(options = {}) {
     io,
     roomService,
     gameGateway,
+    telemetry,
   };
 }
 

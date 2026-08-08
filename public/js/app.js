@@ -19,6 +19,7 @@
 
   const SESSION_STORAGE_KEY = "ocean.reconnect-session.v1";
   const MOTION_STORAGE_KEY = "ocean.reduce-motion.v1";
+  const NICKNAME_STORAGE_KEY = "ocean.nickname.v1";
   const MARKER_STORAGE_PREFIX = "ocean.private-markers.v1";
   const ROOM_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
   const REQUEST_TIMEOUT_MS = 8_000;
@@ -31,6 +32,11 @@
   const state = {
     socket: null,
     connected: false,
+    connection: {
+      phase: "connecting",
+      message: "正在连接服务器。首次访问免费服务器时可能需要约一分钟。",
+      failures: 0,
+    },
     protocolVersion: null,
     serverStage: null,
     room: null,
@@ -40,7 +46,13 @@
     pendingRequest: null,
     clockOffsetMs: 0,
     entry: {
-      nickname: "",
+      nickname: (() => {
+        try {
+          return localStorage.getItem(NICKNAME_STORAGE_KEY) ?? "";
+        } catch (_error) {
+          return "";
+        }
+      })(),
       roomCode:
         new URL(window.location.href).searchParams.get("room")
           ?.trim()
@@ -211,6 +223,12 @@
   function setConnectionDisplay(kind, text) {
     connectionDot.dataset.state = kind;
     connectionText.textContent = text;
+  }
+
+  function setConnectionPhase(phase, message, displayKind, displayText) {
+    state.connection.phase = phase;
+    state.connection.message = message;
+    setConnectionDisplay(displayKind, displayText);
   }
 
   function setReduceMotion(enabled) {
@@ -497,6 +515,9 @@
     }
 
     state.room = nextRoom;
+    document.title = nextRoom.turn?.canAct
+      ? "轮到你行动 · 海战 OCEAN"
+      : "海战 OCEAN";
     state.clockOffsetMs = Date.now() - nextRoom.serverNow;
     prepareMarkerContext(nextRoom);
 
@@ -619,6 +640,18 @@
         </div>
 
         <div class="entry-console">
+          ${state.connection.phase !== "online" ? `
+            <article class="connection-help" role="status" aria-live="polite">
+              <div>
+                <strong>${escapeHtml(
+                  state.connection.phase === "offline" ? "网络连接已中断" : "正在建立实时连接",
+                )}</strong>
+                <p>${escapeHtml(state.connection.message)}</p>
+              </div>
+              <button class="button button--secondary button--compact" data-action="retry-connection">
+                立即重试
+              </button>
+            </article>` : ""}
           ${stored ? `
             <article class="restore-card">
               <div>
@@ -776,7 +809,10 @@
             <div class="invite-box">
               <span>邀请链接</span>
               <code>${escapeHtml(inviteUrl)}</code>
-              <button class="button button--secondary button--compact" data-action="copy-invite">复制邀请链接</button>
+              <div class="invite-box__actions">
+                <button class="button button--secondary button--compact" data-action="copy-invite">复制邀请链接</button>
+                <button class="button button--quiet button--compact" data-action="share-invite">系统分享</button>
+              </div>
             </div>
             <div class="inline-actions">
               <button class="button button--danger-quiet" data-action="leave-room">离开房间</button>
@@ -2472,7 +2508,13 @@
       render();
       return;
     }
-    const socket = window.io({ reconnection: true });
+    const socket = window.io({
+      reconnection: true,
+      reconnectionDelay: 1_000,
+      reconnectionDelayMax: 8_000,
+      randomizationFactor: 0.4,
+      timeout: 10_000,
+    });
     state.socket = socket;
 
     socket.on("system:ready", (message) => {
@@ -2536,7 +2578,8 @@
 
     socket.on("connect", () => {
       state.connected = true;
-      setConnectionDisplay("online", "服务器在线");
+      state.connection.failures = 0;
+      setConnectionPhase("online", "服务器连接正常。", "online", "服务器在线");
       render();
       socket.timeout(3_000).emit("client:ping", {}, (error, response) => {
         if (error || !response?.ok) {
@@ -2559,16 +2602,31 @@
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
       state.connected = false;
       state.restoring = false;
-      setConnectionDisplay("offline", "正在重连");
+      setConnectionPhase(
+        navigator.onLine ? "reconnecting" : "offline",
+        navigator.onLine
+          ? `连接已中断，客户端正在自动重连（${reason ?? "原因未知"}）。`
+          : "当前设备处于离线状态。恢复网络后客户端会自动重连。",
+        "offline",
+        "正在重连",
+      );
       render();
     });
 
     socket.on("connect_error", () => {
       state.connected = false;
-      setConnectionDisplay("offline", "连接失败，正在重试");
+      state.connection.failures += 1;
+      setConnectionPhase(
+        "waking",
+        state.connection.failures >= 2
+          ? "免费服务器可能正在从休眠中唤醒，请保留页面；客户端会自动重试。"
+          : "服务器尚未响应，正在自动重试。",
+        "warning",
+        "正在唤醒服务器",
+      );
       render();
     });
   }
@@ -2576,6 +2634,11 @@
   document.addEventListener("input", (event) => {
     if (event.target.id === "nickname-input") {
       state.entry.nickname = event.target.value;
+      try {
+        localStorage.setItem(NICKNAME_STORAGE_KEY, state.entry.nickname);
+      } catch (_error) {
+        // 昵称记忆失败不影响创建或加入房间。
+      }
       const counter = document.querySelector("#nickname-count");
       if (counter) counter.textContent = Array.from(event.target.value).length;
     }
@@ -2631,6 +2694,19 @@
       window.location.reload();
       return;
     }
+    if (action === "retry-connection") {
+      state.connection.failures = 0;
+      setConnectionPhase(
+        "connecting",
+        "正在重新连接服务器。",
+        "warning",
+        "正在连接",
+      );
+      state.socket?.disconnect();
+      state.socket?.connect();
+      render();
+      return;
+    }
     if (action === "restore-session") {
       void restoreSession();
       return;
@@ -2653,6 +2729,10 @@
         "邀请链接已复制。",
         control,
       );
+      return;
+    }
+    if (action === "share-invite") {
+      void shareInvite(control);
       return;
     }
     if (action === "select-placement") {
@@ -2965,6 +3045,23 @@
     }, 1_500);
   }
 
+  async function shareInvite(button) {
+    const url = `${window.location.origin}/?room=${state.room.roomCode}`;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: "加入海战 OCEAN",
+          text: `房间码：${state.room.roomCode}`,
+          url,
+        });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+      }
+    }
+    await copyText(url, "当前设备不支持系统分享，邀请链接已复制。", button);
+  }
+
   function returnHome() {
     clearStoredSession();
     state.room = null;
@@ -2983,6 +3080,43 @@
     ? "true"
     : "false";
   reduceMotionToggle.checked = state.reduceMotion;
+  window.addEventListener("offline", () => {
+    state.connected = false;
+    setConnectionPhase(
+      "offline",
+      "当前设备处于离线状态。恢复网络后客户端会自动重连。",
+      "offline",
+      "设备离线",
+    );
+    render();
+  });
+  window.addEventListener("online", () => {
+    setConnectionPhase(
+      "reconnecting",
+      "网络已经恢复，正在重新连接服务器。",
+      "warning",
+      "正在重连",
+    );
+    state.socket?.connect();
+    render();
+  });
+  window.addEventListener("beforeunload", (event) => {
+    if (state.room && !["CLOSED", "FINISHED"].includes(state.room.roomPhase)) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (
+      document.visibilityState === "visible" &&
+      state.socket?.connected &&
+      state.room
+    ) {
+      void emitRequest("room:sync", {}).then((response) => {
+        if (response.view) acceptRoomState(response.view);
+      }).catch(() => {});
+    }
+  });
   window.setInterval(updateCountdowns, 250);
   render();
   connectSocket();

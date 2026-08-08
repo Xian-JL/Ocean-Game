@@ -3,6 +3,11 @@
 const { RuleValidationError } = require("../game/errors");
 const { TURN_PHASES } = require("../game/match");
 const { CONNECTION_PHASES, ROOM_PHASES } = require("../game/room");
+const { FixedWindowRateLimiter } = require("../operations/rate-limiter");
+const {
+  OperationalTelemetry,
+  logOperationalError,
+} = require("../operations/telemetry");
 const {
   CLIENT_EVENTS,
   SERVER_EVENTS,
@@ -16,6 +21,10 @@ const {
 const DEFAULT_TIMER_SWEEP_MS = 250;
 const DEFAULT_PHASE_PRESENTATION_MS = 1_000;
 const MAX_AUTOMATIC_TRANSITIONS = 20;
+const CLEANUP_SWEEP_MS = 30_000;
+const GENERAL_REQUEST_LIMIT = Object.freeze({ limit: 120, windowMs: 60_000 });
+const CREATE_ROOM_LIMIT = Object.freeze({ limit: 6, windowMs: 10 * 60_000 });
+const ENTRY_REQUEST_LIMIT = Object.freeze({ limit: 30, windowMs: 60_000 });
 
 function fail(code, message, details = {}) {
   throw new RuleValidationError(code, message, details);
@@ -80,11 +89,19 @@ class SocketGameGateway {
     this.io = options.io;
     this.roomService = options.roomService;
     this.nowIso = options.nowIso ?? (() => new Date().toISOString());
+    this.nowMs = options.nowMs ?? Date.now;
     this.logger = options.logger ?? console;
     this.setTimeoutFn = options.setTimeoutFn ?? setTimeout;
     this.clearTimeoutFn = options.clearTimeoutFn ?? clearTimeout;
     this.setIntervalFn = options.setIntervalFn ?? setInterval;
     this.clearIntervalFn = options.clearIntervalFn ?? clearInterval;
+    this.rateLimiter = options.rateLimiter ?? new FixedWindowRateLimiter({
+      now: this.nowMs,
+    });
+    this.telemetry = options.telemetry ?? new OperationalTelemetry({
+      nowIso: this.nowIso,
+    });
+    this.nextCleanupAt = this.nowMs() + CLEANUP_SWEEP_MS;
     this.timerSweepMs = assertNonNegativeInteger(
       options.timerSweepMs ?? DEFAULT_TIMER_SWEEP_MS,
       "timerSweepMs",
@@ -138,6 +155,18 @@ class SocketGameGateway {
         this.#clearRoomActionReceipts(entry.roomCode);
       }
       await this.advanceRoom(entry.roomCode);
+    }
+    if (this.nowMs() >= this.nextCleanupAt) {
+      this.nextCleanupAt = this.nowMs() + CLEANUP_SWEEP_MS;
+      const removedRoomCodes = this.roomService.cleanupExpiredRooms();
+      for (const roomCode of removedRoomCodes) {
+        this.#cancelRoomTransitions(roomCode);
+        this.#clearRoomActionReceipts(roomCode);
+      }
+      if (removedRoomCodes.length > 0) {
+        this.telemetry.increment("roomsCleaned", removedRoomCodes.length);
+      }
+      this.rateLimiter.pruneExpired();
     }
     return processed.map((entry) => entry.roomCode);
   }
@@ -251,8 +280,9 @@ class SocketGameGateway {
   }
 
   #registerSocket(socket) {
+    this.telemetry.increment("socketConnections");
     socket.emit(SERVER_EVENTS.READY, {
-      stage: "deploy-v0.2",
+      stage: "postlaunch-v0.3",
       protocolVersion: SOCKET_PROTOCOL_VERSION,
       connectedAt: this.nowIso(),
     });
@@ -294,6 +324,8 @@ class SocketGameGateway {
       this.#cancelRematch(socket, payload));
 
     socket.on("disconnect", () => {
+      this.telemetry.increment("socketDisconnects");
+      this.rateLimiter.deletePrefix(`socket:${socket.id}:`);
       void this.#disconnectSocket(socket);
     });
   }
@@ -301,9 +333,15 @@ class SocketGameGateway {
   #registerEvent(socket, eventName, handler) {
     socket.on(eventName, (payload, acknowledge) => {
       const normalized = normalizeIncomingArguments(payload, acknowledge);
+      this.telemetry.increment("socketRequests");
       void Promise.resolve()
+        .then(() => this.#consumeRequestBudget(socket, eventName))
         .then(() => handler(normalized.payload))
         .then((data) => {
+          this.telemetry.increment("socketRequestsSucceeded");
+          this.telemetry.increment(
+            `socket.${eventName.replaceAll(":", "_")}.success`,
+          );
           if (typeof normalized.acknowledge === "function") {
             normalized.acknowledge(createSuccessResponse(data));
           }
@@ -313,9 +351,25 @@ class SocketGameGateway {
             socket,
             error,
             normalized.acknowledge,
+            eventName,
           );
         });
     });
+  }
+
+  #consumeRequestBudget(socket, eventName) {
+    this.rateLimiter.consume(`socket:${socket.id}:all`, GENERAL_REQUEST_LIMIT);
+    const address = String(
+      socket.handshake?.headers?.["x-forwarded-for"] ??
+        socket.handshake?.address ??
+        "unknown",
+    ).split(",", 1)[0].trim();
+    if (eventName === CLIENT_EVENTS.CREATE_ROOM) {
+      this.rateLimiter.consume(`address:${address}:create`, CREATE_ROOM_LIMIT);
+    }
+    if ([CLIENT_EVENTS.JOIN_ROOM, CLIENT_EVENTS.RESUME_ROOM].includes(eventName)) {
+      this.rateLimiter.consume(`address:${address}:entry`, ENTRY_REQUEST_LIMIT);
+    }
   }
 
   async #createRoom(socket, payload) {
@@ -653,7 +707,7 @@ class SocketGameGateway {
       }
     } catch (error) {
       if (!(error instanceof RuleValidationError)) {
-        this.logger.error?.("[Ocean] 记录断线失败：", error);
+        logOperationalError(this.logger, this.telemetry, error, "disconnect");
       }
     }
   }
@@ -741,10 +795,12 @@ class SocketGameGateway {
     }
   }
 
-  async #handleSocketError(socket, error, acknowledge) {
+  async #handleSocketError(socket, error, acknowledge, eventName = "unknown") {
     const serialized = serializeSocketError(error);
     if (!(error instanceof RuleValidationError)) {
-      this.logger.error?.("[Ocean] Socket 事件处理失败：", error);
+      logOperationalError(this.logger, this.telemetry, error, "socket:unexpected");
+    } else {
+      this.telemetry.recordError(error, `socket:${eventName}`);
     }
     socket.emit(SERVER_EVENTS.ERROR, serialized);
 
@@ -758,7 +814,12 @@ class SocketGameGateway {
         socket.emit(SERVER_EVENTS.STATE, view);
       } catch (syncError) {
         if (!(syncError instanceof RuleValidationError)) {
-          this.logger.error?.("[Ocean] 错误后同步状态失败：", syncError);
+          logOperationalError(
+            this.logger,
+            this.telemetry,
+            syncError,
+            "socket:error-sync",
+          );
         }
       }
     }
@@ -773,7 +834,7 @@ class SocketGameGateway {
 
   #reportBackgroundError(roomCode, error) {
     const serialized = serializeSocketError(error);
-    this.logger.error?.("[Ocean] 自动流程处理失败：", error);
+    logOperationalError(this.logger, this.telemetry, error, "background");
     if (!roomCode) {
       return;
     }
@@ -785,7 +846,12 @@ class SocketGameGateway {
           .emit(SERVER_EVENTS.ERROR, serialized);
       }
     } catch (readError) {
-      this.logger.error?.("[Ocean] 自动流程错误通知失败：", readError);
+      logOperationalError(
+        this.logger,
+        this.telemetry,
+        readError,
+        "background:notify",
+      );
     }
   }
 }

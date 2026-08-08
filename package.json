@@ -2,7 +2,7 @@
   "name": "ocean-game",
   "version": "0.1.0",
   "private": true,
-  "description": "《海战 OCEAN》低成本公网部署准备版本",
+  "description": "《海战 OCEAN》上线后运行监控、聚合指标与隐私安全日志版本",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
