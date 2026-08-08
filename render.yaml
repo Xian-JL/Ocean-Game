@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: ocean-game
+    runtime: node
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm run start:public
+    healthCheckPath: /api/health
+    maxShutdownDelaySeconds: 30

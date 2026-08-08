@@ -1,0 +1,32 @@
+《海战 OCEAN》开发环境
+版本：1.0
+确认日期：2026-08-07
+状态：已完成安装并通过检查
+
+一、本机与目录
+操作系统：Windows 10/11 64位
+项目根目录：E:\University\University_2.5\Ocean
+Node.js目录：E:\Node
+编辑器：Visual Studio Code
+版本管理：Git
+调试浏览器：Microsoft Edge
+
+二、实际检查结果
+node.exe：存在于 E:\Node，通过
+npm.cmd：存在于 E:\Node，通过
+PATH：优先指向 E:\Node，通过
+Node.js版本：v24.19.0，通过
+npm版本：11.17.0，通过
+JavaScript运行测试：通过
+项目根目录：存在，通过
+
+三、项目技术基线
+客户端：原生 HTML、CSS、JavaScript
+服务端：单个 Node.js 进程
+HTTP服务：Express
+双人实时通信：Socket.IO
+自动测试：Node.js内置 node --test
+对局存储：首版保存在服务器内存中，不使用数据库
+
+四、首版暂不使用
+React、Vue、TypeScript编译流程、Docker、WSL、PostgreSQL、Redis。

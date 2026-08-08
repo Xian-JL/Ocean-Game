@@ -1,0 +1,463 @@
+"use strict";
+
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const test = require("node:test");
+const { JSDOM } = require("jsdom");
+const { createValidDeployment } = require("../test-fixtures/valid-deployment");
+const Data = require("../public/js/game-data");
+
+const PROJECT_ROOT = path.resolve(__dirname, "..");
+
+class FakeSocket {
+  constructor() {
+    this.connected = false;
+    this.handlers = new Map();
+    this.emitted = [];
+  }
+
+  on(eventName, handler) {
+    const handlers = this.handlers.get(eventName) ?? [];
+    handlers.push(handler);
+    this.handlers.set(eventName, handlers);
+    return this;
+  }
+
+  timeout() {
+    return this;
+  }
+
+  emit(eventName, payload, acknowledge) {
+    this.emitted.push({ eventName, payload });
+    if (typeof acknowledge === "function") {
+      if (eventName === "client:ping") {
+        acknowledge(null, {
+          ok: true,
+          protocolVersion: "1.2",
+        });
+      } else {
+        acknowledge(null, {
+          ok: true,
+          data: { stateVersion: 999 },
+        });
+      }
+    }
+    return this;
+  }
+
+  serverEmit(eventName, payload) {
+    for (const handler of this.handlers.get(eventName) ?? []) {
+      handler(payload);
+    }
+  }
+
+  connect() {
+    this.connected = true;
+    this.serverEmit("connect");
+  }
+
+  disconnect() {
+    this.connected = false;
+    this.serverEmit("disconnect");
+  }
+}
+
+function baseRoom(overrides = {}) {
+  return {
+    roomCode: "ABC234",
+    stateVersion: 1,
+    roomPhase: "WAITING",
+    turnPhase: null,
+    connectionPhase: "CONNECTED",
+    deploymentsLocked: false,
+    seats: [
+      {
+        playerId: "player-1",
+        nickname: "甲",
+        online: true,
+        ready: false,
+        autoPrepared: false,
+      },
+    ],
+    own: {
+      playerId: "player-1",
+      nickname: "甲",
+      deployment: null,
+      consecutiveActionTimeouts: 0,
+    },
+    rematch: {
+      ownRequested: false,
+      opponentRequested: false,
+      requestedPlayerIds: [],
+    },
+    matchSummary: {
+      startedAt: null,
+      finishedAt: null,
+      durationMs: null,
+      turnCount: 0,
+    },
+    serverNow: 10_000,
+    deadlines: {
+      deploymentDeadlineAt: null,
+      actionDeadlineAt: null,
+      reconnectDeadlineAtByPlayer: {},
+    },
+    connection: {
+      offlinePlayerIds: [],
+      pausedTimer: null,
+    },
+    rolling: null,
+    turn: null,
+    battle: null,
+    latestResolution: null,
+    turnEvents: [],
+    systemEvents: [],
+    closedReason: null,
+    ...overrides,
+  };
+}
+
+function createSnapshot() {
+  const deployment = createValidDeployment();
+  const units = deployment
+    .filter((placement) => placement.type !== Data.UNIT_TYPES.DECOY_TORPEDO)
+    .map((placement) => {
+      const definition = Data.getUnitDefinitionByType(placement.type);
+      return {
+        id: placement.id,
+        type: placement.type,
+        cells: [...placement.cells],
+        hp: definition.initialHp,
+        paralyzed: false,
+        hitCells: [],
+      };
+    });
+  const decoys = deployment
+    .filter((placement) => placement.type === Data.UNIT_TYPES.DECOY_TORPEDO)
+    .map((placement) => ({
+      id: placement.id,
+      cell: placement.cells[0],
+      destroyed: false,
+    }));
+  return {
+    units,
+    decoys,
+    remainingUses: Object.fromEntries(
+      Data.ACTION_DEFINITIONS.filter((action) => action.initialUses !== null).map(
+        (action) => [action.type, action.initialUses],
+      ),
+    ),
+  };
+}
+
+function playingRoom() {
+  const snapshot = createSnapshot();
+  return baseRoom({
+    stateVersion: 4,
+    roomPhase: "PLAYING",
+    turnPhase: "ACTIVE",
+    seats: [
+      { playerId: "player-1", nickname: "甲", online: true, ready: true, autoPrepared: false },
+      { playerId: "player-2", nickname: "乙", online: true, ready: true, autoPrepared: false },
+    ],
+    own: {
+      playerId: "player-1",
+      nickname: "甲",
+      deployment: createValidDeployment(),
+      consecutiveActionTimeouts: 0,
+    },
+    matchSummary: {
+      startedAt: 1_000,
+      finishedAt: null,
+      durationMs: 9_000,
+      turnCount: 1,
+    },
+    deadlines: {
+      deploymentDeadlineAt: null,
+      actionDeadlineAt: 100_000,
+      reconnectDeadlineAtByPlayer: {},
+    },
+    turn: {
+      currentPlayerId: "player-1",
+      turnNumber: 1,
+      canAct: true,
+    },
+    battle: {
+      viewerId: "player-1",
+      opponentId: "player-2",
+      match: { status: "playing", result: null },
+      own: {
+        ...snapshot,
+        enemyMap: {
+          cellResults: {},
+          submarineMissileMarkers: ["B3"],
+        },
+        intelligenceAreas: [],
+        actionsLocked: false,
+        actionAvailability: Data.ACTION_DEFINITIONS.map((action) => ({
+          actionType: action.type,
+          name: action.name,
+          sourceId: snapshot.units.find((unit) => unit.type === action.sourceType)?.id,
+          remainingUses: snapshot.remainingUses[action.type] ?? null,
+          available:
+            action.type !== Data.ACTION_TYPES.HELICOPTER_STRAFE,
+          issues:
+            action.type === Data.ACTION_TYPES.HELICOPTER_STRAFE
+              ? [{ code: "ACTION_LOCKED", message: "尚未解锁" }]
+              : [],
+          targetCount: 100,
+        })),
+      },
+      opponent: { id: "player-2" },
+      publicActionLog: [],
+      replay: null,
+    },
+  });
+}
+
+function click(window, element) {
+  element.dispatchEvent(
+    new window.MouseEvent("click", { bubbles: true, cancelable: true }),
+  );
+}
+
+test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 与核心交互", async (context) => {
+  const html = fs
+    .readFileSync(path.join(PROJECT_ROOT, "public/index.html"), "utf8")
+    .replaceAll(/<script[^>]+src="[^"]+"[^>]*><\/script>/g, "");
+  const dom = new JSDOM(html, {
+    url: "http://127.0.0.1:3000/",
+    runScripts: "outside-only",
+    pretendToBeVisual: true,
+  });
+  context.after(() => dom.window.close());
+  const { window } = dom;
+  window.structuredClone = structuredClone;
+  window.document.execCommand = () => true;
+  Object.defineProperty(window.navigator, "clipboard", {
+    value: { writeText: async () => {} },
+    configurable: true,
+  });
+  window.HTMLDialogElement.prototype.showModal = function showModal() {
+    this.setAttribute("open", "");
+  };
+  window.HTMLDialogElement.prototype.close = function close() {
+    this.removeAttribute("open");
+  };
+
+  const socket = new FakeSocket();
+  window.io = () => socket;
+  for (const script of ["game-data.js", "ui-model.js", "app.js"]) {
+    window.eval(
+      fs.readFileSync(path.join(PROJECT_ROOT, "public/js", script), "utf8"),
+    );
+  }
+  socket.connect();
+  socket.serverEmit("system:ready", {
+    stage: "deploy-v0.2",
+    protocolVersion: "1.2",
+  });
+
+  assert.match(window.document.querySelector("#app").textContent, /创建房间/);
+  assert.equal(window.document.querySelectorAll("#create-form").length, 1);
+  click(window, window.document.querySelector('[data-action="open-rules"]'));
+  assert.equal(window.document.querySelector("#rules-dialog").open, true);
+  click(window, window.document.querySelector('[data-action="close-rules"]'));
+  socket.serverEmit("room:error", {
+    code: "TEST_MESSAGE",
+    message: "可恢复的测试提示",
+    details: {},
+  });
+  assert.match(window.document.querySelector(".toast").textContent, /可恢复的测试提示/);
+
+  socket.serverEmit("room:session", {
+    active: true,
+    roomCode: "ABC234",
+    playerId: "player-1",
+    reconnectToken: "private-token-must-not-enter-dom",
+  });
+  socket.serverEmit("room:state", baseRoom());
+  assert.match(window.document.querySelector("#app").textContent, /等待舰队接入/);
+  assert.equal(
+    window.document.body.textContent.includes("private-token-must-not-enter-dom"),
+    false,
+  );
+
+  socket.serverEmit("room:state", baseRoom({
+    stateVersion: 2,
+    roomPhase: "DEPLOYING",
+    seats: [
+      { playerId: "player-1", nickname: "甲", online: true, ready: false, autoPrepared: false },
+      { playerId: "player-2", nickname: "乙", online: true, ready: false, autoPrepared: false },
+    ],
+    deadlines: {
+      deploymentDeadlineAt: 190_000,
+      actionDeadlineAt: null,
+      reconnectDeadlineAtByPlayer: {},
+    },
+  }));
+  assert.equal(window.document.querySelectorAll(".fleet-item").length, 10);
+  assert.equal(window.document.querySelectorAll('[data-action="deployment-cell"]').length, 100);
+  const deploymentPage = window.document.querySelector(".deployment-page");
+  const deploymentBoard = window.document.querySelector(
+    ".deployment-map-card .ocean-board",
+  );
+  click(
+    window,
+    window.document.querySelector(
+      '[data-action="select-placement"][data-placement-id="motorboat"]',
+    ),
+  );
+  assert.equal(window.document.querySelector(".deployment-page"), deploymentPage);
+  assert.equal(
+    window.document.querySelector(".deployment-map-card .ocean-board"),
+    deploymentBoard,
+  );
+  assert.match(window.document.querySelector(".selected-placement-card").textContent, /摩托艇/);
+  const deploymentA1 = window.document.querySelector(
+    '[data-action="deployment-cell"][data-coordinate="A1"]',
+  );
+  deploymentA1.dispatchEvent(
+    new window.MouseEvent("pointerover", { bubbles: true }),
+  );
+  assert.equal(window.document.querySelector(".deployment-page"), deploymentPage);
+  assert.equal(
+    window.document.querySelector(".deployment-map-card .ocean-board"),
+    deploymentBoard,
+  );
+  assert.ok(
+    deploymentA1.classList.contains("board-cell--placement-preview-valid"),
+  );
+  const deploymentA2 = window.document.querySelector(
+    '[data-action="deployment-cell"][data-coordinate="A2"]',
+  );
+  deploymentA2.dispatchEvent(
+    new window.MouseEvent("pointerover", { bubbles: true }),
+  );
+  assert.ok(
+    !deploymentA1.classList.contains("board-cell--placement-preview-valid"),
+  );
+  assert.ok(
+    deploymentA2.classList.contains("board-cell--placement-preview-valid"),
+  );
+  click(window, window.document.querySelector('[data-action="random-deployment"]'));
+  assert.match(window.document.querySelector(".validation-card").textContent, /部署完整合法/);
+  assert.equal(
+    window.document.querySelector('[data-action="ready-deployment"]').disabled,
+    false,
+  );
+
+  socket.serverEmit("room:state", baseRoom({
+    stateVersion: 3,
+    roomPhase: "ROLLING",
+    seats: [
+      { playerId: "player-1", nickname: "甲", online: true, ready: true, autoPrepared: false },
+      { playerId: "player-2", nickname: "乙", online: true, ready: true, autoPrepared: false },
+    ],
+    rolling: {
+      rounds: [
+        {
+          round: 1,
+          rolls: { "player-1": 6, "player-2": 2 },
+          tied: false,
+        },
+      ],
+      firstPlayerId: "player-1",
+    },
+  }));
+  assert.match(window.document.querySelector("#app").textContent, /甲 获得第一回合/);
+
+  socket.serverEmit("room:state", playingRoom());
+  assert.equal(window.document.querySelectorAll(".action-card").length, 9);
+  assert.equal(window.document.querySelectorAll('.battle-map-card [data-action="enemy-cell"]').length, 100);
+  const pirate = window.document.querySelector(
+    `[data-action="select-action"][data-action-type="${Data.ACTION_TYPES.PIRATE_ATTACK}"]`,
+  );
+  click(window, pirate);
+  const enemyA1 = window.document.querySelector(
+    '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A1"]',
+  );
+  click(window, enemyA1);
+  assert.equal(window.document.querySelector("#confirm-dialog").open, true);
+  assert.match(window.document.querySelector("#confirm-body").textContent, /未命中无伤害/);
+  click(window, window.document.querySelector("#confirm-cancel"));
+
+  click(window, window.document.querySelector('[data-action="toggle-marker-mode"]'));
+  const enemyA2 = window.document.querySelector(
+    '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A2"]',
+  );
+  click(window, enemyA2);
+  assert.match(
+    window.document.querySelector(
+      '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A2"]',
+    ).getAttribute("aria-label"),
+    /私人标记 O/,
+  );
+
+  const paused = playingRoom();
+  paused.stateVersion = 5;
+  paused.connectionPhase = "PAUSED_ONE_OFFLINE";
+  paused.seats[1].online = false;
+  paused.connection = {
+    offlinePlayerIds: ["player-2"],
+    pausedTimer: { kind: "action", remainingMs: 45_000 },
+  };
+  paused.deadlines.actionDeadlineAt = null;
+  paused.deadlines.reconnectDeadlineAtByPlayer = {
+    "player-2": 130_000,
+  };
+  socket.serverEmit("room:state", paused);
+  assert.equal(window.document.querySelector("#blocking-overlay").hidden, false);
+  assert.match(window.document.querySelector(".pause-card").textContent, /乙 已断线/);
+  assert.match(window.document.querySelector(".pause-card").textContent, /投降并离开/);
+
+  const resumed = playingRoom();
+  resumed.stateVersion = 6;
+  socket.serverEmit("room:state", resumed);
+  assert.equal(window.document.querySelector("#blocking-overlay").hidden, true);
+
+  const replayOne = createSnapshot();
+  const replayTwo = createSnapshot();
+  const finished = playingRoom();
+  finished.stateVersion = 7;
+  finished.roomPhase = "FINISHED";
+  finished.turnPhase = null;
+  finished.turn = null;
+  finished.deadlines.actionDeadlineAt = null;
+  finished.matchSummary = {
+    startedAt: 1_000,
+    finishedAt: 61_000,
+    durationMs: 60_000,
+    turnCount: 8,
+  };
+  finished.battle.match = {
+    status: "finished",
+    result: {
+      outcome: "win",
+      winnerId: "player-1",
+      loserId: "player-2",
+      reason: "aircraft_carrier_sunk",
+      trigger: { kind: "action" },
+    },
+  };
+  finished.battle.own.actionsLocked = true;
+  finished.battle.own.actionAvailability = [];
+  finished.battle.replay = {
+    players: { "player-1": replayOne, "player-2": replayTwo },
+    actionLog: [],
+    finalSalvo: null,
+  };
+  socket.serverEmit("room:state", finished);
+  assert.match(window.document.querySelector("#result-title").textContent, /胜利/);
+  assert.equal(window.document.querySelectorAll(".replay-tabs button").length, 2);
+  assert.equal(window.document.querySelectorAll(".replay-resources span").length, 5);
+
+  socket.serverEmit("room:state", baseRoom({
+    stateVersion: 8,
+    roomPhase: "CLOSED",
+    closedReason: "disconnect_timeout_before_match",
+  }));
+  assert.match(window.document.querySelector("#app").textContent, /本房间已关闭/);
+  assert.match(window.document.querySelector("#app").textContent, /120 秒/);
+});

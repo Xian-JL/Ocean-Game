@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="《海战 OCEAN》低成本、服务器权威的双人回合制策略游戏"
+    />
+    <meta name="theme-color" content="#061522" />
+    <title>海战 OCEAN</title>
+    <link rel="stylesheet" href="/css/main.css" />
+    <script src="/socket.io/socket.io.js" defer></script>
+    <script src="/js/game-data.js" defer></script>
+    <script src="/js/ui-model.js" defer></script>
+    <script src="/js/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#app">跳到主要内容</a>
+
+    <div class="site-shell">
+      <header class="global-header">
+        <a class="brand" href="/" aria-label="海战 OCEAN 首页">
+          <span class="brand__mark" aria-hidden="true">
+            <span></span><span></span><span></span>
+          </span>
+          <span>
+            <strong>OCEAN</strong>
+            <small>海战</small>
+          </span>
+        </a>
+
+        <div class="global-header__tools">
+          <div class="connection-pill" role="status" aria-live="polite">
+            <span
+              id="connection-dot"
+              class="connection-pill__dot"
+              data-state="connecting"
+              aria-hidden="true"
+            ></span>
+            <span id="connection-text">正在连接</span>
+          </div>
+          <span id="header-room-code" class="header-room" hidden></span>
+          <button class="button button--quiet button--compact" data-action="open-rules">
+            规则与图例
+          </button>
+        </div>
+      </header>
+
+      <main id="app" class="app" tabindex="-1">
+        <section class="boot-card" aria-label="正在启动">
+          <span class="sonar" aria-hidden="true"></span>
+          <p>正在连接海战指挥系统……</p>
+        </section>
+      </main>
+
+      <footer class="global-footer">
+        <span>海战 OCEAN · 公网测试 deploy-v0.2</span>
+        <span>服务器权威 · 协议 1.2</span>
+      </footer>
+    </div>
+
+    <div id="blocking-overlay" class="blocking-overlay" hidden></div>
+    <div
+      id="toast-region"
+      class="toast-region"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false"
+    ></div>
+
+    <dialog id="confirm-dialog" class="modal modal--confirm" aria-labelledby="confirm-title">
+      <div class="modal__signal" aria-hidden="true"></div>
+      <p class="eyebrow">操作确认</p>
+      <h2 id="confirm-title">确认操作</h2>
+      <div id="confirm-body" class="modal__body"></div>
+      <div class="modal__actions">
+        <button id="confirm-cancel" class="button button--secondary" type="button">
+          取消
+        </button>
+        <button id="confirm-accept" class="button button--primary" type="button">
+          确认
+        </button>
+      </div>
+    </dialog>
+
+    <dialog id="rules-dialog" class="modal modal--rules" aria-labelledby="rules-title">
+      <div class="rules-dialog__header">
+        <div>
+          <p class="eyebrow">RULE v1.0 / 快速查阅</p>
+          <h2 id="rules-title">规则与图例</h2>
+        </div>
+        <button class="icon-button" type="button" data-action="close-rules" aria-label="关闭规则">
+          ×
+        </button>
+      </div>
+
+      <div class="rules-dialog__content">
+        <section class="rule-section">
+          <h3>胜负与回合</h3>
+          <p>
+            双方在 10×10 海域部署舰队，轮流完成一个合法行动。航空母舰生命值降至 0
+            时立即结算；双方均无攻击手段时进入终局鱼雷齐射。每回合 90 秒，连续三次行动超时判负。
+          </p>
+        </section>
+
+        <section class="rule-section">
+          <h3>九项行动</h3>
+          <div class="quick-rule-grid">
+            <article><strong>驱逐舰Ⅰ冲撞</strong><span>以中间格为中心的 7×7 范围，命中后自身 −1。</span></article>
+            <article><strong>驱逐舰Ⅱ冲撞</strong><span>以中间两格为中心的 8×8 范围，命中后自身 −1。</span></article>
+            <article><strong>海盗船攻击</strong><span>命中才触发目标、海盗船及相关航空母舰伤害；特殊同时沉没时海盗船一方胜。</span></article>
+            <article><strong>摩托艇冲撞</strong><span>只对航空母舰造成 1 点伤害；撞到水面单位或诱饵后自身沉没。</span></article>
+            <article><strong>潜射导弹</strong><span>共 3 枚；发射方只知道“导弹已发射”，目标格仍未结算。</span></article>
+            <article><strong>核弹</strong><span>共 2 枚；航空母舰 −2，其他作战单位 −1，摧毁诱饵鱼雷。</span></article>
+            <article><strong>震爆弹</strong><span>完整 5×5；只有水下作战单位可能在下个正常回合瘫痪，施加方不知道结果。</span></article>
+            <article><strong>探测弹</strong><span>完整 3×3；存活水下作战单位的未受击格与有效诱饵鱼雷均产生信号，只返回是否探测到信号。</span></article>
+            <article><strong>直升机扫射</strong><span>两艘驱逐舰均沉没后解锁；扫射一整行或列，只命中水面单位，航空母舰最多 −2。</span></article>
+          </div>
+        </section>
+
+        <section class="rule-section">
+          <h3>敌方地图图例</h3>
+          <div class="legend-list">
+            <span><i class="legend-swatch legend-swatch--unknown"></i>未知，可成为目标</span>
+            <span><i class="legend-swatch legend-swatch--hit">✦</i>命中，已结算</span>
+            <span><i class="legend-swatch legend-swatch--miss">×</i>未命中，已结算</span>
+            <span><i class="legend-swatch legend-swatch--missile">↗</i>导弹已发射，仍可成为目标</span>
+            <span><i class="legend-swatch legend-swatch--marker">O</i>本机私人标记</span>
+          </div>
+        </section>
+
+        <section class="rule-section rule-section--preference">
+          <div>
+            <h3>动画偏好</h3>
+            <p>关闭动画不会改变服务器结算，也不会跳过任何行动。</p>
+          </div>
+          <label class="switch-row">
+            <input id="reduce-motion-toggle" type="checkbox" />
+            <span>减少动画</span>
+          </label>
+        </section>
+      </div>
+
+      <div class="modal__actions">
+        <button class="button button--primary" type="button" data-action="close-rules">
+          返回游戏
+        </button>
+      </div>
+    </dialog>
+
+    <noscript>
+      <div class="noscript-message">
+        本游戏需要 JavaScript 才能连接实时对局服务，请在浏览器中启用后刷新页面。
+      </div>
+    </noscript>
+  </body>
+</html>
