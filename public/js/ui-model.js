@@ -118,10 +118,10 @@
 
   function deriveActionStatus(roomState, actionDefinition) {
     const ownBattle = roomState?.battle?.own;
-    const source = ownBattle?.units?.find(
-      (unit) => unit.type === actionDefinition.sourceType,
-    );
-    if (!source || source.hp <= 0) {
+    const source = actionDefinition.sourceType === data.UNIT_TYPES.RADAR
+      ? ownBattle?.radar
+      : ownBattle?.units?.find((unit) => unit.type === actionDefinition.sourceType);
+    if (!source || (typeof source.hp === "number" && source.hp <= 0)) {
       return { code: "sunk", label: "已沉没", enabled: false };
     }
     if (source.paralyzed) {

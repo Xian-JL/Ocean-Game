@@ -185,6 +185,23 @@ test("有效诱饵产生水下信号，被摧毁后不再产生信号", () => {
   );
 });
 
+test("雷达扫描完整 4×4 区域且只返回是否存在敌方布局", () => {
+  const found = resolveAction(
+    createTestBattle(), "player-1",
+    cellIntent("radar-found", ACTION_TYPES.RADAR_SCAN, "radar", "I7"),
+  );
+  assert.equal(found.result.outcome.kind, "radar");
+  assert.equal(found.result.outcome.area.length, 16);
+  assert.equal(found.result.outcome.detected, true);
+  assert.equal(player(found.state, "player-1").remainingUses.radar_scan, 0);
+
+  const empty = resolveAction(
+    createTestBattle(), "player-1",
+    cellIntent("radar-empty", ACTION_TYPES.RADAR_SCAN, "radar", "A5"),
+  );
+  assert.equal(empty.result.outcome.detected, false);
+});
+
 test("直升机扫射同时处理整列，只命中水面单位", () => {
   const resolved = resolveAction(
     unlockHelicopter(createTestBattle()),
@@ -204,8 +221,8 @@ test("直升机扫射同时处理整列，只命中水面单位", () => {
 
   const cellResults = resolved.result.outcome.cellResults;
   assert.equal(cellResults.filter((item) => item.result === "hit").length, 6);
-  assert.equal(cellResults.filter((item) => item.result === "miss").length, 4);
-  assert.equal(player(resolved.state, "player-1").resolvedTargetCells.length, 10);
+  assert.equal(cellResults.filter((item) => item.result === "miss").length, 6);
+  assert.equal(player(resolved.state, "player-1").resolvedTargetCells.length, 12);
 });
 
 test("直升机一次扫过航空母舰多个单位格时最多造成 2 点伤害", () => {
@@ -251,7 +268,7 @@ test("直升机不命中或摧毁诱饵鱼雷，但会命中同列的摩托艇",
   }
 });
 
-test("直升机跳过已结算格并保持其原状态不重复伤害", () => {
+test("直升机重复覆盖已受击格仍报告命中但不重复伤害", () => {
   let battle = unlockHelicopter(createTestBattle());
   battle = damageBattleUnit(battle, "player-2", "carrier", 1, {
     hitCells: ["G5"],
@@ -274,8 +291,8 @@ test("直升机跳过已结算格并保持其原状态不重复伤害", () => {
   const skipped = resolved.result.outcome.cellResults.find(
     (candidate) => candidate.coordinate === "G5",
   );
-  assert.equal(skipped.result, "skipped");
-  assert.equal(resolved.result.pendingTargetCells.length, 9);
+  assert.equal(skipped.result, "hit");
+  assert.equal(resolved.result.pendingTargetCells.length, 12);
 });
 
 test("潜射导弹造成的隐藏受击格仍被范围攻击处理，但不会重复造成伤害", () => {

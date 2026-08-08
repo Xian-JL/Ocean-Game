@@ -11,6 +11,7 @@ const {
   getFullRow,
   getHelicopterArea,
   getShockArea,
+  getRadarArea,
 } = require("../server/game/ranges");
 const { DEPLOYABLE_TYPES: TYPES } = require("../server/game/units");
 
@@ -46,7 +47,7 @@ test("驱逐舰Ⅱ以中间两格的几何中心生成 8×8，靠边时裁切", 
   );
 });
 
-test("震爆弹必须形成完整 5×5，合法中心为 C3～H8", () => {
+test("震爆弹必须形成完整 5×5，合法中心为 C3～J10", () => {
   const area = getShockArea("E5");
   assert.equal(area.length, 25);
   assert.equal(area[0], "C3");
@@ -58,7 +59,7 @@ test("震爆弹必须形成完整 5×5，合法中心为 C3～H8", () => {
   );
 });
 
-test("探测弹必须形成完整 3×3，合法中心为 B2～I9", () => {
+test("探测弹必须形成完整 3×3，合法中心为 B2～K11", () => {
   const area = getDetectionArea("B2");
   assert.equal(area.length, 9);
   assert.deepEqual(area, [
@@ -90,6 +91,8 @@ test("直升机攻击范围是一整行或一整列", () => {
     "A8",
     "A9",
     "A10",
+    "A11",
+    "A12",
   ]);
   assert.deepEqual(getFullColumn(10), [
     "A10",
@@ -102,6 +105,8 @@ test("直升机攻击范围是一整行或一整列", () => {
     "H10",
     "I10",
     "J10",
+    "K10",
+    "L10",
   ]);
   assert.deepEqual(getHelicopterArea("row", "J"), getFullRow("J"));
   assert.deepEqual(
@@ -119,7 +124,7 @@ test("范围函数拒绝非法源单位、行、列或轴", () => {
     () => getDestroyerRange(TYPES.SUBMARINE, ["A1"]),
     (error) => error.code === "UNSUPPORTED_RANGE_SOURCE",
   );
-  assert.throws(() => getFullRow("K"), (error) => error.code === "INVALID_ROW");
+  assert.throws(() => getFullRow("M"), (error) => error.code === "INVALID_ROW");
   assert.throws(
     () => getFullColumn(0),
     (error) => error.code === "INVALID_COLUMN",

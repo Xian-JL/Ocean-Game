@@ -287,6 +287,7 @@ function prepareSecondPlayerForAutomaticSkip(battle) {
   ]);
   next = setRemainingUses(next, "player-2", {
     [ACTION_TYPES.HELICOPTER_STRAFE]: 0,
+    [ACTION_TYPES.RADAR_SCAN]: 0,
   });
   const player = getBattlePlayerState(next, "player-2");
   return replaceBattlePlayerState(next, "player-2", {
@@ -329,7 +330,7 @@ test("Socket 协议创建和加入房间，并分别发送会话与安全状态"
   const firstView = latestState(room.first.recorder);
   const secondView = latestState(room.second.recorder);
 
-  assert.equal(room.first.recorder.ready.at(-1).stage, "deploy-v0.2");
+  assert.equal(room.first.recorder.ready.at(-1).stage, "postlaunch-v0.4");
   assert.equal(room.first.recorder.ready.at(-1).protocolVersion, "1.2");
   const firstSession = room.first.recorder.sessions.at(-1);
   assert.equal(firstSession.active, true);

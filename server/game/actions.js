@@ -13,6 +13,7 @@ const ACTION_TYPES = Object.freeze({
   SHOCK_BOMB: "shock_bomb",
   DETECTION_BOMB: "detection_bomb",
   HELICOPTER_STRAFE: "helicopter_strafe",
+  RADAR_SCAN: "radar_scan",
 });
 
 const ACTION_CATEGORIES = Object.freeze({
@@ -33,6 +34,7 @@ const RANGE_MODES = Object.freeze({
   SHOCK_AREA: "shock_area",
   DETECTION_AREA: "detection_area",
   FULL_LINE: "full_line",
+  RADAR_AREA: "radar_area",
 });
 
 const LIMIT_KINDS = Object.freeze({
@@ -136,6 +138,16 @@ const ACTION_DEFINITIONS = Object.freeze({
     limitKind: LIMIT_KINDS.USE_COUNT,
     initialUses: 1,
   }),
+  [ACTION_TYPES.RADAR_SCAN]: freezeDefinition({
+    type: ACTION_TYPES.RADAR_SCAN,
+    name: "雷达扫描",
+    category: ACTION_CATEGORIES.AUXILIARY,
+    sourceType: DEPLOYABLE_TYPES.RADAR,
+    targetMode: TARGET_MODES.AREA_CENTER,
+    rangeMode: RANGE_MODES.RADAR_AREA,
+    limitKind: LIMIT_KINDS.USE_COUNT,
+    initialUses: 1,
+  }),
 });
 
 const ACTION_TYPE_ORDER = Object.freeze([
@@ -148,6 +160,7 @@ const ACTION_TYPE_ORDER = Object.freeze([
   ACTION_TYPES.SHOCK_BOMB,
   ACTION_TYPES.DETECTION_BOMB,
   ACTION_TYPES.HELICOPTER_STRAFE,
+  ACTION_TYPES.RADAR_SCAN,
 ]);
 
 function getActionDefinition(type) {

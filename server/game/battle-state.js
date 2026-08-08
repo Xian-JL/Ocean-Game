@@ -395,14 +395,8 @@ function recordTargetCellResults(playerState, cellResults) {
     }
     const coordinate = formatCoordinate(cellResult.coordinate);
     const existing = nextResults[coordinate];
-    if (existing && existing !== cellResult.result) {
-      throw new RuleValidationError(
-        "TARGET_CELL_RESULT_CONFLICT",
-        "已结算格的命中结果不能被改写。",
-        { coordinate, existing, requested: cellResult.result },
-      );
-    }
-    nextResults[coordinate] = cellResult.result;
+    // 重复攻击合法；敌方地图保留该格首次公开结论，避免历史被覆盖。
+    nextResults[coordinate] = existing ?? cellResult.result;
     coordinates.push(coordinate);
   }
 

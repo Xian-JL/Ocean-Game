@@ -334,6 +334,22 @@ function resolveDetectionBomb(action, defenderState) {
   };
 }
 
+function resolveRadarScan(action, defenderState) {
+  const areaSet = new Set(action.targetCells);
+  const detected = defenderState.units.some((unit) =>
+    unit.cells.some((cell) => areaSet.has(cell))) ||
+    defenderState.decoys.some((decoy) => !decoy.destroyed && areaSet.has(decoy.cell)) ||
+    defenderState.radar.cells.some((cell) => areaSet.has(cell));
+  return {
+    outcome: {
+      kind: "radar",
+      anchor: action.action.target.coordinate,
+      area: action.targetCells,
+      detected,
+    },
+  };
+}
+
 function resolveHelicopterStrafe(
   action,
   defenderId,
@@ -467,6 +483,8 @@ function resolveAction(battleState, actorId, intent) {
     outcome = resolved.outcome;
   } else if (committed.action.actionType === ACTION_TYPES.DETECTION_BOMB) {
     outcome = resolveDetectionBomb(committed, defenderState).outcome;
+  } else if (committed.action.actionType === ACTION_TYPES.RADAR_SCAN) {
+    outcome = resolveRadarScan(committed, defenderState).outcome;
   } else if (
     committed.action.actionType === ACTION_TYPES.HELICOPTER_STRAFE
   ) {

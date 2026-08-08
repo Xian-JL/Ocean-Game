@@ -51,6 +51,9 @@ const { normalizeServerTime } = require("./timing");
 
 const MAX_ID_ATTEMPTS = 100;
 const RECONNECT_TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,128}$/;
+const DEFAULT_MAX_ROOMS = 200;
+const DEFAULT_CLOSED_ROOM_RETENTION_MS = 10 * 60 * 1000;
+const DEFAULT_FINISHED_ROOM_RETENTION_MS = 2 * 60 * 60 * 1000;
 
 function fail(code, message, details = {}) {
   throw new RuleValidationError(code, message, details);
@@ -102,14 +105,37 @@ class InMemoryRoomService {
     this.randomDeploymentFactory = options.randomDeploymentFactory ??
       (() => generateRandomDeployment(this.random));
     this.reconnectCredentialDigests = new Map();
+    this.roomActivityAt = new Map();
+    this.maxRooms = options.maxRooms ?? DEFAULT_MAX_ROOMS;
+    this.closedRoomRetentionMs = options.closedRoomRetentionMs ??
+      DEFAULT_CLOSED_ROOM_RETENTION_MS;
+    this.finishedRoomRetentionMs = options.finishedRoomRetentionMs ??
+      DEFAULT_FINISHED_ROOM_RETENTION_MS;
+    for (const [name, value] of [
+      ["maxRooms", this.maxRooms],
+      ["closedRoomRetentionMs", this.closedRoomRetentionMs],
+      ["finishedRoomRetentionMs", this.finishedRoomRetentionMs],
+    ]) {
+      if (!Number.isInteger(value) || value < 1) {
+        throw new TypeError(`${name} 必须是正整数。`);
+      }
+    }
   }
 
   createRoom({ nickname }) {
     const nowMs = this.#readNow();
+    if (this.rooms.size >= this.maxRooms) {
+      fail(
+        "SERVER_CAPACITY_REACHED",
+        "当前服务器房间数量已达上限，请稍后再创建。",
+        { maxRooms: this.maxRooms },
+      );
+    }
     const playerId = this.#createUniquePlayerId(null);
     const roomCode = this.#createUniqueRoomCode();
     const room = createRoomState({ roomCode, playerId, nickname });
     this.rooms.set(roomCode, room);
+    this.roomActivityAt.set(roomCode, nowMs);
     const reconnectToken = this.#issueReconnectToken(roomCode, playerId);
     return {
       roomCode,
@@ -249,6 +275,7 @@ class InMemoryRoomService {
     }
     const next = markPlayerDisconnected(current, playerId, nowMs);
     this.rooms.set(next.roomCode, next);
+    this.roomActivityAt.set(next.roomCode, nowMs);
     return {
       changed: true,
       roomCode: next.roomCode,
@@ -270,6 +297,7 @@ class InMemoryRoomService {
       disconnectResolved = true;
     }
     this.rooms.set(next.roomCode, next);
+    this.roomActivityAt.set(next.roomCode, nowMs);
 
     let rotatedReconnectToken = null;
     if (next.roomPhase === ROOM_PHASES.CLOSED) {
@@ -402,6 +430,7 @@ class InMemoryRoomService {
 
       if (next) {
         this.rooms.set(room.roomCode, next);
+        this.roomActivityAt.set(room.roomCode, nowMs);
         if (next.roomPhase === ROOM_PHASES.CLOSED) {
           this.#invalidateRoomCredentials(next.roomCode);
         }
@@ -412,6 +441,39 @@ class InMemoryRoomService {
       }
     }
     return processed;
+  }
+
+  cleanupExpiredRooms() {
+    const nowMs = this.#readNow();
+    const removedRoomCodes = [];
+    for (const [roomCode, room] of this.rooms) {
+      const lastActivityAt = this.roomActivityAt.get(roomCode) ?? nowMs;
+      const retentionMs = room.roomPhase === ROOM_PHASES.CLOSED
+        ? this.closedRoomRetentionMs
+        : room.roomPhase === ROOM_PHASES.FINISHED &&
+            room.seats.every((seat) => !seat.online)
+          ? this.finishedRoomRetentionMs
+          : null;
+      if (retentionMs !== null && nowMs - lastActivityAt >= retentionMs) {
+        this.rooms.delete(roomCode);
+        this.roomActivityAt.delete(roomCode);
+        this.#invalidateRoomCredentials(roomCode);
+        removedRoomCodes.push(roomCode);
+      }
+    }
+    return removedRoomCodes;
+  }
+
+  getOperationsSnapshot() {
+    const roomsByPhase = {};
+    for (const room of this.rooms.values()) {
+      roomsByPhase[room.roomPhase] = (roomsByPhase[room.roomPhase] ?? 0) + 1;
+    }
+    return {
+      roomCount: this.rooms.size,
+      maxRooms: this.maxRooms,
+      roomsByPhase,
+    };
   }
 
   getPlayerView(roomCode, playerId) {
@@ -471,6 +533,7 @@ class InMemoryRoomService {
       });
     }
     this.rooms.set(current.roomCode, next);
+    this.roomActivityAt.set(current.roomCode, this.#readNow());
     return next;
   }
 
@@ -592,6 +655,9 @@ class InMemoryRoomService {
 }
 
 module.exports = {
+  DEFAULT_CLOSED_ROOM_RETENTION_MS,
+  DEFAULT_FINISHED_ROOM_RETENTION_MS,
+  DEFAULT_MAX_ROOMS,
   InMemoryRoomService,
   RECONNECT_TOKEN_PATTERN,
   createRoomCode,

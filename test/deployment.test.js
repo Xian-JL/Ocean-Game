@@ -11,6 +11,7 @@ const { DEPLOYABLE_TYPES: TYPES } = require("../server/game/units");
 
 function createValidDeployment() {
   return [
+    { id: "radar", type: TYPES.RADAR, cells: ["J7", "J8", "J9", "K7", "K8", "K9", "L7", "L8", "L9"] },
     { id: "destroyer-i", type: TYPES.DESTROYER_I, cells: ["A1", "A2", "A3"] },
     {
       id: "destroyer-ii",
@@ -50,8 +51,8 @@ test("完整合法舰队可以部署，单位彼此相邻也合法", () => {
 
   assert.equal(result.valid, true);
   assert.deepEqual(result.errors, []);
-  assert.equal(result.normalizedPlacements.length, 10);
-  assert.equal(assertValidDeployment(deployment).length, 10);
+  assert.equal(result.normalizedPlacements.length, 11);
+  assert.equal(assertValidDeployment(deployment).length, 11);
 });
 
 test("线形单位必须水平或垂直连续", () => {
@@ -93,8 +94,8 @@ test("航空母舰六格必须全部四向连通", () => {
 
 test("完整部署拒绝重叠格、重复 ID 和错误对象数量", () => {
   const deployment = createValidDeployment();
-  deployment[1] = {
-    ...deployment[1],
+  deployment[2] = {
+    ...deployment[2],
     id: "destroyer-i",
     cells: ["A3", "B3", "C3", "D3"],
   };
@@ -112,7 +113,7 @@ test("部署拒绝越界坐标、单对象重复格和错误格数", () => {
   const result = validatePlacement({
     id: "pirate",
     type: TYPES.PIRATE_SHIP,
-    cells: ["A1", "A1", "K1", "A2"],
+    cells: ["A1", "A1", "M1", "A2"],
   });
   const codes = errorCodes(result);
   assert.ok(codes.includes("OUT_OF_BOUNDS"));
@@ -126,6 +127,6 @@ test("非法完整部署断言提供所有结构化错误", () => {
     (error) =>
       error.code === "INVALID_DEPLOYMENT" &&
       Array.isArray(error.details.errors) &&
-      error.details.errors.length === 8,
+      error.details.errors.length === 9,
   );
 });

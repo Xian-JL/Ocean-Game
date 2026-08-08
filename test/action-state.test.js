@@ -25,6 +25,7 @@ test("合法部署生成七个作战单位及全部初始资源", () => {
     shock_bomb: 1,
     detection_bomb: 1,
     helicopter_strafe: 1,
+    radar_scan: 1,
   });
   assert.equal(getRemainingUses(state, ACTION_TYPES.PIRATE_ATTACK), null);
   assert.deepEqual(state.submarineMissileMarkers, []);

@@ -139,11 +139,16 @@ function getDetectionArea(center) {
   );
 }
 
+function getRadarArea(topLeft) {
+  const point = normalizePoint(topLeft);
+  return getRectangle(point.row, point.row + 3, point.column, point.column + 3);
+}
+
 function getFullRow(rowLabel) {
   if (typeof rowLabel !== "string") {
     throw new RuleValidationError(
       "INVALID_ROW",
-      "行必须使用 A～J 表示。",
+      "行必须使用 A～L 表示。",
       { rowLabel },
     );
   }
@@ -153,7 +158,7 @@ function getFullRow(rowLabel) {
   if (row === -1 || normalized.length !== 1) {
     throw new RuleValidationError(
       "INVALID_ROW",
-      "行必须使用 A～J 表示。",
+      "行必须使用 A～L 表示。",
       { rowLabel },
     );
   }
@@ -169,7 +174,7 @@ function getFullColumn(columnNumber) {
   ) {
     throw new RuleValidationError(
       "INVALID_COLUMN",
-      "列必须使用 1～10 的整数表示。",
+      "列必须使用 1～12 的整数表示。",
       { columnNumber },
     );
   }
@@ -200,5 +205,6 @@ module.exports = {
   getFullColumn,
   getFullRow,
   getHelicopterArea,
+  getRadarArea,
   getShockArea,
 };

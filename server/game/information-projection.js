@@ -76,6 +76,12 @@ function createPublicActionRecord(actionRecord) {
           ? "underwater_signal_detected"
           : "no_underwater_signal",
       };
+    case ACTION_TYPES.RADAR_SCAN:
+      return {
+        ...record,
+        area: [...actionRecord.outcome.area],
+        result: actionRecord.outcome.detected ? "layout_detected" : "no_layout_detected",
+      };
 
     case ACTION_TYPES.HELICOPTER_STRAFE:
       return {
@@ -181,10 +187,20 @@ function createOwnPlayerSnapshot(battleState, playerId) {
           },
         ];
       }
+      if (record.action.actionType === ACTION_TYPES.RADAR_SCAN) {
+        return [{
+          sequence: record.sequence,
+          kind: "radar",
+          center: record.outcome.anchor,
+          area: [...record.outcome.area],
+          detected: record.outcome.detected,
+        }];
+      }
       return [];
     });
 
   return {
+    radar: { ...playerState.radar, cells: [...playerState.radar.cells] },
     units: playerState.units.map((unit) => ({
       id: unit.id,
       type: unit.type,
@@ -211,6 +227,7 @@ function createOwnPlayerSnapshot(battleState, playerId) {
 
 function createRevealPlayerSnapshot(playerState) {
   return {
+    radar: { ...playerState.radar, cells: [...playerState.radar.cells] },
     units: playerState.units.map((unit) => ({
       id: unit.id,
       type: unit.type,

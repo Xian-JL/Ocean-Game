@@ -2,8 +2,8 @@
 
 const { RuleValidationError } = require("./errors");
 
-const BOARD_SIZE = 10;
-const ROW_LABELS = "ABCDEFGHIJ";
+const BOARD_SIZE = 12;
+const ROW_LABELS = "ABCDEFGHIJKL";
 
 function isPointInBounds(row, column) {
   return (
@@ -20,18 +20,18 @@ function parseCoordinate(value) {
   if (typeof value !== "string") {
     throw new RuleValidationError(
       "INVALID_COORDINATE",
-      "坐标必须是 A1～J10 格式的字符串。",
+      "坐标必须是 A1～L12 格式的字符串。",
       { value },
     );
   }
 
   const normalized = value.trim().toUpperCase();
-  const match = /^([A-J])(10|[1-9])$/.exec(normalized);
+  const match = /^([A-L])(1[0-2]|[1-9])$/.exec(normalized);
 
   if (!match) {
     throw new RuleValidationError(
       "INVALID_COORDINATE",
-      "坐标必须位于 A1～J10。",
+      "坐标必须位于 A1～L12。",
       { value },
     );
   }
@@ -60,7 +60,7 @@ function normalizePoint(value) {
 
   throw new RuleValidationError(
     "INVALID_COORDINATE",
-    "坐标必须位于 A1～J10。",
+    "坐标必须位于 A1～L12。",
     { value },
   );
 }

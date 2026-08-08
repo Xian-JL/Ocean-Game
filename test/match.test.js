@@ -136,6 +136,7 @@ function preparePlayerTwoForAutomaticSkip(battle) {
   ]);
   next = setRemainingUses(next, "player-2", {
     helicopter_strafe: 0,
+    radar_scan: 0,
   });
   const playerState = getBattlePlayerState(next, "player-2");
   return replaceBattlePlayerState(next, "player-2", {

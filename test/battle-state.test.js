@@ -102,7 +102,7 @@ test("同一已受击单位格不能通过底层伤害接口重复造成伤害",
   assert.equal(repeated.event.appliedDamage, 0);
 });
 
-test("攻击方逐格命中结果与已结算格同步保存且不可冲突改写", () => {
+test("攻击方逐格命中结果与已结算格同步保存，重复攻击保留首次结论", () => {
   const player = getBattlePlayerState(createTestBattle(), "player-1");
   const recorded = recordTargetCellResults(player, [
     { coordinate: "a1", result: "hit" },
@@ -113,13 +113,10 @@ test("攻击方逐格命中结果与已结算格同步保存且不可冲突改�
     B2: "miss",
   });
   assert.deepEqual(recorded.resolvedTargetCells, ["A1", "B2"]);
-  assert.throws(
-    () =>
-      recordTargetCellResults(recorded, [
-        { coordinate: "A1", result: "miss" },
-      ]),
-    (error) => error.code === "TARGET_CELL_RESULT_CONFLICT",
-  );
+  const repeated = recordTargetCellResults(recorded, [
+    { coordinate: "A1", result: "miss" },
+  ]);
+  assert.equal(repeated.targetCellResults.A1, "hit");
 });
 
 test("诱饵鱼雷摧毁状态独立于作战单位生命值", () => {
@@ -184,6 +181,11 @@ test("没有合法行动时自动跳过并解除瘫痪，有合法行动时禁�
       unit.hp,
     );
   }
+  player = getBattlePlayerState(battle, "player-2");
+  battle = replaceBattlePlayerState(battle, "player-2", {
+    ...player,
+    remainingUses: { ...player.remainingUses, radar_scan: 0 },
+  });
 
   const skipped = completeAutomaticSkip(battle, "player-2");
   assert.equal(

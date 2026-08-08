@@ -31,6 +31,7 @@ const {
   getFullColumn,
   getFullRow,
   getShockArea,
+  getRadarArea,
 } = require("./ranges");
 const { DEPLOYABLE_TYPES } = require("./units");
 
@@ -68,6 +69,15 @@ function isHelicopterUnlocked(state) {
 
 function getSourceIssues(state, definition, sourceId, options = {}) {
   const issues = [];
+  if (definition.sourceType === DEPLOYABLE_TYPES.RADAR) {
+    if (sourceId !== state.radar.id) {
+      issues.push(createRuleIssue("SOURCE_NOT_FOUND", "找不到指定的雷达。", { sourceId }));
+    }
+    if (getRemainingUses(state, definition.type) <= 0) {
+      issues.push(createRuleIssue("RESOURCE_EXHAUSTED", "雷达扫描次数已经耗尽。", { actionType: definition.type }));
+    }
+    return issues;
+  }
   const source = getUnitById(state, sourceId);
 
   if (!source) {
@@ -165,7 +175,6 @@ function getActionTargetOptions(state, actionType) {
         return [];
       }
       return getDestroyerIRange(source.cells)
-        .filter((cell) => !resolved.has(cell))
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     case RANGE_MODES.DESTROYER_II: {
@@ -174,28 +183,25 @@ function getActionTargetOptions(state, actionType) {
         return [];
       }
       return getDestroyerIIRange(source.cells)
-        .filter((cell) => !resolved.has(cell))
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     case RANGE_MODES.FULL_BOARD:
-      return ALL_BOARD_CELLS.filter((cell) => !resolved.has(cell)).map(
+      return ALL_BOARD_CELLS.map(
         (coordinate) => ({ kind: "cell", coordinate }),
       );
     case RANGE_MODES.SHOCK_AREA:
-      return createCenterTargets(2, 7, 2, 7);
+      return createCenterTargets(2, BOARD_SIZE - 3, 2, BOARD_SIZE - 3);
     case RANGE_MODES.DETECTION_AREA:
-      return createCenterTargets(1, 8, 1, 8);
+      return createCenterTargets(1, BOARD_SIZE - 2, 1, BOARD_SIZE - 2);
+    case RANGE_MODES.RADAR_AREA:
+      return createCenterTargets(0, BOARD_SIZE - 4, 0, BOARD_SIZE - 4);
     case RANGE_MODES.FULL_LINE: {
       const targets = [];
       for (const row of ROW_LABELS) {
-        if (getFullRow(row).some((cell) => !resolved.has(cell))) {
-          targets.push({ kind: "row", row });
-        }
+        targets.push({ kind: "row", row });
       }
       for (let column = 1; column <= BOARD_SIZE; column += 1) {
-        if (getFullColumn(column).some((cell) => !resolved.has(cell))) {
-          targets.push({ kind: "column", column });
-        }
+        targets.push({ kind: "column", column });
       }
       return targets;
     }
@@ -286,16 +292,6 @@ function validateAndNormalizeTarget(state, definition, source, target) {
         };
       }
 
-      if (state.resolvedTargetCells.includes(normalizedTarget.coordinate)) {
-        return {
-          error: createRuleIssue(
-            "TARGET_ALREADY_RESOLVED",
-            "单格攻击不能再次选择已结算格。",
-            { coordinate: normalizedTarget.coordinate },
-          ),
-        };
-      }
-
       return {
         normalizedTarget,
         targetCells: [normalizedTarget.coordinate],
@@ -307,9 +303,10 @@ function validateAndNormalizeTarget(state, definition, source, target) {
       const normalizedTarget = normalizeCellTarget(target);
       let cells;
       try {
-        cells =
-          definition.rangeMode === RANGE_MODES.SHOCK_AREA
-            ? getShockArea(normalizedTarget.coordinate)
+        cells = definition.rangeMode === RANGE_MODES.SHOCK_AREA
+          ? getShockArea(normalizedTarget.coordinate)
+          : definition.rangeMode === RANGE_MODES.RADAR_AREA
+            ? getRadarArea(normalizedTarget.coordinate)
             : getDetectionArea(normalizedTarget.coordinate);
       } catch (error) {
         if (error instanceof RuleValidationError) {
@@ -333,16 +330,7 @@ function validateAndNormalizeTarget(state, definition, source, target) {
 
     if (definition.targetMode === TARGET_MODES.ROW_OR_COLUMN) {
       const { normalizedTarget, cells } = normalizeLineTarget(target);
-      const pendingTargetCells = getUnresolvedCells(state, cells);
-      if (pendingTargetCells.length === 0) {
-        return {
-          error: createRuleIssue(
-            "NO_UNRESOLVED_TARGETS",
-            "所选行或列没有尚未结算的格。",
-            { target: normalizedTarget },
-          ),
-        };
-      }
+      const pendingTargetCells = cells;
       return {
         normalizedTarget,
         targetCells: cells,
@@ -467,7 +455,9 @@ function validateActionIntent(state, intent) {
 function getActionAvailability(state, actionType, options = {}) {
   assertActionState(state);
   const definition = getActionDefinition(actionType);
-  const source = getUnitByType(state, definition.sourceType);
+  const source = definition.sourceType === DEPLOYABLE_TYPES.RADAR
+    ? state.radar
+    : getUnitByType(state, definition.sourceType);
   const issues = source
     ? getSourceIssues(state, definition, source.id, options)
     : [

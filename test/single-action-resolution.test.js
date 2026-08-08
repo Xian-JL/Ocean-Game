@@ -421,6 +421,29 @@ test("同一单位格被潜射导弹命中过后不会再次造成任何伤害",
   );
 });
 
+test("海盗船重复命中同一已受击格不再触发目标、航母或自身伤害", () => {
+  const first = resolveAction(
+    createTestBattle(), "player-1",
+    createIntent("pirate-first-cell", ACTION_TYPES.PIRATE_ATTACK, "pirate", "C3"),
+  );
+  const hpAfterFirst = {
+    target: unit(first.state, "player-2", "submarine").hp,
+    enemyCarrier: unit(first.state, "player-2", "carrier").hp,
+    pirate: unit(first.state, "player-1", "pirate").hp,
+  };
+  const second = resolveAction(
+    first.state, "player-1",
+    createIntent("pirate-repeat-cell", ACTION_TYPES.PIRATE_ATTACK, "pirate", "C3"),
+  );
+  assert.equal(second.result.outcome.actualResult, "miss");
+  assert.deepEqual({
+    target: unit(second.state, "player-2", "submarine").hp,
+    enemyCarrier: unit(second.state, "player-2", "carrier").hp,
+    pirate: unit(second.state, "player-1", "pirate").hp,
+  }, hpAfterFirst);
+  assert.equal(second.result.outcome.damageEvents.length, 0);
+});
+
 test("沉没单位的其他单位格作为残骸处理并返回未命中", () => {
   let battle = createTestBattle();
   battle = damageBattleUnit(battle, "player-2", "carrier", 4);

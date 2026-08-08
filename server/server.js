@@ -106,7 +106,7 @@ function startOceanServer(options = {}) {
     const address = httpServer.address();
     const listeningPort =
       address && typeof address === "object" ? address.port : config.port;
-    logger.log("[Ocean] 公网部署准备 deploy-v0.2 已启动");
+    logger.log("[Ocean] 运行监控 postlaunch-v0.4 已启动");
     for (const [index, url] of displayUrls(
       config,
       listeningPort,

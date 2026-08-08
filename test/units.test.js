@@ -13,7 +13,7 @@ const {
 } = require("../server/game/units");
 
 test("舰队编成、占格数和初始生命值与规则文档一致", () => {
-  assert.equal(Object.keys(DEPLOYABLE_DEFINITIONS).length, 8);
+  assert.equal(Object.keys(DEPLOYABLE_DEFINITIONS).length, 9);
   assert.deepEqual(FLEET_REQUIREMENTS, {
     destroyer_i: 1,
     destroyer_ii: 1,
@@ -23,6 +23,7 @@ test("舰队编成、占格数和初始生命值与规则文档一致", () => {
     nuclear_submarine: 1,
     aircraft_carrier: 1,
     decoy_torpedo: 3,
+    radar: 1,
   });
 
   assert.deepEqual(
@@ -41,6 +42,7 @@ test("舰队编成、占格数和初始生命值与规则文档一致", () => {
       nuclear_submarine: [4, 2],
       aircraft_carrier: [6, 6],
       decoy_torpedo: [1, null],
+      radar: [9, null],
     },
   );
 });

@@ -21,7 +21,7 @@ test("服务器随机部署连续生成多套完整合法舰队", () => {
     const result = validateDeployment(deployment);
 
     assert.equal(result.valid, true, `seed=${seed}`);
-    assert.equal(deployment.length, 10);
+    assert.equal(deployment.length, 11);
   }
 });
 

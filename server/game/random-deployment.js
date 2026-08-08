@@ -6,6 +6,7 @@ const { RuleValidationError } = require("./errors");
 const { DEPLOYABLE_TYPES: TYPES } = require("./units");
 
 const PLACEMENT_SPECS = Object.freeze([
+  { id: "radar", type: TYPES.RADAR, shape: "square_3x3" },
   { id: "carrier", type: TYPES.AIRCRAFT_CARRIER, shape: "rectangle_2x3" },
   { id: "destroyer-ii", type: TYPES.DESTROYER_II, shape: "line_4" },
   { id: "submarine", type: TYPES.SUBMARINE, shape: "square_2x2" },
@@ -19,6 +20,7 @@ const PLACEMENT_SPECS = Object.freeze([
 ]);
 
 const OUTPUT_ID_ORDER = Object.freeze([
+  "radar",
   "destroyer-i",
   "destroyer-ii",
   "submarine",
@@ -104,6 +106,7 @@ const CANDIDATES_BY_SHAPE = Object.freeze({
   line_4: Object.freeze(createLineCandidates(4)),
   line_3: Object.freeze(createLineCandidates(3)),
   square_2x2: Object.freeze(createRectangleCandidates(2, 2)),
+  square_3x3: Object.freeze(createRectangleCandidates(3, 3)),
   single: Object.freeze(createRectangleCandidates(1, 1)),
 });
 

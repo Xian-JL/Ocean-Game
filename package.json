@@ -1,8 +1,8 @@
 {
   "name": "ocean-game",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "private": true,
-  "description": "《海战 OCEAN》低成本公网部署准备版本",
+  "description": "《海战 OCEAN》12×12 地图、一次伤害格、雷达扫描与分层私人标记版本",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

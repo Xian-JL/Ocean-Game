@@ -244,6 +244,36 @@ p {
   font-size: 0.78rem;
 }
 
+.connection-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 196, 87, 0.42);
+  border-radius: 14px;
+  background: rgba(255, 181, 51, 0.08);
+}
+
+.connection-help strong,
+.connection-help p {
+  margin: 0;
+}
+
+.connection-help p {
+  margin-top: 0.3rem;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+@media (max-width: 640px) {
+  .connection-help {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
 .connection-pill {
   gap: 8px;
 }
@@ -1128,8 +1158,8 @@ kbd {
 .ocean-board {
   display: grid;
   width: max-content;
-  grid-template-columns: 23px repeat(10, var(--cell-size));
-  grid-template-rows: 23px repeat(10, var(--cell-size));
+  grid-template-columns: 23px repeat(12, var(--cell-size));
+  grid-template-rows: 23px repeat(12, var(--cell-size));
   gap: 2px;
   margin: 0 auto;
   user-select: none;
@@ -1198,6 +1228,11 @@ kbd {
 .board-cell--decoy {
   border-color: rgba(244, 173, 84, 0.5);
   background: linear-gradient(145deg, rgba(127, 84, 33, 0.86), rgba(74, 48, 24, 0.92));
+}
+
+.board-cell--radar {
+  border-color: rgba(89, 224, 172, 0.5);
+  background: linear-gradient(145deg, rgba(30, 110, 88, 0.86), rgba(15, 61, 55, 0.92));
 }
 
 .board-cell--selected-unit,
@@ -1334,6 +1369,19 @@ kbd {
   font-size: 0.87rem;
   font-weight: 700;
 }
+
+.board-cell--marker-occupied .marker-glyph { color: #ff6b77; }
+.marker-half { position: absolute; right: 2px; left: 2px; height: calc(50% - 3px); border-radius: 2px; opacity: 0.9; }
+.marker-half--top { top: 2px; }
+.marker-half--bottom { bottom: 2px; }
+.board-cell--marker-surface_yes .marker-half--top,
+.board-cell--marker-underwater_yes .marker-half--bottom { background: #ff6b77; }
+.board-cell--marker-surface_no .marker-half--top,
+.board-cell--marker-underwater_no .marker-half--bottom { background: #eefaff; }
+.board-cell--marker-surface_yes .marker-half--bottom,
+.board-cell--marker-surface_no .marker-half--bottom,
+.board-cell--marker-underwater_yes .marker-half--top,
+.board-cell--marker-underwater_no .marker-half--top { border: 1px solid rgba(184, 237, 248, 0.18); }
 
 .board-cell--intel-shock {
   outline: 2px solid rgba(188, 140, 255, 0.55);
@@ -3442,12 +3490,12 @@ kbd {
   .battle-map-card .board-frame,
   .deployment-map-card .board-frame,
   .replay-map-panel .board-frame {
-    --cell-size: clamp(27px, calc((100vw - 64px) / 10), 34px);
+    --cell-size: clamp(23px, calc((100vw - 68px) / 12), 32px);
   }
 
   .ocean-board {
-    grid-template-columns: 21px repeat(10, var(--cell-size));
-    grid-template-rows: 21px repeat(10, var(--cell-size));
+    grid-template-columns: 21px repeat(12, var(--cell-size));
+    grid-template-rows: 21px repeat(12, var(--cell-size));
     gap: 1px;
   }
 
@@ -3721,5 +3769,102 @@ select {
 
   .battle-header__turn strong {
     font-size: 0.86rem;
+  }
+}
+
+/* Postlaunch v0.2: touch, safe-area and narrow-screen hardening. */
+html,
+body {
+  min-height: 100%;
+  min-height: 100dvh;
+}
+
+body {
+  padding-right: env(safe-area-inset-right);
+  padding-left: env(safe-area-inset-left);
+}
+
+.global-header {
+  padding-top: env(safe-area-inset-top);
+}
+
+.global-footer {
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
+}
+
+.board-frame {
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.button,
+.text-button,
+.board-cell,
+.mobile-map-tabs button {
+  touch-action: manipulation;
+}
+
+:where(button, input, select, textarea, a, [tabindex]):focus-visible {
+  outline: 3px solid rgba(99, 221, 245, 0.86);
+  outline-offset: 3px;
+}
+
+.invite-box__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (max-width: 1080px) {
+  .mobile-map-tabs {
+    position: sticky;
+    z-index: 18;
+    top: calc(66px + env(safe-area-inset-top));
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgba(5, 22, 34, 0.94);
+    backdrop-filter: blur(12px);
+  }
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding-bottom: calc(54px + env(safe-area-inset-bottom));
+  }
+
+  .battle-map-card .board-frame,
+  .deployment-map-card .board-frame,
+  .replay-map-panel .board-frame {
+    --cell-size: 40px;
+  }
+
+  .board-frame::after {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 0.76rem;
+    text-align: center;
+    content: "地图可左右滑动";
+  }
+
+  .invite-box__actions,
+  .invite-box__actions .button {
+    width: 100%;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .button,
+  .text-button,
+  .mobile-map-tabs button {
+    min-height: 46px;
+  }
+
+  .board-cell {
+    min-width: 40px;
+    min-height: 40px;
   }
 }

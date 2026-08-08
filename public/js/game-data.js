@@ -9,8 +9,8 @@
     root.OceanGameData = api;
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
-  const BOARD_SIZE = 10;
-  const ROWS = Object.freeze("ABCDEFGHIJ".split(""));
+  const BOARD_SIZE = 12;
+  const ROWS = Object.freeze("ABCDEFGHIJKL".split(""));
   const COLUMNS = Object.freeze(
     Array.from({ length: BOARD_SIZE }, (_value, index) => index + 1),
   );
@@ -24,6 +24,7 @@
     NUCLEAR_SUBMARINE: "nuclear_submarine",
     AIRCRAFT_CARRIER: "aircraft_carrier",
     DECOY_TORPEDO: "decoy_torpedo",
+    RADAR: "radar",
   });
 
   const ACTION_TYPES = Object.freeze({
@@ -36,6 +37,7 @@
     SHOCK_BOMB: "shock_bomb",
     DETECTION_BOMB: "detection_bomb",
     HELICOPTER_STRAFE: "helicopter_strafe",
+    RADAR_SCAN: "radar_scan",
   });
 
   const UNIT_DEFINITIONS = Object.freeze([
@@ -127,6 +129,11 @@
       initialHp: null,
       shapeText: "单格",
     })),
+    Object.freeze({
+      id: "radar", type: UNIT_TYPES.RADAR, name: "雷达", shortName: "达",
+      category: "radar", shape: "square3", cellCount: 9, initialHp: null,
+      shapeText: "3×3",
+    }),
   ]);
 
   const ACTION_DEFINITIONS = Object.freeze([
@@ -211,6 +218,15 @@
       initialUses: 1,
       warning: "选择完整一行或一列，只命中水面单位；对航空母舰的本次总伤害最多为 2。己方两艘驱逐舰均沉没后解锁。",
     }),
+    Object.freeze({
+      type: ACTION_TYPES.RADAR_SCAN,
+      name: "雷达扫描",
+      sourceType: UNIT_TYPES.RADAR,
+      targetMode: "area",
+      rangeMode: "radar",
+      initialUses: 1,
+      warning: "选择一个完整 4×4 区域，只返回该区域内是否存在敌方布局，不公开数量、层级或类型。",
+    }),
   ]);
 
   const ALL_COORDINATES = Object.freeze(
@@ -221,7 +237,7 @@
     if (typeof coordinate !== "string") {
       return null;
     }
-    const match = /^([A-J])(10|[1-9])$/.exec(coordinate.trim().toUpperCase());
+    const match = /^([A-L])(1[0-2]|[1-9])$/.exec(coordinate.trim().toUpperCase());
     if (!match) {
       return null;
     }
@@ -345,6 +361,9 @@
     if (definition.shape === "square") {
       return rectangle(point.row, point.row + 1, point.column, point.column + 1);
     }
+    if (definition.shape === "square3") {
+      return rectangle(point.row, point.row + 2, point.column, point.column + 2);
+    }
     if (definition.shape === "line") {
       return Array.from({ length: definition.cellCount }, (_value, index) =>
         orientation === "vertical"
@@ -378,6 +397,11 @@
         Math.max(...rows) - Math.min(...rows) === 1 &&
         Math.max(...columns) - Math.min(...columns) === 1
       );
+    }
+    if (definition.shape === "square3") {
+      return new Set(rows).size === 3 && new Set(columns).size === 3 &&
+        Math.max(...rows) - Math.min(...rows) === 2 &&
+        Math.max(...columns) - Math.min(...columns) === 2;
     }
     if (definition.shape === "line") {
       const horizontal = new Set(rows).size === 1;
@@ -517,9 +541,11 @@
     "decoy-1": ALL_COORDINATES.map((cell) => [cell]),
     "decoy-2": ALL_COORDINATES.map((cell) => [cell]),
     "decoy-3": ALL_COORDINATES.map((cell) => [cell]),
+    radar: rectangleCandidates(3, 3),
   });
 
   const RANDOM_ORDER = Object.freeze([
+    "radar",
     "carrier",
     "destroyer-ii",
     "submarine",
@@ -618,6 +644,9 @@
         point.column + 1,
       );
     }
+    if (kind === "radar") {
+      return rectangle(point.row, point.row + 3, point.column, point.column + 3);
+    }
     return [];
   }
 
@@ -667,30 +696,29 @@
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     if (definition.rangeMode === "full_board") {
-      return ALL_COORDINATES.filter((cell) => !resolved.has(cell)).map(
+      return ALL_COORDINATES.map(
         (coordinate) => ({ kind: "cell", coordinate }),
       );
     }
     if (definition.rangeMode === "shock") {
-      return rectangle(2, 7, 2, 7).map((coordinate) => ({
+      return rectangle(2, BOARD_SIZE - 3, 2, BOARD_SIZE - 3).map((coordinate) => ({
         kind: "cell",
         coordinate,
       }));
     }
     if (definition.rangeMode === "detection") {
-      return rectangle(1, 8, 1, 8).map((coordinate) => ({
+      return rectangle(1, BOARD_SIZE - 2, 1, BOARD_SIZE - 2).map((coordinate) => ({
         kind: "cell",
         coordinate,
       }));
     }
+    if (definition.rangeMode === "radar") {
+      return rectangle(0, BOARD_SIZE - 4, 0, BOARD_SIZE - 4).map((coordinate) => ({ kind: "cell", coordinate }));
+    }
     if (definition.rangeMode === "full_line") {
       return [
-        ...ROWS.filter((row) =>
-          COLUMNS.some((column) => !resolved.has(`${row}${column}`)),
-        ).map((row) => ({ kind: "row", row })),
-        ...COLUMNS.filter((column) =>
-          ROWS.some((row) => !resolved.has(`${row}${column}`)),
-        ).map((column) => ({ kind: "column", column })),
+        ...ROWS.map((row) => ({ kind: "row", row })),
+        ...COLUMNS.map((column) => ({ kind: "column", column })),
       ];
     }
     return [];
@@ -719,6 +747,9 @@
     }
     if (definition.rangeMode === "detection") {
       return getAreaCells("detection", target.coordinate);
+    }
+    if (definition.rangeMode === "radar") {
+      return getAreaCells("radar", target.coordinate);
     }
     if (definition.rangeMode === "full_line") {
       return getFullLine(target);

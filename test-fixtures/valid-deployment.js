@@ -5,6 +5,11 @@ const { DEPLOYABLE_TYPES: TYPES } = require("../server/game/units");
 function createValidDeployment() {
   return [
     {
+      id: "radar",
+      type: TYPES.RADAR,
+      cells: ["J7", "J8", "J9", "K7", "K8", "K9", "L7", "L8", "L9"],
+    },
+    {
       id: "destroyer-i",
       type: TYPES.DESTROYER_I,
       cells: ["A1", "A2", "A3"],

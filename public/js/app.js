@@ -19,7 +19,9 @@
 
   const SESSION_STORAGE_KEY = "ocean.reconnect-session.v1";
   const MOTION_STORAGE_KEY = "ocean.reduce-motion.v1";
-  const MARKER_STORAGE_PREFIX = "ocean.private-markers.v1";
+  const NICKNAME_STORAGE_KEY = "ocean.nickname.v1";
+  const MARKER_STORAGE_PREFIX = "ocean.private-markers.v2";
+  const MARKER_CYCLE = ["occupied", "surface_yes", "surface_no", "underwater_yes", "underwater_no"];
   const ROOM_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
   const REQUEST_TIMEOUT_MS = 8_000;
 
@@ -31,6 +33,11 @@
   const state = {
     socket: null,
     connected: false,
+    connection: {
+      phase: "connecting",
+      message: "正在连接服务器。首次访问免费服务器时可能需要约一分钟。",
+      failures: 0,
+    },
     protocolVersion: null,
     serverStage: null,
     room: null,
@@ -40,7 +47,13 @@
     pendingRequest: null,
     clockOffsetMs: 0,
     entry: {
-      nickname: "",
+      nickname: (() => {
+        try {
+          return localStorage.getItem(NICKNAME_STORAGE_KEY) ?? "";
+        } catch (_error) {
+          return "";
+        }
+      })(),
       roomCode:
         new URL(window.location.href).searchParams.get("room")
           ?.trim()
@@ -68,7 +81,7 @@
       actionId: null,
       helicopterAxis: null,
       markerMode: false,
-      markers: new Set(),
+      markers: new Map(),
       markerContext: null,
       mobileMap: "enemy",
       actionDrawerOpen: false,
@@ -164,13 +177,10 @@
       const parsed = JSON.parse(
         localStorage.getItem(markerStorageKey(roomCode, playerId)),
       );
-      return new Set(
-        Array.isArray(parsed)
-          ? parsed.filter((coordinate) => Data.parseCoordinate(coordinate))
-          : [],
-      );
+      return new Map(Array.isArray(parsed) ? parsed.filter((entry) =>
+        Array.isArray(entry) && Data.parseCoordinate(entry[0]) && MARKER_CYCLE.includes(entry[1])) : []);
     } catch (_error) {
-      return new Set();
+      return new Map();
     }
   }
 
@@ -182,7 +192,7 @@
     try {
       localStorage.setItem(
         markerStorageKey(context.roomCode, context.playerId),
-        JSON.stringify([...state.battle.markers]),
+        JSON.stringify([...state.battle.markers.entries()]),
       );
     } catch (_error) {
       showToast("浏览器未允许保存私人标记。", "warning");
@@ -195,7 +205,7 @@
     } catch (_error) {
       // 私人标记只影响本机显示，清除失败不影响对局。
     }
-    state.battle.markers = new Set();
+    state.battle.markers = new Map();
   }
 
   function updateRoomAddress(roomCode) {
@@ -211,6 +221,12 @@
   function setConnectionDisplay(kind, text) {
     connectionDot.dataset.state = kind;
     connectionText.textContent = text;
+  }
+
+  function setConnectionPhase(phase, message, displayKind, displayText) {
+    state.connection.phase = phase;
+    state.connection.message = message;
+    setConnectionDisplay(displayKind, displayText);
   }
 
   function setReduceMotion(enabled) {
@@ -393,7 +409,7 @@
     }
     const resolved = Data.resolvedTargetSet(room.battle.own);
     let changed = false;
-    for (const coordinate of [...state.battle.markers]) {
+    for (const coordinate of state.battle.markers.keys()) {
       if (resolved.has(coordinate)) {
         state.battle.markers.delete(coordinate);
         changed = true;
@@ -497,6 +513,9 @@
     }
 
     state.room = nextRoom;
+    document.title = nextRoom.turn?.canAct
+      ? "轮到你行动 · 海战 OCEAN"
+      : "海战 OCEAN";
     state.clockOffsetMs = Date.now() - nextRoom.serverNow;
     prepareMarkerContext(nextRoom);
 
@@ -619,6 +638,18 @@
         </div>
 
         <div class="entry-console">
+          ${state.connection.phase !== "online" ? `
+            <article class="connection-help" role="status" aria-live="polite">
+              <div>
+                <strong>${escapeHtml(
+                  state.connection.phase === "offline" ? "网络连接已中断" : "正在建立实时连接",
+                )}</strong>
+                <p>${escapeHtml(state.connection.message)}</p>
+              </div>
+              <button class="button button--secondary button--compact" data-action="retry-connection">
+                立即重试
+              </button>
+            </article>` : ""}
           ${stored ? `
             <article class="restore-card">
               <div>
@@ -776,7 +807,10 @@
             <div class="invite-box">
               <span>邀请链接</span>
               <code>${escapeHtml(inviteUrl)}</code>
-              <button class="button button--secondary button--compact" data-action="copy-invite">复制邀请链接</button>
+              <div class="invite-box__actions">
+                <button class="button button--secondary button--compact" data-action="copy-invite">复制邀请链接</button>
+                <button class="button button--quiet button--compact" data-action="share-invite">系统分享</button>
+              </div>
             </div>
             <div class="inline-actions">
               <button class="button button--danger-quiet" data-action="leave-room">离开房间</button>
@@ -1205,6 +1239,12 @@
 
   function ownBattleCellMap(snapshot) {
     const map = new Map();
+    if (snapshot?.radar) {
+      const definition = Data.getUnitDefinitionByType(Data.UNIT_TYPES.RADAR);
+      for (const coordinate of snapshot.radar.cells) {
+        map.set(coordinate, { kind: "radar", radar: snapshot.radar, definition });
+      }
+    }
     for (const unit of snapshot?.units ?? []) {
       const definition = Data.getUnitDefinitionByType(unit.type);
       for (const coordinate of unit.cells) {
@@ -1253,6 +1293,10 @@
         if (entry.decoy.destroyed) classes.push("board-cell--wreck");
         content = `<span class="unit-glyph">雷</span>${entry.decoy.destroyed ? '<span class="cell-state-glyph">×</span>' : ""}`;
         label = `${coordinate}，诱饵鱼雷${entry.decoy.destroyed ? "，已摧毁" : "，有效"}`;
+      } else if (entry?.kind === "radar") {
+        classes.push("board-cell--unit", "board-cell--radar");
+        content = '<span class="unit-glyph">达</span>';
+        label = `${coordinate}，雷达部署物，不受攻击伤害`;
       }
       return {
         classes,
@@ -1310,7 +1354,8 @@
       const result = results[coordinate];
       const resolved = result === "hit" || result === "miss";
       const hasMissile = missiles.has(coordinate) && !resolved;
-      const hasMarker = state.battle.markers.has(coordinate) && !resolved;
+      const marker = !resolved ? state.battle.markers.get(coordinate) : null;
+      const hasMarker = Boolean(marker);
       const classes = [];
       let content = "";
       let stateText = "未知";
@@ -1327,9 +1372,10 @@
         content = '<span class="missile-glyph">↗</span>';
         stateText = "导弹已发射，仍未结算";
       } else if (hasMarker) {
-        classes.push("board-cell--marker");
-        content = '<span class="marker-glyph">O</span>';
-        stateText = "未知，本机私人标记 O";
+        classes.push("board-cell--marker", `board-cell--marker-${marker}`);
+        content = marker === "occupied" ? '<span class="marker-glyph">●</span>' : '<span class="marker-half marker-half--top"></span><span class="marker-half marker-half--bottom"></span>';
+        const markerText = { occupied: "确定有布局", surface_yes: "水面有布局", surface_no: "水面无布局", underwater_yes: "水下有布局", underwater_no: "水下无布局" }[marker];
+        stateText = `未知，本机标记：${markerText}`;
       }
       if (intelligenceCells.has(coordinate)) {
         classes.push(
@@ -1607,8 +1653,8 @@
               </div>
               ${renderEnemyBoard(battle.own)}
               <div class="map-caption">
-                <span>${state.battle.markerMode ? "标记模式：点击未知格添加或取消本机 O。" : state.battle.selectedAction ? "高亮格为当前行动合法目标。" : "选择行动后显示合法目标。"}</span>
-                ${intel ? `<button class="intel-chip" data-action="clear-intelligence" data-kind="${intel.kind}">${intel.kind === "shock" ? "5×5 震爆区域" : `3×3 探测区域 · ${intel.detected ? "有水下信号" : "无水下信号"}`} ×</button>` : ""}
+                <span>${state.battle.markerMode ? "标记模式：反复点击切换确定有、海面有/无、水下有/无和清除。" : state.battle.selectedAction ? "高亮格为当前行动合法目标。" : "选择行动后显示合法目标。"}</span>
+                ${intel ? `<button class="intel-chip" data-action="clear-intelligence" data-kind="${intel.kind}">${intel.kind === "shock" ? "5×5 震爆区域" : intel.kind === "radar" ? `4×4 雷达区域 · ${intel.detected ? "发现布局" : "未发现布局"}` : `3×3 探测区域 · ${intel.detected ? "有水下信号" : "无水下信号"}`} ×</button>` : ""}
               </div>
             </section>
 
@@ -2213,9 +2259,9 @@
     if (!definition || !state.battle.target) {
       throw { message: "行动或目标已经失效，请重新选择。" };
     }
-    const source = room.battle.own.units.find(
-      (unit) => unit.type === definition.sourceType,
-    );
+    const source = definition.sourceType === Data.UNIT_TYPES.RADAR
+      ? room.battle.own.radar
+      : room.battle.own.units.find((unit) => unit.type === definition.sourceType);
     if (!source) {
       throw { message: "找不到该行动的己方来源单位。" };
     }
@@ -2335,11 +2381,10 @@
         showToast("命中或未命中格不能添加私人标记。", "warning");
         return;
       }
-      if (state.battle.markers.has(coordinate)) {
-        state.battle.markers.delete(coordinate);
-      } else {
-        state.battle.markers.add(coordinate);
-      }
+      const current = state.battle.markers.get(coordinate);
+      const nextIndex = current ? MARKER_CYCLE.indexOf(current) + 1 : 0;
+      if (nextIndex >= MARKER_CYCLE.length) state.battle.markers.delete(coordinate);
+      else state.battle.markers.set(coordinate, MARKER_CYCLE[nextIndex]);
       saveMarkers();
       render();
       return;
@@ -2472,7 +2517,13 @@
       render();
       return;
     }
-    const socket = window.io({ reconnection: true });
+    const socket = window.io({
+      reconnection: true,
+      reconnectionDelay: 1_000,
+      reconnectionDelayMax: 8_000,
+      randomizationFactor: 0.4,
+      timeout: 10_000,
+    });
     state.socket = socket;
 
     socket.on("system:ready", (message) => {
@@ -2536,7 +2587,8 @@
 
     socket.on("connect", () => {
       state.connected = true;
-      setConnectionDisplay("online", "服务器在线");
+      state.connection.failures = 0;
+      setConnectionPhase("online", "服务器连接正常。", "online", "服务器在线");
       render();
       socket.timeout(3_000).emit("client:ping", {}, (error, response) => {
         if (error || !response?.ok) {
@@ -2559,16 +2611,31 @@
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
       state.connected = false;
       state.restoring = false;
-      setConnectionDisplay("offline", "正在重连");
+      setConnectionPhase(
+        navigator.onLine ? "reconnecting" : "offline",
+        navigator.onLine
+          ? `连接已中断，客户端正在自动重连（${reason ?? "原因未知"}）。`
+          : "当前设备处于离线状态。恢复网络后客户端会自动重连。",
+        "offline",
+        "正在重连",
+      );
       render();
     });
 
     socket.on("connect_error", () => {
       state.connected = false;
-      setConnectionDisplay("offline", "连接失败，正在重试");
+      state.connection.failures += 1;
+      setConnectionPhase(
+        "waking",
+        state.connection.failures >= 2
+          ? "免费服务器可能正在从休眠中唤醒，请保留页面；客户端会自动重试。"
+          : "服务器尚未响应，正在自动重试。",
+        "warning",
+        "正在唤醒服务器",
+      );
       render();
     });
   }
@@ -2576,6 +2643,11 @@
   document.addEventListener("input", (event) => {
     if (event.target.id === "nickname-input") {
       state.entry.nickname = event.target.value;
+      try {
+        localStorage.setItem(NICKNAME_STORAGE_KEY, state.entry.nickname);
+      } catch (_error) {
+        // 昵称记忆失败不影响创建或加入房间。
+      }
       const counter = document.querySelector("#nickname-count");
       if (counter) counter.textContent = Array.from(event.target.value).length;
     }
@@ -2631,6 +2703,19 @@
       window.location.reload();
       return;
     }
+    if (action === "retry-connection") {
+      state.connection.failures = 0;
+      setConnectionPhase(
+        "connecting",
+        "正在重新连接服务器。",
+        "warning",
+        "正在连接",
+      );
+      state.socket?.disconnect();
+      state.socket?.connect();
+      render();
+      return;
+    }
     if (action === "restore-session") {
       void restoreSession();
       return;
@@ -2653,6 +2738,10 @@
         "邀请链接已复制。",
         control,
       );
+      return;
+    }
+    if (action === "share-invite") {
+      void shareInvite(control);
       return;
     }
     if (action === "select-placement") {
@@ -2965,6 +3054,23 @@
     }, 1_500);
   }
 
+  async function shareInvite(button) {
+    const url = `${window.location.origin}/?room=${state.room.roomCode}`;
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: "加入海战 OCEAN",
+          text: `房间码：${state.room.roomCode}`,
+          url,
+        });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+      }
+    }
+    await copyText(url, "当前设备不支持系统分享，邀请链接已复制。", button);
+  }
+
   function returnHome() {
     clearStoredSession();
     state.room = null;
@@ -2983,6 +3089,43 @@
     ? "true"
     : "false";
   reduceMotionToggle.checked = state.reduceMotion;
+  window.addEventListener("offline", () => {
+    state.connected = false;
+    setConnectionPhase(
+      "offline",
+      "当前设备处于离线状态。恢复网络后客户端会自动重连。",
+      "offline",
+      "设备离线",
+    );
+    render();
+  });
+  window.addEventListener("online", () => {
+    setConnectionPhase(
+      "reconnecting",
+      "网络已经恢复，正在重新连接服务器。",
+      "warning",
+      "正在重连",
+    );
+    state.socket?.connect();
+    render();
+  });
+  window.addEventListener("beforeunload", (event) => {
+    if (state.room && !["CLOSED", "FINISHED"].includes(state.room.roomPhase)) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (
+      document.visibilityState === "visible" &&
+      state.socket?.connected &&
+      state.room
+    ) {
+      void emitRequest("room:sync", {}).then((response) => {
+        if (response.view) acceptRoomState(response.view);
+      }).catch(() => {});
+    }
+  });
   window.setInterval(updateCountdowns, 250);
   render();
   connectSocket();

@@ -154,8 +154,8 @@ async function randomizeAndReady(dom, requireSelectiveShock = false) {
     );
     if (overwrite) click(window, overwrite);
     await waitFor(
-      () => window.document.querySelectorAll("[data-deployment-cell]").length === 28,
-      "随机部署没有生成完整十对象舰队",
+      () => window.document.querySelectorAll("[data-deployment-cell]").length === 37,
+      "随机部署没有生成完整十一对象部署",
     );
     shockCenter = selectiveShockCenter(dom);
     if (!requireSelectiveShock || shockCenter) break;

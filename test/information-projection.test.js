@@ -218,7 +218,7 @@ test("直升机反馈只包含逐格命中或未命中，不包含目标身份",
   });
   const actor = resolved.deliveriesByPlayer["player-1"];
 
-  assert.equal(actor.feedback.cellResults.length, 10);
+  assert.equal(actor.feedback.cellResults.length, 12);
   assert.deepEqual(Object.keys(actor.feedback.cellResults[0]).sort(), [
     "coordinate",
     "result",

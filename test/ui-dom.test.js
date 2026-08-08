@@ -255,7 +255,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "deploy-v0.2",
+    stage: "postlaunch-v0.4",
     protocolVersion: "1.2",
   });
 
@@ -297,8 +297,8 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
       reconnectDeadlineAtByPlayer: {},
     },
   }));
-  assert.equal(window.document.querySelectorAll(".fleet-item").length, 10);
-  assert.equal(window.document.querySelectorAll('[data-action="deployment-cell"]').length, 100);
+  assert.equal(window.document.querySelectorAll(".fleet-item").length, 11);
+  assert.equal(window.document.querySelectorAll('[data-action="deployment-cell"]').length, 144);
   const deploymentPage = window.document.querySelector(".deployment-page");
   const deploymentBoard = window.document.querySelector(
     ".deployment-map-card .ocean-board",
@@ -369,8 +369,8 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   assert.match(window.document.querySelector("#app").textContent, /甲 获得第一回合/);
 
   socket.serverEmit("room:state", playingRoom());
-  assert.equal(window.document.querySelectorAll(".action-card").length, 9);
-  assert.equal(window.document.querySelectorAll('.battle-map-card [data-action="enemy-cell"]').length, 100);
+  assert.equal(window.document.querySelectorAll(".action-card").length, 10);
+  assert.equal(window.document.querySelectorAll('.battle-map-card [data-action="enemy-cell"]').length, 144);
   const pirate = window.document.querySelector(
     `[data-action="select-action"][data-action-type="${Data.ACTION_TYPES.PIRATE_ATTACK}"]`,
   );
@@ -392,7 +392,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
     window.document.querySelector(
       '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A2"]',
     ).getAttribute("aria-label"),
-    /私人标记 O/,
+    /本机标记：确定有布局/,
   );
 
   const paused = playingRoom();
@@ -451,7 +451,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   socket.serverEmit("room:state", finished);
   assert.match(window.document.querySelector("#result-title").textContent, /胜利/);
   assert.equal(window.document.querySelectorAll(".replay-tabs button").length, 2);
-  assert.equal(window.document.querySelectorAll(".replay-resources span").length, 5);
+  assert.equal(window.document.querySelectorAll(".replay-resources span").length, 6);
 
   socket.serverEmit("room:state", baseRoom({
     stateVersion: 8,

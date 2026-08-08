@@ -197,12 +197,12 @@ test("两个正式页面客户端可真实创建、加入、部署并进入服�
   ]);
 
   for (const browser of [first, second]) {
-    assert.equal(browser.window.document.querySelectorAll(".action-card").length, 9);
+    assert.equal(browser.window.document.querySelectorAll(".action-card").length, 10);
     assert.equal(
       browser.window.document.querySelectorAll(
         '.battle-map-card--enemy [data-action="enemy-cell"]',
       ).length,
-      100,
+      144,
     );
     assert.equal(
       browser.window.document.body.textContent.includes("reconnectToken"),

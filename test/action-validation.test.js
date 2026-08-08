@@ -41,10 +41,10 @@ function sinkUnits(state, unitIds) {
   );
 }
 
-test("初始状态有八种合法行动，直升机扫射尚未解锁", () => {
+test("初始状态有九种合法行动，直升机扫射尚未解锁", () => {
   const state = createState();
   const legal = listLegalActions(state);
-  assert.equal(legal.length, 8);
+  assert.equal(legal.length, 9);
 
   const helicopter = getActionAvailability(
     state,
@@ -63,19 +63,19 @@ test("初始状态有八种合法行动，直升机扫射尚未解锁", () => {
   );
   assert.equal(
     getActionAvailability(state, ACTION_TYPES.PIRATE_ATTACK).targetCount,
-    100,
+    144,
   );
   assert.equal(
     getActionAvailability(state, ACTION_TYPES.SHOCK_BOMB).targetCount,
-    36,
+    64,
   );
   assert.equal(
     getActionAvailability(state, ACTION_TYPES.DETECTION_BOMB).targetCount,
-    64,
+    100,
   );
 });
 
-test("九种行动都接受各自唯一的目标形式", () => {
+test("十种行动都接受各自唯一的目标形式", () => {
   const state = createState();
   const cases = [
     [ACTION_TYPES.DESTROYER_I_RAM, "destroyer-i", { kind: "cell", coordinate: "D5" }],
@@ -86,6 +86,7 @@ test("九种行动都接受各自唯一的目标形式", () => {
     [ACTION_TYPES.NUCLEAR_BOMB, "nuclear", { kind: "cell", coordinate: "J8" }],
     [ACTION_TYPES.SHOCK_BOMB, "nuclear", { kind: "cell", coordinate: "C3" }],
     [ACTION_TYPES.DETECTION_BOMB, "nuclear", { kind: "cell", coordinate: "I9" }],
+    [ACTION_TYPES.RADAR_SCAN, "radar", { kind: "cell", coordinate: "I9" }],
   ];
 
   cases.forEach(([actionType, sourceId, target], index) => {
@@ -111,7 +112,7 @@ test("九种行动都接受各自唯一的目标形式", () => {
     kind: "row",
     row: "A",
   });
-  assert.equal(helicopter.targetCells.length, 10);
+  assert.equal(helicopter.targetCells.length, 12);
 });
 
 test("行动来源必须匹配、存活且未瘫痪", () => {
@@ -152,7 +153,7 @@ test("行动来源必须匹配、存活且未瘫痪", () => {
   assert.ok(errorCodes(paralyzedResult).includes("SOURCE_PARALYZED"));
 });
 
-test("驱逐舰目标必须在自身范围内，单格攻击拒绝已结算格", () => {
+test("驱逐舰目标必须在自身范围内，单格攻击允许重复选择已结算格", () => {
   const state = createState();
   const outOfRange = validateActionIntent(
     state,
@@ -175,7 +176,7 @@ test("驱逐舰目标必须在自身范围内，单格攻击拒绝已结算格",
       { kind: "cell", coordinate: "A1" },
     ),
   );
-  assert.ok(errorCodes(repeated).includes("TARGET_ALREADY_RESOLVED"));
+  assert.equal(repeated.valid, true);
 });
 
 test("震爆弹和探测弹中心必须形成完整区域，但可覆盖已结算格", () => {
@@ -232,7 +233,7 @@ test("直升机扫射仅在两艘己方驱逐舰均沉没后解锁", () => {
   );
 });
 
-test("直升机范围跳过已结算格，整行均已结算时拒绝该行", () => {
+test("直升机允许重复覆盖已结算格，伤害资格由结算器逐格判断", () => {
   let state = sinkUnits(createState(), ["destroyer-i", "destroyer-ii"]);
   state = markTargetCellsResolved(state, [
     "A1",
@@ -245,6 +246,8 @@ test("直升机范围跳过已结算格，整行均已结算时拒绝该行", ()
     "A8",
     "A9",
     "A10",
+    "A11",
+    "A12",
     "B1",
   ]);
 
@@ -257,7 +260,8 @@ test("直升机范围跳过已结算格，整行均已结算时拒绝该行", ()
       { kind: "row", row: "A" },
     ),
   );
-  assert.ok(errorCodes(rowA).includes("NO_UNRESOLVED_TARGETS"));
+  assert.equal(rowA.valid, true);
+  assert.equal(rowA.pendingTargetCells.length, 12);
 
   const rowB = validateActionIntent(
     state,
@@ -269,11 +273,11 @@ test("直升机范围跳过已结算格，整行均已结算时拒绝该行", ()
     ),
   );
   assert.equal(rowB.valid, true);
-  assert.equal(rowB.targetCells.length, 10);
-  assert.equal(rowB.pendingTargetCells.length, 9);
+  assert.equal(rowB.targetCells.length, 12);
+  assert.equal(rowB.pendingTargetCells.length, 12);
   assert.equal(
     getActionTargetOptions(state, ACTION_TYPES.HELICOPTER_STRAFE).length,
-    19,
+    24,
   );
 });
 
@@ -421,7 +425,7 @@ test("重复行动编号不会再次消耗资源", () => {
   assert.equal(getRemainingUses(first.state, ACTION_TYPES.NUCLEAR_BOMB), 1);
 });
 
-test("仅因水下行动来源瘫痪而无行动时可自动跳过，但仍保有攻击手段", () => {
+test("水下来源瘫痪时仍可使用尚未消耗的雷达扫描", () => {
   let state = sinkUnits(createState(), [
     "destroyer-i",
     "destroyer-ii",
@@ -432,14 +436,14 @@ test("仅因水下行动来源瘫痪而无行动时可自动跳过，但仍保�
   ]);
   state = setUnitStatus(state, "submarine", { paralyzed: true });
 
-  assert.equal(hasAnyLegalAction(state), false);
+  assert.equal(hasAnyLegalAction(state), true);
   assert.equal(hasAttackCapability(state), true);
 });
 
-test("辅助行动不计入攻击手段，所有攻击目标结算后也视为无攻击手段", () => {
+test("辅助行动不计入攻击手段，重复攻击规则使已结算坐标仍可选择", () => {
   const allResolved = markTargetCellsResolved(createState(), ALL_BOARD_CELLS);
   assert.equal(hasAnyLegalAction(allResolved), true);
-  assert.equal(hasAttackCapability(allResolved), false);
+  assert.equal(hasAttackCapability(allResolved), true);
   assert.equal(
     getActionAvailability(allResolved, ACTION_TYPES.SHOCK_BOMB).available,
     true,

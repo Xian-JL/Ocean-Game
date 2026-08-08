@@ -54,6 +54,14 @@ function isSquare2x2(points) {
   );
 }
 
+function isSquare3x3(points) {
+  const rows = [...new Set(points.map((point) => point.row))].sort((a, b) => a - b);
+  const columns = [...new Set(points.map((point) => point.column))].sort((a, b) => a - b);
+  return rows.length === 3 && columns.length === 3 && rows[2] - rows[0] === 2 &&
+    columns[2] - columns[0] === 2 &&
+    points.every((point) => rows.includes(point.row) && columns.includes(point.column));
+}
+
 function isFourConnected(points) {
   if (points.length === 0) {
     return false;
@@ -90,6 +98,8 @@ function hasRequiredShape(shape, points) {
       return isLine(points);
     case DEPLOYMENT_SHAPES.SQUARE_2X2:
       return isSquare2x2(points);
+    case DEPLOYMENT_SHAPES.SQUARE_3X3:
+      return isSquare3x3(points);
     case DEPLOYMENT_SHAPES.SINGLE:
       return points.length === 1;
     case DEPLOYMENT_SHAPES.FOUR_CONNECTED:
@@ -167,7 +177,7 @@ function validatePlacement(placement, options = {}) {
     } catch (error) {
       if (error instanceof RuleValidationError) {
         errors.push(
-          createRuleIssue("OUT_OF_BOUNDS", "部署坐标必须位于 A1～J10。", {
+          createRuleIssue("OUT_OF_BOUNDS", "部署坐标必须位于 A1～L12。", {
             index,
             id,
             cellIndex,

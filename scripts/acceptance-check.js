@@ -24,6 +24,9 @@ const REQUIRED_PATHS = Object.freeze([
   "test/ui-full-match-integration.test.js",
   "test/ui-readability.test.js",
   "test/production-readiness.test.js",
+  "test/postlaunch-stability.test.js",
+  "test/postlaunch-mobile.test.js",
+  "test/postlaunch-monitoring.test.js",
   "render.yaml",
   ".node-version",
 ]);

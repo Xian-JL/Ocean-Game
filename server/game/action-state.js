@@ -20,6 +20,7 @@ function assertActionState(state) {
     !Array.isArray(state.resolvedTargetCells) ||
     !Array.isArray(state.submarineMissileMarkers) ||
     !Array.isArray(state.processedActionIds)
+    || !state.radar || !Array.isArray(state.radar.cells)
   ) {
     throw new RuleValidationError(
       "INVALID_ACTION_STATE",
@@ -64,6 +65,10 @@ function createInitialActionState(deployment) {
 
   return {
     units,
+    radar: (() => {
+      const placement = normalizedPlacements.find((item) => item.type === "radar");
+      return { id: placement.id, type: placement.type, cells: [...placement.cells] };
+    })(),
     remainingUses: createInitialRemainingUses(),
     resolvedTargetCells: [],
     submarineMissileMarkers: [],

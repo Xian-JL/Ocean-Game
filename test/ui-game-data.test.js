@@ -32,25 +32,25 @@ function createOwnBattle(overrides = {}) {
   };
 }
 
-test("正式页面坐标模型固定生成 A1～J10 的 100 格", () => {
-  assert.equal(Data.ALL_COORDINATES.length, 100);
+test("正式页面坐标模型固定生成 A1～L12 的 144 格", () => {
+  assert.equal(Data.ALL_COORDINATES.length, 144);
   assert.equal(Data.ALL_COORDINATES[0], "A1");
-  assert.equal(Data.ALL_COORDINATES.at(-1), "J10");
+  assert.equal(Data.ALL_COORDINATES.at(-1), "L12");
   assert.deepEqual(Data.parseCoordinate("j10"), { row: 9, column: 9 });
-  assert.equal(Data.parseCoordinate("K1"), null);
+  assert.equal(Data.parseCoordinate("M1"), null);
 });
 
-test("正式页面定义七个作战单位、三个诱饵鱼雷和九项正式行动", () => {
-  assert.equal(Data.UNIT_DEFINITIONS.length, 10);
+test("正式页面定义七个作战单位、三个诱饵、一个雷达和十项行动", () => {
+  assert.equal(Data.UNIT_DEFINITIONS.length, 11);
   assert.equal(
     Data.UNIT_DEFINITIONS.filter((unit) => unit.category !== "decoy").length,
-    7,
+    8,
   );
   assert.equal(
     Data.UNIT_DEFINITIONS.filter((unit) => unit.category === "decoy").length,
     3,
   );
-  assert.equal(Data.ACTION_DEFINITIONS.length, 9);
+  assert.equal(Data.ACTION_DEFINITIONS.length, 10);
   assert.deepEqual(
     Data.ACTION_DEFINITIONS.map((action) => action.name),
     [
@@ -63,6 +63,7 @@ test("正式页面定义七个作战单位、三个诱饵鱼雷和九项正式�
       "震爆弹",
       "探测弹",
       "直升机扫射",
+      "雷达扫描",
     ],
   );
   assert.match(
@@ -75,7 +76,7 @@ test("服务器测试夹具在客户端部署预检中同样完整合法", () =>
   const result = Data.validateDeployment(createValidDeployment());
   assert.equal(result.valid, true);
   assert.deepEqual(result.errors, []);
-  assert.equal(result.normalizedPlacements.length, 10);
+  assert.equal(result.normalizedPlacements.length, 11);
 });
 
 test("客户端部署预检拒绝重叠、缺失与不连通航空母舰", () => {
@@ -139,16 +140,16 @@ test("驱逐舰Ⅰ和驱逐舰Ⅱ客户端范围与 7×7、8×8 规则一致", (
   assert.ok(second.includes("I9"));
 });
 
-test("震爆弹与探测弹只提供能够形成完整 5×5、3×3 的中心格", () => {
+test("震爆弹、探测弹在 12×12 地图提供完整区域中心格", () => {
   const own = createOwnBattle();
   const shock = Data.getTargetOptions(Data.ACTION_TYPES.SHOCK_BOMB, own);
   const detection = Data.getTargetOptions(Data.ACTION_TYPES.DETECTION_BOMB, own);
-  assert.equal(shock.length, 36);
+  assert.equal(shock.length, 64);
   assert.equal(shock[0].coordinate, "C3");
-  assert.equal(shock.at(-1).coordinate, "H8");
-  assert.equal(detection.length, 64);
+  assert.equal(shock.at(-1).coordinate, "J10");
+  assert.equal(detection.length, 100);
   assert.equal(detection[0].coordinate, "B2");
-  assert.equal(detection.at(-1).coordinate, "I9");
+  assert.equal(detection.at(-1).coordinate, "K11");
   assert.equal(
     Data.previewCells(Data.ACTION_TYPES.SHOCK_BOMB, {
       kind: "cell",
@@ -158,7 +159,7 @@ test("震爆弹与探测弹只提供能够形成完整 5×5、3×3 的中心格"
   );
 });
 
-test("只有潜射标记的格仍是合法单格目标，命中或未命中格才被排除", () => {
+test("重复攻击规则下所有单格都保持可选", () => {
   const own = createOwnBattle({
     enemyMap: {
       cellResults: { A1: "hit", A2: "miss" },
@@ -167,13 +168,13 @@ test("只有潜射标记的格仍是合法单格目标，命中或未命中格�
   });
   const options = Data.getTargetOptions(Data.ACTION_TYPES.SUBMARINE_MISSILE, own);
   const coordinates = new Set(options.map((option) => option.coordinate));
-  assert.equal(coordinates.has("A1"), false);
-  assert.equal(coordinates.has("A2"), false);
+  assert.equal(coordinates.has("A1"), true);
+  assert.equal(coordinates.has("A2"), true);
   assert.equal(coordinates.has("A3"), true);
-  assert.equal(options.length, 98);
+  assert.equal(options.length, 144);
 });
 
-test("直升机扫射只排除十格均已结算的整行或整列", () => {
+test("直升机扫射允许重复覆盖已结算的整行或整列", () => {
   const rowAResults = Object.fromEntries(
     Data.COLUMNS.map((column) => [`A${column}`, column % 2 ? "hit" : "miss"]),
   );
@@ -184,14 +185,14 @@ test("直升机扫射只排除十格均已结算的整行或整列", () => {
     },
   });
   const options = Data.getTargetOptions(Data.ACTION_TYPES.HELICOPTER_STRAFE, own);
-  assert.equal(options.some((target) => target.kind === "row" && target.row === "A"), false);
+  assert.equal(options.some((target) => target.kind === "row" && target.row === "A"), true);
   assert.equal(options.some((target) => target.kind === "row" && target.row === "B"), true);
-  assert.equal(options.filter((target) => target.kind === "column").length, 10);
+  assert.equal(options.filter((target) => target.kind === "column").length, 12);
   assert.equal(
     Data.previewCells(Data.ACTION_TYPES.HELICOPTER_STRAFE, {
       kind: "column",
       column: 3,
     }).length,
-    10,
+    12,
   );
 });

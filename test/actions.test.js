@@ -15,9 +15,9 @@ const {
 } = require("../server/game/actions");
 const { DEPLOYABLE_TYPES } = require("../server/game/units");
 
-test("九种正式行动名称、来源和目标形式固定", () => {
-  assert.equal(ACTION_TYPE_ORDER.length, 9);
-  assert.equal(new Set(ACTION_TYPE_ORDER).size, 9);
+test("十种正式行动名称、来源和目标形式固定", () => {
+  assert.equal(ACTION_TYPE_ORDER.length, 10);
+  assert.equal(new Set(ACTION_TYPE_ORDER).size, 10);
   assert.deepEqual(
     ACTION_TYPE_ORDER.map((type) => ACTION_DEFINITIONS[type].name),
     [
@@ -30,6 +30,7 @@ test("九种正式行动名称、来源和目标形式固定", () => {
       "震爆弹",
       "探测弹",
       "直升机扫射",
+      "雷达扫描",
     ],
   );
   assert.equal(
@@ -46,11 +47,12 @@ test("九种正式行动名称、来源和目标形式固定", () => {
   );
 });
 
-test("只有震爆弹和探测弹属于辅助行动", () => {
+test("震爆弹、探测弹和雷达扫描属于辅助行动", () => {
   const auxiliary = ACTION_TYPE_ORDER.filter(isAuxiliaryAction);
   assert.deepEqual(auxiliary, [
     ACTION_TYPES.SHOCK_BOMB,
     ACTION_TYPES.DETECTION_BOMB,
+    ACTION_TYPES.RADAR_SCAN,
   ]);
   assert.equal(
     ACTION_TYPE_ORDER.filter(isAttackAction).length,
@@ -69,6 +71,7 @@ test("有限资源初始数量与规则一致，无限行动不创建计数", ()
     shock_bomb: 1,
     detection_bomb: 1,
     helicopter_strafe: 1,
+    radar_scan: 1,
   });
   assert.equal(
     ACTION_DEFINITIONS[ACTION_TYPES.DESTROYER_I_RAM].initialUses,
