@@ -6,4 +6,3 @@ services:
     buildCommand: npm ci
     startCommand: npm run start:public
     healthCheckPath: /api/health
-    maxShutdownDelaySeconds: 30
