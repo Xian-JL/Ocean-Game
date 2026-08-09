@@ -33,10 +33,10 @@
   }
 
   if (footerRelease && Data.RELEASE) {
-    footerRelease.textContent = `海战 OCEAN · 运行监控 ${Data.RELEASE.stage}`;
+    footerRelease.textContent = `v${Data.RELEASE.version}`;
   }
   if (footerProtocol && Data.RELEASE) {
-    footerProtocol.textContent = `服务器权威 · 协议 ${Data.RELEASE.socketProtocolVersion}`;
+    footerProtocol.textContent = `Rule ${Data.RELEASE.ruleVersion} · Socket ${Data.RELEASE.socketProtocolVersion}`;
   }
 
   const state = {
@@ -682,7 +682,7 @@
   function render() {
     headerRoomCode.hidden = !state.room?.roomCode;
     headerRoomCode.textContent = state.room?.roomCode
-      ? `房间 ${state.room.roomCode}`
+      ? `${state.room.roomCode} · ${state.room.maxPlayers ?? 2}P`
       : "";
     const page = Model.pageForState(state.room);
     const samePage = state.renderedPage === page;
@@ -724,66 +724,69 @@
     const stored = readStoredSession();
     const pending = state.pendingRequest;
     const roomCode = escapeHtml(state.entry.roomCode);
+    const online = state.connection.phase === "online";
     return `
-      <section class="entry-page page-enter" aria-labelledby="entry-title">
-        <div class="entry-hero">
-          <p class="eyebrow">双人 / 三人 · 回合制 · 服务器权威</p>
-          <h1 id="entry-title">在未知海域<br /><span>找到对手。</span></h1>
-          <p class="entry-hero__summary">
-            部署八个作战单位与三枚诱饵鱼雷，在不泄露舰队位置的前提下完成探测、震爆与十项战术行动。
-          </p>
-          <div class="entry-facts" aria-label="游戏要点">
-            <span><strong>12×12</strong> 战术海域</span>
-            <span><strong>90 秒</strong> 行动回合</span>
-            <span><strong>2～3 人</strong> 私密对战</span>
+      <section class="entry-page entry-page--v07 page-enter" aria-labelledby="entry-title">
+        <div class="entry-hero entry-hero--v07">
+          <div class="entry-hero__badge"><span></span> ONLINE TACTICAL GAME</div>
+          <h1 id="entry-title">OCEAN</h1>
+          <p class="entry-hero__tagline">深海战术对抗</p>
+          <div class="entry-hero__visual" aria-hidden="true">
+            <span class="hero-sonar hero-sonar--one"></span>
+            <span class="hero-sonar hero-sonar--two"></span>
+            <span class="hero-sonar hero-sonar--three"></span>
+            <i></i>
+          </div>
+          <div class="entry-facts entry-facts--v07" aria-label="游戏特征">
+            <span><strong>12×12</strong> 海域</span>
+            <span><strong>2–3</strong> 玩家</span>
+            <span><strong>90s</strong> 回合</span>
           </div>
         </div>
 
-        <div class="entry-console">
-          ${state.connection.phase !== "online" ? `
-            <article class="connection-help" role="status" aria-live="polite">
+        <div class="entry-console entry-console--v07">
+          ${!online ? `
+            <article class="connection-help connection-help--compact" role="status" aria-live="polite">
+              <span class="connection-help__signal" aria-hidden="true"></span>
               <div>
-                <strong>${escapeHtml(
-                  state.connection.phase === "offline" ? "网络连接已中断" : "正在建立实时连接",
-                )}</strong>
+                <strong>${escapeHtml(state.connection.phase === "offline" ? "连接已中断" : "正在连接服务器")}</strong>
                 <p>${escapeHtml(state.connection.message)}</p>
               </div>
-              <button class="button button--secondary button--compact" data-action="retry-connection">
-                立即重试
-              </button>
+              <button class="button button--quiet button--compact" data-action="retry-connection">重试</button>
             </article>` : ""}
+
           ${stored ? `
-            <article class="restore-card">
+            <article class="restore-card restore-card--v07">
+              <div class="restore-card__status" aria-hidden="true">↻</div>
               <div>
-                <span class="status-kicker">检测到本机座位</span>
-                <strong>房间 ${escapeHtml(stored.roomCode)}</strong>
-                <small>使用本机私密凭证恢复，不会占用新席位。</small>
+                <span class="status-kicker">可恢复对局</span>
+                <strong>${escapeHtml(stored.roomCode)}</strong>
               </div>
               <div class="restore-card__actions">
                 <button class="button button--primary button--compact" data-action="restore-session" ${!state.connected || pending ? "disabled" : ""}>
-                  ${state.restoring ? "正在恢复…" : "恢复上次对局"}
+                  ${state.restoring ? "恢复中…" : "继续"}
                 </button>
-                <button class="button button--quiet button--compact" data-action="dismiss-session" ${pending ? "disabled" : ""}>忽略</button>
+                <button class="icon-button icon-button--small" data-action="dismiss-session" ${pending ? "disabled" : ""} aria-label="忽略恢复记录" data-tooltip="忽略">×</button>
               </div>
             </article>` : ""}
 
-          <div class="entry-form-card">
-            <div class="entry-form-card__header">
-              <span class="step-number">01</span>
+          <div class="entry-form-card entry-form-card--v07">
+            <div class="entry-form-card__header entry-form-card__header--v07">
               <div>
-                <h2>建立身份</h2>
-                <p>昵称只在当前房间显示，长度 1～12 个字符。</p>
+                <span class="status-kicker">进入战场</span>
+                <h2>开始对局</h2>
               </div>
+              <button class="icon-button icon-button--small" type="button" data-action="open-rules" aria-label="打开游戏说明" data-tooltip="游戏说明">?</button>
             </div>
 
-            <label class="field">
-              <span>你的昵称</span>
+            <label class="field field--modern">
+              <span>昵称</span>
               <input
                 id="nickname-input"
                 name="nickname"
                 maxlength="12"
                 autocomplete="nickname"
-                placeholder="例如：深蓝指挥官"
+                placeholder="输入昵称"
                 value="${escapeHtml(state.entry.nickname)}"
                 ${pending ? "disabled" : ""}
               />
@@ -792,28 +795,41 @@
 
             ${state.entry.error ? `<p class="form-error" role="alert">${escapeHtml(state.entry.error)}</p>` : ""}
 
-            <form id="create-form" class="entry-action-block">
-              <div>
-                <strong>创建新房间</strong>
-                <span>生成 6 位房间码，可选择双人或三人对战。</span>
+            <form id="create-form" class="create-room-panel">
+              <div class="mode-switch" role="radiogroup" aria-label="对战人数">
+                <button
+                  type="button"
+                  class="mode-switch__option ${state.entry.maxPlayers === 2 ? "is-active" : ""}"
+                  role="radio"
+                  aria-checked="${state.entry.maxPlayers === 2}"
+                  data-action="select-mode"
+                  data-max-players="2"
+                  ${!state.connected || pending ? "disabled" : ""}
+                >
+                  <span>2 人</span><small>对战</small>
+                </button>
+                <button
+                  type="button"
+                  class="mode-switch__option ${state.entry.maxPlayers === 3 ? "is-active" : ""}"
+                  role="radio"
+                  aria-checked="${state.entry.maxPlayers === 3}"
+                  data-action="select-mode"
+                  data-max-players="3"
+                  ${!state.connected || pending ? "disabled" : ""}
+                >
+                  <span>3 人</span><small>自由战</small>
+                </button>
               </div>
-              <label class="field field--compact">
-                <span>对战人数</span>
-                <select id="max-players-input" ${pending ? "disabled" : ""}>
-                  <option value="2" ${state.entry.maxPlayers === 2 ? "selected" : ""}>双人对战</option>
-                  <option value="3" ${state.entry.maxPlayers === 3 ? "selected" : ""}>三人对战</option>
-                </select>
-              </label>
-              <button class="button button--primary" type="submit" ${!state.connected || pending ? "disabled" : ""}>
-                ${pending === "create" ? "正在创建…" : "创建房间"}
+              <button class="button button--primary button--large" type="submit" ${!state.connected || pending ? "disabled" : ""}>
+                ${pending === "create" ? '<span class="button-spinner" aria-hidden="true"></span> 创建中…' : '创建房间 <span aria-hidden="true">→</span>'}
               </button>
             </form>
 
-            <div class="entry-divider"><span>或加入已有房间</span></div>
+            <div class="entry-divider entry-divider--clean"><span>加入已有房间</span></div>
 
-            <form id="join-form" class="join-form">
-              <label class="field field--code">
-                <span>6 位房间码</span>
+            <form id="join-form" class="join-form join-form--v07">
+              <label class="field field--code field--modern">
+                <span class="sr-only">6 位房间码</span>
                 <input
                   id="room-code-input"
                   name="roomCode"
@@ -821,21 +837,16 @@
                   inputmode="text"
                   autocomplete="off"
                   spellcheck="false"
-                  placeholder="ABC234"
+                  placeholder="输入 6 位房间码"
                   value="${roomCode}"
                   ${pending ? "disabled" : ""}
                 />
               </label>
               <button class="button button--secondary" type="submit" ${!state.connected || pending ? "disabled" : ""}>
-                ${pending === "join" ? "正在加入…" : "加入房间"}
+                ${pending === "join" ? '<span class="button-spinner" aria-hidden="true"></span> 加入中…' : "加入"}
               </button>
             </form>
           </div>
-
-          <p class="entry-security">
-            <span aria-hidden="true">◆</span>
-            房间码用于邀请；恢复座位使用浏览器本机保存的独立私密凭证。
-          </p>
         </div>
       </section>`;
   }
@@ -897,35 +908,45 @@
   function renderWaitingPage() {
     const room = state.room;
     const inviteUrl = `${window.location.origin}/?room=${room.roomCode}`;
+    const occupied = room.seats.length;
+    const capacity = room.maxPlayers ?? 2;
     return `
-      <section class="waiting-page page-enter" aria-labelledby="waiting-title">
-        ${renderRoomTop("等待舰队接入", `坐满 ${room.maxPlayers ?? 2} 名玩家后，服务器将同时启动 180 秒舰队部署。`, {
-          kicker: "P02 / 房间等待",
+      <section class="waiting-page waiting-page--v07 page-enter" aria-labelledby="waiting-title">
+        ${renderRoomTop("等待玩家", `${occupied} / ${capacity} 已加入`, {
+          kicker: `${capacity === 3 ? "3 PLAYER FFA" : "2 PLAYER MATCH"}`,
         })}
-        <div class="waiting-layout">
-          <div class="waiting-radar" aria-hidden="true">
-            <span class="radar-sweep"></span>
-            <i class="radar-point radar-point--one"></i>
-            <i class="radar-point radar-point--two"></i>
-            <strong>SEARCHING</strong>
-            <small>等待另一名玩家</small>
-          </div>
-          <div class="waiting-panel">
-            <p class="status-kicker">玩家席位</p>
-            ${renderSeats(room)}
-            <div class="invite-box">
-              <span>邀请链接</span>
+
+        <div class="waiting-layout waiting-layout--v07">
+          <section class="lobby-room-card" aria-label="房间邀请">
+            <span class="status-kicker">房间码</span>
+            <strong class="lobby-room-code">${escapeHtml(room.roomCode)}</strong>
+            <div class="lobby-room-actions">
+              <button class="button button--primary" data-action="copy-room">复制房间码</button>
+              <button class="button button--secondary" data-action="share-invite">分享邀请</button>
+            </div>
+            <div class="lobby-link" title="${escapeHtml(inviteUrl)}">
+              <span aria-hidden="true">↗</span>
               <code>${escapeHtml(inviteUrl)}</code>
-              <div class="invite-box__actions">
-                <button class="button button--secondary button--compact" data-action="copy-invite">复制邀请链接</button>
-                <button class="button button--quiet button--compact" data-action="share-invite">系统分享</button>
+              <button class="icon-button icon-button--small" data-action="copy-invite" aria-label="复制邀请链接" data-tooltip="复制链接">⧉</button>
+            </div>
+          </section>
+
+          <section class="waiting-panel waiting-panel--v07" aria-labelledby="waiting-title">
+            <div class="waiting-panel__heading">
+              <div>
+                <span class="status-kicker">玩家</span>
+                <h2 id="waiting-title">${occupied} / ${capacity}</h2>
               </div>
+              <span class="lobby-wait-indicator" aria-live="polite">
+                <i></i>${occupied < capacity ? "等待加入" : "准备开始"}
+              </span>
             </div>
-            <div class="inline-actions">
+            ${renderSeats(room)}
+            <div class="waiting-panel__footer">
               <button class="button button--danger-quiet" data-action="leave-room">离开房间</button>
-              <button class="button button--quiet" data-action="open-rules">查看精简规则</button>
+              <button class="button button--quiet" data-action="open-rules">游戏说明</button>
             </div>
-          </div>
+          </section>
         </div>
       </section>`;
   }
@@ -2885,6 +2906,11 @@
     if (!control || control.disabled) return;
     const action = control.dataset.action;
 
+    if (action === "select-mode") {
+      state.entry.maxPlayers = Number(control.dataset.maxPlayers) === 3 ? 3 : 2;
+      render();
+      return;
+    }
     if (action === "open-rules") {
       reduceMotionToggle.checked = state.reduceMotion;
       if (!rulesDialog.open) rulesDialog.showModal();

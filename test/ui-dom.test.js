@@ -255,7 +255,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "postlaunch-v0.6.2",
+    stage: "postlaunch-v0.7.0",
     protocolVersion: "1.5",
   });
 
@@ -278,7 +278,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
     reconnectToken: "private-token-must-not-enter-dom",
   });
   socket.serverEmit("room:state", baseRoom());
-  assert.match(window.document.querySelector("#app").textContent, /等待舰队接入/);
+  assert.match(window.document.querySelector("#app").textContent, /等待玩家/);
   assert.equal(
     window.document.body.textContent.includes("private-token-must-not-enter-dom"),
     false,

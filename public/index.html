@@ -7,7 +7,7 @@
       name="description"
       content="《海战 OCEAN》服务器权威的双人/三人回合制策略游戏"
     />
-    <meta name="theme-color" content="#061522" />
+    <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
     <link rel="stylesheet" href="/css/main.css" />
     <script src="/socket.io/socket.io.js" defer></script>
@@ -31,7 +31,8 @@
         </a>
 
         <div class="global-header__tools">
-          <div class="connection-pill" role="status" aria-live="polite">
+          <span id="header-room-code" class="header-room" hidden></span>
+          <div class="connection-pill" role="status" aria-live="polite" data-tooltip="实时连接状态">
             <span
               id="connection-dot"
               class="connection-pill__dot"
@@ -40,9 +41,13 @@
             ></span>
             <span id="connection-text">正在连接</span>
           </div>
-          <span id="header-room-code" class="header-room" hidden></span>
-          <button class="button button--quiet button--compact" data-action="open-rules">
-            规则与图例
+          <button
+            class="button button--quiet button--compact header-help"
+            data-action="open-rules"
+            data-tooltip="游戏说明与设置"
+            aria-label="打开游戏说明与设置"
+          >
+            <span aria-hidden="true">?</span><span>帮助</span>
           </button>
         </div>
       </header>
@@ -55,8 +60,12 @@
       </main>
 
       <footer class="global-footer">
-        <span id="footer-release">海战 OCEAN · 运行监控 postlaunch-v0.6.2</span>
-        <span id="footer-protocol">服务器权威 · 协议 1.5</span>
+        <span>OCEAN</span>
+        <span class="global-footer__meta">
+          <span id="footer-release">v0.7.0</span>
+          <span aria-hidden="true">·</span>
+          <span id="footer-protocol">Rule 1.4 · Socket 1.5</span>
+        </span>
       </footer>
     </div>
 
@@ -87,8 +96,8 @@
     <dialog id="rules-dialog" class="modal modal--rules" aria-labelledby="rules-title">
       <div class="rules-dialog__header">
         <div>
-          <p class="eyebrow">RULE v1.4 / 快速查阅</p>
-          <h2 id="rules-title">规则与图例</h2>
+          <p class="eyebrow">OCEAN HELP</p>
+          <h2 id="rules-title">游戏说明</h2>
         </div>
         <button class="icon-button" type="button" data-action="close-rules" aria-label="关闭规则">
           ×
@@ -99,7 +108,7 @@
         <section class="rule-section">
           <h3>胜负与回合</h3>
           <p>
-            2～3 名玩家在 12×12 海域秘密部署舰队。每名玩家自己的首个行动回合必须使用航空母舰雷达扫描完整 4×4 海域，之后按回合执行一个合法行动。双人局航空母舰沉没即落败；三人局航空母舰沉没者出局，直到只剩一名玩家。所有仍在局玩家均无攻击手段时进入终局逐枚手动鱼雷引爆。每个正常行动回合 90 秒，连续三次实际行动超时出局。
+            2～3 名玩家在 12×12 海域秘密部署舰队。双人局每回合执行一次合法行动；三人局每个正常回合分别对另外两名仍在局敌人各完成一次合法操作，两次操作共享同一个 90 秒计时。每名玩家自己的首个正常回合第一项操作必须使用航空母舰雷达扫描。航空母舰沉没时，双人局直接落败，三人局该玩家出局。
           </p>
         </section>
 
@@ -116,6 +125,16 @@
             <article><strong>探测弹</strong><span>完整 3×3；存活水下作战单位的未受击格与有效诱饵鱼雷均产生信号，只返回是否探测到信号。</span></article>
             <article><strong>直升机扫射</strong><span>两艘驱逐舰均沉没后解锁；扫射一整行或列，只命中水面单位，航空母舰最多 −2。</span></article>
             <article><strong>雷达扫描</strong><span>每名玩家首个行动回合强制使用；完整 4×4，只向行动方返回是否存在敌方布局。</span></article>
+          </div>
+        </section>
+
+        <section class="rule-section">
+          <h3>三人模式</h3>
+          <div class="quick-rule-grid quick-rule-grid--compact">
+            <article><strong>双目标回合</strong><span>分别对两名仍在局敌人各完成一次操作；行动组合可以不同。</span></article>
+            <article><strong>独立敌方地图</strong><span>两名敌人的命中、未命中、导弹标记与私人标记分别记录。</span></article>
+            <article><strong>直升机例外</strong><span>两名敌人都在局时，一次扫射同时对两人同一行或列独立结算，并结束当前回合。</span></article>
+            <article><strong>终局鱼雷例外</strong><span>手动引爆一枚己方诱饵鱼雷时，同一坐标同时作用于其他所有仍在局敌人。</span></article>
           </div>
         </section>
 
@@ -144,7 +163,7 @@
 
       <div class="modal__actions">
         <button class="button button--primary" type="button" data-action="close-rules">
-          返回游戏
+          完成
         </button>
       </div>
     </dialog>

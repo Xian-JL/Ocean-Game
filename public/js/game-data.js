@@ -10,8 +10,8 @@
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
   const RELEASE = Object.freeze({
-    version: "0.6.2",
-    stage: "postlaunch-v0.6.2",
+    version: "0.7.0",
+    stage: "postlaunch-v0.7.0",
     ruleVersion: "1.4",
     socketProtocolVersion: "1.5",
   });
