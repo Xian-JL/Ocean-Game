@@ -151,6 +151,17 @@
           enabled: false,
         };
       }
+      if (
+        roomState?.maxPlayers === 3 &&
+        (roomState?.turn?.requiredTargetPlayerIds?.length ?? 0) > 1 &&
+        (roomState?.turn?.actionCount ?? 0) > 0
+      ) {
+        return {
+          code: "locked",
+          label: "三人局直升机须作为本回合首个行动并同时攻击两名敌方玩家",
+          enabled: false,
+        };
+      }
     }
     if (roomState?.turnPhase === "RESOLVING") {
       return { code: "submitting", label: "服务器正在结算", enabled: false };
@@ -212,9 +223,12 @@
 
   function publicActionText(record, roomState) {
     const actorName = nicknameFor(roomState, record.actorId);
-    const defenderName = record.defenderId
-      ? nicknameFor(roomState, record.defenderId)
-      : "目标玩家";
+    const defenderIds = record.defenderIds ?? [record.defenderId].filter(Boolean);
+    const defenderName = defenderIds.length > 1
+      ? defenderIds.map((id) => nicknameFor(roomState, id)).join("、")
+      : record.defenderId
+        ? nicknameFor(roomState, record.defenderId)
+        : "目标玩家";
     const target = formatTarget(record.target);
     const prefix = `${actorName} 对 ${defenderName}`;
     let resultText = "";
@@ -241,6 +255,13 @@
       const hits = record.cellResults.filter((cell) => cell.result === "hit").length;
       const misses = record.cellResults.filter((cell) => cell.result === "miss").length;
       resultText = ` · 命中 ${hits} 格，未命中 ${misses} 格`;
+    } else if (record.cellResultsByDefender) {
+      const counts = Object.entries(record.cellResultsByDefender).map(([playerId, cells]) => {
+        const hits = cells.filter((cell) => cell.result === "hit").length;
+        const misses = cells.filter((cell) => cell.result === "miss").length;
+        return `${nicknameFor(roomState, playerId)}：命中 ${hits} 格 / 未命中 ${misses} 格`;
+      });
+      resultText = ` · ${counts.join("；")}`;
     }
     return `${prefix} 使用${record.actionName}，目标 ${target}${resultText}`;
   }

@@ -212,7 +212,11 @@
 
   function clearMarkersFor(roomCode, playerId) {
     try {
-      localStorage.removeItem(markerStorageKey(roomCode, playerId));
+      const prefix = `${MARKER_STORAGE_PREFIX}:${roomCode}:${playerId}:`;
+      for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+        const key = localStorage.key(index);
+        if (key?.startsWith(prefix)) localStorage.removeItem(key);
+      }
     } catch (_error) {
       // 私人标记只影响本机显示，清除失败不影响对局。
     }
@@ -420,7 +424,9 @@
       };
       state.battle.markers = readMarkers(room.roomCode, room.own.playerId, targetPlayerId);
     }
-    const resolved = Data.resolvedTargetSet(room.battle.own);
+    const enemyMap = room.battle.own.enemyMapsByPlayer?.[targetPlayerId]
+      ?? room.battle.own.enemyMap;
+    const resolved = Data.resolvedTargetSet({ ...room.battle.own, enemyMap });
     let changed = false;
     for (const coordinate of state.battle.markers.keys()) {
       if (resolved.has(coordinate)) {
@@ -449,11 +455,14 @@
     }
     const ownId = room.own.playerId;
     const actorName = Model.nicknameFor(room, feedback.actorId);
-    const defenderName = feedback.defenderId
-      ? Model.nicknameFor(room, feedback.defenderId)
-      : "目标玩家";
+    const defenderIds = feedback.defenderIds ?? [feedback.defenderId].filter(Boolean);
+    const defenderName = defenderIds.length > 1
+      ? defenderIds.map((id) => Model.nicknameFor(room, id)).join("、")
+      : feedback.defenderId
+        ? Model.nicknameFor(room, feedback.defenderId)
+        : "目标玩家";
     const isActor = feedback.actorId === ownId;
-    const isDefender = feedback.defenderId === ownId;
+    const isDefender = defenderIds.includes(ownId);
     const target = Model.formatTarget(feedback.target);
     const publicActorPrefix = isDefender
       ? `${actorName} 对你`
@@ -522,6 +531,20 @@
         ? `${actorTargetPrefix}：${target} 未命中。`
         : `${publicActorPrefix}使用${feedback.actionName}：${target} 未命中。`;
     }
+    if (feedback.cellResultsByDefender) {
+      const counts = Object.entries(feedback.cellResultsByDefender).map(([playerId, cells]) => {
+        const hits = cells.filter((cell) => cell.result === "hit").length;
+        const misses = cells.filter((cell) => cell.result === "miss").length;
+        return `${Model.nicknameFor(room, playerId)}：命中 ${hits} 格，未命中 ${misses} 格`;
+      });
+      if (isActor && exactDamage.length > 0) {
+        return `直升机同时扫射 ${defenderName}：${counts.join("；")}；${exactDamage.join("；")}。`;
+      }
+      if (isDefender && receivedHits.length > 0) {
+        return `${actorName} 对所有敌方玩家执行直升机扫射：${receivedHits.join("；")}。`;
+      }
+      return `直升机同时扫射 ${defenderName}：${counts.join("；")}。`;
+    }
     if (Array.isArray(feedback.cellResults)) {
       const hits = feedback.cellResults.filter((cell) => cell.result === "hit").length;
       const misses = feedback.cellResults.filter((cell) => cell.result === "miss").length;
@@ -586,7 +609,9 @@
     }
 
     state.room = nextRoom;
-    const availableTargets = nextRoom.battle?.opponentIds ?? [];
+    const availableTargets = nextRoom.turn?.canAct && nextRoom.maxPlayers === 3
+      ? (nextRoom.turn.remainingTargetPlayerIds ?? [])
+      : (nextRoom.battle?.opponentIds ?? []);
     if (!availableTargets.includes(state.battle.targetPlayerId)) {
       state.battle.targetPlayerId = availableTargets[0] ?? null;
     }
@@ -1544,9 +1569,11 @@
         <div class="action-rail__content">
         ${(room.battle.opponentIds?.length ?? 0) > 1 ? `
           <label class="field target-player-field">
-            <span>本回合攻击对象</span>
+            <span>本回合目标${room.turn?.canAct ? ` · 剩余 ${room.turn.remainingTargetPlayerIds?.length ?? 0}` : ""}</span>
             <select id="target-player-input">
-              ${room.battle.opponentIds.map((playerId) => `
+              ${(room.turn?.canAct
+                ? (room.turn.remainingTargetPlayerIds ?? [])
+                : room.battle.opponentIds).map((playerId) => `
                 <option value="${escapeHtml(playerId)}" ${state.battle.targetPlayerId === playerId ? "selected" : ""}>
                   ${escapeHtml(Model.nicknameFor(room, playerId))}
                 </option>`).join("")}
@@ -2344,9 +2371,15 @@
     const target = state.battle.target;
     if (!definition || !target) return;
     const remaining = state.room.battle.own.remainingUses?.[definition.type];
+    const globalHelicopter =
+      definition.type === Data.ACTION_TYPES.HELICOPTER_STRAFE &&
+      state.room.maxPlayers === 3 &&
+      (state.room.turn?.remainingTargetPlayerIds?.length ?? 0) > 1;
     const paragraphs = [
       `目标：${Model.formatTarget(target)}`,
-      ...(state.room.battle.opponentIds?.length > 1
+      ...(globalHelicopter
+        ? [`敌方玩家：${state.room.turn.remainingTargetPlayerIds.map((playerId) => Model.nicknameFor(state.room, playerId)).join("、")}（同时生效）`]
+        : state.room.battle.opponentIds?.length > 1
         ? [`敌方玩家：${Model.nicknameFor(state.room, state.battle.targetPlayerId)}`]
         : []),
       definition.warning,
@@ -2509,7 +2542,10 @@
   function handleEnemyCell(coordinate) {
     const ownBattle = state.room?.battle?.own;
     if (!ownBattle) return;
-    const resolved = Data.resolvedTargetSet(ownBattle);
+    const selectedEnemyMap =
+      ownBattle.enemyMapsByPlayer?.[state.battle.targetPlayerId] ?? ownBattle.enemyMap;
+    const effectiveOwnBattle = { ...ownBattle, enemyMap: selectedEnemyMap };
+    const resolved = Data.resolvedTargetSet(effectiveOwnBattle);
     if (state.battle.markerMode) {
       if (resolved.has(coordinate)) {
         showToast("命中或未命中格不能添加私人标记。", "warning");
@@ -2542,7 +2578,7 @@
     } else {
       target = { kind: "cell", coordinate };
     }
-    const options = Data.getTargetOptions(actionType, ownBattle);
+    const options = Data.getTargetOptions(actionType, effectiveOwnBattle);
     const optionKeys = new Set(options.map(Data.targetKey));
     if (!optionKeys.has(Data.targetKey(target))) {
       showToast(

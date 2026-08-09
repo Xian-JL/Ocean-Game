@@ -5,7 +5,7 @@ const { once } = require("node:events");
 const test = require("node:test");
 const { createOceanServer } = require("../server/app");
 
-test("运行监控 postlaunch-v0.6.1 提供健康检查、游戏入口和 Socket.IO 协议入口", async (context) => {
+test("运行监控 postlaunch-v0.6.2 提供健康检查、游戏入口和 Socket.IO 协议入口", async (context) => {
   const fixedTime = "2026-08-07T00:00:00.000Z";
   const { httpServer, io } = createOceanServer({
     now: () => fixedTime,
@@ -30,8 +30,8 @@ test("运行监控 postlaunch-v0.6.1 提供健康检查、游戏入口和 Socket
   assert.deepEqual(await healthResponse.json(), {
     status: "ok",
     service: "ocean",
-    stage: "postlaunch-v0.6.1",
-    socketProtocol: "1.4",
+    stage: "postlaunch-v0.6.2",
+    socketProtocol: "1.5",
     timestamp: fixedTime,
   });
 

@@ -3,8 +3,11 @@
 const {
   MATCH_STATUS,
   assertBattleState,
+  clearParalysisForPlayer,
+  getBattlePlayerState,
   getNextActivePlayerId,
   getOpponentPlayerId,
+  replaceBattlePlayerState,
 } = require("./battle-state");
 const {
   END_REASONS,
@@ -12,7 +15,12 @@ const {
   finishByForfeit,
 } = require("./endgame");
 const { RuleValidationError } = require("./errors");
-const { TURN_PHASES, assertMatchRoomState } = require("./match");
+const {
+  TURN_PHASES,
+  assertMatchRoomState,
+  getRemainingTurnTargetPlayerIds,
+  prepareNextTurn,
+} = require("./match");
 const {
   CONNECTION_PHASES,
   ROOM_PHASES,
@@ -284,6 +292,7 @@ function closeRoomForDisconnect(room, reason, message, finishedAt) {
     pausedTimer: null,
     battleState,
     currentPlayerId: null,
+    turnActionState: null,
     pendingAction: null,
     matchFinishedAt: room.matchStartedAt === null ? null : finishedAt,
     closedReason: reason,
@@ -326,14 +335,22 @@ function finishRoomByDisconnectForfeit(room, loserId, finishedAt) {
     const seats = room.seats.map((seat) => seat.playerId === loserId
       ? { ...seat, reconnectDeadlineAt: null }
       : seat);
+    const connectionPhase = deriveConnectionPhase(
+      seats,
+      battleState.match.eliminatedPlayerIds,
+    );
     let actionDeadlineAt = room.actionDeadlineAt;
     if (room.pausedTimer?.kind === PAUSED_TIMER_KINDS.ACTION) {
       actionDeadlineAt = finishedAt + room.pausedTimer.remainingMs;
     }
-    const currentPlayerId = room.currentPlayerId === loserId
-      ? getNextActivePlayerId(battleState, loserId)
-      : room.currentPlayerId;
-    return assertMatchRoomState({
+    const continuedPausedTimer = connectionPhase === CONNECTION_PHASES.CONNECTED
+      ? null
+      : room.pausedTimer;
+    if (continuedPausedTimer?.kind === PAUSED_TIMER_KINDS.ACTION) {
+      actionDeadlineAt = null;
+    }
+
+    let nextRoom = {
       ...room,
       ...appendSystemEvent(
         room,
@@ -343,16 +360,48 @@ function finishRoomByDisconnectForfeit(room, loserId, finishedAt) {
       ),
       stateVersion: room.stateVersion + 1,
       seats,
-      connectionPhase: deriveConnectionPhase(
-        seats,
-        battleState.match.eliminatedPlayerIds,
-      ),
-      pausedTimer: null,
+      connectionPhase,
+      pausedTimer: continuedPausedTimer,
       actionDeadlineAt,
       battleState,
-      currentPlayerId,
       pendingAction: null,
-    });
+    };
+
+    if (room.currentPlayerId === loserId) {
+      const nextPlayerId = getNextActivePlayerId(battleState, loserId);
+      return assertMatchRoomState(
+        prepareNextTurn(nextRoom, battleState, nextPlayerId, finishedAt),
+      );
+    }
+
+    const remainingTargetIds = getRemainingTurnTargetPlayerIds(
+      battleState,
+      room.turnActionState,
+    );
+    if (remainingTargetIds.length > 0) {
+      return assertMatchRoomState(nextRoom);
+    }
+
+    let clearedState = battleState;
+    if (room.currentPlayerId !== null) {
+      const currentState = getBattlePlayerState(
+        clearedState,
+        room.currentPlayerId,
+      );
+      clearedState = replaceBattlePlayerState(
+        clearedState,
+        room.currentPlayerId,
+        clearParalysisForPlayer(currentState),
+      );
+    }
+    nextRoom = { ...nextRoom, battleState: clearedState };
+    const nextPlayerId = getNextActivePlayerId(
+      clearedState,
+      room.currentPlayerId,
+    );
+    return assertMatchRoomState(
+      prepareNextTurn(nextRoom, clearedState, nextPlayerId, finishedAt),
+    );
   }
   return assertMatchRoomState({
     ...room,
@@ -371,6 +420,7 @@ function finishRoomByDisconnectForfeit(room, loserId, finishedAt) {
     pausedTimer: null,
     battleState,
     currentPlayerId: null,
+    turnActionState: null,
     pendingAction: null,
     matchFinishedAt: finishedAt,
   });

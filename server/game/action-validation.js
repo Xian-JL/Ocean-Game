@@ -147,7 +147,7 @@ function createCenterTargets(minRow, maxRow, minColumn, maxColumn) {
   return targets;
 }
 
-function getActionTargetOptions(state, actionType) {
+function getActionTargetOptions(state, actionType, options = {}) {
   assertActionState(state);
   const definition = getActionDefinition(actionType);
   const destroyerTargets = new Set(state.destroyerTargetCells);
@@ -159,7 +159,11 @@ function getActionTargetOptions(state, actionType) {
         return [];
       }
       return getDestroyerIRange(source.cells)
-        .filter((coordinate) => !destroyerTargets.has(coordinate))
+        .filter((coordinate) =>
+          !destroyerTargets.has(coordinate) &&
+          !(typeof options.targetPlayerId === "string" &&
+            destroyerTargets.has(`${options.targetPlayerId}:${coordinate}`))
+        )
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     case RANGE_MODES.DESTROYER_II: {
@@ -168,7 +172,11 @@ function getActionTargetOptions(state, actionType) {
         return [];
       }
       return getDestroyerIIRange(source.cells)
-        .filter((coordinate) => !destroyerTargets.has(coordinate))
+        .filter((coordinate) =>
+          !destroyerTargets.has(coordinate) &&
+          !(typeof options.targetPlayerId === "string" &&
+            destroyerTargets.has(`${options.targetPlayerId}:${coordinate}`))
+        )
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     case RANGE_MODES.FULL_BOARD:
@@ -472,7 +480,7 @@ function getActionAvailability(state, actionType, options = {}) {
           sourceType: definition.sourceType,
         }),
       ];
-  const targets = source ? getActionTargetOptions(state, actionType) : [];
+  const targets = source ? getActionTargetOptions(state, actionType, options) : [];
 
   if (source && targets.length === 0) {
     issues.push(
@@ -512,6 +520,17 @@ function hasAnyLegalAction(state) {
   return listLegalActions(state).length > 0;
 }
 
+function hasAnyLegalActionForTarget(state, targetPlayerId, options = {}) {
+  const excludedActionTypes = new Set(options.excludeActionTypes ?? []);
+  return listActionAvailability(state, {
+    ...options,
+    targetPlayerId,
+  }).some(
+    (availability) =>
+      availability.available && !excludedActionTypes.has(availability.actionType),
+  );
+}
+
 function hasAttackCapability(state) {
   return listActionAvailability(state, { ignoreParalysis: true }).some(
     (availability) =>
@@ -525,7 +544,7 @@ function commitActionUsage(state, intent) {
   if (!validation.valid) {
     throw new RuleValidationError(
       "INVALID_ACTION",
-      "行动请求不符合《游戏规则 v1.2》。",
+      "行动请求不符合《游戏规则 v1.4》。",
       { errors: validation.errors },
     );
   }
@@ -585,6 +604,7 @@ module.exports = {
   getActionAvailability,
   getActionTargetOptions,
   hasAnyLegalAction,
+  hasAnyLegalActionForTarget,
   hasAttackCapability,
   isHelicopterUnlocked,
   listActionAvailability,

@@ -444,99 +444,149 @@ function resolveHelicopterStrafe(
   };
 }
 
-function resolveAction(battleState, actorId, intent) {
+function resolveAction(battleState, actorId, intent, options = {}) {
   assertBattleState(battleState);
   const opponentIds = getOpponentPlayerIds(battleState, actorId);
-  const defenderId = opponentIds.length === 1
-    ? opponentIds[0]
-    : intent?.targetPlayerId;
-  if (!opponentIds.includes(defenderId)) {
+  const isGlobalHelicopter =
+    intent?.actionType === ACTION_TYPES.HELICOPTER_STRAFE &&
+    opponentIds.length > 1;
+  const defenderIds = isGlobalHelicopter
+    ? [...opponentIds]
+    : [opponentIds.length === 1 ? opponentIds[0] : intent?.targetPlayerId];
+
+  if (
+    defenderIds.length < 1 ||
+    defenderIds.some((defenderId) => !opponentIds.includes(defenderId))
+  ) {
     throw new RuleValidationError(
       "INVALID_TARGET_PLAYER",
       "三人对战必须选择一名仍在对局中的敌方玩家。",
-      { actorId, defenderId, opponentIds },
+      { actorId, defenderIds, opponentIds },
     );
   }
+
   const initialActorState = getBattlePlayerState(battleState, actorId);
-  const initialDefenderState = getBattlePlayerState(battleState, defenderId);
   const validation = validateActionIntent(initialActorState, intent);
 
   if (!validation.valid) {
     throw new RuleValidationError(
       "INVALID_ACTION",
-      "行动请求不符合《游戏规则 v1.2》。",
+      "行动请求不符合《游戏规则 v1.4》。",
       { errors: validation.errors },
     );
   }
 
   const committed = commitActionUsage(initialActorState, intent);
   let actorState = committed.state;
-  let defenderState = initialDefenderState;
+  const players = { ...battleState.players };
   let outcome;
+  let defenderId = defenderIds[0];
 
-  if (
-    VISIBLE_SINGLE_CELL_ACTIONS.has(committed.action.actionType) ||
-    [ACTION_TYPES.SUBMARINE_MISSILE, ACTION_TYPES.NUCLEAR_BOMB].includes(
-      committed.action.actionType,
-    )
-  ) {
-    const resolved = resolveSingleCellAction(
-      committed.action,
-      actorId,
-      defenderId,
-      actorState,
-      defenderState,
-    );
-    actorState = resolved.actorState;
-    defenderState = resolved.defenderState;
-    outcome = resolved.outcome;
+  if (isGlobalHelicopter) {
+    const outcomesByDefender = {};
+    const damageEvents = [];
+    const decoyEvents = [];
+    const cellResultsByDefender = {};
 
-    if (VISIBLE_SINGLE_CELL_ACTIONS.has(committed.action.actionType)) {
-      actorState = recordTargetCellResults(actorState, [
-        {
-          coordinate: committed.action.target.coordinate,
-          result: outcome.actualResult,
-        },
-      ]);
+    for (const targetPlayerId of defenderIds) {
+      const initialDefenderState = getBattlePlayerState(battleState, targetPlayerId);
+      const resolved = resolveHelicopterStrafe(
+        committed,
+        targetPlayerId,
+        initialDefenderState,
+      );
+      players[targetPlayerId] = resolved.defenderState;
+      outcomesByDefender[targetPlayerId] = resolved.outcome;
+      cellResultsByDefender[targetPlayerId] = resolved.outcome.cellResults;
+      damageEvents.push(...resolved.outcome.damageEvents);
+      decoyEvents.push(...resolved.outcome.decoyEvents);
     }
-  } else if (committed.action.actionType === ACTION_TYPES.SHOCK_BOMB) {
-    const resolved = resolveShockBomb(committed, defenderState);
-    defenderState = resolved.defenderState;
-    outcome = resolved.outcome;
-  } else if (committed.action.actionType === ACTION_TYPES.DETECTION_BOMB) {
-    outcome = resolveDetectionBomb(committed, defenderState).outcome;
-  } else if (committed.action.actionType === ACTION_TYPES.RADAR_SCAN) {
-    outcome = resolveRadarScan(committed, defenderState).outcome;
-  } else if (
-    committed.action.actionType === ACTION_TYPES.HELICOPTER_STRAFE
-  ) {
-    const resolved = resolveHelicopterStrafe(
-      committed,
-      defenderId,
-      defenderState,
-    );
-    defenderState = resolved.defenderState;
-    outcome = resolved.outcome;
-    actorState = recordTargetCellResults(
-      actorState,
-      outcome.cellResults.filter((cellResult) =>
-        ["hit", "miss"].includes(cellResult.result),
-      ),
-    );
+
+    outcome = {
+      kind: "multi_defender_line",
+      target: committed.action.target,
+      defenderIds: [...defenderIds],
+      outcomesByDefender,
+      cellResultsByDefender,
+      damageEvents,
+      decoyEvents,
+    };
+    defenderId = null;
   } else {
-    throw new RuleValidationError(
-      "UNSUPPORTED_ACTION_RESOLUTION",
-      "该行动尚无结算器。",
-      { actionType: committed.action.actionType },
-    );
+    const targetPlayerId = defenderIds[0];
+    const initialDefenderState = getBattlePlayerState(battleState, targetPlayerId);
+    let defenderState = initialDefenderState;
+
+    if (
+      VISIBLE_SINGLE_CELL_ACTIONS.has(committed.action.actionType) ||
+      [ACTION_TYPES.SUBMARINE_MISSILE, ACTION_TYPES.NUCLEAR_BOMB].includes(
+        committed.action.actionType,
+      )
+    ) {
+      const resolved = resolveSingleCellAction(
+        committed.action,
+        actorId,
+        targetPlayerId,
+        actorState,
+        defenderState,
+      );
+      actorState = resolved.actorState;
+      defenderState = resolved.defenderState;
+      outcome = resolved.outcome;
+
+      if (VISIBLE_SINGLE_CELL_ACTIONS.has(committed.action.actionType)) {
+        actorState = recordTargetCellResults(actorState, [
+          {
+            coordinate: committed.action.target.coordinate,
+            result: outcome.actualResult,
+          },
+        ]);
+      }
+    } else if (committed.action.actionType === ACTION_TYPES.SHOCK_BOMB) {
+      const resolved = resolveShockBomb(committed, defenderState);
+      defenderState = resolved.defenderState;
+      outcome = resolved.outcome;
+    } else if (committed.action.actionType === ACTION_TYPES.DETECTION_BOMB) {
+      outcome = resolveDetectionBomb(committed, defenderState).outcome;
+    } else if (committed.action.actionType === ACTION_TYPES.RADAR_SCAN) {
+      outcome = resolveRadarScan(committed, defenderState).outcome;
+    } else if (
+      committed.action.actionType === ACTION_TYPES.HELICOPTER_STRAFE
+    ) {
+      const resolved = resolveHelicopterStrafe(
+        committed,
+        targetPlayerId,
+        defenderState,
+      );
+      defenderState = resolved.defenderState;
+      outcome = resolved.outcome;
+      actorState = recordTargetCellResults(
+        actorState,
+        outcome.cellResults.filter((cellResult) =>
+          ["hit", "miss"].includes(cellResult.result),
+        ),
+      );
+    } else {
+      throw new RuleValidationError(
+        "UNSUPPORTED_ACTION_RESOLUTION",
+        "该行动尚无结算器。",
+        { actionType: committed.action.actionType },
+      );
+    }
+
+    players[targetPlayerId] = defenderState;
   }
 
-  actorState = clearParalysisForPlayer(actorState);
+  if (options.clearParalysisAfterAction !== false) {
+    actorState = clearParalysisForPlayer(actorState);
+  }
+  players[actorId] = actorState;
 
   const actionRecord = {
     sequence: battleState.nextActionSequence,
     actorId,
     defenderId,
+    defenderIds: [...defenderIds],
     action: committed.action,
     targetCells: committed.targetCells,
     pendingTargetCells: committed.pendingTargetCells,
@@ -544,11 +594,7 @@ function resolveAction(battleState, actorId, intent) {
   };
   const nextState = {
     ...battleState,
-    players: {
-      ...battleState.players,
-      [actorId]: actorState,
-      [defenderId]: defenderState,
-    },
+    players,
     actionLog: [...battleState.actionLog, actionRecord],
     nextActionSequence: battleState.nextActionSequence + 1,
   };

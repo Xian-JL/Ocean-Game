@@ -10,8 +10,8 @@ const {
   getBattleDecoyAtCell,
   getBattlePlayerState,
   getBattleUnitAtCell,
-  getNextActivePlayerId,
   getOpponentPlayerId,
+  getOpponentPlayerIds,
   replaceBattlePlayerState,
   destroyDecoy,
 } = require("./battle-state");
@@ -87,6 +87,22 @@ function carrierSunkInEvents(events, side) {
   );
 }
 
+function carrierSunkPlayerIdsInEvents(events, side) {
+  return [
+    ...new Set(
+      events
+        .filter(
+          (event) =>
+            event.side === side &&
+            event.unitType === DEPLOYABLE_TYPES.AIRCRAFT_CARRIER &&
+            event.sunk === true &&
+            typeof event.playerId === "string",
+        )
+        .map((event) => event.playerId),
+    ),
+  ];
+}
+
 function settleCarrierOutcome(battleState, actionRecord) {
   ensureBattlePlaying(battleState);
   if (
@@ -103,10 +119,11 @@ function settleCarrierOutcome(battleState, actionRecord) {
   }
 
   const damageEvents = actionRecord.outcome?.damageEvents ?? [];
-  const defenderCarrierSunk = carrierSunkInEvents(
+  const defenderCarrierSunkIds = carrierSunkPlayerIdsInEvents(
     damageEvents,
     "defender",
   );
+  const defenderCarrierSunk = defenderCarrierSunkIds.length > 0;
   const actorCarrierSunk = carrierSunkInEvents(damageEvents, "actor");
   const trigger = {
     kind: "action",
@@ -118,7 +135,7 @@ function settleCarrierOutcome(battleState, actionRecord) {
   if (battleState.playerIds.length === 3) {
     const priorEliminated = battleState.match.eliminatedPlayerIds ?? [];
     const eliminated = new Set(priorEliminated);
-    if (defenderCarrierSunk) eliminated.add(actionRecord.defenderId);
+    for (const defenderId of defenderCarrierSunkIds) eliminated.add(defenderId);
     if (actorCarrierSunk) eliminated.add(actionRecord.actorId);
     if (eliminated.size === priorEliminated.length) {
       return { state: battleState, ended: false, result: null };
@@ -151,10 +168,11 @@ function settleCarrierOutcome(battleState, actionRecord) {
   }
 
   if (actionRecord.action.actionType === ACTION_TYPES.PIRATE_ATTACK) {
+    const singleDefenderId = actionRecord.defenderId ?? actionRecord.defenderIds?.[0];
     if (defenderCarrierSunk) {
       result = createWinResult(
         actionRecord.actorId,
-        actionRecord.defenderId,
+        singleDefenderId,
         actorCarrierSunk
           ? END_REASONS.PIRATE_SIMULTANEOUS_CARRIER_SINK
           : END_REASONS.PIRATE_ENEMY_CARRIER_SUNK,
@@ -162,16 +180,17 @@ function settleCarrierOutcome(battleState, actionRecord) {
       );
     } else if (actorCarrierSunk) {
       result = createWinResult(
-        actionRecord.defenderId,
+        singleDefenderId,
         actionRecord.actorId,
         END_REASONS.PIRATE_OWN_CARRIER_SUNK,
         trigger,
       );
     }
   } else if (defenderCarrierSunk) {
+    const singleDefenderId = actionRecord.defenderId ?? actionRecord.defenderIds?.[0];
     result = createWinResult(
       actionRecord.actorId,
-      actionRecord.defenderId,
+      singleDefenderId,
       END_REASONS.AIRCRAFT_CARRIER_SUNK,
       trigger,
     );
@@ -227,93 +246,76 @@ function inspectFinalSalvoTarget(playerState, coordinate) {
 
 function createFinalSalvoPlan(battleState) {
   const shots = [];
-  const freshHitsByTargetPlayer = Object.fromEntries(
-    battleState.playerIds.map((playerId) => [playerId, new Map()]),
-  );
+  const damagePlans = [];
+  const eliminated = new Set(battleState.match.eliminatedPlayerIds ?? []);
 
   for (const sourcePlayerId of battleState.playerIds) {
+    if (eliminated.has(sourcePlayerId)) continue;
     const sourceState = getBattlePlayerState(battleState, sourcePlayerId);
-    const targetPlayerId = getNextActivePlayerId(battleState, sourcePlayerId);
-    const targetState = getBattlePlayerState(battleState, targetPlayerId);
+    const targetPlayerIds = getOpponentPlayerIds(battleState, sourcePlayerId);
 
     for (const decoy of sourceState.decoys.filter(
       (candidate) => !candidate.destroyed,
     )) {
-      const inspection = inspectFinalSalvoTarget(targetState, decoy.cell);
-      const liveUnit = inspection.kind === "unit" ? inspection.unit : null;
-      const freshUnitCell = Boolean(
-        liveUnit && !liveUnit.hitCells.includes(decoy.cell),
-      );
-      const result = liveUnit ? "hit" : "miss";
-
-      shots.push({
-        sourcePlayerId,
-        sourceDecoyId: decoy.id,
-        sourceCoordinate: decoy.cell,
-        targetPlayerId,
-        targetCoordinate: decoy.cell,
-        result,
-        actualTargetKind: inspection.kind,
-        targetUnitId: liveUnit?.id ?? null,
-        targetUnitType: liveUnit?.type ?? null,
-        freshUnitCell,
-      });
-
-      if (freshUnitCell) {
-        const byUnit = freshHitsByTargetPlayer[targetPlayerId];
-        const hitCells = byUnit.get(liveUnit.id) ?? [];
-        hitCells.push(decoy.cell);
-        byUnit.set(liveUnit.id, hitCells);
+      for (const targetPlayerId of targetPlayerIds) {
+        const targetState = getBattlePlayerState(battleState, targetPlayerId);
+        const inspection = inspectFinalSalvoTarget(targetState, decoy.cell);
+        const liveUnit = inspection.kind === "unit" ? inspection.unit : null;
+        const freshUnitCell = Boolean(
+          liveUnit && !liveUnit.hitCells.includes(decoy.cell),
+        );
+        shots.push({
+          sourcePlayerId,
+          sourceDecoyId: decoy.id,
+          sourceCoordinate: decoy.cell,
+          targetPlayerId,
+          targetCoordinate: decoy.cell,
+          result: liveUnit ? "hit" : "miss",
+          actualTargetKind: inspection.kind,
+          targetUnitId: liveUnit?.id ?? null,
+          targetUnitType: liveUnit?.type ?? null,
+          freshUnitCell,
+        });
+        if (freshUnitCell) {
+          damagePlans.push({
+            sourcePlayerId,
+            targetPlayerId,
+            unitId: liveUnit.id,
+            cell: decoy.cell,
+          });
+        }
       }
     }
   }
 
-  return {
-    shots,
-    freshHitsByTargetPlayer,
-  };
+  return { shots, damagePlans };
 }
 
 function applyFinalSalvoPlan(battleState, plan) {
-  const players = { ...battleState.players };
+  let state = battleState;
   const damageEvents = [];
 
-  for (const targetPlayerId of battleState.playerIds) {
-    let targetState = players[targetPlayerId];
-    const sourcePlayerId = battleState.playerIds.find(
-      (id) => getNextActivePlayerId(battleState, id) === targetPlayerId,
-    ) ?? null;
-
-    for (const [unitId, hitCells] of plan.freshHitsByTargetPlayer[
-      targetPlayerId
-    ].entries()) {
-      const applied = applyDamageToUnit(
-        targetState,
-        unitId,
-        hitCells.length,
-        {
-          hitCells,
-          reason: "final_salvo",
-        },
-      );
-      targetState = applied.state;
+  for (const damagePlan of plan.damagePlans) {
+    const targetState = getBattlePlayerState(state, damagePlan.targetPlayerId);
+    const applied = applyDamageToUnit(targetState, damagePlan.unitId, 1, {
+      hitCells: [damagePlan.cell],
+      reason: "final_salvo",
+    });
+    state = replaceBattlePlayerState(
+      state,
+      damagePlan.targetPlayerId,
+      applied.state,
+    );
+    if (applied.event.appliedDamage > 0) {
       damageEvents.push({
-        sourcePlayerId,
-        targetPlayerId,
+        sourcePlayerId: damagePlan.sourcePlayerId,
+        targetPlayerId: damagePlan.targetPlayerId,
         ...applied.event,
       });
     }
-
-    players[targetPlayerId] = targetState;
   }
 
-  return {
-    state: {
-      ...battleState,
-      players,
-    },
-    damageEvents,
-  };
+  return { state, damageEvents };
 }
 
 function getCarrierHp(playerState) {
@@ -348,6 +350,7 @@ function resolveFinalSalvo(battleState) {
     ]),
   );
   const ranking = applied.state.playerIds
+    .filter((id) => !(applied.state.match.eliminatedPlayerIds ?? []).includes(id))
     .map((id) => ({ id, hp: carrierHpByPlayer[id] }))
     .sort((a, b) => b.hp - a.hp);
   let result;
@@ -472,26 +475,28 @@ function resolveManualFinalSalvoRound(battleState, finalSalvo) {
     if (selected === "pass") continue;
     const sourceState = getBattlePlayerState(battleState, sourcePlayerId);
     const decoy = sourceState.decoys.find((item) => item.id === selected);
-    const targetPlayerId = getNextActivePlayerId(battleState, sourcePlayerId);
-    const targetState = getBattlePlayerState(battleState, targetPlayerId);
-    const inspection = inspectFinalSalvoTarget(targetState, decoy.cell);
-    const liveUnit = inspection.kind === "unit" ? inspection.unit : null;
-    const freshUnitCell = Boolean(liveUnit && !liveUnit.hitCells.includes(decoy.cell));
-    shots.push({
-      round: finalSalvo.round,
-      sourcePlayerId,
-      sourceDecoyId: decoy.id,
-      sourceCoordinate: decoy.cell,
-      targetPlayerId,
-      targetCoordinate: decoy.cell,
-      result: liveUnit ? "hit" : "miss",
-      actualTargetKind: inspection.kind,
-      targetUnitId: liveUnit?.id ?? null,
-      targetUnitType: liveUnit?.type ?? null,
-      freshUnitCell,
-    });
-    if (freshUnitCell) {
-      damagePlans.push({ sourcePlayerId, targetPlayerId, unit: liveUnit, cell: decoy.cell });
+    const targetPlayerIds = getOpponentPlayerIds(battleState, sourcePlayerId);
+    for (const targetPlayerId of targetPlayerIds) {
+      const targetState = getBattlePlayerState(battleState, targetPlayerId);
+      const inspection = inspectFinalSalvoTarget(targetState, decoy.cell);
+      const liveUnit = inspection.kind === "unit" ? inspection.unit : null;
+      const freshUnitCell = Boolean(liveUnit && !liveUnit.hitCells.includes(decoy.cell));
+      shots.push({
+        round: finalSalvo.round,
+        sourcePlayerId,
+        sourceDecoyId: decoy.id,
+        sourceCoordinate: decoy.cell,
+        targetPlayerId,
+        targetCoordinate: decoy.cell,
+        result: liveUnit ? "hit" : "miss",
+        actualTargetKind: inspection.kind,
+        targetUnitId: liveUnit?.id ?? null,
+        targetUnitType: liveUnit?.type ?? null,
+        freshUnitCell,
+      });
+      if (freshUnitCell) {
+        damagePlans.push({ sourcePlayerId, targetPlayerId, unit: liveUnit, cell: decoy.cell });
+      }
     }
   }
 

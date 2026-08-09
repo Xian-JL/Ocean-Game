@@ -245,6 +245,7 @@ test("FINAL_SALVO 展示期间断线超时以断线判负覆盖尚未展示完�
     roomPhase: ROOM_PHASES.FINAL_SALVO,
     turnPhase: null,
     currentPlayerId: null,
+    turnActionState: null,
     pendingAction: null,
     actionDeadlineAt: null,
     matchFinishedAt: 1_500,

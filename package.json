@@ -1,8 +1,8 @@
 {
   "name": "ocean-game",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "private": true,
-  "description": "《海战 OCEAN》双人/三人对战、分级战报与新平衡数值版本",
+  "description": "《海战 OCEAN》双人/三人对战、三人双目标回合与多目标终局鱼雷版本",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

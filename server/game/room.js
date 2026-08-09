@@ -134,6 +134,7 @@ function createRoomState({ roomCode, playerId, nickname, maxPlayers = 2 }) {
     battleState: null,
     currentPlayerId: null,
     turnNumber: 0,
+    turnActionState: null,
     matchStartedAt: null,
     matchFinishedAt: null,
     pendingAction: null,

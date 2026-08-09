@@ -10,13 +10,14 @@ const {
   getBattlePlayerState,
   getNextActivePlayerId,
   getOpponentPlayerId,
+  getOpponentPlayerIds,
   replaceBattlePlayerState,
 } = require("./battle-state");
 const {
   ACTION_TYPES,
 } = require("./actions");
 const {
-  hasAnyLegalAction,
+  hasAnyLegalActionForTarget,
   validateActionIntent,
 } = require("./action-validation");
 const {
@@ -52,6 +53,57 @@ const TURN_PHASES = Object.freeze({
 });
 
 const MAX_ROLL_ROUNDS = 100;
+
+function createTurnActionState(battleState, playerId) {
+  const requiredTargetPlayerIds = getOpponentPlayerIds(battleState, playerId);
+  return {
+    playerId,
+    requiredTargetPlayerIds,
+    completedTargetPlayerIds: [],
+    actionCount: 0,
+  };
+}
+
+function getRemainingTurnTargetPlayerIds(battleState, turnActionState) {
+  if (!turnActionState) return [];
+  const eliminated = new Set(battleState.match.eliminatedPlayerIds ?? []);
+  const completed = new Set(turnActionState.completedTargetPlayerIds ?? []);
+  return (turnActionState.requiredTargetPlayerIds ?? []).filter(
+    (playerId) => !eliminated.has(playerId) && !completed.has(playerId),
+  );
+}
+
+function completeTurnTargets(turnActionState, playerIds) {
+  const completed = new Set(turnActionState.completedTargetPlayerIds ?? []);
+  for (const playerId of playerIds) completed.add(playerId);
+  return {
+    ...turnActionState,
+    completedTargetPlayerIds: [...completed],
+    actionCount: (turnActionState.actionCount ?? 0) + 1,
+  };
+}
+
+function hasLegalActionForTurnTargets(
+  battleState,
+  playerId,
+  targetPlayerIds,
+  turnActionState = null,
+) {
+  if (!Array.isArray(targetPlayerIds) || targetPlayerIds.length === 0) {
+    return false;
+  }
+  const playerState = getBattlePlayerState(battleState, playerId);
+  const excludeActionTypes =
+    (turnActionState?.requiredTargetPlayerIds?.length ?? 0) > 1 &&
+    (turnActionState?.actionCount ?? 0) > 0
+      ? [ACTION_TYPES.HELICOPTER_STRAFE]
+      : [];
+  return targetPlayerIds.some((targetPlayerId) =>
+    hasAnyLegalActionForTarget(playerState, targetPlayerId, {
+      excludeActionTypes,
+    }),
+  );
+}
 
 function clone(value) {
   return structuredClone(value);
@@ -166,8 +218,12 @@ function startPlaying(room, nowMs = Date.now()) {
   );
   const firstPlayerId = room.rolling.firstPlayerId;
   const begun = beginNormalTurn(battleState, firstPlayerId);
-  const active = hasAnyLegalAction(
-    getBattlePlayerState(begun.state, firstPlayerId),
+  const turnActionState = createTurnActionState(begun.state, firstPlayerId);
+  const active = hasLegalActionForTurnTargets(
+    begun.state,
+    firstPlayerId,
+    getRemainingTurnTargetPlayerIds(begun.state, turnActionState),
+    turnActionState,
   );
 
   return assertMatchRoomState(
@@ -177,6 +233,7 @@ function startPlaying(room, nowMs = Date.now()) {
       battleState: begun.state,
       currentPlayerId: firstPlayerId,
       turnNumber: active ? 1 : 0,
+      turnActionState,
       matchStartedAt: normalizedNow,
       matchFinishedAt: null,
       pendingAction: null,
@@ -235,6 +292,46 @@ function beginPlayerAction(room, playerId, intent, nowMs = Date.now()) {
   }
   assertActionWindowOpen(room, nowMs);
 
+  const turnActionState = room.turnActionState;
+  if (!turnActionState || turnActionState.playerId !== playerId) {
+    fail("INVALID_TURN_ACTION_STATE", "当前回合缺少有效的多目标行动进度。", {
+      playerId,
+      turnActionState,
+    });
+  }
+  const remainingTargetPlayerIds = getRemainingTurnTargetPlayerIds(
+    room.battleState,
+    turnActionState,
+  );
+  const isThreePlayerTurn = room.battleState.playerIds.length === 3;
+  const isHelicopter = intent?.actionType === ACTION_TYPES.HELICOPTER_STRAFE;
+  const helicopterHadMultipleRequiredTargets =
+    isThreePlayerTurn && turnActionState.requiredTargetPlayerIds.length > 1;
+  const isGlobalHelicopterNow =
+    isThreePlayerTurn && isHelicopter && remainingTargetPlayerIds.length > 1;
+  if (
+    helicopterHadMultipleRequiredTargets &&
+    isHelicopter &&
+    turnActionState.actionCount > 0
+  ) {
+    fail(
+      "HELICOPTER_REQUIRES_FRESH_TURN",
+      "三人对战中直升机扫射必须作为本回合的首个且唯一行动，并同时作用于所有仍在局敌方玩家。",
+    );
+  }
+  if (isThreePlayerTurn && !isGlobalHelicopterNow) {
+    if (!remainingTargetPlayerIds.includes(intent?.targetPlayerId)) {
+      fail(
+        "TURN_TARGET_ALREADY_RESOLVED",
+        "本回合必须对每名仍在局敌方玩家分别执行一次行动，已完成的目标不能再次作为本回合目标。",
+        {
+          targetPlayerId: intent?.targetPlayerId ?? null,
+          remainingTargetPlayerIds,
+        },
+      );
+    }
+  }
+
   const playerState = getBattlePlayerState(room.battleState, playerId);
   if (
     playerState.remainingUses[ACTION_TYPES.RADAR_SCAN] > 0 &&
@@ -247,7 +344,7 @@ function beginPlayerAction(room, playerId, intent, nowMs = Date.now()) {
   }
   const validation = validateActionIntent(playerState, intent);
   if (!validation.valid) {
-    fail("INVALID_ACTION", "行动请求不符合《游戏规则 v1.2》。", {
+    fail("INVALID_ACTION", "行动请求不符合《游戏规则 v1.4》。", {
       errors: validation.errors,
     });
   }
@@ -258,6 +355,7 @@ function beginPlayerAction(room, playerId, intent, nowMs = Date.now()) {
       pendingAction: {
         playerId,
         intent: clone(validation.normalizedIntent),
+        turnDeadlineAt: room.actionDeadlineAt,
       },
       actionDeadlineAt: null,
     }),
@@ -267,8 +365,12 @@ function beginPlayerAction(room, playerId, intent, nowMs = Date.now()) {
 function prepareNextTurn(room, battleState, nextPlayerId, nowMs) {
   const normalizedNow = normalizeServerTime(nowMs);
   const begun = beginNormalTurn(battleState, nextPlayerId);
-  const active = hasAnyLegalAction(
-    getBattlePlayerState(begun.state, nextPlayerId),
+  const turnActionState = createTurnActionState(begun.state, nextPlayerId);
+  const active = hasLegalActionForTurnTargets(
+    begun.state,
+    nextPlayerId,
+    getRemainingTurnTargetPlayerIds(begun.state, turnActionState),
+    turnActionState,
   );
   const connected = room.connectionPhase === CONNECTION_PHASES.CONNECTED;
   return {
@@ -277,6 +379,7 @@ function prepareNextTurn(room, battleState, nextPlayerId, nowMs) {
     currentPlayerId: nextPlayerId,
     turnPhase: active ? TURN_PHASES.ACTIVE : TURN_PHASES.AUTO_SKIPPING,
     turnNumber: room.turnNumber + (active ? 1 : 0),
+    turnActionState,
     pendingAction: null,
     lastTurnStart: {
       playerId: nextPlayerId,
@@ -302,6 +405,7 @@ function finishAsFinalSalvo(room, battleState, finishedAt, extraChanges = {}) {
     turnPhase: null,
     battleState,
     currentPlayerId: null,
+    turnActionState: null,
     pendingAction: null,
     actionDeadlineAt: null,
     pausedTimer: null,
@@ -318,6 +422,7 @@ function finishImmediately(room, battleState, finishedAt, extraChanges = {}) {
     turnPhase: null,
     battleState,
     currentPlayerId: null,
+    turnActionState: null,
     pendingAction: null,
     actionDeadlineAt: null,
     pausedTimer: null,
@@ -337,16 +442,20 @@ function completePlayerAction(room, nowMs = Date.now()) {
     room.battleState,
     pending.playerId,
     pending.intent,
+    { clearParalysisAfterAction: false },
+  );
+  const actedTargetPlayerIds = resolved.actionRecord.defenderIds ??
+    [resolved.actionRecord.defenderId].filter(Boolean);
+  const turnActionState = completeTurnTargets(
+    room.turnActionState,
+    actedTargetPlayerIds,
   );
   let next = {
     ...room,
     battleState: resolved.state,
     pendingAction: null,
+    turnActionState,
     lastResolutionByPlayer: clone(resolved.deliveriesByPlayer),
-    consecutiveActionTimeouts: {
-      ...room.consecutiveActionTimeouts,
-      [pending.playerId]: 0,
-    },
   };
 
   if (resolved.state.match.status === MATCH_STATUS.FINISHED) {
@@ -356,16 +465,52 @@ function completePlayerAction(room, nowMs = Date.now()) {
   } else if (resolved.state.match.finalSalvo?.status === "selecting") {
     next = finishAsFinalSalvo(next, resolved.state, normalizedNow);
   } else {
-    const nextPlayerId = getNextActivePlayerId(
+    const actorEliminated = (resolved.state.match.eliminatedPlayerIds ?? [])
+      .includes(pending.playerId);
+    const remainingTargetPlayerIds = getRemainingTurnTargetPlayerIds(
+      resolved.state,
+      turnActionState,
+    );
+    const actorHasLegalAction = !actorEliminated && hasLegalActionForTurnTargets(
       resolved.state,
       pending.playerId,
+      remainingTargetPlayerIds,
+      turnActionState,
     );
-    next = prepareNextTurn(
-      next,
-      resolved.state,
-      nextPlayerId,
-      normalizedNow,
-    );
+
+    if (remainingTargetPlayerIds.length > 0 && actorHasLegalAction) {
+      next = {
+        ...next,
+        turnPhase: TURN_PHASES.ACTIVE,
+        currentPlayerId: pending.playerId,
+        actionDeadlineAt: pending.turnDeadlineAt,
+      };
+    } else {
+      const actorState = getBattlePlayerState(resolved.state, pending.playerId);
+      const clearedState = replaceBattlePlayerState(
+        resolved.state,
+        pending.playerId,
+        clearParalysisForPlayer(actorState),
+      );
+      next = {
+        ...next,
+        battleState: clearedState,
+        consecutiveActionTimeouts: {
+          ...room.consecutiveActionTimeouts,
+          [pending.playerId]: 0,
+        },
+      };
+      const nextPlayerId = getNextActivePlayerId(
+        clearedState,
+        pending.playerId,
+      );
+      next = prepareNextTurn(
+        next,
+        clearedState,
+        nextPlayerId,
+        normalizedNow,
+      );
+    }
   }
 
   return assertMatchRoomState({
@@ -596,6 +741,33 @@ function assertMatchRoomState(room) {
         currentPlayerId: room.currentPlayerId,
       });
     }
+    if (
+      !room.turnActionState ||
+      typeof room.turnActionState !== "object" ||
+      room.turnActionState.playerId !== room.currentPlayerId ||
+      !Array.isArray(room.turnActionState.requiredTargetPlayerIds) ||
+      !Array.isArray(room.turnActionState.completedTargetPlayerIds) ||
+      !Number.isInteger(room.turnActionState.actionCount) ||
+      room.turnActionState.actionCount < 0
+    ) {
+      fail("INVALID_MATCH_ROOM_STATE", "PLAYING 房间缺少有效的本回合多目标行动状态。", {
+        turnActionState: room.turnActionState,
+      });
+    }
+    const requiredTargets = room.turnActionState.requiredTargetPlayerIds;
+    const completedTargets = room.turnActionState.completedTargetPlayerIds;
+    if (
+      new Set(requiredTargets).size !== requiredTargets.length ||
+      new Set(completedTargets).size !== completedTargets.length ||
+      requiredTargets.some(
+        (id) => id === room.currentPlayerId || !room.battleState.playerIds.includes(id),
+      ) ||
+      completedTargets.some((id) => !requiredTargets.includes(id))
+    ) {
+      fail("INVALID_MATCH_ROOM_STATE", "本回合多目标行动状态包含无效玩家。", {
+        turnActionState: room.turnActionState,
+      });
+    }
     if (!Number.isInteger(room.turnNumber) || room.turnNumber < 0) {
       fail("INVALID_MATCH_ROOM_STATE", "回合计数必须是非负整数。", {
         turnNumber: room.turnNumber,
@@ -667,6 +839,12 @@ function assertMatchRoomState(room) {
   } else if (room.battleState !== null) {
     fail("INVALID_MATCH_ROOM_STATE", "正式对战开始前不能具有战场状态。", {
       roomPhase: room.roomPhase,
+    });
+  }
+  if (room.roomPhase !== ROOM_PHASES.PLAYING && room.turnActionState !== null) {
+    fail("INVALID_MATCH_ROOM_STATE", "PLAYING 之外不能保留本回合多目标行动状态。", {
+      roomPhase: room.roomPhase,
+      turnActionState: room.turnActionState,
     });
   }
   if (room.roomPhase !== ROOM_PHASES.PLAYING && room.actionDeadlineAt !== null) {
@@ -784,6 +962,17 @@ function createRoomView(room, viewerId, nowMs = Date.now()) {
       ? {
           currentPlayerId: room.currentPlayerId,
           turnNumber: room.turnNumber,
+          requiredTargetPlayerIds: [
+            ...room.turnActionState.requiredTargetPlayerIds,
+          ],
+          completedTargetPlayerIds: [
+            ...room.turnActionState.completedTargetPlayerIds,
+          ],
+          remainingTargetPlayerIds: getRemainingTurnTargetPlayerIds(
+            room.battleState,
+            room.turnActionState,
+          ),
+          actionCount: room.turnActionState.actionCount,
           canAct:
             room.connectionPhase === CONNECTION_PHASES.CONNECTED &&
             room.turnPhase === TURN_PHASES.ACTIVE &&
@@ -820,9 +1009,12 @@ module.exports = {
   completeAutomaticTurnSkip,
   completeFinalSalvo,
   completePlayerAction,
+  createTurnActionState,
   createRoomView,
   createRoomViewsByPlayer,
   determineFirstPlayer,
+  getRemainingTurnTargetPlayerIds,
+  prepareNextTurn,
   processActionTimeout,
   rollDie,
   startPlaying,

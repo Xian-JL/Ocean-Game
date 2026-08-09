@@ -6,8 +6,18 @@ const {
 } = require("./connection");
 const { END_REASONS, finishByForfeit } = require("./endgame");
 const { RuleValidationError } = require("./errors");
-const { TURN_PHASES, assertMatchRoomState } = require("./match");
-const { getNextActivePlayerId } = require("./battle-state");
+const {
+  TURN_PHASES,
+  assertMatchRoomState,
+  getRemainingTurnTargetPlayerIds,
+  prepareNextTurn,
+} = require("./match");
+const {
+  clearParalysisForPlayer,
+  getBattlePlayerState,
+  getNextActivePlayerId,
+  replaceBattlePlayerState,
+} = require("./battle-state");
 const {
   CONNECTION_PHASES,
   ROOM_PHASES,
@@ -76,20 +86,42 @@ function surrenderMatch(room, playerId, nowMs = Date.now()) {
   }));
 
   if (!forfeited.ended) {
-    const nextPlayerId = room.currentPlayerId === playerId
-      ? getNextActivePlayerId(forfeited.state, playerId)
-      : room.currentPlayerId;
-    return assertMatchRoomState({
+    let next = {
       ...room,
       stateVersion: room.stateVersion + 1,
       battleState: forfeited.state,
-      currentPlayerId: nextPlayerId,
-      turnPhase: TURN_PHASES.ACTIVE,
       pendingAction: null,
-      actionDeadlineAt: createDeadline(normalizedNow, require("./timing").ACTION_DURATION_MS),
       turnEvents: [...room.turnEvents, event],
       nextTurnEventSequence: room.nextTurnEventSequence + 1,
-    });
+    };
+
+    const currentPlayerEliminated = room.currentPlayerId === playerId;
+    const remainingTargets = currentPlayerEliminated
+      ? []
+      : getRemainingTurnTargetPlayerIds(
+          forfeited.state,
+          room.turnActionState,
+        );
+
+    if (!currentPlayerEliminated && remainingTargets.length > 0) {
+      return assertMatchRoomState(next);
+    }
+
+    let battleState = forfeited.state;
+    if (!currentPlayerEliminated) {
+      const currentState = getBattlePlayerState(battleState, room.currentPlayerId);
+      battleState = replaceBattlePlayerState(
+        battleState,
+        room.currentPlayerId,
+        clearParalysisForPlayer(currentState),
+      );
+    }
+    const nextPlayerId = getNextActivePlayerId(
+      battleState,
+      currentPlayerEliminated ? playerId : room.currentPlayerId,
+    );
+    next = prepareNextTurn(next, battleState, nextPlayerId, normalizedNow);
+    return assertMatchRoomState(next);
   }
 
   return assertMatchRoomState({
@@ -103,6 +135,7 @@ function surrenderMatch(room, playerId, nowMs = Date.now()) {
     pausedTimer: null,
     battleState: forfeited.state,
     currentPlayerId: null,
+    turnActionState: null,
     pendingAction: null,
     lastTurnStart: null,
     matchFinishedAt: normalizedNow,
@@ -206,6 +239,7 @@ function startRematch(room, nowMs = Date.now()) {
     battleState: null,
     currentPlayerId: null,
     turnNumber: 0,
+    turnActionState: null,
     matchStartedAt: null,
     matchFinishedAt: null,
     pendingAction: null,
@@ -266,6 +300,7 @@ function leaveFinishedRoom(room, playerId, nowMs = Date.now()) {
     battleState: null,
     currentPlayerId: null,
     turnNumber: 0,
+    turnActionState: null,
     matchStartedAt: null,
     matchFinishedAt: null,
     pendingAction: null,

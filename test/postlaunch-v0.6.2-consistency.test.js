@@ -20,17 +20,17 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("v0.6.1 前后端发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "0.6.1");
-  assert.equal(RELEASE_VERSION, "0.6.1");
-  assert.equal(RELEASE_STAGE, "postlaunch-v0.6.1");
-  assert.equal(RULE_VERSION, "1.3");
-  assert.equal(SOCKET_PROTOCOL_VERSION, "1.4");
+test("v0.6.2 前后端发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "0.6.2");
+  assert.equal(RELEASE_VERSION, "0.6.2");
+  assert.equal(RELEASE_STAGE, "postlaunch-v0.6.2");
+  assert.equal(RULE_VERSION, "1.4");
+  assert.equal(SOCKET_PROTOCOL_VERSION, "1.5");
   assert.deepEqual(Data.RELEASE, {
-    version: "0.6.1",
-    stage: "postlaunch-v0.6.1",
-    ruleVersion: "1.3",
-    socketProtocolVersion: "1.4",
+    version: "0.6.2",
+    stage: "postlaunch-v0.6.2",
+    ruleVersion: "1.4",
+    socketProtocolVersion: "1.5",
   });
 });
 
@@ -56,8 +56,8 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   }
 
   for (const current of [
-    "postlaunch-v0.6.1",
-    "RULE v1.3",
+    "postlaunch-v0.6.2",
+    "RULE v1.4",
     "12×12",
     "8 个作战单位",
   ]) {
@@ -77,9 +77,9 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
 test("当前规则与页面流程文档不再保留已废弃的核心数值", () => {
   const currentDocs = [
     read("README.md"),
-    read("docs/rule-v1.3.md"),
-    read("docs/page-flow-v1.3.md"),
-    read("docs/release-manifest-postlaunch-v0.6.1.md"),
+    read("docs/rule-v1.4.md"),
+    read("docs/page-flow-v1.4.md"),
+    read("docs/release-manifest-postlaunch-v0.6.2.md"),
   ].join("\n");
 
   for (const stale of ["10×10", "7×7", "8×8", "postlaunch-v0.3", "协议 1.2"]) {

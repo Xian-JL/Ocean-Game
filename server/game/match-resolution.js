@@ -11,9 +11,9 @@ const {
  * 返回值中的 state 仅供服务器保存；deliveriesByPlayer 的每个值只能发送给
  * 对应键名的玩家，不能把整个路由表广播给浏览器。
  */
-function resolveBattleAction(battleState, actorId, intent) {
+function resolveBattleAction(battleState, actorId, intent, options = {}) {
   ensureBattlePlaying(battleState);
-  const resolved = resolveAction(battleState, actorId, intent);
+  const resolved = resolveAction(battleState, actorId, intent, options);
   const settled = settleAfterAction(resolved.state, resolved.result);
 
   return {
@@ -22,6 +22,7 @@ function resolveBattleAction(battleState, actorId, intent) {
       settled.state,
       resolved.result,
     ),
+    actionRecord: resolved.result,
   };
 }
 

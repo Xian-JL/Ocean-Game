@@ -2,7 +2,7 @@
 
 const { RuleValidationError } = require("../game/errors");
 
-const SOCKET_PROTOCOL_VERSION = "1.4";
+const SOCKET_PROTOCOL_VERSION = "1.5";
 
 const CLIENT_EVENTS = Object.freeze({
   PING: "client:ping",
