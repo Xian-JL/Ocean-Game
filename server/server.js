@@ -2,6 +2,7 @@
 
 const os = require("node:os");
 const { createOceanServer } = require("./app");
+const { RELEASE_STAGE } = require("./release");
 
 const DEFAULT_HOST = "127.0.0.1";
 const LAN_HOST = "0.0.0.0";
@@ -106,7 +107,7 @@ function startOceanServer(options = {}) {
     const address = httpServer.address();
     const listeningPort =
       address && typeof address === "object" ? address.port : config.port;
-    logger.log("[Ocean] 运行监控 postlaunch-v0.6 已启动");
+    logger.log(`[Ocean] 运行监控 ${RELEASE_STAGE} 已启动`);
     for (const [index, url] of displayUrls(
       config,
       listeningPort,

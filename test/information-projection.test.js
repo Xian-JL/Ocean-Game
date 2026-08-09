@@ -188,7 +188,7 @@ test("震爆弹立即反馈不泄露是否生效，瘫痪仅在防守方回合�
   assert.deepEqual(paralyzedIds, ["enemy-submarine", "enemy-nuclear"]);
 });
 
-test("探测弹只公开布尔结果，不公开信号数量、坐标或对象类型", () => {
+test("探测弹布尔结果只发给行动方，公共记录和防守方不泄露结果", () => {
   const resolved = resolveBattleAction(
     createSecretBattle(),
     "player-1",
@@ -200,11 +200,39 @@ test("探测弹只公开布尔结果，不公开信号数量、坐标或对象�
     ),
   );
   const actor = resolved.deliveriesByPlayer["player-1"];
+  const defender = resolved.deliveriesByPlayer["player-2"];
 
-  assert.equal(actor.publicRecord.result, "underwater_signal_detected");
+  assert.equal(actor.publicRecord.result, null);
+  assert.equal(actor.feedback.result, "underwater_signal_detected");
+  assert.equal(defender.feedback.result, null);
+  assert.equal(actor.publicRecord.defenderId, "player-2");
   assert.equal(actor.publicRecord.area.length, 9);
   assert.equal(JSON.stringify(actor.feedback).includes("enemy-submarine"), false);
   assertNoInternalKeys(actor);
+  assertNoInternalKeys(defender);
+});
+
+test("雷达扫描布尔结果只发给行动方，公共记录和防守方不泄露结果", () => {
+  const resolved = resolveBattleAction(
+    createSecretBattle(),
+    "player-1",
+    cellIntent(
+      "safe-radar",
+      ACTION_TYPES.RADAR_SCAN,
+      "carrier",
+      "A1",
+    ),
+  );
+  const actor = resolved.deliveriesByPlayer["player-1"];
+  const defender = resolved.deliveriesByPlayer["player-2"];
+
+  assert.equal(actor.publicRecord.result, null);
+  assert.equal(actor.feedback.result, "layout_detected");
+  assert.equal(defender.feedback.result, null);
+  assert.equal(actor.publicRecord.defenderId, "player-2");
+  assert.equal(actor.publicRecord.area.length, 16);
+  assertNoInternalKeys(actor);
+  assertNoInternalKeys(defender);
 });
 
 test("直升机公开逐格结果，并向攻击方单独提供精确伤害", () => {

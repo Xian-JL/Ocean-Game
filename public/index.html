@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="《海战 OCEAN》低成本、服务器权威的双人回合制策略游戏"
+      content="《海战 OCEAN》服务器权威的双人/三人回合制策略游戏"
     />
     <meta name="theme-color" content="#061522" />
     <title>海战 OCEAN</title>
@@ -55,8 +55,8 @@
       </main>
 
       <footer class="global-footer">
-        <span>海战 OCEAN · 运行监控 postlaunch-v0.3</span>
-        <span>服务器权威 · 协议 1.2</span>
+        <span id="footer-release">海战 OCEAN · 运行监控 postlaunch-v0.6.1</span>
+        <span id="footer-protocol">服务器权威 · 协议 1.4</span>
       </footer>
     </div>
 
@@ -87,7 +87,7 @@
     <dialog id="rules-dialog" class="modal modal--rules" aria-labelledby="rules-title">
       <div class="rules-dialog__header">
         <div>
-          <p class="eyebrow">RULE v1.0 / 快速查阅</p>
+          <p class="eyebrow">RULE v1.3 / 快速查阅</p>
           <h2 id="rules-title">规则与图例</h2>
         </div>
         <button class="icon-button" type="button" data-action="close-rules" aria-label="关闭规则">
@@ -99,23 +99,23 @@
         <section class="rule-section">
           <h3>胜负与回合</h3>
           <p>
-            双方在 12×12 海域部署舰队，首个行动回合使用航空母舰自带雷达扫描 4×4 海域，之后轮流完成一个合法行动。航空母舰生命值降至 0
-            时立即结算；双方均无攻击手段时进入终局逐枚手动鱼雷引爆。每回合 90 秒，连续三次行动超时判负。
+            2～3 名玩家在 12×12 海域秘密部署舰队。每名玩家自己的首个行动回合必须使用航空母舰雷达扫描完整 4×4 海域，之后按回合执行一个合法行动。双人局航空母舰沉没即落败；三人局航空母舰沉没者出局，直到只剩一名玩家。所有仍在局玩家均无攻击手段时进入终局逐枚手动鱼雷引爆。每个正常行动回合 90 秒，连续三次实际行动超时出局。
           </p>
         </section>
 
         <section class="rule-section">
-          <h3>九项行动</h3>
+          <h3>十项行动</h3>
           <div class="quick-rule-grid">
-            <article><strong>驱逐舰Ⅰ冲撞</strong><span>以中间格为中心的 7×7 范围，命中后自身 −1。</span></article>
-            <article><strong>驱逐舰Ⅱ冲撞</strong><span>以中间两格为中心的 8×8 范围，命中后自身 −1。</span></article>
+            <article><strong>驱逐舰Ⅰ冲撞</strong><span>沿舰身 11 格、垂直舰身 7 格；命中存活作战单位自身 −0.5，命中诱饵自身 −1。</span></article>
+            <article><strong>驱逐舰Ⅱ冲撞</strong><span>沿舰身 10 格、垂直舰身 8 格；命中存活作战单位自身 −0.5，命中诱饵自身 −1。</span></article>
             <article><strong>海盗船攻击</strong><span>命中才触发目标、海盗船及相关航空母舰伤害；特殊同时沉没时海盗船一方胜。</span></article>
             <article><strong>摩托艇冲撞</strong><span>只对航空母舰造成 1 点伤害；撞到水面单位或诱饵后自身沉没。</span></article>
-            <article><strong>潜射导弹</strong><span>共 3 枚；发射方只知道“导弹已发射”，目标格仍未结算。</span></article>
+            <article><strong>潜射导弹</strong><span>共 4 枚；发射方只知道“导弹已发射”，目标格仍未结算。</span></article>
             <article><strong>核弹</strong><span>共 2 枚；航空母舰 −2，其他作战单位 −1，摧毁诱饵鱼雷。</span></article>
             <article><strong>震爆弹</strong><span>完整 5×5；只有水下作战单位可能在下个正常回合瘫痪，施加方不知道结果。</span></article>
             <article><strong>探测弹</strong><span>完整 3×3；存活水下作战单位的未受击格与有效诱饵鱼雷均产生信号，只返回是否探测到信号。</span></article>
             <article><strong>直升机扫射</strong><span>两艘驱逐舰均沉没后解锁；扫射一整行或列，只命中水面单位，航空母舰最多 −2。</span></article>
+            <article><strong>雷达扫描</strong><span>每名玩家首个行动回合强制使用；完整 4×4，只向行动方返回是否存在敌方布局。</span></article>
           </div>
         </section>
 

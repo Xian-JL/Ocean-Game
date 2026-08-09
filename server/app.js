@@ -8,6 +8,7 @@ const { Server } = require("socket.io");
 const { InMemoryRoomService } = require("./game/room-service");
 const { SocketGameGateway } = require("./socket/game-gateway");
 const { OperationalTelemetry } = require("./operations/telemetry");
+const { RELEASE_STAGE, SOCKET_PROTOCOL_VERSION } = require("./release");
 
 const PUBLIC_DIRECTORY = path.resolve(__dirname, "..", "public");
 
@@ -97,8 +98,8 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ok",
       service: "ocean",
-      stage: "postlaunch-v0.6",
-      socketProtocol: "1.2",
+      stage: RELEASE_STAGE,
+      socketProtocol: SOCKET_PROTOCOL_VERSION,
       timestamp: nowIso(),
     });
   });
@@ -108,8 +109,8 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ok",
       service: "ocean",
-      stage: "postlaunch-v0.6",
-      socketProtocol: "1.2",
+      stage: RELEASE_STAGE,
+      socketProtocol: SOCKET_PROTOCOL_VERSION,
       uptimeSeconds: Math.max(0, Math.floor((clock() - startedAtMs) / 1000)),
       connections: io?.engine?.clientsCount ?? 0,
       ...roomService.getOperationsSnapshot(),
@@ -122,7 +123,7 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ready",
       service: "ocean",
-      stage: "postlaunch-v0.6",
+      stage: RELEASE_STAGE,
       timestamp: nowIso(),
     });
   });
@@ -133,7 +134,7 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ok",
       service: "ocean",
-      stage: "postlaunch-v0.6",
+      stage: RELEASE_STAGE,
       uptimeSeconds: Math.max(0, Math.floor((clock() - startedAtMs) / 1000)),
       memoryMb: {
         rss: Math.round(memory.rss / 1024 / 1024),

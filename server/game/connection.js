@@ -395,7 +395,7 @@ function processDisconnectTimeout(room, nowMs = Date.now()) {
         : END_REASONS.BOTH_DISCONNECTED,
       PRE_MATCH_PHASES.has(room.roomPhase)
         ? "玩家未在 120 秒内返回，房间已关闭"
-        : "双方均未在各自的 120 秒时限内返回，对局取消",
+        : "所有仍在局玩家均未在各自的 120 秒时限内返回，对局取消",
       normalizedNow,
     );
   }

@@ -7,6 +7,8 @@
   const connectionDot = document.querySelector("#connection-dot");
   const connectionText = document.querySelector("#connection-text");
   const headerRoomCode = document.querySelector("#header-room-code");
+  const footerRelease = document.querySelector("#footer-release");
+  const footerProtocol = document.querySelector("#footer-protocol");
   const blockingOverlay = document.querySelector("#blocking-overlay");
   const toastRegion = document.querySelector("#toast-region");
   const confirmDialog = document.querySelector("#confirm-dialog");
@@ -28,6 +30,13 @@
   if (!Data || !Model || !app) {
     document.body.textContent = "正式页面资源加载失败，请刷新页面。";
     return;
+  }
+
+  if (footerRelease && Data.RELEASE) {
+    footerRelease.textContent = `海战 OCEAN · 运行监控 ${Data.RELEASE.stage}`;
+  }
+  if (footerProtocol && Data.RELEASE) {
+    footerProtocol.textContent = `服务器权威 · 协议 ${Data.RELEASE.socketProtocolVersion}`;
   }
 
   const state = {
@@ -440,7 +449,16 @@
     }
     const ownId = room.own.playerId;
     const actorName = Model.nicknameFor(room, feedback.actorId);
+    const defenderName = feedback.defenderId
+      ? Model.nicknameFor(room, feedback.defenderId)
+      : "目标玩家";
+    const isActor = feedback.actorId === ownId;
+    const isDefender = feedback.defenderId === ownId;
     const target = Model.formatTarget(feedback.target);
+    const publicActorPrefix = isDefender
+      ? `${actorName} 对你`
+      : `${actorName} 对 ${defenderName}`;
+    const actorTargetPrefix = `${feedback.actionName} → ${defenderName}`;
     const exactDamage = (feedback.inflictedDamage ?? [])
       .filter((event) => event.appliedDamage > 0)
       .map((event) => {
@@ -452,55 +470,74 @@
         const unit = Data.getUnitDefinitionByType(event.unitType);
         return `${unit?.name ?? "己方单位"}被命中${event.sunk ? "并沉没" : ""}`;
       });
+
     if (feedback.actionType === Data.ACTION_TYPES.SUBMARINE_MISSILE) {
-      return feedback.actorId === ownId
-        ? `潜射导弹已发射至 ${target}；命中结果不会向你显示。`
+      return isActor
+        ? `潜射导弹已向 ${defenderName} 的 ${target} 发射；命中结果不会向你显示。`
         : receivedHits.length > 0
-          ? `${actorName} 使用潜射导弹攻击了 ${target}；${receivedHits.join("；")}。`
-          : `${actorName} 使用潜射导弹攻击了 ${target}。`;
+          ? `${publicActorPrefix}使用潜射导弹攻击了 ${target}；${receivedHits.join("；")}。`
+          : `${publicActorPrefix}使用潜射导弹攻击了 ${target}。`;
     }
     if (feedback.actionType === Data.ACTION_TYPES.NUCLEAR_BOMB) {
-      return feedback.actorId === ownId
-        ? `核弹已投放至 ${target}；命中结果不会向你显示。`
+      return isActor
+        ? `核弹已向 ${defenderName} 的 ${target} 投放；命中结果不会向你显示。`
         : receivedHits.length > 0
-          ? `${actorName} 向 ${target} 投放了核弹；${receivedHits.join("；")}。`
-          : `${actorName} 向 ${target} 投放了核弹。`;
+          ? `${publicActorPrefix}向 ${target} 投放了核弹；${receivedHits.join("；")}。`
+          : `${publicActorPrefix}向 ${target} 投放了核弹。`;
     }
     if (feedback.actionType === Data.ACTION_TYPES.SHOCK_BOMB) {
-      return feedback.actorId === ownId
-        ? `震爆弹已作用于以 ${target} 为中心的 5×5 区域；是否生效不会向你显示。`
-        : `${actorName} 以 ${target} 为中心使用了震爆弹。`;
+      return isActor
+        ? `震爆弹已作用于 ${defenderName} 地图中以 ${target} 为中心的 5×5 区域；是否生效不会向你显示。`
+        : `${publicActorPrefix}以 ${target} 为中心使用了震爆弹。`;
+    }
+    if (feedback.actionType === Data.ACTION_TYPES.DETECTION_BOMB) {
+      if (isActor) {
+        return feedback.result === "underwater_signal_detected"
+          ? `探测弹：${defenderName} 的 ${target} 周围探测到水下信号。`
+          : `探测弹：${defenderName} 的 ${target} 周围未探测到水下信号。`;
+      }
+      return `${publicActorPrefix}以 ${target} 为中心使用了探测弹；探测结果仅行动方可见。`;
+    }
+    if (feedback.actionType === Data.ACTION_TYPES.RADAR_SCAN) {
+      if (isActor) {
+        return feedback.result === "layout_detected"
+          ? `雷达扫描：${defenderName} 的 ${target} 起始 4×4 区域发现布局。`
+          : `雷达扫描：${defenderName} 的 ${target} 起始 4×4 区域未发现布局。`;
+      }
+      return `${publicActorPrefix}从 ${target} 开始执行了 4×4 雷达扫描；扫描结果仅行动方可见。`;
     }
     if (feedback.result === "hit") {
-      if (feedback.actorId === ownId && exactDamage.length > 0) {
-        return `${feedback.actionName}：${target} 命中；${exactDamage.join("；")}。`;
+      if (isActor && exactDamage.length > 0) {
+        return `${actorTargetPrefix}：${target} 命中；${exactDamage.join("；")}。`;
       }
-      if (feedback.actorId !== ownId && receivedHits.length > 0) {
-        return `${feedback.actionName}：${receivedHits.join("；")}。`;
+      if (isDefender && receivedHits.length > 0) {
+        return `${actorName} 使用${feedback.actionName}：${receivedHits.join("；")}。`;
       }
-      return `${feedback.actionName}：${target} 命中。`;
+      return isActor
+        ? `${actorTargetPrefix}：${target} 命中。`
+        : `${publicActorPrefix}使用${feedback.actionName}：${target} 命中。`;
     }
     if (feedback.result === "miss") {
-      return `${feedback.actionName}：${target} 未命中。`;
-    }
-    if (feedback.result === "underwater_signal_detected") {
-      return `探测弹：${target} 周围探测到水下信号。`;
-    }
-    if (feedback.result === "no_underwater_signal") {
-      return `探测弹：${target} 周围未探测到水下信号。`;
+      return isActor
+        ? `${actorTargetPrefix}：${target} 未命中。`
+        : `${publicActorPrefix}使用${feedback.actionName}：${target} 未命中。`;
     }
     if (Array.isArray(feedback.cellResults)) {
       const hits = feedback.cellResults.filter((cell) => cell.result === "hit").length;
       const misses = feedback.cellResults.filter((cell) => cell.result === "miss").length;
-      if (feedback.actorId === ownId && exactDamage.length > 0) {
-        return `直升机扫射完成：命中 ${hits} 格，未命中 ${misses} 格；${exactDamage.join("；")}。`;
+      if (isActor && exactDamage.length > 0) {
+        return `直升机扫射 → ${defenderName}：命中 ${hits} 格，未命中 ${misses} 格；${exactDamage.join("；")}。`;
       }
-      if (feedback.actorId !== ownId && receivedHits.length > 0) {
-        return `直升机扫射完成：${receivedHits.join("；")}。`;
+      if (isDefender && receivedHits.length > 0) {
+        return `${actorName} 对你执行直升机扫射：${receivedHits.join("；")}。`;
       }
-      return `直升机扫射完成：命中 ${hits} 格，未命中 ${misses} 格。`;
+      return isActor
+        ? `直升机扫射 → ${defenderName}：命中 ${hits} 格，未命中 ${misses} 格。`
+        : `${publicActorPrefix}执行直升机扫射：命中 ${hits} 格，未命中 ${misses} 格。`;
     }
-    return `${feedback.actionName}已经完成结算。`;
+    return isActor
+      ? `${actorTargetPrefix}已经完成结算。`
+      : `${publicActorPrefix}使用${feedback.actionName}已经完成结算。`;
   }
 
   function acceptRoomState(nextRoom) {
@@ -665,15 +702,15 @@
     return `
       <section class="entry-page page-enter" aria-labelledby="entry-title">
         <div class="entry-hero">
-          <p class="eyebrow">双人 · 回合制 · 服务器权威</p>
-          <h1 id="entry-title">在未知海域<br /><span>找到对方。</span></h1>
+          <p class="eyebrow">双人 / 三人 · 回合制 · 服务器权威</p>
+          <h1 id="entry-title">在未知海域<br /><span>找到对手。</span></h1>
           <p class="entry-hero__summary">
-            部署七个作战单位与三枚诱饵鱼雷，在不泄露舰队位置的前提下完成探测、震爆与九项战术行动。
+            部署八个作战单位与三枚诱饵鱼雷，在不泄露舰队位置的前提下完成探测、震爆与十项战术行动。
           </p>
           <div class="entry-facts" aria-label="游戏要点">
-            <span><strong>10×10</strong> 战术海域</span>
+            <span><strong>12×12</strong> 战术海域</span>
             <span><strong>90 秒</strong> 行动回合</span>
-            <span><strong>2 人</strong> 私密对战</span>
+            <span><strong>2～3 人</strong> 私密对战</span>
           </div>
         </div>
 
@@ -1170,7 +1207,7 @@
         <div class="deployment-layout">
           <aside class="deployment-panel deployment-panel--fleet">
             <div class="panel-heading">
-              <span>舰队清单</span><small>7 个作战单位 · 3 枚诱饵</small>
+              <span>舰队清单</span><small>8 个作战单位 · 3 枚诱饵</small>
             </div>
             ${renderDeploymentInventory(locked)}
           </aside>
@@ -1179,14 +1216,14 @@
             <div class="map-card__heading">
               <div>
                 <span class="status-kicker">己方海域</span>
-                <h2>10×10 部署图</h2>
+                <h2>12×12 部署图</h2>
               </div>
               <span class="map-state" data-ready="${locked}">${locked ? "部署已锁定" : "编辑中"}</span>
             </div>
             ${renderDeploymentBoard(locked)}
             <p class="board-help">
               ${locked
-                ? "本方已准备。对方准备前可取消准备并继续编辑。"
+                ? "本方已准备。尚无其他玩家准备时可取消准备并继续编辑。"
                 : selectedDefinition?.shape === "connected"
                   ? "航空母舰：依次选择 6 个四向连通格；点击已选的最后一格可撤销。"
                   : "选中对象后点击地图起点；桌面端也可拖动已放置对象。按 R 旋转直线单位。"}
@@ -1695,11 +1732,11 @@
               <strong>手动鱼雷引爆 · 第 ${finalSalvoState?.round ?? "—"} 轮</strong>
               ${finalSalvoState?.status === "selecting"
                 ? finalSalvoState.ownSubmitted
-                  ? `<p>本轮选择已秘密提交，正在等待对方。${finalSalvoState.opponentSubmitted ? "双方选择已齐，服务器正在同时结算。" : ""}</p>`
+                  ? `<p>本轮选择已秘密提交，正在等待其他仍在局玩家。${finalSalvoState.opponentSubmitted ? "本轮所有玩家选择已齐，服务器正在同时结算。" : ""}</p>`
                   : availableFinalDecoys.length > 0
-                    ? `<p>选择一枚尚未触发的己方诱饵鱼雷。双方提交后同时攻击各自对应坐标。</p>
+                    ? `<p>选择一枚尚未触发的己方诱饵鱼雷。所有仍在局玩家提交后同时攻击各自对应坐标。</p>
                        <div class="final-salvo-actions">${availableFinalDecoys.map((decoy) => `<button class="button button--secondary" data-action="submit-final-salvo" data-decoy-id="${escapeHtml(decoy.id)}">引爆 ${escapeHtml(decoy.cell)}</button>`).join("")}</div>`
-                    : "<p>本方已无可引爆鱼雷，服务器将自动跳过并等待对方。</p>"
+                    : "<p>本方已无可引爆鱼雷，服务器将自动跳过并等待其他仍在局玩家。</p>"
                 : "<p>全部鱼雷已经结算，正在生成最终结果。</p>"}
             </div>
           </div>` : ""}
@@ -1878,7 +1915,6 @@
       ? state.replayPlayerId
       : room.own.playerId;
     const selectedSnapshot = replay?.players?.[selectedPlayerId];
-    const opponent = Model.getOpponentSeat(room);
     return `
       <section class="finished-page page-enter" data-result="${relative.code}" aria-labelledby="result-title">
         <header class="result-hero">
@@ -1908,8 +1944,11 @@
 
         <div class="rematch-status" data-requested="${room.rematch.ownRequested}">
           <span>${room.rematch.ownRequested ? "你已申请再来一局" : "你尚未申请再来一局"}</span>
-          <strong>${room.rematch.opponentRequested ? `${escapeHtml(opponent?.nickname)} 已申请` : `等待 ${escapeHtml(opponent?.nickname ?? "对方")} 选择`}</strong>
-          <small>双方确认且全部在线后，将清空上局部署与资源并重新开始 180 秒部署。</small>
+          <strong>${room.seats
+            .filter((seat) => seat.playerId !== room.own.playerId)
+            .map((seat) => `${escapeHtml(seat.nickname)} ${room.rematch.requestedPlayerIds.includes(seat.playerId) ? "已申请" : "等待确认"}`)
+            .join(" · ")}</strong>
+          <small>所有房间玩家确认且全部在线后，将清空上局部署与资源并重新开始 180 秒部署。</small>
         </div>
 
         <div class="replay-layout">
@@ -1937,7 +1976,7 @@
         ${renderFinalSalvoReplay(room)}
 
         <details class="public-log-after-match">
-          <summary>查看对局中双方当时可见的公开记录</summary>
+          <summary>查看对局中各玩家当时可见的公开记录</summary>
           ${renderPublicLog(room)}
         </details>
       </section>`;
@@ -2627,6 +2666,17 @@
     socket.on("system:ready", (message) => {
       state.protocolVersion = message?.protocolVersion ?? null;
       state.serverStage = message?.stage ?? null;
+      if (
+        Data.RELEASE &&
+        (state.protocolVersion !== Data.RELEASE.socketProtocolVersion ||
+          state.serverStage !== Data.RELEASE.stage)
+      ) {
+        showToast(
+          `前后端版本不一致：页面 ${Data.RELEASE.stage}/协议 ${Data.RELEASE.socketProtocolVersion}，服务器 ${state.serverStage ?? "未知"}/协议 ${state.protocolVersion ?? "未知"}。请强制刷新页面。`,
+          "warning",
+          12_000,
+        );
+      }
     });
 
     socket.on("room:session", (session) => {
@@ -2911,7 +2961,7 @@
     if (action === "clear-deployment") {
       openConfirm({
         title: "清空全部部署？",
-        paragraphs: ["七个作战单位与三枚诱饵鱼雷都会撤回，清空后可以撤销。"],
+        paragraphs: ["八个作战单位与三枚诱饵鱼雷都会撤回，清空后可以撤销。"],
         confirmLabel: "确认清空",
         danger: true,
         onConfirm: () => {
@@ -2927,7 +2977,7 @@
     if (action === "ready-deployment") {
       openConfirm({
         title: "提交部署并准备？",
-        paragraphs: ["服务器会再次验证完整部署。本方准备后地图只读；对方尚未准备时仍可取消准备。"],
+        paragraphs: ["服务器会再次验证完整部署。本方准备后地图只读；尚无其他玩家准备时仍可取消准备。"],
         confirmLabel: "提交并准备",
         onConfirm: submitAndReadyDeployment,
       });
@@ -2944,8 +2994,8 @@
         title: state.room.roomPhase === "FINISHED" ? "离开本房间？" : "关闭并离开房间？",
         paragraphs: [
           state.room.roomPhase === "FINISHED"
-            ? "离开后你的本机凭证失效；留下的玩家将回到等待页。"
-            : "对局开始前离开会关闭房间，双方当前部署不会保留。",
+            ? "离开后你的本机凭证失效；其余玩家将保留在房间并回到等待页。"
+            : "对局开始前离开会关闭房间，当前房间玩家的部署不会保留。",
         ],
         confirmLabel: "确认离开",
         danger: true,

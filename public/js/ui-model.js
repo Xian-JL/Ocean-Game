@@ -27,20 +27,20 @@
     aircraft_carrier_sunk: "航空母舰被攻击摧毁",
     pirate_enemy_carrier_sunk: "海盗船攻击使敌方航空母舰沉没",
     pirate_simultaneous_carrier_sink:
-      "双方航空母舰同时沉没；按海盗船特殊规则，海盗船一方获胜",
+      "行动方与防守方航空母舰同时沉没；按海盗船特殊规则，海盗船行动方获胜",
     pirate_own_carrier_sunk: "海盗船攻击仅使发动方航空母舰沉没",
     final_salvo_higher_carrier_hp:
       "终局鱼雷全部手动引爆后，航空母舰剩余生命值较高的一方获胜",
-    final_salvo_tie: "终局鱼雷全部手动引爆后双方航空母舰生命值相同",
+    final_salvo_tie: "终局鱼雷全部手动引爆后，最高航空母舰生命值并列",
     surrender: "一方主动投降",
     three_consecutive_timeouts: "一方连续三次行动超时",
     disconnect_timeout: "一方未在 120 秒内重连",
-    both_disconnected: "双方均未在 120 秒内重连，对局取消",
+    both_disconnected: "所有仍在局玩家均未在 120 秒内重连，对局取消",
   });
 
   const CLOSED_REASON_TEXT = Object.freeze({
     disconnect_timeout_before_match: "玩家未在 120 秒内返回，房间已关闭。",
-    both_disconnected: "双方均未在 120 秒内返回，房间已关闭。",
+    both_disconnected: "所有需要在线的玩家均未在 120 秒内返回，房间已关闭。",
     player_left_before_match: "有玩家在对局开始前离开，房间已关闭。",
   });
 
@@ -205,38 +205,44 @@
     if (result.reason === "pirate_own_carrier_sunk") {
       return result.loserId === viewerId
         ? "海盗船攻击仅使己方航空母舰沉没"
-        : "对方海盗船攻击仅使其航空母舰沉没";
+        : "海盗船行动方仅使自己的航空母舰沉没";
     }
     return END_REASON_TEXT[result.reason] ?? `终局原因：${result.reason}`;
   }
 
   function publicActionText(record, roomState) {
-    const nickname = nicknameFor(roomState, record.actorId);
+    const actorName = nicknameFor(roomState, record.actorId);
+    const defenderName = record.defenderId
+      ? nicknameFor(roomState, record.defenderId)
+      : "目标玩家";
     const target = formatTarget(record.target);
+    const prefix = `${actorName} 对 ${defenderName}`;
     let resultText = "";
     if (record.actionType === data.ACTION_TYPES.SUBMARINE_MISSILE) {
-      return `${nickname} 使用潜射导弹攻击了 ${target}`;
+      return `${prefix} 使用潜射导弹攻击了 ${target}`;
     }
     if (record.actionType === data.ACTION_TYPES.NUCLEAR_BOMB) {
-      return `${nickname} 向 ${target} 投放了核弹`;
+      return `${prefix} 向 ${target} 投放了核弹`;
     }
     if (record.actionType === data.ACTION_TYPES.SHOCK_BOMB) {
-      return `${nickname} 以 ${target} 为中心使用震爆弹`;
+      return `${prefix} 以 ${target} 为中心使用震爆弹`;
+    }
+    if (record.actionType === data.ACTION_TYPES.DETECTION_BOMB) {
+      return `${prefix} 以 ${target} 为中心使用探测弹`;
+    }
+    if (record.actionType === data.ACTION_TYPES.RADAR_SCAN) {
+      return `${prefix} 从 ${target} 开始执行雷达扫描`;
     }
     if (record.result === "hit") {
       resultText = " · 命中";
     } else if (record.result === "miss") {
       resultText = " · 未命中";
-    } else if (record.result === "underwater_signal_detected") {
-      resultText = " · 探测到水下信号";
-    } else if (record.result === "no_underwater_signal") {
-      resultText = " · 未探测到水下信号";
     } else if (Array.isArray(record.cellResults)) {
       const hits = record.cellResults.filter((cell) => cell.result === "hit").length;
       const misses = record.cellResults.filter((cell) => cell.result === "miss").length;
       resultText = ` · 命中 ${hits} 格，未命中 ${misses} 格`;
     }
-    return `${nickname} 使用${record.actionName}，目标 ${target}${resultText}`;
+    return `${prefix} 使用${record.actionName}，目标 ${target}${resultText}`;
   }
 
   function turnEventText(event, roomState) {

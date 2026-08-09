@@ -254,7 +254,7 @@ function submitDeployment(room, playerId, deployment, nowMs = Date.now()) {
     "只有部署阶段可以提交舰队部署。",
   );
   if (room.deploymentsLocked) {
-    fail("DEPLOYMENT_LOCKED", "双方部署已经锁定。", { playerId });
+    fail("DEPLOYMENT_LOCKED", "所有玩家的部署已经锁定。", { playerId });
   }
   assertDeploymentWindowOpen(room, nowMs);
 
@@ -287,7 +287,7 @@ function setPlayerReady(room, playerId, nowMs = Date.now()) {
     "只有部署阶段可以准备。",
   );
   if (room.deploymentsLocked) {
-    fail("DEPLOYMENT_LOCKED", "双方部署已经锁定。", { playerId });
+    fail("DEPLOYMENT_LOCKED", "所有玩家的部署已经锁定。", { playerId });
   }
   assertDeploymentWindowOpen(room, nowMs);
 
@@ -327,7 +327,7 @@ function cancelPlayerReady(room, playerId, nowMs = Date.now()) {
     room,
     ROOM_PHASES.DEPLOYING,
     "CANCEL_READY_NOT_ALLOWED",
-    "只有对方尚未准备时才能取消准备。",
+    "只有其他玩家均尚未准备时才能取消准备。",
   );
   assertDeploymentWindowOpen(room, nowMs);
 
@@ -743,14 +743,14 @@ function assertRoomState(room) {
     });
   }
   if (room.roomPhase === ROOM_PHASES.DEPLOYING && room.deploymentsLocked) {
-    fail("INVALID_ROOM_STATE", "部署阶段不能提前锁定双方部署。");
+    fail("INVALID_ROOM_STATE", "部署阶段不能提前锁定所有玩家的部署。");
   }
   if (
     [ROOM_PHASES.ROLLING, ROOM_PHASES.PLAYING, ROOM_PHASES.FINAL_SALVO,
       ROOM_PHASES.FINISHED].includes(room.roomPhase) &&
     (!room.deploymentsLocked || !room.seats.every((seat) => seat.ready))
   ) {
-    fail("INVALID_ROOM_STATE", "掷骰及后续阶段必须锁定两份已准备部署。");
+    fail("INVALID_ROOM_STATE", "掷骰及后续阶段必须锁定全部玩家的已准备部署。");
   }
   if (room.roomPhase !== ROOM_PHASES.PLAYING && room.turnPhase !== null) {
     fail("INVALID_ROOM_STATE", "turnPhase 只允许在 PLAYING 阶段存在。", {

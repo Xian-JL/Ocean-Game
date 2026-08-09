@@ -9,6 +9,12 @@
     root.OceanGameData = api;
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
+  const RELEASE = Object.freeze({
+    version: "0.6.1",
+    stage: "postlaunch-v0.6.1",
+    ruleVersion: "1.3",
+    socketProtocolVersion: "1.4",
+  });
   const BOARD_SIZE = 12;
   const ROWS = Object.freeze("ABCDEFGHIJKL".split(""));
   const COLUMNS = Object.freeze(
@@ -138,7 +144,7 @@
       targetMode: "cell",
       rangeMode: "destroyer_i",
       initialUses: null,
-      warning: "命中作战单位或诱饵鱼雷时，驱逐舰Ⅰ自身受到 1 点伤害；未命中不自损。",
+      warning: "命中存活作战单位时目标受到 1 点伤害、驱逐舰Ⅰ自身受到 0.5 点伤害；命中诱饵鱼雷时摧毁诱饵、驱逐舰Ⅰ自身受到 1 点伤害；未命中不自损。",
     }),
     Object.freeze({
       type: ACTION_TYPES.DESTROYER_II_RAM,
@@ -147,7 +153,7 @@
       targetMode: "cell",
       rangeMode: "destroyer_ii",
       initialUses: null,
-      warning: "命中作战单位或诱饵鱼雷时，驱逐舰Ⅱ自身受到 1 点伤害；未命中不自损。",
+      warning: "命中存活作战单位时目标受到 1 点伤害、驱逐舰Ⅱ自身受到 0.5 点伤害；命中诱饵鱼雷时摧毁诱饵、驱逐舰Ⅱ自身受到 1 点伤害；未命中不自损。",
     }),
     Object.freeze({
       type: ACTION_TYPES.PIRATE_ATTACK,
@@ -772,6 +778,7 @@
     BOARD_SIZE,
     COLUMNS,
     ROWS,
+    RELEASE,
     UNIT_DEFINITIONS,
     UNIT_TYPES,
     createAnchoredCells,

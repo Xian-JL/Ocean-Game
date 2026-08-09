@@ -220,6 +220,7 @@ class InMemoryRoomService {
       roomCode: next.roomCode,
       stateVersion: next.stateVersion,
       remainingPlayerId: next.seats[0].playerId,
+      remainingPlayerIds: next.seats.map((seat) => seat.playerId),
       viewsByPlayer: createRoomViewsByPlayer(next, nowMs),
     };
   }

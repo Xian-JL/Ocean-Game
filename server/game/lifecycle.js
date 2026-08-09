@@ -227,22 +227,24 @@ function leaveFinishedRoom(room, playerId, nowMs = Date.now()) {
   );
   assertOnlineSeat(room, playerId);
   const normalizedNow = normalizeServerTime(nowMs);
-  const remaining = room.seats.find((seat) => seat.playerId !== playerId);
-  if (!remaining) {
-    fail("INVALID_ROOM_STATE", "赛后离开前房间必须保留另一名玩家。");
+  const remaining = room.seats.filter((seat) => seat.playerId !== playerId);
+  if (remaining.length < 1) {
+    fail("INVALID_ROOM_STATE", "赛后离开前房间必须保留至少一名玩家。");
   }
 
-  const remainingSeat = {
-    ...remaining,
+  const seats = remaining.map((seat) => ({
+    ...seat,
     deployment: null,
     ready: false,
     autoPrepared: false,
-    disconnectedAt: remaining.online ? null : normalizedNow,
-    reconnectDeadlineAt: remaining.online
+    disconnectedAt: seat.online ? null : normalizedNow,
+    reconnectDeadlineAt: seat.online
       ? null
       : normalizedNow + RECONNECT_DURATION_MS,
-  };
-  const seats = [remainingSeat];
+  }));
+  const ownerPlayerId = seats.some((seat) => seat.playerId === room.ownerPlayerId)
+    ? room.ownerPlayerId
+    : seats[0].playerId;
 
   return assertMatchRoomState({
     ...room,
@@ -251,17 +253,15 @@ function leaveFinishedRoom(room, playerId, nowMs = Date.now()) {
     turnPhase: null,
     connectionPhase: deriveConnectionPhase(seats),
     pausedTimer: null,
-    ownerPlayerId: remainingSeat.playerId,
+    ownerPlayerId,
     seats,
     deploymentsLocked: false,
     deploymentDeadlineAt: null,
     actionDeadlineAt: null,
-    consecutiveActionTimeouts: {
-      [remainingSeat.playerId]: 0,
-    },
-    rematchRequestedByPlayer: {
-      [remainingSeat.playerId]: false,
-    },
+    consecutiveActionTimeouts: Object.fromEntries(
+      seats.map((seat) => [seat.playerId, 0]),
+    ),
+    rematchRequestedByPlayer: falseByPlayer(seats),
     rolling: null,
     battleState: null,
     currentPlayerId: null,

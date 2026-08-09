@@ -335,7 +335,7 @@ function resolveFinalSalvo(battleState) {
   if (!bothPlayersLackAttackCapability(battleState)) {
     throw new RuleValidationError(
       "FINAL_SALVO_NOT_ALLOWED",
-      "只有双方均无攻击手段时才能执行终局鱼雷齐射。",
+      "只有所有仍在局玩家均无攻击手段时才能执行终局鱼雷齐射。",
     );
   }
 
@@ -412,7 +412,7 @@ function startManualFinalSalvo(battleState) {
   if (!bothPlayersLackAttackCapability(battleState)) {
     throw new RuleValidationError(
       "FINAL_SALVO_NOT_ALLOWED",
-      "只有双方均无攻击手段时才能进入手动鱼雷引爆阶段。",
+      "只有所有仍在局玩家均无攻击手段时才能进入手动鱼雷引爆阶段。",
     );
   }
   return {

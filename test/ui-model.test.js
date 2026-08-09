@@ -111,7 +111,7 @@ test("海盗船特殊胜负原因保持冻结规则用语", () => {
       },
       "player-1",
     ),
-    "双方航空母舰同时沉没；按海盗船特殊规则，海盗船一方获胜",
+    "行动方与防守方航空母舰同时沉没；按海盗船特殊规则，海盗船行动方获胜",
   );
   assert.equal(
     Model.endReasonForViewer(
@@ -132,6 +132,7 @@ test("潜射导弹、核弹与震爆弹公开记录不添加命中或生效结�
     {
       sequence: 1,
       actorId: "player-1",
+      defenderId: "player-2",
       actionType: Data.ACTION_TYPES.SUBMARINE_MISSILE,
       actionName: "潜射导弹",
       target: { kind: "cell", coordinate: "B3" },
@@ -139,13 +140,14 @@ test("潜射导弹、核弹与震爆弹公开记录不添加命中或生效结�
     },
     room,
   );
-  assert.equal(missile, "甲 使用潜射导弹攻击了 B3");
+  assert.equal(missile, "甲 对 乙 使用潜射导弹攻击了 B3");
   assert.equal(missile.includes("命中"), false);
 
   const nuclear = Model.publicActionText(
     {
       sequence: 2,
       actorId: "player-1",
+      defenderId: "player-2",
       actionType: Data.ACTION_TYPES.NUCLEAR_BOMB,
       actionName: "核弹",
       target: { kind: "cell", coordinate: "B3" },
@@ -153,13 +155,14 @@ test("潜射导弹、核弹与震爆弹公开记录不添加命中或生效结�
     },
     room,
   );
-  assert.equal(nuclear, "甲 向 B3 投放了核弹");
+  assert.equal(nuclear, "甲 对 乙 向 B3 投放了核弹");
   assert.equal(nuclear.includes("命中"), false);
 
   const shock = Model.publicActionText(
     {
       sequence: 2,
       actorId: "player-2",
+      defenderId: "player-1",
       actionType: Data.ACTION_TYPES.SHOCK_BOMB,
       actionName: "震爆弹",
       target: { kind: "cell", coordinate: "E5" },
@@ -167,9 +170,39 @@ test("潜射导弹、核弹与震爆弹公开记录不添加命中或生效结�
     },
     room,
   );
-  assert.equal(shock, "乙 以 E5 为中心使用震爆弹");
+  assert.equal(shock, "乙 对 甲 以 E5 为中心使用震爆弹");
   assert.equal(shock.includes("成功"), false);
   assert.equal(shock.includes("失败"), false);
+
+  const detection = Model.publicActionText(
+    {
+      sequence: 3,
+      actorId: "player-1",
+      defenderId: "player-2",
+      actionType: Data.ACTION_TYPES.DETECTION_BOMB,
+      actionName: "探测弹",
+      target: { kind: "cell", coordinate: "C3" },
+      result: null,
+    },
+    room,
+  );
+  assert.equal(detection, "甲 对 乙 以 C3 为中心使用探测弹");
+  assert.equal(detection.includes("信号"), false);
+
+  const radar = Model.publicActionText(
+    {
+      sequence: 4,
+      actorId: "player-1",
+      defenderId: "player-2",
+      actionType: Data.ACTION_TYPES.RADAR_SCAN,
+      actionName: "雷达扫描",
+      target: { kind: "cell", coordinate: "A1" },
+      result: null,
+    },
+    room,
+  );
+  assert.equal(radar, "甲 对 乙 从 A1 开始执行雷达扫描");
+  assert.equal(radar.includes("发现"), false);
 });
 
 test("单格、行与列目标使用统一无歧义术语", () => {

@@ -10,10 +10,14 @@ const {
   replaceBattlePlayerState,
 } = require("../server/game/battle-state");
 const { resolveBattleAction } = require("../server/game/match-resolution");
+const { leaveFinishedRoom, surrenderMatch } = require("../server/game/lifecycle");
+const { determineFirstPlayer, startPlaying } = require("../server/game/match");
 const {
   ROOM_PHASES,
   createRoomState,
   joinRoomState,
+  setPlayerReady,
+  submitDeployment,
 } = require("../server/game/room");
 const { createValidDeployment } = require("../test-fixtures/valid-deployment");
 
@@ -32,6 +36,26 @@ function cellIntent(actionId, actionType, sourceId, targetPlayerId, coordinate) 
     targetPlayerId,
     target: { kind: "cell", coordinate },
   };
+}
+
+function threePlayerPlayingRoom(nowMs = 1_000) {
+  let room = createRoomState({
+    roomCode: "ABC234",
+    playerId: "player-1",
+    nickname: "一号",
+    maxPlayers: 3,
+  });
+  room = joinRoomState(room, { playerId: "player-2", nickname: "二号" }, nowMs);
+  room = joinRoomState(room, { playerId: "player-3", nickname: "三号" }, nowMs);
+  for (const playerId of ["player-1", "player-2", "player-3"]) {
+    room = submitDeployment(room, playerId, createValidDeployment(), nowMs);
+  }
+  for (const playerId of ["player-1", "player-2", "player-3"]) {
+    room = setPlayerReady(room, playerId, nowMs);
+  }
+  const rolls = [0.9, 0.5, 0.1];
+  room = determineFirstPlayer(room, () => rolls.shift());
+  return startPlaying(room, nowMs);
 }
 
 test("三人房间在第三名玩家加入后才进入部署阶段", () => {
@@ -71,6 +95,8 @@ test("三人行动必须选择仍存活的敌方玩家，第三方取得旁观�
     "afterHp",
   ), false);
   assert.equal(resolved.deliveriesByPlayer["player-3"].feedback.observer, true);
+  assert.equal(resolved.deliveriesByPlayer["player-3"].publicRecord.defenderId, "player-2");
+  assert.equal(resolved.deliveriesByPlayer["player-3"].feedback.defenderId, "player-2");
   assert.equal(Object.hasOwn(resolved.deliveriesByPlayer["player-3"].feedback, "ownDamage"), false);
 });
 
@@ -108,5 +134,49 @@ test("三人局首个航空母舰沉没只令该玩家出局，对局继续", ()
   assert.equal(resolved.state.match.status, "playing");
   assert.deepEqual(resolved.state.match.eliminatedPlayerIds, ["player-2"]);
   assert.equal(resolved.state.match.result, null);
+});
+
+test("三人探测弹结果只向行动方公开，防守方和第三方只知道行动与目标玩家", () => {
+  const resolved = resolveBattleAction(
+    threePlayerBattle(),
+    "player-1",
+    cellIntent("detect-p2", ACTION_TYPES.DETECTION_BOMB, "nuclear", "player-2", "B2"),
+  );
+  const actor = resolved.deliveriesByPlayer["player-1"];
+  const defender = resolved.deliveriesByPlayer["player-2"];
+  const observer = resolved.deliveriesByPlayer["player-3"];
+
+  assert.ok(["underwater_signal_detected", "no_underwater_signal"].includes(actor.feedback.result));
+  assert.equal(actor.publicRecord.result, null);
+  assert.equal(defender.feedback.result, null);
+  assert.equal(observer.feedback.result, null);
+  assert.equal(observer.feedback.observer, true);
+  assert.equal(observer.publicRecord.defenderId, "player-2");
+  assert.equal(observer.view.publicActionLog.at(-1).result, null);
+  assert.equal(observer.view.publicActionLog.at(-1).defenderId, "player-2");
+});
+
+test("三人局赛后一名玩家离开时保留其余两名玩家并重置为等待房间", () => {
+  let room = threePlayerPlayingRoom(1_000);
+  room = surrenderMatch(room, "player-3", 2_000);
+  assert.equal(room.roomPhase, ROOM_PHASES.PLAYING);
+  room = surrenderMatch(room, "player-2", 3_000);
+  assert.equal(room.roomPhase, ROOM_PHASES.FINISHED);
+
+  const waiting = leaveFinishedRoom(room, "player-1", 4_000);
+  assert.equal(waiting.roomPhase, ROOM_PHASES.WAITING);
+  assert.equal(waiting.maxPlayers, 3);
+  assert.equal(waiting.ownerPlayerId, "player-2");
+  assert.deepEqual(waiting.seats.map((seat) => seat.playerId), ["player-2", "player-3"]);
+  assert.ok(waiting.seats.every((seat) => seat.deployment === null && !seat.ready));
+  assert.deepEqual(waiting.consecutiveActionTimeouts, {
+    "player-2": 0,
+    "player-3": 0,
+  });
+  assert.deepEqual(waiting.rematchRequestedByPlayer, {
+    "player-2": false,
+    "player-3": false,
+  });
+  assert.equal(waiting.battleState, null);
 });
 

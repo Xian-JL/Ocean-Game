@@ -49,6 +49,7 @@ function createPublicActionRecord(actionRecord) {
   const record = {
     sequence: actionRecord.sequence,
     actorId: actionRecord.actorId,
+    defenderId: actionRecord.defenderId,
     actionType: definition.type,
     actionName: definition.name,
     target: clone(actionRecord.action.target),
@@ -70,18 +71,11 @@ function createPublicActionRecord(actionRecord) {
       };
 
     case ACTION_TYPES.DETECTION_BOMB:
-      return {
-        ...record,
-        area: [...actionRecord.outcome.area],
-        result: actionRecord.outcome.detected
-          ? "underwater_signal_detected"
-          : "no_underwater_signal",
-      };
     case ACTION_TYPES.RADAR_SCAN:
       return {
         ...record,
         area: [...actionRecord.outcome.area],
-        result: actionRecord.outcome.detected ? "layout_detected" : "no_layout_detected",
+        result: null,
       };
 
     case ACTION_TYPES.HELICOPTER_STRAFE:
@@ -160,8 +154,18 @@ function createActorFeedback(battleState, actionRecord) {
       ? null
       : actorState.remainingUses[definition.type];
 
+  const publicRecord = createPublicActionRecord(actionRecord);
+  const privateResult = definition.type === ACTION_TYPES.DETECTION_BOMB
+    ? (actionRecord.outcome.detected
+      ? "underwater_signal_detected"
+      : "no_underwater_signal")
+    : definition.type === ACTION_TYPES.RADAR_SCAN
+      ? (actionRecord.outcome.detected ? "layout_detected" : "no_layout_detected")
+      : publicRecord.result;
+
   return {
-    ...createPublicActionRecord(actionRecord),
+    ...publicRecord,
+    result: privateResult,
     actionId: actionRecord.action.actionId,
     sourceId: actionRecord.action.sourceId,
     remainingUses,

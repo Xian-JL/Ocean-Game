@@ -21,7 +21,8 @@ function createOwnBattle(overrides = {}) {
       { id: "submarine", type: Data.UNIT_TYPES.SUBMARINE, cells: ["A1", "A2", "B1", "B2"], hp: 2, paralyzed: false },
       { id: "pirate", type: Data.UNIT_TYPES.PIRATE_SHIP, cells: ["A3", "A4", "A5"], hp: 2, paralyzed: false },
       { id: "motorboat", type: Data.UNIT_TYPES.MOTORBOAT, cells: ["A6"], hp: 1, paralyzed: false },
-      { id: "nuclear", type: Data.UNIT_TYPES.NUCLEAR_SUBMARINE, cells: ["H1", "H2", "I1", "I2"], hp: 2, paralyzed: false },
+      { id: "motorboat-2", type: Data.UNIT_TYPES.MOTORBOAT, cells: ["A7"], hp: 1, paralyzed: false },
+      { id: "nuclear", type: Data.UNIT_TYPES.NUCLEAR_SUBMARINE, cells: ["H1", "H2", "I1", "I2"], hp: 3, paralyzed: false },
       { id: "carrier", type: Data.UNIT_TYPES.AIRCRAFT_CARRIER, cells: ["H5", "H6", "I5", "I6", "J5", "J6"], hp: 6, paralyzed: false },
     ],
     enemyMap: {

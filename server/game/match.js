@@ -401,7 +401,7 @@ function completeAutomaticTurnSkip(room, nowMs = Date.now()) {
     lastTurnStart: null,
   };
 
-  // 防御性检查：双方永久失去攻击手段时，终局齐射优先于继续跳过。
+  // 防御性检查：所有仍在局玩家永久失去攻击手段时，终局齐射优先于继续跳过。
   if (bothPlayersLackAttackCapability(clearedBattle)) {
     next = finishAsFinalSalvo(
       next,
@@ -522,7 +522,7 @@ function completeFinalSalvo(room) {
   if (room.battleState.match.status !== MATCH_STATUS.FINISHED) {
     fail(
       "FINAL_SALVO_SELECTION_PENDING",
-      "双方尚未完成全部手动鱼雷引爆，不能进入赛后结算页。",
+      "所有仍在局玩家尚未完成全部手动鱼雷引爆，不能进入赛后结算页。",
     );
   }
   return assertMatchRoomState(

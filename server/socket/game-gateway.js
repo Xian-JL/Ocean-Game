@@ -1,6 +1,7 @@
 "use strict";
 
 const { RuleValidationError } = require("../game/errors");
+const { RELEASE_STAGE } = require("../release");
 const { TURN_PHASES } = require("../game/match");
 const { CONNECTION_PHASES, ROOM_PHASES } = require("../game/room");
 const { FixedWindowRateLimiter } = require("../operations/rate-limiter");
@@ -285,7 +286,7 @@ class SocketGameGateway {
   #registerSocket(socket) {
     this.telemetry.increment("socketConnections");
     socket.emit(SERVER_EVENTS.READY, {
-      stage: "postlaunch-v0.6",
+      stage: RELEASE_STAGE,
       protocolVersion: SOCKET_PROTOCOL_VERSION,
       connectedAt: this.nowIso(),
     });
@@ -487,6 +488,7 @@ class SocketGameGateway {
         roomCode: session.roomCode,
         stateVersion: result.stateVersion,
         remainingPlayerId: result.remainingPlayerId,
+        remainingPlayerIds: result.remainingPlayerIds,
         roomPhase: ROOM_PHASES.WAITING,
       };
     }
