@@ -228,7 +228,10 @@ class SocketGameGateway {
         continue;
       }
 
-      if (room.roomPhase === ROOM_PHASES.FINAL_SALVO) {
+      if (
+        room.roomPhase === ROOM_PHASES.FINAL_SALVO &&
+        room.battleState.match.status === "finished"
+      ) {
         this.#scheduleTransition(
           roomCode,
           "finish-final-salvo",
@@ -254,7 +257,7 @@ class SocketGameGateway {
 
       if (
         room.roomPhase === ROOM_PHASES.FINISHED &&
-        room.seats.length === 2 &&
+        room.seats.length === room.maxPlayers &&
         room.seats.every(
           (seat) => room.rematchRequestedByPlayer[seat.playerId],
         )
@@ -282,7 +285,7 @@ class SocketGameGateway {
   #registerSocket(socket) {
     this.telemetry.increment("socketConnections");
     socket.emit(SERVER_EVENTS.READY, {
-      stage: "postlaunch-v0.4",
+      stage: "postlaunch-v0.6",
       protocolVersion: SOCKET_PROTOCOL_VERSION,
       connectedAt: this.nowIso(),
     });
@@ -316,6 +319,8 @@ class SocketGameGateway {
       this.#cancelReady(socket, payload));
     this.#registerEvent(socket, CLIENT_EVENTS.SUBMIT_ACTION, (payload) =>
       this.#submitAction(socket, payload));
+    this.#registerEvent(socket, CLIENT_EVENTS.SUBMIT_FINAL_SALVO, (payload) =>
+      this.#submitFinalSalvo(socket, payload));
     this.#registerEvent(socket, CLIENT_EVENTS.SURRENDER_MATCH, (payload) =>
       this.#surrenderMatch(socket, payload));
     this.#registerEvent(socket, CLIENT_EVENTS.REQUEST_REMATCH, (payload) =>
@@ -377,6 +382,7 @@ class SocketGameGateway {
     const normalized = requirePayloadObject(payload);
     const result = this.roomService.createRoom({
       nickname: normalized.nickname,
+      maxPlayers: normalized.maxPlayers ?? 2,
     });
     await this.#bindSocket(
       socket,
@@ -598,6 +604,24 @@ class SocketGameGateway {
     }
     await this.advanceRoom(session.roomCode);
     return data;
+  }
+
+  async #submitFinalSalvo(socket, payload) {
+    const session = this.#requireSession(socket);
+    const normalized = requirePayloadObject(payload);
+    const expectedVersion = requireExpectedVersion(normalized);
+    const views = this.roomService.submitFinalSalvo({
+      roomCode: session.roomCode,
+      playerId: session.playerId,
+      decoyId: normalized.decoyId,
+      expectedVersion,
+    });
+    this.#emitViews(views);
+    await this.advanceRoom(session.roomCode);
+    return {
+      stateVersion: views[session.playerId].stateVersion,
+      round: views[session.playerId].battle?.match?.finalSalvo?.round ?? null,
+    };
   }
 
   #surrenderMatch(socket, payload) {

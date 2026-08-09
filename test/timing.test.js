@@ -72,7 +72,11 @@ function createPlayingRoom(startTime = START_TIME) {
     createRollingRoom(),
     sequenceRandom([0.9, 0.1]),
   );
-  return startPlaying(decided, startTime);
+  const room = startPlaying(decided, startTime);
+  for (const playerId of room.battleState.playerIds) {
+    room.battleState.players[playerId].remainingUses.radar_scan = 0;
+  }
+  return room;
 }
 
 function pirateMiss(actionId, coordinate) {

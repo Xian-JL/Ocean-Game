@@ -8,9 +8,13 @@ const {
   completeAutomaticSkip,
   createBattleState,
   getBattlePlayerState,
+  getNextActivePlayerId,
   getOpponentPlayerId,
   replaceBattlePlayerState,
 } = require("./battle-state");
+const {
+  ACTION_TYPES,
+} = require("./actions");
 const {
   hasAnyLegalAction,
   validateActionIntent,
@@ -19,7 +23,8 @@ const {
   END_REASONS,
   bothPlayersLackAttackCapability,
   finishByForfeit,
-  resolveFinalSalvo,
+  startManualFinalSalvo,
+  submitManualFinalSalvo,
 } = require("./endgame");
 const { RuleValidationError } = require("./errors");
 const { createPlayerView } = require("./information-projection");
@@ -101,26 +106,23 @@ function determineFirstPlayer(room, random = Math.random) {
     });
   }
 
-  const [firstSeat, secondSeat] = room.seats;
   const rounds = [];
   let firstPlayerId = null;
 
   for (let round = 1; round <= MAX_ROLL_ROUNDS; round += 1) {
-    const firstRoll = rollDie(random);
-    const secondRoll = rollDie(random);
+    const rolls = Object.fromEntries(
+      room.seats.map((seat) => [seat.playerId, rollDie(random)]),
+    );
+    const highest = Math.max(...Object.values(rolls));
+    const leaders = room.seats.filter((seat) => rolls[seat.playerId] === highest);
     rounds.push({
       round,
-      rolls: {
-        [firstSeat.playerId]: firstRoll,
-        [secondSeat.playerId]: secondRoll,
-      },
-      tied: firstRoll === secondRoll,
+      rolls,
+      tied: leaders.length !== 1,
     });
 
-    if (firstRoll !== secondRoll) {
-      firstPlayerId = firstRoll > secondRoll
-        ? firstSeat.playerId
-        : secondSeat.playerId;
+    if (leaders.length === 1) {
+      firstPlayerId = leaders[0].playerId;
       break;
     }
   }
@@ -234,9 +236,18 @@ function beginPlayerAction(room, playerId, intent, nowMs = Date.now()) {
   assertActionWindowOpen(room, nowMs);
 
   const playerState = getBattlePlayerState(room.battleState, playerId);
+  if (
+    playerState.remainingUses[ACTION_TYPES.RADAR_SCAN] > 0 &&
+    intent?.actionType !== ACTION_TYPES.RADAR_SCAN
+  ) {
+    fail(
+      "OPENING_RADAR_REQUIRED",
+      "该玩家的首个行动回合必须先使用航空母舰雷达扫描 4×4 海域。",
+    );
+  }
   const validation = validateActionIntent(playerState, intent);
   if (!validation.valid) {
-    fail("INVALID_ACTION", "行动请求不符合《游戏规则 v1.0》。", {
+    fail("INVALID_ACTION", "行动请求不符合《游戏规则 v1.2》。", {
       errors: validation.errors,
     });
   }
@@ -294,7 +305,8 @@ function finishAsFinalSalvo(room, battleState, finishedAt, extraChanges = {}) {
     pendingAction: null,
     actionDeadlineAt: null,
     pausedTimer: null,
-    matchFinishedAt: finishedAt,
+    matchFinishedAt:
+      battleState.match.status === MATCH_STATUS.FINISHED ? finishedAt : null,
   };
 }
 
@@ -341,8 +353,10 @@ function completePlayerAction(room, nowMs = Date.now()) {
     next = resolved.state.match.finalSalvo
       ? finishAsFinalSalvo(next, resolved.state, normalizedNow)
       : finishImmediately(next, resolved.state, normalizedNow);
+  } else if (resolved.state.match.finalSalvo?.status === "selecting") {
+    next = finishAsFinalSalvo(next, resolved.state, normalizedNow);
   } else {
-    const nextPlayerId = getOpponentPlayerId(
+    const nextPlayerId = getNextActivePlayerId(
       resolved.state,
       pending.playerId,
     );
@@ -389,10 +403,13 @@ function completeAutomaticTurnSkip(room, nowMs = Date.now()) {
 
   // 防御性检查：双方永久失去攻击手段时，终局齐射优先于继续跳过。
   if (bothPlayersLackAttackCapability(clearedBattle)) {
-    const finalSalvo = resolveFinalSalvo(clearedBattle);
-    next = finishAsFinalSalvo(next, finalSalvo.state, normalizedNow);
+    next = finishAsFinalSalvo(
+      next,
+      startManualFinalSalvo(clearedBattle),
+      normalizedNow,
+    );
   } else {
-    const nextPlayerId = getOpponentPlayerId(
+    const nextPlayerId = getNextActivePlayerId(
       clearedBattle,
       skippedPlayerId,
     );
@@ -466,9 +483,16 @@ function processActionTimeout(room, nowMs = Date.now()) {
       timedOutPlayerId,
       END_REASONS.THREE_CONSECUTIVE_TIMEOUTS,
     );
-    next = finishImmediately(next, forfeited.state, normalizedNow);
+    next = forfeited.ended
+      ? finishImmediately(next, forfeited.state, normalizedNow)
+      : prepareNextTurn(
+          next,
+          forfeited.state,
+          getNextActivePlayerId(forfeited.state, timedOutPlayerId),
+          normalizedNow,
+        );
   } else {
-    const nextPlayerId = getOpponentPlayerId(
+    const nextPlayerId = getNextActivePlayerId(
       clearedBattle,
       timedOutPlayerId,
     );
@@ -495,9 +519,46 @@ function completeFinalSalvo(room) {
     "FINAL_SALVO_NOT_ACTIVE",
     "只有 FINAL_SALVO 阶段可以结束齐射展示。",
   );
+  if (room.battleState.match.status !== MATCH_STATUS.FINISHED) {
+    fail(
+      "FINAL_SALVO_SELECTION_PENDING",
+      "双方尚未完成全部手动鱼雷引爆，不能进入赛后结算页。",
+    );
+  }
   return assertMatchRoomState(
     bumpVersion(room, {
       roomPhase: ROOM_PHASES.FINISHED,
+    }),
+  );
+}
+
+function submitFinalSalvoSelection(room, playerId, decoyId, nowMs = Date.now()) {
+  assertMatchRoomState(room);
+  assertRoomConnected(room);
+  assertRoomPhase(
+    room,
+    ROOM_PHASES.FINAL_SALVO,
+    "FINAL_SALVO_NOT_ACTIVE",
+    "当前不在手动鱼雷引爆阶段。",
+  );
+  assertPlayerId(playerId);
+  const seat = getPlayerSeat(room, playerId);
+  if (!seat.online) {
+    fail("PLAYER_OFFLINE", "离线玩家不能提交鱼雷选择。", { playerId });
+  }
+  const battleState = submitManualFinalSalvo(
+    room.battleState,
+    playerId,
+    decoyId,
+  );
+  const normalizedNow = normalizeServerTime(nowMs);
+  return assertMatchRoomState(
+    bumpVersion(room, {
+      battleState,
+      matchFinishedAt:
+        battleState.match.status === MATCH_STATUS.FINISHED
+          ? normalizedNow
+          : null,
     }),
   );
 }
@@ -576,14 +637,25 @@ function assertMatchRoomState(room) {
     [ROOM_PHASES.FINAL_SALVO, ROOM_PHASES.FINISHED].includes(room.roomPhase)
   ) {
     assertBattleState(room.battleState);
-    if (room.battleState.match.status !== MATCH_STATUS.FINISHED) {
-      fail("INVALID_MATCH_ROOM_STATE", "终局房间必须具有已结束的战场。");
-    }
     if (
       room.roomPhase === ROOM_PHASES.FINAL_SALVO &&
       room.battleState.match.finalSalvo === null
     ) {
       fail("INVALID_MATCH_ROOM_STATE", "FINAL_SALVO 阶段缺少齐射结果。");
+    }
+    if (
+      room.roomPhase === ROOM_PHASES.FINAL_SALVO &&
+      ![MATCH_STATUS.PLAYING, MATCH_STATUS.FINISHED].includes(
+        room.battleState.match.status,
+      )
+    ) {
+      fail("INVALID_MATCH_ROOM_STATE", "手动鱼雷阶段战场状态无效。");
+    }
+    if (
+      room.roomPhase === ROOM_PHASES.FINISHED &&
+      room.battleState.match.status !== MATCH_STATUS.FINISHED
+    ) {
+      fail("INVALID_MATCH_ROOM_STATE", "赛后房间必须具有已结束的战场。");
     }
   } else if (room.roomPhase === ROOM_PHASES.CLOSED) {
     if (room.battleState !== null) {
@@ -617,10 +689,28 @@ function createSafeBattleView(room, viewerId, nowMs) {
     room.roomPhase === ROOM_PHASES.PLAYING &&
     room.turnPhase === TURN_PHASES.ACTIVE &&
     room.currentPlayerId === viewerId &&
+    !(room.battleState.match.eliminatedPlayerIds ?? []).includes(viewerId) &&
     !isDeadlineReached(room.actionDeadlineAt, nowMs);
   if (!canAct) {
     view.own.actionsLocked = true;
     view.own.actionAvailability = [];
+  }
+  if (canAct && view.own.remainingUses[ACTION_TYPES.RADAR_SCAN] > 0) {
+    view.own.actionAvailability = view.own.actionAvailability.map((item) =>
+      item.actionType === ACTION_TYPES.RADAR_SCAN
+        ? item
+        : {
+            ...item,
+            available: false,
+            issues: [
+              {
+                code: "OPENING_RADAR_REQUIRED",
+                message: "首个行动回合必须先扫描 4×4 海域。",
+                details: {},
+              },
+            ],
+          },
+    );
   }
   return view;
 }
@@ -631,6 +721,7 @@ function createRoomView(room, viewerId, nowMs = Date.now()) {
   const viewerSeat = getPlayerSeat(room, viewerId);
   return {
     roomCode: room.roomCode,
+    maxPlayers: room.maxPlayers,
     stateVersion: room.stateVersion,
     roomPhase: room.roomPhase,
     turnPhase: room.turnPhase,
@@ -735,4 +826,5 @@ module.exports = {
   processActionTimeout,
   rollDie,
   startPlaying,
+  submitFinalSalvoSelection,
 };

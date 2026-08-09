@@ -3,6 +3,7 @@
 const {
   MATCH_STATUS,
   assertBattleState,
+  getNextActivePlayerId,
   getOpponentPlayerId,
 } = require("./battle-state");
 const {
@@ -42,12 +43,14 @@ function fail(code, message, details = {}) {
   throw new RuleValidationError(code, message, details);
 }
 
-function deriveConnectionPhase(seats) {
-  const offlineCount = seats.filter((seat) => !seat.online).length;
+function deriveConnectionPhase(seats, ignoredPlayerIds = []) {
+  const ignored = new Set(ignoredPlayerIds);
+  const activeSeats = seats.filter((seat) => !ignored.has(seat.playerId));
+  const offlineCount = activeSeats.filter((seat) => !seat.online).length;
   if (offlineCount === 0) {
     return CONNECTION_PHASES.CONNECTED;
   }
-  if (seats.length === 2 && offlineCount === seats.length) {
+  if (activeSeats.length > 1 && offlineCount === activeSeats.length) {
     return CONNECTION_PHASES.PAUSED_BOTH_OFFLINE;
   }
   return CONNECTION_PHASES.PAUSED_ONE_OFFLINE;
@@ -129,7 +132,10 @@ function disconnectPlayer(room, playerId, nowMs = Date.now()) {
     ...room,
     ...timerChanges,
     seats,
-    connectionPhase: deriveConnectionPhase(seats),
+    connectionPhase: deriveConnectionPhase(
+      seats,
+      room.battleState?.match?.eliminatedPlayerIds ?? [],
+    ),
     stateVersion: room.stateVersion + 1,
   });
 }
@@ -166,7 +172,10 @@ function reconnectPlayer(room, playerId, nowMs = Date.now()) {
     reconnectDeadlineAt: null,
   };
   const seats = replaceSeat(room, playerId, onlineSeat);
-  const connectionPhase = deriveConnectionPhase(seats);
+  const connectionPhase = deriveConnectionPhase(
+    seats,
+    room.battleState?.match?.eliminatedPlayerIds ?? [],
+  );
   const allOnline = connectionPhase === CONNECTION_PHASES.CONNECTED;
   let deploymentDeadlineAt = room.deploymentDeadlineAt;
   let actionDeadlineAt = room.actionDeadlineAt;
@@ -309,10 +318,42 @@ function createDisconnectForfeitBattleState(battleState, loserId) {
 }
 
 function finishRoomByDisconnectForfeit(room, loserId, finishedAt) {
-  const battleState = createDisconnectForfeitBattleState(
-    room.battleState,
-    loserId,
-  );
+  const forfeited = room.battleState.match.status === MATCH_STATUS.PLAYING
+    ? finishByForfeit(room.battleState, loserId, END_REASONS.DISCONNECT_TIMEOUT)
+    : { state: createDisconnectForfeitBattleState(room.battleState, loserId), ended: true };
+  const battleState = forfeited.state;
+  if (!forfeited.ended) {
+    const seats = room.seats.map((seat) => seat.playerId === loserId
+      ? { ...seat, reconnectDeadlineAt: null }
+      : seat);
+    let actionDeadlineAt = room.actionDeadlineAt;
+    if (room.pausedTimer?.kind === PAUSED_TIMER_KINDS.ACTION) {
+      actionDeadlineAt = finishedAt + room.pausedTimer.remainingMs;
+    }
+    const currentPlayerId = room.currentPlayerId === loserId
+      ? getNextActivePlayerId(battleState, loserId)
+      : room.currentPlayerId;
+    return assertMatchRoomState({
+      ...room,
+      ...appendSystemEvent(
+        room,
+        END_REASONS.DISCONNECT_TIMEOUT,
+        "玩家未在 120 秒内重连，断线方出局",
+        [loserId],
+      ),
+      stateVersion: room.stateVersion + 1,
+      seats,
+      connectionPhase: deriveConnectionPhase(
+        seats,
+        battleState.match.eliminatedPlayerIds,
+      ),
+      pausedTimer: null,
+      actionDeadlineAt,
+      battleState,
+      currentPlayerId,
+      pendingAction: null,
+    });
+  }
   return assertMatchRoomState({
     ...room,
     ...appendSystemEvent(

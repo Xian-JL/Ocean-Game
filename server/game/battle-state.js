@@ -94,10 +94,10 @@ function createBattlePlayerState(deployment) {
 }
 
 function createBattleState(playerEntries) {
-  if (!Array.isArray(playerEntries) || playerEntries.length !== 2) {
+  if (!Array.isArray(playerEntries) || ![2, 3].includes(playerEntries.length)) {
     throw new RuleValidationError(
       "INVALID_BATTLE_PLAYERS",
-      "权威战场必须恰好包含两名玩家。",
+      "权威战场必须包含两名或三名玩家。",
     );
   }
 
@@ -112,10 +112,10 @@ function createBattleState(playerEntries) {
     return assertPlayerId(entry.id);
   });
 
-  if (new Set(playerIds).size !== 2) {
+  if (new Set(playerIds).size !== playerIds.length) {
     throw new RuleValidationError(
       "DUPLICATE_PLAYER_ID",
-      "两名玩家必须使用不同的玩家 ID。",
+      "所有玩家必须使用不同的玩家 ID。",
       { playerIds },
     );
   }
@@ -134,6 +134,7 @@ function createBattleState(playerEntries) {
       status: MATCH_STATUS.PLAYING,
       result: null,
       finalSalvo: null,
+      eliminatedPlayerIds: [],
     },
   };
 }
@@ -143,7 +144,7 @@ function assertBattleState(battleState) {
     !battleState ||
     typeof battleState !== "object" ||
     !Array.isArray(battleState.playerIds) ||
-    battleState.playerIds.length !== 2 ||
+    ![2, 3].includes(battleState.playerIds.length) ||
     !battleState.players ||
     typeof battleState.players !== "object" ||
     !Array.isArray(battleState.actionLog) ||
@@ -153,7 +154,9 @@ function assertBattleState(battleState) {
     typeof battleState.match !== "object" ||
     !Object.values(MATCH_STATUS).includes(battleState.match.status) ||
     !Object.hasOwn(battleState.match, "result") ||
-    !Object.hasOwn(battleState.match, "finalSalvo")
+    !Object.hasOwn(battleState.match, "finalSalvo") ||
+    (Object.hasOwn(battleState.match, "eliminatedPlayerIds") &&
+      !Array.isArray(battleState.match.eliminatedPlayerIds))
   ) {
     throw new RuleValidationError(
       "INVALID_BATTLE_STATE",
@@ -175,12 +178,21 @@ function assertBattleState(battleState) {
 
   if (
     battleState.match.status === MATCH_STATUS.PLAYING &&
-    (battleState.match.result !== null ||
-      battleState.match.finalSalvo !== null)
+    battleState.match.result !== null
   ) {
     throw new RuleValidationError(
       "INVALID_BATTLE_STATE",
-      "进行中的战场不能包含终局结果或终局鱼雷齐射记录。",
+      "进行中的战场不能包含终局结果。",
+    );
+  }
+  if (
+    battleState.match.status === MATCH_STATUS.PLAYING &&
+    battleState.match.finalSalvo !== null &&
+    battleState.match.finalSalvo.status !== "selecting"
+  ) {
+    throw new RuleValidationError(
+      "INVALID_BATTLE_STATE",
+      "进行中的手动鱼雷阶段必须处于 selecting 状态。",
     );
   }
   if (
@@ -211,7 +223,34 @@ function getBattlePlayerState(battleState, playerId) {
 
 function getOpponentPlayerId(battleState, playerId) {
   getBattlePlayerState(battleState, playerId);
-  return battleState.playerIds.find((candidate) => candidate !== playerId);
+  const opponents = getOpponentPlayerIds(battleState, playerId);
+  if (opponents.length !== 1) {
+    throw new RuleValidationError(
+      "OPPONENT_SELECTION_REQUIRED",
+      "三人对战必须明确选择一名敌方玩家。",
+      { playerId, opponentIds: opponents },
+    );
+  }
+  return opponents[0];
+}
+
+function getOpponentPlayerIds(battleState, playerId, options = {}) {
+  getBattlePlayerState(battleState, playerId);
+  const includeEliminated = options.includeEliminated === true;
+  return battleState.playerIds.filter(
+    (candidate) => candidate !== playerId &&
+      (includeEliminated || !(battleState.match.eliminatedPlayerIds ?? []).includes(candidate)),
+  );
+}
+
+function getNextActivePlayerId(battleState, playerId) {
+  getBattlePlayerState(battleState, playerId);
+  const start = battleState.playerIds.indexOf(playerId);
+  for (let offset = 1; offset <= battleState.playerIds.length; offset += 1) {
+    const candidate = battleState.playerIds[(start + offset) % battleState.playerIds.length];
+    if (!(battleState.match.eliminatedPlayerIds ?? []).includes(candidate)) return candidate;
+  }
+  return playerId;
 }
 
 function replaceBattlePlayerState(battleState, playerId, playerState) {
@@ -516,6 +555,8 @@ module.exports = {
   getBattleUnitAtCell,
   getBattleUnitById,
   getOpponentPlayerId,
+  getOpponentPlayerIds,
+  getNextActivePlayerId,
   queueParalysis,
   recordTargetCellResults,
   replaceBattlePlayerState,

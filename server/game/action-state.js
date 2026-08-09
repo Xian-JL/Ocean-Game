@@ -18,9 +18,10 @@ function assertActionState(state) {
     !state.remainingUses ||
     typeof state.remainingUses !== "object" ||
     !Array.isArray(state.resolvedTargetCells) ||
+    !Array.isArray(state.destroyerTargetCells) ||
     !Array.isArray(state.submarineMissileMarkers) ||
+    !Array.isArray(state.nuclearBombMarkers) ||
     !Array.isArray(state.processedActionIds)
-    || !state.radar || !Array.isArray(state.radar.cells)
   ) {
     throw new RuleValidationError(
       "INVALID_ACTION_STATE",
@@ -65,13 +66,11 @@ function createInitialActionState(deployment) {
 
   return {
     units,
-    radar: (() => {
-      const placement = normalizedPlacements.find((item) => item.type === "radar");
-      return { id: placement.id, type: placement.type, cells: [...placement.cells] };
-    })(),
     remainingUses: createInitialRemainingUses(),
     resolvedTargetCells: [],
+    destroyerTargetCells: [],
     submarineMissileMarkers: [],
+    nuclearBombMarkers: [],
     processedActionIds: [],
   };
 }
@@ -83,7 +82,8 @@ function getUnitById(state, unitId) {
 
 function getUnitByType(state, type) {
   assertActionState(state);
-  return state.units.find((unit) => unit.type === type) || null;
+  return state.units.find((unit) => unit.type === type && unit.hp > 0) ||
+    state.units.find((unit) => unit.type === type) || null;
 }
 
 function getRemainingUses(state, actionType) {
@@ -135,6 +135,31 @@ function markSubmarineMissileTarget(state, coordinate) {
       ...new Set(
         sortCoordinates([...state.submarineMissileMarkers, normalized]),
       ),
+    ],
+  };
+}
+
+function markNuclearBombTarget(state, coordinate) {
+  assertActionState(state);
+  const [normalized] = sortCoordinates([coordinate]);
+  return {
+    ...state,
+    nuclearBombMarkers: [
+      ...new Set(sortCoordinates([...state.nuclearBombMarkers, normalized])),
+    ],
+  };
+}
+
+function markDestroyerTarget(state, coordinate, targetPlayerId = null) {
+  assertActionState(state);
+  const [normalized] = sortCoordinates([coordinate]);
+  const stored = typeof targetPlayerId === "string"
+    ? `${targetPlayerId}:${normalized}`
+    : normalized;
+  return {
+    ...state,
+    destroyerTargetCells: [
+      ...new Set([...state.destroyerTargetCells, stored]),
     ],
   };
 }
@@ -227,6 +252,8 @@ module.exports = {
   getUnitByType,
   hasProcessedActionId,
   hasResolvedTargetCell,
+  markDestroyerTarget,
+  markNuclearBombTarget,
   markSubmarineMissileTarget,
   markTargetCellsResolved,
   setUnitStatus,

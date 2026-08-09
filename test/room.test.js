@@ -234,6 +234,10 @@ test("内存房间服务可以原子编排创建、加入、准备、掷骰和�
     roomCode: created.roomCode,
     expectedVersion: views[created.playerId].stateVersion,
   });
+  const serverRoom = service.rooms.get(created.roomCode);
+  for (const playerId of serverRoom.battleState.playerIds) {
+    serverRoom.battleState.players[playerId].remainingUses.radar_scan = 0;
+  }
   view = service.beginAction({
     roomCode: created.roomCode,
     playerId: created.playerId,

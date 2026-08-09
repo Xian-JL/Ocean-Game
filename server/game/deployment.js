@@ -341,7 +341,7 @@ function assertValidDeployment(placements) {
   if (!result.valid) {
     throw new RuleValidationError(
       "INVALID_DEPLOYMENT",
-      "部署不符合《游戏规则 v1.0》。",
+      "部署不符合《游戏规则 v1.2》。",
       { errors: result.errors },
     );
   }

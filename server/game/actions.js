@@ -96,7 +96,7 @@ const ACTION_DEFINITIONS = Object.freeze({
     targetMode: TARGET_MODES.SINGLE_CELL,
     rangeMode: RANGE_MODES.FULL_BOARD,
     limitKind: LIMIT_KINDS.AMMUNITION,
-    initialUses: 3,
+    initialUses: 4,
   }),
   [ACTION_TYPES.NUCLEAR_BOMB]: freezeDefinition({
     type: ACTION_TYPES.NUCLEAR_BOMB,
@@ -142,7 +142,7 @@ const ACTION_DEFINITIONS = Object.freeze({
     type: ACTION_TYPES.RADAR_SCAN,
     name: "雷达扫描",
     category: ACTION_CATEGORIES.AUXILIARY,
-    sourceType: DEPLOYABLE_TYPES.RADAR,
+    sourceType: DEPLOYABLE_TYPES.AIRCRAFT_CARRIER,
     targetMode: TARGET_MODES.AREA_CENTER,
     rangeMode: RANGE_MODES.RADAR_AREA,
     limitKind: LIMIT_KINDS.USE_COUNT,

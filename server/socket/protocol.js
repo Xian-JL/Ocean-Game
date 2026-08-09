@@ -2,7 +2,7 @@
 
 const { RuleValidationError } = require("../game/errors");
 
-const SOCKET_PROTOCOL_VERSION = "1.2";
+const SOCKET_PROTOCOL_VERSION = "1.4";
 
 const CLIENT_EVENTS = Object.freeze({
   PING: "client:ping",
@@ -15,6 +15,7 @@ const CLIENT_EVENTS = Object.freeze({
   READY_DEPLOYMENT: "deployment:ready",
   CANCEL_READY: "deployment:cancel-ready",
   SUBMIT_ACTION: "action:submit",
+  SUBMIT_FINAL_SALVO: "final-salvo:submit",
   SURRENDER_MATCH: "match:surrender",
   REQUEST_REMATCH: "rematch:request",
   CANCEL_REMATCH: "rematch:cancel",

@@ -106,7 +106,10 @@ function bumpVersion(room, changes) {
   };
 }
 
-function createRoomState({ roomCode, playerId, nickname }) {
+function createRoomState({ roomCode, playerId, nickname, maxPlayers = 2 }) {
+  if (![2, 3].includes(maxPlayers)) {
+    fail("INVALID_PLAYER_COUNT", "房间人数只能是 2 或 3。", { maxPlayers });
+  }
   const ownerSeat = createSeat(playerId, nickname);
   return {
     roomCode: normalizeRoomCode(roomCode),
@@ -116,6 +119,7 @@ function createRoomState({ roomCode, playerId, nickname }) {
     connectionPhase: CONNECTION_PHASES.CONNECTED,
     pausedTimer: null,
     ownerPlayerId: ownerSeat.playerId,
+    maxPlayers,
     seats: [ownerSeat],
     deploymentsLocked: false,
     deploymentDeadlineAt: null,
@@ -194,9 +198,10 @@ function joinRoomState(room, { playerId, nickname }, nowMs = Date.now()) {
     "ROOM_NOT_JOINABLE",
     "房间已满或对局已经开始，不能加入。",
   );
-  if (room.seats.length !== 1) {
-    fail("ROOM_FULL", "房间已经有两名玩家。", {
+  if (room.seats.length >= room.maxPlayers) {
+    fail("ROOM_FULL", "房间席位已经坐满。", {
       seatCount: room.seats.length,
+      maxPlayers: room.maxPlayers,
     });
   }
   if (room.seats.some((seat) => seat.playerId === playerId)) {
@@ -204,13 +209,14 @@ function joinRoomState(room, { playerId, nickname }, nowMs = Date.now()) {
   }
 
   const joinedSeat = createSeat(playerId, nickname);
+  const seats = [...room.seats, joinedSeat];
+  const full = seats.length === room.maxPlayers;
   const next = bumpVersion(room, {
-    seats: [...room.seats, joinedSeat],
-    roomPhase: ROOM_PHASES.DEPLOYING,
-    deploymentDeadlineAt: createDeadline(
-      normalizedNow,
-      DEPLOYMENT_DURATION_MS,
-    ),
+    seats,
+    roomPhase: full ? ROOM_PHASES.DEPLOYING : ROOM_PHASES.WAITING,
+    deploymentDeadlineAt: full
+      ? createDeadline(normalizedNow, DEPLOYMENT_DURATION_MS)
+      : null,
     consecutiveActionTimeouts: {
       ...room.consecutiveActionTimeouts,
       [joinedSeat.playerId]: 0,
@@ -304,7 +310,7 @@ function setPlayerReady(room, playerId, nowMs = Date.now()) {
     autoPrepared: false,
   };
   const seats = replaceSeat(room, playerId, readySeat);
-  const allReady = seats.length === 2 && seats.every((candidate) => candidate.ready);
+  const allReady = seats.length === room.maxPlayers && seats.every((candidate) => candidate.ready);
   const next = bumpVersion(room, {
     seats,
     roomPhase: allReady ? ROOM_PHASES.ROLLING : ROOM_PHASES.DEPLOYING,
@@ -326,12 +332,11 @@ function cancelPlayerReady(room, playerId, nowMs = Date.now()) {
   assertDeploymentWindowOpen(room, nowMs);
 
   const seat = getPlayerSeat(room, playerId);
-  const opponent = getOpponentSeat(room, playerId);
   if (!seat.ready) {
     fail("PLAYER_NOT_READY", "该玩家尚未准备。", { playerId });
   }
-  if (opponent?.ready) {
-    fail("OPPONENT_ALREADY_READY", "对方已经准备，不能取消准备。", {
+  if (room.seats.some((candidate) => candidate.playerId !== playerId && candidate.ready)) {
+    fail("OPPONENT_ALREADY_READY", "已有其他玩家准备，不能取消准备。", {
       playerId,
     });
   }
@@ -529,17 +534,22 @@ function assertRoomState(room) {
       connectionPhase: room.connectionPhase,
     });
   }
-  if (!Array.isArray(room.seats) || room.seats.length < 1 || room.seats.length > 2) {
-    fail("INVALID_ROOM_STATE", "房间必须包含一至两个玩家席位。", {
+  if (![2, 3].includes(room.maxPlayers)) {
+    fail("INVALID_ROOM_STATE", "房间人数配置只能是 2 或 3。", { maxPlayers: room.maxPlayers });
+  }
+  if (!Array.isArray(room.seats) || room.seats.length < 1 || room.seats.length > room.maxPlayers) {
+    fail("INVALID_ROOM_STATE", "房间席位数量超出人数配置。", {
       seatCount: room.seats?.length,
     });
   }
 
   room.seats.forEach(assertSeat);
-  const offlineCount = room.seats.filter((seat) => !seat.online).length;
+  const eliminatedIds = new Set(room.battleState?.match?.eliminatedPlayerIds ?? []);
+  const connectionSeats = room.seats.filter((seat) => !eliminatedIds.has(seat.playerId));
+  const offlineCount = connectionSeats.filter((seat) => !seat.online).length;
   const expectedConnectionPhase = offlineCount === 0
     ? CONNECTION_PHASES.CONNECTED
-    : offlineCount === room.seats.length && room.seats.length === 2
+    : offlineCount === connectionSeats.length && connectionSeats.length > 1
       ? CONNECTION_PHASES.PAUSED_BOTH_OFFLINE
       : CONNECTION_PHASES.PAUSED_ONE_OFFLINE;
   if (room.connectionPhase !== expectedConnectionPhase) {
@@ -556,7 +566,7 @@ function assertRoomState(room) {
     }
   } else if (
     ![ROOM_PHASES.FINISHED, ROOM_PHASES.CLOSED].includes(room.roomPhase) &&
-    room.seats.some(
+    connectionSeats.some(
       (seat) => !seat.online && seat.reconnectDeadlineAt === null,
     )
   ) {
@@ -690,11 +700,20 @@ function assertRoomState(room) {
   ) {
     fail("INVALID_ROOM_STATE", "PLAYING 阶段必须只有对局开始时间。");
   }
+  if (room.roomPhase === ROOM_PHASES.FINAL_SALVO) {
+    if (room.matchStartedAt === null) {
+      fail("INVALID_ROOM_STATE", "手动鱼雷阶段必须保留对局开始时间。");
+    }
+    const salvoFinished = room.battleState?.match?.status === "finished";
+    if (salvoFinished !== (room.matchFinishedAt !== null)) {
+      fail("INVALID_ROOM_STATE", "手动鱼雷阶段的结束时间与战场状态不一致。");
+    }
+  }
   if (
-    [ROOM_PHASES.FINAL_SALVO, ROOM_PHASES.FINISHED].includes(room.roomPhase) &&
+    room.roomPhase === ROOM_PHASES.FINISHED &&
     (room.matchStartedAt === null || room.matchFinishedAt === null)
   ) {
-    fail("INVALID_ROOM_STATE", "终局阶段必须具有完整对局时间。");
+    fail("INVALID_ROOM_STATE", "赛后阶段必须具有完整对局时间。");
   }
   if (
     !Array.isArray(room.systemEvents) ||
@@ -708,17 +727,17 @@ function assertRoomState(room) {
       ownerPlayerId: room.ownerPlayerId,
     });
   }
-  if (room.roomPhase === ROOM_PHASES.WAITING && room.seats.length !== 1) {
-    fail("INVALID_ROOM_STATE", "等待阶段必须只有一名玩家。", {
+  if (room.roomPhase === ROOM_PHASES.WAITING && room.seats.length >= room.maxPlayers) {
+    fail("INVALID_ROOM_STATE", "等待阶段必须至少保留一个空席位。", {
       seatCount: room.seats.length,
     });
   }
   if (
     [ROOM_PHASES.DEPLOYING, ROOM_PHASES.ROLLING, ROOM_PHASES.PLAYING,
       ROOM_PHASES.FINAL_SALVO, ROOM_PHASES.FINISHED].includes(room.roomPhase) &&
-    room.seats.length !== 2
+    room.seats.length !== room.maxPlayers
   ) {
-    fail("INVALID_ROOM_STATE", "当前房间阶段必须具有两个玩家席位。", {
+    fail("INVALID_ROOM_STATE", "当前房间阶段必须坐满配置的玩家席位。", {
       roomPhase: room.roomPhase,
       seatCount: room.seats.length,
     });

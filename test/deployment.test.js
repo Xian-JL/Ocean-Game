@@ -11,7 +11,6 @@ const { DEPLOYABLE_TYPES: TYPES } = require("../server/game/units");
 
 function createValidDeployment() {
   return [
-    { id: "radar", type: TYPES.RADAR, cells: ["J7", "J8", "J9", "K7", "K8", "K9", "L7", "L8", "L9"] },
     { id: "destroyer-i", type: TYPES.DESTROYER_I, cells: ["A1", "A2", "A3"] },
     {
       id: "destroyer-ii",
@@ -25,6 +24,7 @@ function createValidDeployment() {
     },
     { id: "pirate", type: TYPES.PIRATE_SHIP, cells: ["F1", "F2", "F3"] },
     { id: "motorboat", type: TYPES.MOTORBOAT, cells: ["J10"] },
+    { id: "motorboat-2", type: TYPES.MOTORBOAT, cells: ["L12"] },
     {
       id: "nuclear",
       type: TYPES.NUCLEAR_SUBMARINE,
@@ -127,6 +127,6 @@ test("非法完整部署断言提供所有结构化错误", () => {
     (error) =>
       error.code === "INVALID_DEPLOYMENT" &&
       Array.isArray(error.details.errors) &&
-      error.details.errors.length === 9,
+      error.details.errors.length === 8,
   );
 });

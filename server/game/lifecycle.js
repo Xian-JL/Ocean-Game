@@ -7,6 +7,7 @@ const {
 const { END_REASONS, finishByForfeit } = require("./endgame");
 const { RuleValidationError } = require("./errors");
 const { TURN_PHASES, assertMatchRoomState } = require("./match");
+const { getNextActivePlayerId } = require("./battle-state");
 const {
   CONNECTION_PHASES,
   ROOM_PHASES,
@@ -73,6 +74,23 @@ function surrenderMatch(room, playerId, nowMs = Date.now()) {
     ...seat,
     reconnectDeadlineAt: null,
   }));
+
+  if (!forfeited.ended) {
+    const nextPlayerId = room.currentPlayerId === playerId
+      ? getNextActivePlayerId(forfeited.state, playerId)
+      : room.currentPlayerId;
+    return assertMatchRoomState({
+      ...room,
+      stateVersion: room.stateVersion + 1,
+      battleState: forfeited.state,
+      currentPlayerId: nextPlayerId,
+      turnPhase: TURN_PHASES.ACTIVE,
+      pendingAction: null,
+      actionDeadlineAt: createDeadline(normalizedNow, require("./timing").ACTION_DURATION_MS),
+      turnEvents: [...room.turnEvents, event],
+      nextTurnEventSequence: room.nextTurnEventSequence + 1,
+    });
+  }
 
   return assertMatchRoomState({
     ...room,
@@ -149,12 +167,12 @@ function startRematch(room, nowMs = Date.now()) {
   assertRoomConnected(room);
   const normalizedNow = normalizeServerTime(nowMs);
   if (
-    room.seats.length !== 2 ||
+    room.seats.length !== room.maxPlayers ||
     room.seats.some(
       (seat) => !room.rematchRequestedByPlayer[seat.playerId],
     )
   ) {
-    fail("REMATCH_CONFIRMATION_REQUIRED", "双方都确认后才能开始再来一局。");
+    fail("REMATCH_CONFIRMATION_REQUIRED", "所有玩家都确认后才能开始再来一局。");
   }
 
   const seats = room.seats.map((seat) => ({

@@ -55,11 +55,11 @@ test("初始状态有九种合法行动，直升机扫射尚未解锁", () => {
 
   assert.equal(
     getActionAvailability(state, ACTION_TYPES.DESTROYER_I_RAM).targetCount,
-    20,
+    28,
   );
   assert.equal(
     getActionAvailability(state, ACTION_TYPES.DESTROYER_II_RAM).targetCount,
-    35,
+    40,
   );
   assert.equal(
     getActionAvailability(state, ACTION_TYPES.PIRATE_ATTACK).targetCount,
@@ -86,7 +86,7 @@ test("十种行动都接受各自唯一的目标形式", () => {
     [ACTION_TYPES.NUCLEAR_BOMB, "nuclear", { kind: "cell", coordinate: "J8" }],
     [ACTION_TYPES.SHOCK_BOMB, "nuclear", { kind: "cell", coordinate: "C3" }],
     [ACTION_TYPES.DETECTION_BOMB, "nuclear", { kind: "cell", coordinate: "I9" }],
-    [ACTION_TYPES.RADAR_SCAN, "radar", { kind: "cell", coordinate: "I9" }],
+    [ACTION_TYPES.RADAR_SCAN, "carrier", { kind: "cell", coordinate: "I9" }],
   ];
 
   cases.forEach(([actionType, sourceId, target], index) => {
@@ -161,7 +161,7 @@ test("驱逐舰目标必须在自身范围内，单格攻击允许重复选择�
       "out-of-range",
       ACTION_TYPES.DESTROYER_I_RAM,
       "destroyer-i",
-      { kind: "cell", coordinate: "D6" },
+      { kind: "cell", coordinate: "E8" },
     ),
   );
   assert.ok(errorCodes(outOfRange).includes("TARGET_OUT_OF_RANGE"));
@@ -310,7 +310,7 @@ test("潜射标记不属于已结算格，同一格仍可再次攻击", () => {
 test("有限行动每次合法使用都消耗一次，耗尽后拒绝", () => {
   const initial = createState();
   let state = initial;
-  for (let index = 1; index <= 3; index += 1) {
+  for (let index = 1; index <= 4; index += 1) {
     state = commitActionUsage(
       state,
       createIntent(
@@ -322,14 +322,14 @@ test("有限行动每次合法使用都消耗一次，耗尽后拒绝", () => {
     ).state;
   }
 
-  assert.equal(getRemainingUses(initial, ACTION_TYPES.SUBMARINE_MISSILE), 3);
+  assert.equal(getRemainingUses(initial, ACTION_TYPES.SUBMARINE_MISSILE), 4);
   assert.equal(getRemainingUses(state, ACTION_TYPES.SUBMARINE_MISSILE), 0);
   assert.deepEqual(state.submarineMissileMarkers, ["A1"]);
 
   const exhausted = validateActionIntent(
     state,
     createIntent(
-      "missile-4",
+      "missile-5",
       ACTION_TYPES.SUBMARINE_MISSILE,
       "submarine",
       { kind: "cell", coordinate: "A2" },
@@ -425,19 +425,22 @@ test("重复行动编号不会再次消耗资源", () => {
   assert.equal(getRemainingUses(first.state, ACTION_TYPES.NUCLEAR_BOMB), 1);
 });
 
-test("水下来源瘫痪时仍可使用尚未消耗的雷达扫描", () => {
+test("水下来源瘫痪时航空母舰仍可使用尚未消耗的雷达扫描", () => {
   let state = sinkUnits(createState(), [
     "destroyer-i",
     "destroyer-ii",
     "pirate",
     "motorboat",
     "nuclear",
-    "carrier",
   ]);
   state = setUnitStatus(state, "submarine", { paralyzed: true });
 
   assert.equal(hasAnyLegalAction(state), true);
   assert.equal(hasAttackCapability(state), true);
+  assert.equal(
+    getActionAvailability(state, ACTION_TYPES.RADAR_SCAN).available,
+    true,
+  );
 });
 
 test("辅助行动不计入攻击手段，重复攻击规则使已结算坐标仍可选择", () => {

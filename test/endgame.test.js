@@ -65,6 +65,7 @@ function prepareOnlyLastNuclearAttack(battle) {
     "submarine",
     "pirate",
     "motorboat",
+    "motorboat-2",
   ]);
   next = setRemainingUses(next, "player-1", {
     submarine_missile: 0,
@@ -78,6 +79,7 @@ function prepareOnlyLastNuclearAttack(battle) {
     "submarine",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "nuclear",
   ]);
   next = setRemainingUses(next, "player-2", {
@@ -114,7 +116,7 @@ test("普通攻击摧毁敌方航空母舰后立即判攻击方获胜", () => {
 
 test("海盗船行动使双方航空母舰同时沉没时海盗船一方获胜", () => {
   let battle = createTestBattle();
-  battle = damageBattleUnit(battle, "player-1", "carrier", 5);
+  battle = damageBattleUnit(battle, "player-1", "carrier", 5.5);
   battle = damageBattleUnit(battle, "player-2", "carrier", 4);
   const resolved = resolveBattleAction(
     battle,
@@ -138,7 +140,7 @@ test("海盗船行动使双方航空母舰同时沉没时海盗船一方获胜",
 
 test("海盗船行动只使己方航空母舰沉没时海盗船一方失败", () => {
   let battle = createTestBattle();
-  battle = damageBattleUnit(battle, "player-1", "carrier", 5);
+  battle = damageBattleUnit(battle, "player-1", "carrier", 5.5);
   const resolved = resolveBattleAction(
     battle,
     "player-1",
@@ -159,7 +161,7 @@ test("海盗船行动只使己方航空母舰沉没时海盗船一方失败", ()
   );
 });
 
-test("海盗船命中其他单位造成的额外 0.5 伤害也能摧毁敌方航空母舰并获胜", () => {
+test("海盗船命中其他单位不再额外伤害敌方航空母舰", () => {
   let battle = createTestBattle();
   battle = damageBattleUnit(battle, "player-2", "carrier", 5.5);
   const resolved = resolveBattleAction(
@@ -173,12 +175,9 @@ test("海盗船命中其他单位造成的额外 0.5 伤害也能摧毁敌方航
     ),
   );
 
-  assert.equal(unit(resolved.state, "player-2", "carrier").hp, 0);
-  assert.equal(resolved.state.match.result.winnerId, "player-1");
-  assert.equal(
-    resolved.state.match.result.reason,
-    END_REASONS.PIRATE_ENEMY_CARRIER_SUNK,
-  );
+  assert.equal(unit(resolved.state, "player-2", "carrier").hp, 0.5);
+  assert.equal(resolved.state.match.status, "playing");
+  assert.equal(resolved.state.match.result, null);
 });
 
 test("没有航空母舰沉没且双方仍有攻击手段时对局继续", () => {

@@ -66,7 +66,7 @@ test("震爆弹、探测弹和雷达扫描属于辅助行动", () => {
 
 test("有限资源初始数量与规则一致，无限行动不创建计数", () => {
   assert.deepEqual(createInitialRemainingUses(), {
-    submarine_missile: 3,
+    submarine_missile: 4,
     nuclear_bomb: 2,
     shock_bomb: 1,
     detection_bomb: 1,

@@ -10,7 +10,10 @@ const {
   getBattleDecoyAtCell,
   getBattlePlayerState,
   getBattleUnitAtCell,
+  getNextActivePlayerId,
   getOpponentPlayerId,
+  replaceBattlePlayerState,
+  destroyDecoy,
 } = require("./battle-state");
 const { RuleValidationError } = require("./errors");
 const { DEPLOYABLE_TYPES } = require("./units");
@@ -67,6 +70,7 @@ function finishBattle(battleState, result, finalSalvo = null) {
   return {
     ...battleState,
     match: {
+      ...battleState.match,
       status: MATCH_STATUS.FINISHED,
       result,
       finalSalvo,
@@ -110,6 +114,41 @@ function settleCarrierOutcome(battleState, actionRecord) {
     actionType: actionRecord.action.actionType,
   };
   let result = null;
+
+  if (battleState.playerIds.length === 3) {
+    const priorEliminated = battleState.match.eliminatedPlayerIds ?? [];
+    const eliminated = new Set(priorEliminated);
+    if (defenderCarrierSunk) eliminated.add(actionRecord.defenderId);
+    if (actorCarrierSunk) eliminated.add(actionRecord.actorId);
+    if (eliminated.size === priorEliminated.length) {
+      return { state: battleState, ended: false, result: null };
+    }
+    const activeIds = battleState.playerIds.filter((id) => !eliminated.has(id));
+    const state = {
+      ...battleState,
+      match: { ...battleState.match, eliminatedPlayerIds: [...eliminated] },
+    };
+    if (activeIds.length === 1) {
+      result = {
+        ...createWinResult(activeIds[0], [...eliminated][0] ?? null,
+          END_REASONS.AIRCRAFT_CARRIER_SUNK, trigger),
+        loserIds: [...eliminated],
+      };
+      return { state: finishBattle(state, result), ended: true, result };
+    }
+    if (activeIds.length === 0) {
+      result = {
+        outcome: MATCH_OUTCOMES.DRAW,
+        winnerId: null,
+        loserId: null,
+        loserIds: [...eliminated],
+        reason: END_REASONS.AIRCRAFT_CARRIER_SUNK,
+        trigger,
+      };
+      return { state: finishBattle(state, result), ended: true, result };
+    }
+    return { state, ended: false, result: null };
+  }
 
   if (actionRecord.action.actionType === ACTION_TYPES.PIRATE_ATTACK) {
     if (defenderCarrierSunk) {
@@ -155,6 +194,7 @@ function bothPlayersLackAttackCapability(battleState) {
   assertBattleState(battleState);
   return battleState.playerIds.every(
     (playerId) =>
+      (battleState.match.eliminatedPlayerIds ?? []).includes(playerId) ||
       !hasAttackCapability(getBattlePlayerState(battleState, playerId)),
   );
 }
@@ -193,10 +233,7 @@ function createFinalSalvoPlan(battleState) {
 
   for (const sourcePlayerId of battleState.playerIds) {
     const sourceState = getBattlePlayerState(battleState, sourcePlayerId);
-    const targetPlayerId = getOpponentPlayerId(
-      battleState,
-      sourcePlayerId,
-    );
+    const targetPlayerId = getNextActivePlayerId(battleState, sourcePlayerId);
     const targetState = getBattlePlayerState(battleState, targetPlayerId);
 
     for (const decoy of sourceState.decoys.filter(
@@ -243,10 +280,9 @@ function applyFinalSalvoPlan(battleState, plan) {
 
   for (const targetPlayerId of battleState.playerIds) {
     let targetState = players[targetPlayerId];
-    const sourcePlayerId = getOpponentPlayerId(
-      battleState,
-      targetPlayerId,
-    );
+    const sourcePlayerId = battleState.playerIds.find(
+      (id) => getNextActivePlayerId(battleState, id) === targetPlayerId,
+    ) ?? null;
 
     for (const [unitId, hitCells] of plan.freshHitsByTargetPlayer[
       targetPlayerId
@@ -311,12 +347,12 @@ function resolveFinalSalvo(battleState) {
       getCarrierHp(getBattlePlayerState(applied.state, playerId)),
     ]),
   );
-  const [firstPlayerId, secondPlayerId] = applied.state.playerIds;
-  const firstHp = carrierHpByPlayer[firstPlayerId];
-  const secondHp = carrierHpByPlayer[secondPlayerId];
+  const ranking = applied.state.playerIds
+    .map((id) => ({ id, hp: carrierHpByPlayer[id] }))
+    .sort((a, b) => b.hp - a.hp);
   let result;
 
-  if (firstHp === secondHp) {
+  if (ranking.length > 1 && ranking[0].hp === ranking[1].hp) {
     result = {
       outcome: MATCH_OUTCOMES.DRAW,
       winnerId: null,
@@ -325,8 +361,8 @@ function resolveFinalSalvo(battleState) {
       trigger: { kind: "final_salvo" },
     };
   } else {
-    const winnerId = firstHp > secondHp ? firstPlayerId : secondPlayerId;
-    const loserId = getOpponentPlayerId(applied.state, winnerId);
+    const winnerId = ranking[0].id;
+    const loserId = ranking.at(-1).id;
     result = createWinResult(
       winnerId,
       loserId,
@@ -350,6 +386,238 @@ function resolveFinalSalvo(battleState) {
   };
 }
 
+function createManualFinalSalvoState(battleState) {
+  const selectionsByPlayer = {};
+  const usedDecoyIdsByPlayer = {};
+  for (const playerId of battleState.playerIds) {
+    const playerState = getBattlePlayerState(battleState, playerId);
+    const available = !(battleState.match.eliminatedPlayerIds ?? []).includes(playerId) &&
+      playerState.decoys.some((decoy) => !decoy.destroyed);
+    selectionsByPlayer[playerId] = available ? null : "pass";
+    usedDecoyIdsByPlayer[playerId] = [];
+  }
+  return {
+    status: "selecting",
+    round: 1,
+    selectionsByPlayer,
+    usedDecoyIdsByPlayer,
+    shots: [],
+    damageEvents: [],
+    carrierHpByPlayer: null,
+  };
+}
+
+function startManualFinalSalvo(battleState) {
+  ensureBattlePlaying(battleState);
+  if (!bothPlayersLackAttackCapability(battleState)) {
+    throw new RuleValidationError(
+      "FINAL_SALVO_NOT_ALLOWED",
+      "只有双方均无攻击手段时才能进入手动鱼雷引爆阶段。",
+    );
+  }
+  return {
+    ...battleState,
+    match: {
+      ...battleState.match,
+      finalSalvo: createManualFinalSalvoState(battleState),
+    },
+  };
+}
+
+function applyPirateLink(playerState, damageEvents, playerId) {
+  const pirateDamaged = damageEvents.some(
+    (event) =>
+      event.targetPlayerId === playerId &&
+      event.unitType === DEPLOYABLE_TYPES.PIRATE_SHIP &&
+      event.appliedDamage > 0,
+  );
+  if (!pirateDamaged) return { state: playerState, event: null };
+  const carrier = getUnitByType(playerState, DEPLOYABLE_TYPES.AIRCRAFT_CARRIER);
+  if (!carrier || carrier.hp <= 0) return { state: playerState, event: null };
+  const linked = applyDamageToUnit(playerState, carrier.id, 0.5, {
+    reason: "pirate_damage_carrier_link",
+  });
+  return {
+    state: linked.state,
+    event: {
+      sourcePlayerId: getOpponentPlayerIdForPair(playerId, damageEvents),
+      targetPlayerId: playerId,
+      ...linked.event,
+    },
+  };
+}
+
+function getOpponentPlayerIdForPair(playerId, damageEvents) {
+  return damageEvents.find((event) => event.targetPlayerId === playerId)
+    ?.sourcePlayerId ?? null;
+}
+
+function resolveManualFinalSalvoRound(battleState, finalSalvo) {
+  let nextState = battleState;
+  const shots = [];
+  const roundDamageEvents = [];
+
+  for (const sourcePlayerId of battleState.playerIds) {
+    const selected = finalSalvo.selectionsByPlayer[sourcePlayerId];
+    if (selected === "pass") continue;
+    const sourceState = getBattlePlayerState(nextState, sourcePlayerId);
+    const decoy = sourceState.decoys.find((item) => item.id === selected);
+    const consumed = destroyDecoy(sourceState, decoy.id, "manual_final_salvo");
+    nextState = replaceBattlePlayerState(nextState, sourcePlayerId, consumed.state);
+  }
+
+  const damagePlans = [];
+  for (const sourcePlayerId of battleState.playerIds) {
+    const selected = finalSalvo.selectionsByPlayer[sourcePlayerId];
+    if (selected === "pass") continue;
+    const sourceState = getBattlePlayerState(battleState, sourcePlayerId);
+    const decoy = sourceState.decoys.find((item) => item.id === selected);
+    const targetPlayerId = getNextActivePlayerId(battleState, sourcePlayerId);
+    const targetState = getBattlePlayerState(battleState, targetPlayerId);
+    const inspection = inspectFinalSalvoTarget(targetState, decoy.cell);
+    const liveUnit = inspection.kind === "unit" ? inspection.unit : null;
+    const freshUnitCell = Boolean(liveUnit && !liveUnit.hitCells.includes(decoy.cell));
+    shots.push({
+      round: finalSalvo.round,
+      sourcePlayerId,
+      sourceDecoyId: decoy.id,
+      sourceCoordinate: decoy.cell,
+      targetPlayerId,
+      targetCoordinate: decoy.cell,
+      result: liveUnit ? "hit" : "miss",
+      actualTargetKind: inspection.kind,
+      targetUnitId: liveUnit?.id ?? null,
+      targetUnitType: liveUnit?.type ?? null,
+      freshUnitCell,
+    });
+    if (freshUnitCell) {
+      damagePlans.push({ sourcePlayerId, targetPlayerId, unit: liveUnit, cell: decoy.cell });
+    }
+  }
+
+  for (const plan of damagePlans) {
+    const targetState = getBattlePlayerState(nextState, plan.targetPlayerId);
+    const applied = applyDamageToUnit(targetState, plan.unit.id, 1, {
+      hitCells: [plan.cell],
+      reason: "manual_final_salvo",
+    });
+    nextState = replaceBattlePlayerState(nextState, plan.targetPlayerId, applied.state);
+    roundDamageEvents.push({
+      sourcePlayerId: plan.sourcePlayerId,
+      targetPlayerId: plan.targetPlayerId,
+      ...applied.event,
+    });
+  }
+
+  for (const playerId of battleState.playerIds) {
+    const linked = applyPirateLink(
+      getBattlePlayerState(nextState, playerId),
+      roundDamageEvents,
+      playerId,
+    );
+    nextState = replaceBattlePlayerState(nextState, playerId, linked.state);
+    if (linked.event) roundDamageEvents.push(linked.event);
+  }
+
+  return { state: nextState, shots, damageEvents: roundDamageEvents };
+}
+
+function finishManualFinalSalvo(battleState, finalSalvo) {
+  const carrierHpByPlayer = Object.fromEntries(
+    battleState.playerIds.map((playerId) => [
+      playerId,
+      getCarrierHp(getBattlePlayerState(battleState, playerId)),
+    ]),
+  );
+  const ranking = battleState.playerIds
+    .filter((id) => !(battleState.match.eliminatedPlayerIds ?? []).includes(id))
+    .map((id) => ({ id, hp: carrierHpByPlayer[id] }))
+    .sort((a, b) => b.hp - a.hp);
+  const tied = ranking.length > 1 && ranking[0].hp === ranking[1].hp;
+  const result = tied
+    ? {
+        outcome: MATCH_OUTCOMES.DRAW,
+        winnerId: null,
+        loserId: null,
+        reason: END_REASONS.FINAL_SALVO_TIE,
+        trigger: { kind: "manual_final_salvo" },
+      }
+    : createWinResult(
+        ranking[0].id,
+        ranking.at(-1).id,
+        END_REASONS.FINAL_SALVO_HIGHER_CARRIER_HP,
+        { kind: "manual_final_salvo" },
+      );
+  const completed = {
+    ...finalSalvo,
+    status: "completed",
+    selectionsByPlayer: Object.fromEntries(
+      battleState.playerIds.map((playerId) => [playerId, null]),
+    ),
+    carrierHpByPlayer,
+  };
+  return finishBattle(battleState, result, completed);
+}
+
+function submitManualFinalSalvo(battleState, playerId, decoyId) {
+  ensureBattlePlaying(battleState);
+  const draft = battleState.match.finalSalvo;
+  if (!draft || draft.status !== "selecting") {
+    throw new RuleValidationError("FINAL_SALVO_NOT_ACTIVE", "当前不在手动鱼雷引爆阶段。");
+  }
+  getBattlePlayerState(battleState, playerId);
+  if (draft.selectionsByPlayer[playerId] !== null) {
+    throw new RuleValidationError("FINAL_SALVO_ALREADY_SUBMITTED", "本轮已经提交鱼雷选择。");
+  }
+  const playerState = getBattlePlayerState(battleState, playerId);
+  const decoy = playerState.decoys.find((item) => item.id === decoyId);
+  if (!decoy || decoy.destroyed || draft.usedDecoyIdsByPlayer[playerId].includes(decoyId)) {
+    throw new RuleValidationError("INVALID_FINAL_SALVO_DECOY", "只能选择尚未触发的己方诱饵鱼雷。", { decoyId });
+  }
+  let finalSalvo = {
+    ...draft,
+    selectionsByPlayer: { ...draft.selectionsByPlayer, [playerId]: decoyId },
+  };
+  let state = { ...battleState, match: { ...battleState.match, finalSalvo } };
+  if (state.playerIds.some((id) => finalSalvo.selectionsByPlayer[id] === null)) {
+    return state;
+  }
+
+  const round = resolveManualFinalSalvoRound(state, finalSalvo);
+  state = round.state;
+  const usedDecoyIdsByPlayer = Object.fromEntries(
+    state.playerIds.map((id) => [
+      id,
+      finalSalvo.selectionsByPlayer[id] === "pass"
+        ? [...finalSalvo.usedDecoyIdsByPlayer[id]]
+        : [...finalSalvo.usedDecoyIdsByPlayer[id], finalSalvo.selectionsByPlayer[id]],
+    ]),
+  );
+  finalSalvo = {
+    ...finalSalvo,
+    shots: [...finalSalvo.shots, ...round.shots],
+    damageEvents: [...finalSalvo.damageEvents, ...round.damageEvents],
+    usedDecoyIdsByPlayer,
+  };
+  const availableByPlayer = Object.fromEntries(
+    state.playerIds.map((id) => [
+      id,
+      getBattlePlayerState(state, id).decoys.some((item) => !item.destroyed),
+    ]),
+  );
+  if (!Object.values(availableByPlayer).some(Boolean)) {
+    return finishManualFinalSalvo(state, finalSalvo);
+  }
+  finalSalvo = {
+    ...finalSalvo,
+    round: finalSalvo.round + 1,
+    selectionsByPlayer: Object.fromEntries(
+      state.playerIds.map((id) => [id, availableByPlayer[id] ? null : "pass"]),
+    ),
+  };
+  return { ...state, match: { ...state.match, finalSalvo } };
+}
+
 function settleAfterAction(battleState, actionRecord) {
   ensureBattlePlaying(battleState);
   const carrierOutcome = settleCarrierOutcome(battleState, actionRecord);
@@ -360,12 +628,18 @@ function settleAfterAction(battleState, actionRecord) {
     };
   }
 
-  if (bothPlayersLackAttackCapability(battleState)) {
-    return resolveFinalSalvo(battleState);
+  const settledState = carrierOutcome.state;
+  if (bothPlayersLackAttackCapability(settledState)) {
+    return {
+      state: startManualFinalSalvo(settledState),
+      ended: false,
+      result: null,
+      finalSalvo: null,
+    };
   }
 
   return {
-    state: battleState,
+    state: settledState,
     ended: false,
     result: null,
     finalSalvo: null,
@@ -383,6 +657,25 @@ function finishByForfeit(battleState, loserId, reason) {
     );
   }
 
+  if (battleState.playerIds.length === 3) {
+    const eliminated = [...new Set([
+      ...(battleState.match.eliminatedPlayerIds ?? []),
+      loserId,
+    ])];
+    const activeIds = battleState.playerIds.filter((id) => !eliminated.includes(id));
+    const ongoing = {
+      ...battleState,
+      match: { ...battleState.match, eliminatedPlayerIds: eliminated },
+    };
+    if (activeIds.length > 1) {
+      return { state: ongoing, result: null, ended: false };
+    }
+    const result = {
+      ...createWinResult(activeIds[0], loserId, reason, { kind: "forfeit" }),
+      loserIds: eliminated,
+    };
+    return { state: finishBattle(ongoing, result), result, ended: true };
+  }
   const winnerId = getOpponentPlayerId(battleState, loserId);
   const result = createWinResult(winnerId, loserId, reason, {
     kind: "forfeit",
@@ -390,6 +683,7 @@ function finishByForfeit(battleState, loserId, reason) {
   return {
     state: finishBattle(battleState, result),
     result,
+    ended: true,
   };
 }
 
@@ -416,6 +710,8 @@ module.exports = {
   ensureBattlePlaying,
   finishByForfeit,
   resolveFinalSalvo,
+  startManualFinalSalvo,
+  submitManualFinalSalvo,
   settleAfterAction,
   settleCarrierOutcome,
 };

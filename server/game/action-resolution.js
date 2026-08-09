@@ -15,6 +15,7 @@ const {
   getBattlePlayerState,
   getBattleUnitAtCell,
   getOpponentPlayerId,
+  getOpponentPlayerIds,
   queueParalysis,
   recordTargetCellResults,
 } = require("./battle-state");
@@ -30,7 +31,6 @@ const VISIBLE_SINGLE_CELL_ACTIONS = new Set([
   ACTION_TYPES.DESTROYER_II_RAM,
   ACTION_TYPES.PIRATE_ATTACK,
   ACTION_TYPES.MOTORBOAT_RAM,
-  ACTION_TYPES.NUCLEAR_BOMB,
 ]);
 
 function inspectCell(playerState, coordinate) {
@@ -92,6 +92,8 @@ function resolveSingleCellAction(
     liveUnit && !liveUnit.hitCells.includes(coordinate),
   );
   let actualResult = "miss";
+  let actorPirateCarrierCoupled = false;
+  let defenderPirateCarrierCoupled = false;
 
   function damageActor(unitId, damage, options = {}) {
     const applied = applyDamageToUnit(actorState, unitId, damage, options);
@@ -101,6 +103,17 @@ function resolveSingleCellAction(
       side: "actor",
       ...applied.event,
     });
+    if (
+      applied.event.unitType === DEPLOYABLE_TYPES.PIRATE_SHIP &&
+      applied.event.appliedDamage > 0 &&
+      !actorPirateCarrierCoupled
+    ) {
+      actorPirateCarrierCoupled = true;
+      const carrier = getUnitByType(actorState, DEPLOYABLE_TYPES.AIRCRAFT_CARRIER);
+      if (carrier?.hp > 0) {
+        damageActor(carrier.id, 0.5, { reason: "pirate_damage_carrier_link" });
+      }
+    }
   }
 
   function damageDefender(unitId, damage, options = {}) {
@@ -116,6 +129,17 @@ function resolveSingleCellAction(
       side: "defender",
       ...applied.event,
     });
+    if (
+      applied.event.unitType === DEPLOYABLE_TYPES.PIRATE_SHIP &&
+      applied.event.appliedDamage > 0 &&
+      !defenderPirateCarrierCoupled
+    ) {
+      defenderPirateCarrierCoupled = true;
+      const carrier = getUnitByType(defenderState, DEPLOYABLE_TYPES.AIRCRAFT_CARRIER);
+      if (carrier?.hp > 0) {
+        damageDefender(carrier.id, 0.5, { reason: "pirate_damage_carrier_link" });
+      }
+    }
   }
 
   function destroyTargetDecoy(reason) {
@@ -128,26 +152,6 @@ function resolveSingleCellAction(
     });
   }
 
-  function damageEnemyCarrier(damage, reason) {
-    const carrier = getUnitByType(
-      defenderState,
-      DEPLOYABLE_TYPES.AIRCRAFT_CARRIER,
-    );
-    if (carrier && carrier.hp > 0) {
-      damageDefender(carrier.id, damage, { reason });
-    }
-  }
-
-  function damageOwnCarrier(damage, reason) {
-    const carrier = getUnitByType(
-      actorState,
-      DEPLOYABLE_TYPES.AIRCRAFT_CARRIER,
-    );
-    if (carrier && carrier.hp > 0) {
-      damageActor(carrier.id, damage, { reason });
-    }
-  }
-
   switch (action.actionType) {
     case ACTION_TYPES.DESTROYER_I_RAM:
     case ACTION_TYPES.DESTROYER_II_RAM:
@@ -158,7 +162,7 @@ function resolveSingleCellAction(
             hitCells: [coordinate],
             reason: action.actionType,
           });
-          damageActor(action.sourceId, 1, {
+          damageActor(action.sourceId, 0.5, {
             reason: `${action.actionType}_self_damage`,
           });
         }
@@ -175,32 +179,19 @@ function resolveSingleCellAction(
       if (liveUnit) {
         actualResult = "hit";
         if (freshUnitCell) {
-          if (liveUnit.type === DEPLOYABLE_TYPES.AIRCRAFT_CARRIER) {
-            damageDefender(liveUnit.id, 2, {
-              hitCells: [coordinate],
-              reason: ACTION_TYPES.PIRATE_ATTACK,
-            });
-            damageActor(action.sourceId, 1, {
-              reason: "pirate_self_damage",
-            });
-            damageOwnCarrier(1, "pirate_own_carrier_damage");
-          } else {
-            damageDefender(liveUnit.id, 2, {
-              hitCells: [coordinate],
-              reason: ACTION_TYPES.PIRATE_ATTACK,
-            });
-            damageEnemyCarrier(0.5, "pirate_enemy_carrier_extra_damage");
-            damageActor(action.sourceId, 1, {
-              reason: "pirate_self_damage",
-            });
-          }
+          damageDefender(liveUnit.id, 2, {
+            hitCells: [coordinate],
+            reason: ACTION_TYPES.PIRATE_ATTACK,
+          });
+          damageActor(action.sourceId, 1, {
+            reason: "pirate_successful_hit_self_damage",
+          });
         }
       } else if (activeDecoy) {
         actualResult = "hit";
         destroyTargetDecoy(ACTION_TYPES.PIRATE_ATTACK);
-        damageEnemyCarrier(0.5, "pirate_enemy_carrier_extra_damage");
-        damageActor(action.sourceId, 2, {
-          reason: "pirate_decoy_and_self_damage",
+        damageActor(action.sourceId, 1, {
+          reason: "pirate_decoy_explosion",
         });
       }
       break;
@@ -338,8 +329,7 @@ function resolveRadarScan(action, defenderState) {
   const areaSet = new Set(action.targetCells);
   const detected = defenderState.units.some((unit) =>
     unit.cells.some((cell) => areaSet.has(cell))) ||
-    defenderState.decoys.some((decoy) => !decoy.destroyed && areaSet.has(decoy.cell)) ||
-    defenderState.radar.cells.some((cell) => areaSet.has(cell));
+    defenderState.decoys.some((decoy) => !decoy.destroyed && areaSet.has(decoy.cell));
   return {
     outcome: {
       kind: "radar",
@@ -396,6 +386,7 @@ function resolveHelicopterStrafe(
   }
 
   const damageEvents = [];
+  let pirateCarrierCoupled = false;
   for (const [unitId, hitCells] of freshCellsByUnit.entries()) {
     const unit = initialDefenderState.units.find(
       (candidate) => candidate.id === unitId,
@@ -420,6 +411,25 @@ function resolveHelicopterStrafe(
       coveredFreshCellCount: hitCells.length,
       ...applied.event,
     });
+    if (
+      unit.type === DEPLOYABLE_TYPES.PIRATE_SHIP &&
+      applied.event.appliedDamage > 0 &&
+      !pirateCarrierCoupled
+    ) {
+      pirateCarrierCoupled = true;
+      const carrier = getUnitByType(defenderState, DEPLOYABLE_TYPES.AIRCRAFT_CARRIER);
+      if (carrier?.hp > 0) {
+        const linked = applyDamageToUnit(defenderState, carrier.id, 0.5, {
+          reason: "pirate_damage_carrier_link",
+        });
+        defenderState = linked.state;
+        damageEvents.push({
+          playerId: defenderId,
+          side: "defender",
+          ...linked.event,
+        });
+      }
+    }
   }
 
   return {
@@ -436,7 +446,17 @@ function resolveHelicopterStrafe(
 
 function resolveAction(battleState, actorId, intent) {
   assertBattleState(battleState);
-  const defenderId = getOpponentPlayerId(battleState, actorId);
+  const opponentIds = getOpponentPlayerIds(battleState, actorId);
+  const defenderId = opponentIds.length === 1
+    ? opponentIds[0]
+    : intent?.targetPlayerId;
+  if (!opponentIds.includes(defenderId)) {
+    throw new RuleValidationError(
+      "INVALID_TARGET_PLAYER",
+      "三人对战必须选择一名仍在对局中的敌方玩家。",
+      { actorId, defenderId, opponentIds },
+    );
+  }
   const initialActorState = getBattlePlayerState(battleState, actorId);
   const initialDefenderState = getBattlePlayerState(battleState, defenderId);
   const validation = validateActionIntent(initialActorState, intent);
@@ -444,7 +464,7 @@ function resolveAction(battleState, actorId, intent) {
   if (!validation.valid) {
     throw new RuleValidationError(
       "INVALID_ACTION",
-      "行动请求不符合《游戏规则 v1.0》。",
+      "行动请求不符合《游戏规则 v1.2》。",
       { errors: validation.errors },
     );
   }
@@ -456,7 +476,9 @@ function resolveAction(battleState, actorId, intent) {
 
   if (
     VISIBLE_SINGLE_CELL_ACTIONS.has(committed.action.actionType) ||
-    committed.action.actionType === ACTION_TYPES.SUBMARINE_MISSILE
+    [ACTION_TYPES.SUBMARINE_MISSILE, ACTION_TYPES.NUCLEAR_BOMB].includes(
+      committed.action.actionType,
+    )
   ) {
     const resolved = resolveSingleCellAction(
       committed.action,

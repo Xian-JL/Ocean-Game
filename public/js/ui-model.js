@@ -30,8 +30,8 @@
       "双方航空母舰同时沉没；按海盗船特殊规则，海盗船一方获胜",
     pirate_own_carrier_sunk: "海盗船攻击仅使发动方航空母舰沉没",
     final_salvo_higher_carrier_hp:
-      "终局鱼雷齐射后，航空母舰剩余生命值较高的一方获胜",
-    final_salvo_tie: "终局鱼雷齐射后双方航空母舰生命值相同",
+      "终局鱼雷全部手动引爆后，航空母舰剩余生命值较高的一方获胜",
+    final_salvo_tie: "终局鱼雷全部手动引爆后双方航空母舰生命值相同",
     surrender: "一方主动投降",
     three_consecutive_timeouts: "一方连续三次行动超时",
     disconnect_timeout: "一方未在 120 秒内重连",
@@ -111,6 +111,7 @@
       SOURCE_PARALYZED: "该单位本回合不能行动",
       RESOURCE_EXHAUSTED: "弹药或使用次数已经耗尽",
       ACTION_LOCKED: "己方两艘驱逐舰均沉没后解锁",
+      OPENING_RADAR_REQUIRED: "首个行动回合必须先扫描 4×4 海域",
       NO_LEGAL_TARGET: "攻击范围内没有合法目标",
     };
     return map[issue?.code] ?? issue?.message ?? "当前不可用";
@@ -118,9 +119,9 @@
 
   function deriveActionStatus(roomState, actionDefinition) {
     const ownBattle = roomState?.battle?.own;
-    const source = actionDefinition.sourceType === data.UNIT_TYPES.RADAR
-      ? ownBattle?.radar
-      : ownBattle?.units?.find((unit) => unit.type === actionDefinition.sourceType);
+    const source = ownBattle?.units?.find(
+      (unit) => unit.type === actionDefinition.sourceType,
+    );
     if (!source || (typeof source.hp === "number" && source.hp <= 0)) {
       return { code: "sunk", label: "已沉没", enabled: false };
     }
@@ -215,6 +216,9 @@
     let resultText = "";
     if (record.actionType === data.ACTION_TYPES.SUBMARINE_MISSILE) {
       return `${nickname} 使用潜射导弹攻击了 ${target}`;
+    }
+    if (record.actionType === data.ACTION_TYPES.NUCLEAR_BOMB) {
+      return `${nickname} 向 ${target} 投放了核弹`;
     }
     if (record.actionType === data.ACTION_TYPES.SHOCK_BOMB) {
       return `${nickname} 以 ${target} 为中心使用震爆弹`;

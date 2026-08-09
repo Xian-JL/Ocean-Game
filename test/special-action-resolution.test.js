@@ -181,14 +181,14 @@ test("有效诱饵产生水下信号，被摧毁后不再产生信号", () => {
   assert.equal(afterDestruction.result.outcome.detected, false);
   assert.deepEqual(
     player(afterDestruction.state, "player-1").resolvedTargetCells,
-    ["A10"],
+    [],
   );
 });
 
 test("雷达扫描完整 4×4 区域且只返回是否存在敌方布局", () => {
   const found = resolveAction(
     createTestBattle(), "player-1",
-    cellIntent("radar-found", ACTION_TYPES.RADAR_SCAN, "radar", "I7"),
+    cellIntent("radar-found", ACTION_TYPES.RADAR_SCAN, "carrier", "I7"),
   );
   assert.equal(found.result.outcome.kind, "radar");
   assert.equal(found.result.outcome.area.length, 16);
@@ -197,7 +197,7 @@ test("雷达扫描完整 4×4 区域且只返回是否存在敌方布局", () =>
 
   const empty = resolveAction(
     createTestBattle(), "player-1",
-    cellIntent("radar-empty", ACTION_TYPES.RADAR_SCAN, "radar", "A5"),
+    cellIntent("radar-empty", ACTION_TYPES.RADAR_SCAN, "carrier", "A5"),
   );
   assert.equal(empty.result.outcome.detected, false);
 });
@@ -216,7 +216,7 @@ test("直升机扫射同时处理整列，只命中水面单位", () => {
     ["B1", "C1", "D1", "E1"],
   );
   assert.equal(unit(resolved.state, "player-2", "pirate").hp, 1);
-  assert.equal(unit(resolved.state, "player-2", "nuclear").hp, 2);
+  assert.equal(unit(resolved.state, "player-2", "nuclear").hp, 3);
   assert.deepEqual(unit(resolved.state, "player-2", "nuclear").hitCells, []);
 
   const cellResults = resolved.result.outcome.cellResults;

@@ -99,6 +99,7 @@ function exhaustPlayerAttacks(battle, playerId) {
     "submarine",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "nuclear",
   ]);
   next = setRemainingUses(next, playerId, {
@@ -127,6 +128,7 @@ function prepareLastSubmarineMissile(battle) {
     "destroyer-ii",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "nuclear",
   ]);
   next = setRemainingUses(next, "player-1", {
@@ -247,7 +249,7 @@ test("终局鱼雷覆盖此前已经受击的存活单位格时显示命中但�
   assert.equal(resolved.result.outcome, "draw");
 });
 
-test("最后一种攻击手段使用完毕后由正式行动入口自动触发终局齐射", () => {
+test("最后一种攻击手段使用完毕后进入手动鱼雷选择阶段", () => {
   const battle = prepareLastSubmarineMissile(createTestBattle());
   const resolved = resolveBattleAction(battle, "player-1", {
     actionId: "last-submarine-missile",
@@ -256,15 +258,9 @@ test("最后一种攻击手段使用完毕后由正式行动入口自动触发�
     target: { kind: "cell", coordinate: "J1" },
   });
 
-  assert.equal(resolved.state.match.status, "finished");
+  assert.equal(resolved.state.match.status, "playing");
   assert.ok(resolved.state.match.finalSalvo);
-  assert.equal(
-    resolved.state.match.result.reason,
-    END_REASONS.FINAL_SALVO_TIE,
-  );
-  assert.equal(
-    resolved.deliveriesByPlayer["player-1"].view.replay.finalSalvo.shots
-      .length,
-    6,
-  );
+  assert.equal(resolved.state.match.finalSalvo.status, "selecting");
+  assert.equal(resolved.state.match.finalSalvo.round, 1);
+  assert.equal(resolved.deliveriesByPlayer["player-1"].view.replay, null);
 });

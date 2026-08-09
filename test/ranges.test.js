@@ -15,32 +15,32 @@ const {
 } = require("../server/game/ranges");
 const { DEPLOYABLE_TYPES: TYPES } = require("../server/game/units");
 
-test("驱逐舰Ⅰ以自身中间格为中心生成 7×7，靠边时裁切", () => {
+test("驱逐舰Ⅰ沿舰身生成 11×7，靠边时裁切", () => {
   const central = getDestroyerIRange(["E4", "E5", "E6"]);
-  assert.equal(central.length, 49);
-  assert.equal(central[0], "B2");
-  assert.equal(central.at(-1), "H8");
+  assert.equal(central.length, 70);
+  assert.equal(central[0], "B1");
+  assert.equal(central.at(-1), "H10");
 
   const clipped = getDestroyerIRange(["A1", "A2", "A3"]);
-  assert.equal(clipped.length, 20);
+  assert.equal(clipped.length, 28);
   assert.equal(clipped[0], "A1");
-  assert.equal(clipped.at(-1), "D5");
+  assert.equal(clipped.at(-1), "D7");
 });
 
-test("驱逐舰Ⅱ以中间两格的几何中心生成 8×8，靠边时裁切", () => {
+test("驱逐舰Ⅱ沿舰身生成 10×8，靠边时裁切", () => {
   const central = getDestroyerIIRange(["E4", "E5", "E6", "E7"]);
-  assert.equal(central.length, 64);
-  assert.equal(central[0], "B2");
-  assert.equal(central.at(-1), "I9");
+  assert.equal(central.length, 80);
+  assert.equal(central[0], "B1");
+  assert.equal(central.at(-1), "I10");
 
   const clipped = getDestroyerIIRange(["A1", "A2", "A3", "A4"]);
-  assert.equal(clipped.length, 30);
+  assert.equal(clipped.length, 35);
   assert.equal(clipped[0], "A1");
-  assert.equal(clipped.at(-1), "E6");
+  assert.equal(clipped.at(-1), "E7");
 
   const vertical = getDestroyerIIRange(["A1", "B1", "C1", "D1"]);
-  assert.equal(vertical.length, 30);
-  assert.equal(vertical.at(-1), "F5");
+  assert.equal(vertical.length, 35);
+  assert.equal(vertical.at(-1), "G5");
   assert.deepEqual(
     getDestroyerRange(TYPES.DESTROYER_II, ["A1", "B1", "C1", "D1"]),
     vertical,

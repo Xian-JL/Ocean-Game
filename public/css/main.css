@@ -1972,6 +1972,24 @@ kbd {
   font-size: 0.7rem;
 }
 
+.final-salvo-banner > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.final-salvo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.final-salvo-actions .button {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 0.78rem;
+}
+
 .resolution-strip {
   justify-content: space-between;
   border-color: rgba(99, 221, 245, 0.2);

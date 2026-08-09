@@ -239,6 +239,10 @@ async function preparePlayingRoom(harness) {
       state.stateVersion === playing.stateVersion,
     "双方没有同步进入 PLAYING",
   );
+  const serverRoom = harness.roomService.rooms.get(room.roomCode);
+  for (const playerId of serverRoom.battleState.playerIds) {
+    serverRoom.battleState.players[playerId].remainingUses.radar_scan = 0;
+  }
   return room;
 }
 
@@ -284,6 +288,7 @@ function prepareSecondPlayerForAutomaticSkip(battle) {
     "destroyer-ii",
     "pirate",
     "motorboat",
+    "motorboat-2",
   ]);
   next = setRemainingUses(next, "player-2", {
     [ACTION_TYPES.HELICOPTER_STRAFE]: 0,
@@ -302,6 +307,7 @@ function prepareLastSubmarineMissile(battle) {
     "destroyer-ii",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "nuclear",
   ]);
   next = setRemainingUses(next, "player-1", {
@@ -315,6 +321,7 @@ function prepareLastSubmarineMissile(battle) {
     "submarine",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "nuclear",
   ]);
   return setRemainingUses(next, "player-2", {
@@ -330,8 +337,8 @@ test("Socket 协议创建和加入房间，并分别发送会话与安全状态"
   const firstView = latestState(room.first.recorder);
   const secondView = latestState(room.second.recorder);
 
-  assert.equal(room.first.recorder.ready.at(-1).stage, "postlaunch-v0.4");
-  assert.equal(room.first.recorder.ready.at(-1).protocolVersion, "1.2");
+  assert.equal(room.first.recorder.ready.at(-1).stage, "postlaunch-v0.6");
+  assert.equal(room.first.recorder.ready.at(-1).protocolVersion, "1.4");
   const firstSession = room.first.recorder.sessions.at(-1);
   assert.equal(firstSession.active, true);
   assert.equal(firstSession.roomCode, room.roomCode);
@@ -608,6 +615,41 @@ test("终局条件出现后依次广播 FINAL_SALVO 和 FINISHED", async (contex
     },
   );
   assert.equal(response.ok, true);
+  await waitForValue(
+    () => room.first.recorder.states,
+    (state) => state.roomPhase === "FINAL_SALVO",
+    "终局条件出现后没有进入手动鱼雷阶段",
+  );
+  for (let number = 1; number <= 3; number += 1) {
+    const firstSelection = await emitWithAck(
+      room.first.socket,
+      CLIENT_EVENTS.SUBMIT_FINAL_SALVO,
+      {
+        expectedVersion: latestState(room.first.recorder).stateVersion,
+        decoyId: `decoy-${number}`,
+      },
+    );
+    assert.equal(firstSelection.ok, true);
+    await waitForValue(
+      () => room.second.recorder.states,
+      (state) => state.stateVersion === firstSelection.data.stateVersion,
+      "第二方没有同步第一方的秘密提交状态",
+    );
+    const secondSelection = await emitWithAck(
+      room.second.socket,
+      CLIENT_EVENTS.SUBMIT_FINAL_SALVO,
+      {
+        expectedVersion: latestState(room.second.recorder).stateVersion,
+        decoyId: `decoy-${number}`,
+      },
+    );
+    assert.equal(secondSelection.ok, true);
+    await waitForValue(
+      () => room.first.recorder.states,
+      (state) => state.stateVersion >= secondSelection.data.stateVersion,
+      "第一方没有同步本轮同时结算",
+    );
+  }
   const finished = await waitForValue(
     () => room.first.recorder.states,
     (state) => state.roomPhase === "FINISHED",
@@ -1322,7 +1364,12 @@ test("再来一局会清除上一局行动回执，同一行动编号可作为�
     CLIENT_EVENTS.SUBMIT_ACTION,
     {
       expectedVersion: latestState(room.first.recorder).stateVersion,
-      intent: pirateMiss("same-id-in-new-match"),
+      intent: {
+        actionId: "same-id-in-new-match",
+        actionType: ACTION_TYPES.RADAR_SCAN,
+        sourceId: "carrier",
+        target: { kind: "cell", coordinate: "A1" },
+      },
     },
   );
   assert.equal(reused.ok, true, JSON.stringify(reused));

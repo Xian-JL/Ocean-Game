@@ -30,10 +30,11 @@ test("合法部署生成双方权威战场、受击格和诱饵状态", () => {
     status: "playing",
     result: null,
     finalSalvo: null,
+    eliminatedPlayerIds: [],
   });
 
   const player = getBattlePlayerState(battle, "player-1");
-  assert.equal(player.units.length, 7);
+  assert.equal(player.units.length, 8);
   assert.equal(player.decoys.length, 3);
   assert.ok(player.units.every((unit) => unit.hitCells.length === 0));
   assert.ok(player.decoys.every((decoy) => decoy.destroyed === false));
@@ -167,6 +168,7 @@ test("没有合法行动时自动跳过并解除瘫痪，有合法行动时禁�
     "destroyer-ii",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "nuclear",
     "carrier",
   ]) {

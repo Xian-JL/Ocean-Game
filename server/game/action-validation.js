@@ -15,6 +15,8 @@ const {
   getUnitById,
   getUnitByType,
   hasProcessedActionId,
+  markDestroyerTarget,
+  markNuclearBombTarget,
   markSubmarineMissileTarget,
 } = require("./action-state");
 const {
@@ -47,15 +49,6 @@ function isNonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
 }
 
-function getResolvedSet(state) {
-  return new Set(state.resolvedTargetCells);
-}
-
-function getUnresolvedCells(state, cells) {
-  const resolved = getResolvedSet(state);
-  return cells.filter((cell) => !resolved.has(cell));
-}
-
 function isHelicopterUnlocked(state) {
   const destroyerI = getUnitByType(state, DEPLOYABLE_TYPES.DESTROYER_I);
   const destroyerII = getUnitByType(state, DEPLOYABLE_TYPES.DESTROYER_II);
@@ -69,15 +62,6 @@ function isHelicopterUnlocked(state) {
 
 function getSourceIssues(state, definition, sourceId, options = {}) {
   const issues = [];
-  if (definition.sourceType === DEPLOYABLE_TYPES.RADAR) {
-    if (sourceId !== state.radar.id) {
-      issues.push(createRuleIssue("SOURCE_NOT_FOUND", "找不到指定的雷达。", { sourceId }));
-    }
-    if (getRemainingUses(state, definition.type) <= 0) {
-      issues.push(createRuleIssue("RESOURCE_EXHAUSTED", "雷达扫描次数已经耗尽。", { actionType: definition.type }));
-    }
-    return issues;
-  }
   const source = getUnitById(state, sourceId);
 
   if (!source) {
@@ -166,7 +150,7 @@ function createCenterTargets(minRow, maxRow, minColumn, maxColumn) {
 function getActionTargetOptions(state, actionType) {
   assertActionState(state);
   const definition = getActionDefinition(actionType);
-  const resolved = getResolvedSet(state);
+  const destroyerTargets = new Set(state.destroyerTargetCells);
 
   switch (definition.rangeMode) {
     case RANGE_MODES.DESTROYER_I: {
@@ -175,6 +159,7 @@ function getActionTargetOptions(state, actionType) {
         return [];
       }
       return getDestroyerIRange(source.cells)
+        .filter((coordinate) => !destroyerTargets.has(coordinate))
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     case RANGE_MODES.DESTROYER_II: {
@@ -183,6 +168,7 @@ function getActionTargetOptions(state, actionType) {
         return [];
       }
       return getDestroyerIIRange(source.cells)
+        .filter((coordinate) => !destroyerTargets.has(coordinate))
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     case RANGE_MODES.FULL_BOARD:
@@ -264,7 +250,7 @@ function normalizeLineTarget(target) {
   );
 }
 
-function validateAndNormalizeTarget(state, definition, source, target) {
+function validateAndNormalizeTarget(state, definition, source, target, targetPlayerId = null) {
   try {
     if (definition.targetMode === TARGET_MODES.SINGLE_CELL) {
       const normalizedTarget = normalizeCellTarget(target);
@@ -287,6 +273,25 @@ function validateAndNormalizeTarget(state, definition, source, target) {
           error: createRuleIssue(
             "TARGET_OUT_OF_RANGE",
             "目标格不在该行动的攻击范围内。",
+            { coordinate: normalizedTarget.coordinate },
+          ),
+        };
+      }
+
+      if (
+        [RANGE_MODES.DESTROYER_I, RANGE_MODES.DESTROYER_II].includes(
+          definition.rangeMode,
+        ) &&
+        (state.destroyerTargetCells.includes(normalizedTarget.coordinate) ||
+          (typeof targetPlayerId === "string" &&
+            state.destroyerTargetCells.includes(
+              `${targetPlayerId}:${normalizedTarget.coordinate}`,
+            )))
+      ) {
+        return {
+          error: createRuleIssue(
+            "DESTROYER_TARGET_ALREADY_USED",
+            "该坐标已经由任一驱逐舰攻击过，不能再次作为驱逐舰目标。",
             { coordinate: normalizedTarget.coordinate },
           ),
         };
@@ -429,6 +434,7 @@ function validateActionIntent(state, intent) {
       definition,
       source,
       intent.target,
+      intent.targetPlayerId,
     );
     if (targetResult.error) {
       errors.push(targetResult.error);
@@ -444,6 +450,9 @@ function validateActionIntent(state, intent) {
           actionId,
           actionType: definition.type,
           sourceId,
+          ...(typeof intent.targetPlayerId === "string"
+            ? { targetPlayerId: intent.targetPlayerId }
+            : {}),
           target: targetResult.normalizedTarget,
         }
       : null,
@@ -455,9 +464,7 @@ function validateActionIntent(state, intent) {
 function getActionAvailability(state, actionType, options = {}) {
   assertActionState(state);
   const definition = getActionDefinition(actionType);
-  const source = definition.sourceType === DEPLOYABLE_TYPES.RADAR
-    ? state.radar
-    : getUnitByType(state, definition.sourceType);
+  const source = getUnitByType(state, definition.sourceType);
   const issues = source
     ? getSourceIssues(state, definition, source.id, options)
     : [
@@ -518,7 +525,7 @@ function commitActionUsage(state, intent) {
   if (!validation.valid) {
     throw new RuleValidationError(
       "INVALID_ACTION",
-      "行动请求不符合《游戏规则 v1.0》。",
+      "行动请求不符合《游戏规则 v1.2》。",
       { errors: validation.errors },
     );
   }
@@ -542,6 +549,25 @@ function commitActionUsage(state, intent) {
     nextState = markSubmarineMissileTarget(
       nextState,
       validation.normalizedIntent.target.coordinate,
+    );
+  }
+
+  if (definition.type === ACTION_TYPES.NUCLEAR_BOMB) {
+    nextState = markNuclearBombTarget(
+      nextState,
+      validation.normalizedIntent.target.coordinate,
+    );
+  }
+
+  if (
+    [ACTION_TYPES.DESTROYER_I_RAM, ACTION_TYPES.DESTROYER_II_RAM].includes(
+      definition.type,
+    )
+  ) {
+    nextState = markDestroyerTarget(
+      nextState,
+      validation.normalizedIntent.target.coordinate,
+      validation.normalizedIntent.targetPlayerId,
     );
   }
 

@@ -24,7 +24,6 @@
     NUCLEAR_SUBMARINE: "nuclear_submarine",
     AIRCRAFT_CARRIER: "aircraft_carrier",
     DECOY_TORPEDO: "decoy_torpedo",
-    RADAR: "radar",
   });
 
   const ACTION_TYPES = Object.freeze({
@@ -85,17 +84,17 @@
       initialHp: 2,
       shapeText: "1×3 直线",
     }),
-    Object.freeze({
-      id: "motorboat",
+    ...[1, 2].map((number) => Object.freeze({
+      id: number === 1 ? "motorboat" : "motorboat-2",
       type: UNIT_TYPES.MOTORBOAT,
-      name: "摩托艇",
+      name: `摩托艇 ${number}`,
       shortName: "摩",
       category: "surface",
       shape: "single",
       cellCount: 1,
       initialHp: 1,
       shapeText: "单格",
-    }),
+    })),
     Object.freeze({
       id: "nuclear",
       type: UNIT_TYPES.NUCLEAR_SUBMARINE,
@@ -104,7 +103,7 @@
       category: "underwater",
       shape: "square",
       cellCount: 4,
-      initialHp: 2,
+      initialHp: 3,
       shapeText: "2×2",
     }),
     Object.freeze({
@@ -129,11 +128,6 @@
       initialHp: null,
       shapeText: "单格",
     })),
-    Object.freeze({
-      id: "radar", type: UNIT_TYPES.RADAR, name: "雷达", shortName: "达",
-      category: "radar", shape: "square3", cellCount: 9, initialHp: null,
-      shapeText: "3×3",
-    }),
   ]);
 
   const ACTION_DEFINITIONS = Object.freeze([
@@ -162,7 +156,7 @@
       targetMode: "cell",
       rangeMode: "full_board",
       initialUses: null,
-      warning: "命中航空母舰：敌方航空母舰 −2、海盗船 −1、己方航空母舰 −1；命中其他作战单位：目标 −2、敌方航空母舰额外 −0.5、海盗船 −1；命中诱饵鱼雷：摧毁诱饵、敌方航空母舰额外 −0.5、海盗船共 −2；未命中无伤害。",
+      warning: "成功命中任一敌方作战单位时目标 −2、海盗船自损 1；命中诱饵时海盗船受爆炸伤害 1。海盗船每次实际受伤都会使己方航空母舰额外损失 0.5；未命中无伤害。",
     }),
     Object.freeze({
       type: ACTION_TYPES.MOTORBOAT_RAM,
@@ -179,7 +173,7 @@
       sourceType: UNIT_TYPES.SUBMARINE,
       targetMode: "cell",
       rangeMode: "full_board",
-      initialUses: 3,
+      initialUses: 4,
       warning: "发射后只显示“导弹已发射”；你不会获知命中、未命中、目标类型或伤害。该格仍可再次成为攻击目标。",
     }),
     Object.freeze({
@@ -189,7 +183,7 @@
       targetMode: "cell",
       rangeMode: "full_board",
       initialUses: 2,
-      warning: "命中航空母舰造成 2 点伤害，命中其他作战单位造成 1 点伤害，命中诱饵鱼雷会将其摧毁。",
+      warning: "命中航空母舰造成 2 点伤害，命中其他作战单位造成 1 点伤害，命中诱饵鱼雷会将其摧毁；发射方不会获知命中情况。",
     }),
     Object.freeze({
       type: ACTION_TYPES.SHOCK_BOMB,
@@ -221,11 +215,11 @@
     Object.freeze({
       type: ACTION_TYPES.RADAR_SCAN,
       name: "雷达扫描",
-      sourceType: UNIT_TYPES.RADAR,
+      sourceType: UNIT_TYPES.AIRCRAFT_CARRIER,
       targetMode: "area",
       rangeMode: "radar",
       initialUses: 1,
-      warning: "选择一个完整 4×4 区域，只返回该区域内是否存在敌方布局，不公开数量、层级或类型。",
+      warning: "每名玩家的首个行动回合必须使用航空母舰自带雷达，选择完整 4×4 区域；只返回是否存在敌方布局。",
     }),
   ]);
 
@@ -533,6 +527,7 @@
     submarine: rectangleCandidates(2, 2),
     pirate: lineCandidates(3),
     motorboat: ALL_COORDINATES.map((cell) => [cell]),
+    "motorboat-2": ALL_COORDINATES.map((cell) => [cell]),
     nuclear: rectangleCandidates(2, 2),
     carrier: [
       ...rectangleCandidates(2, 3),
@@ -541,11 +536,9 @@
     "decoy-1": ALL_COORDINATES.map((cell) => [cell]),
     "decoy-2": ALL_COORDINATES.map((cell) => [cell]),
     "decoy-3": ALL_COORDINATES.map((cell) => [cell]),
-    radar: rectangleCandidates(3, 3),
   });
 
   const RANDOM_ORDER = Object.freeze([
-    "radar",
     "carrier",
     "destroyer-ii",
     "submarine",
@@ -553,6 +546,7 @@
     "destroyer-i",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "decoy-1",
     "decoy-2",
     "decoy-3",
@@ -599,26 +593,20 @@
     const points = sortCoordinates(cells).map(parseCoordinate);
     if (type === UNIT_TYPES.DESTROYER_I && points.length === 3) {
       const center = points[1];
-      return rectangle(
-        center.row - 3,
-        center.row + 3,
-        center.column - 3,
-        center.column + 3,
-        true,
-      );
+      const horizontal = points[0].row === points[2].row;
+      return horizontal
+        ? rectangle(center.row - 3, center.row + 3, center.column - 5, center.column + 5, true)
+        : rectangle(center.row - 5, center.row + 5, center.column - 3, center.column + 3, true);
     }
     if (type === UNIT_TYPES.DESTROYER_II && points.length === 4) {
       const centerRow = Math.floor((points[1].row + points[2].row) / 2);
       const centerColumn = Math.floor(
         (points[1].column + points[2].column) / 2,
       );
-      return rectangle(
-        centerRow - 3,
-        centerRow + 4,
-        centerColumn - 3,
-        centerColumn + 4,
-        true,
-      );
+      const horizontal = points[0].row === points[3].row;
+      return horizontal
+        ? rectangle(centerRow - 3, centerRow + 4, centerColumn - 4, centerColumn + 5, true)
+        : rectangle(centerRow - 4, centerRow + 5, centerColumn - 3, centerColumn + 4, true);
     }
     return [];
   }
@@ -678,7 +666,9 @@
     if (!definition) {
       return [];
     }
-    const resolved = resolvedTargetSet(ownBattle);
+    const destroyerTargets = new Set(
+      ownBattle?.enemyMap?.destroyerTargetCells ?? [],
+    );
     const source = (ownBattle?.units ?? []).find(
       (unit) => unit.type === definition.sourceType,
     );
@@ -687,12 +677,12 @@
     }
     if (definition.rangeMode === "destroyer_i") {
       return destroyerRange(source.cells, UNIT_TYPES.DESTROYER_I)
-        .filter((cell) => !resolved.has(cell))
+        .filter((cell) => !destroyerTargets.has(cell))
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     if (definition.rangeMode === "destroyer_ii") {
       return destroyerRange(source.cells, UNIT_TYPES.DESTROYER_II)
-        .filter((cell) => !resolved.has(cell))
+        .filter((cell) => !destroyerTargets.has(cell))
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     if (definition.rangeMode === "full_board") {

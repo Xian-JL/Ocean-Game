@@ -47,6 +47,7 @@
     pendingRequest: null,
     clockOffsetMs: 0,
     entry: {
+      maxPlayers: 2,
       nickname: (() => {
         try {
           return localStorage.getItem(NICKNAME_STORAGE_KEY) ?? "";
@@ -76,6 +77,7 @@
       hoverCoordinate: null,
     },
     battle: {
+      targetPlayerId: null,
       selectedAction: null,
       target: null,
       actionId: null,
@@ -168,14 +170,14 @@
     }
   }
 
-  function markerStorageKey(roomCode, playerId) {
-    return `${MARKER_STORAGE_PREFIX}:${roomCode}:${playerId}`;
+  function markerStorageKey(roomCode, playerId, targetPlayerId = "default") {
+    return `${MARKER_STORAGE_PREFIX}:${roomCode}:${playerId}:${targetPlayerId}`;
   }
 
-  function readMarkers(roomCode, playerId) {
+  function readMarkers(roomCode, playerId, targetPlayerId = "default") {
     try {
       const parsed = JSON.parse(
-        localStorage.getItem(markerStorageKey(roomCode, playerId)),
+        localStorage.getItem(markerStorageKey(roomCode, playerId, targetPlayerId)),
       );
       return new Map(Array.isArray(parsed) ? parsed.filter((entry) =>
         Array.isArray(entry) && Data.parseCoordinate(entry[0]) && MARKER_CYCLE.includes(entry[1])) : []);
@@ -191,7 +193,7 @@
     }
     try {
       localStorage.setItem(
-        markerStorageKey(context.roomCode, context.playerId),
+        markerStorageKey(context.roomCode, context.playerId, context.targetPlayerId),
         JSON.stringify([...state.battle.markers.entries()]),
       );
     } catch (_error) {
@@ -398,14 +400,16 @@
     if (!room?.battle || !room?.own?.playerId) {
       return;
     }
-    const key = `${room.roomCode}:${room.own.playerId}`;
+    const targetPlayerId = state.battle.targetPlayerId ?? "default";
+    const key = `${room.roomCode}:${room.own.playerId}:${targetPlayerId}`;
     if (state.battle.markerContext?.key !== key) {
       state.battle.markerContext = {
         key,
         roomCode: room.roomCode,
         playerId: room.own.playerId,
+        targetPlayerId,
       };
-      state.battle.markers = readMarkers(room.roomCode, room.own.playerId);
+      state.battle.markers = readMarkers(room.roomCode, room.own.playerId, targetPlayerId);
     }
     const resolved = Data.resolvedTargetSet(room.battle.own);
     let changed = false;
@@ -437,10 +441,30 @@
     const ownId = room.own.playerId;
     const actorName = Model.nicknameFor(room, feedback.actorId);
     const target = Model.formatTarget(feedback.target);
+    const exactDamage = (feedback.inflictedDamage ?? [])
+      .filter((event) => event.appliedDamage > 0)
+      .map((event) => {
+        const unit = Data.getUnitDefinitionByType(event.unitType);
+        return `${unit?.name ?? "目标单位"}生命值变为 ${Model.formatHp(event.afterHp)}`;
+      });
+    const receivedHits = (feedback.receivedHits ?? [])
+      .map((event) => {
+        const unit = Data.getUnitDefinitionByType(event.unitType);
+        return `${unit?.name ?? "己方单位"}被命中${event.sunk ? "并沉没" : ""}`;
+      });
     if (feedback.actionType === Data.ACTION_TYPES.SUBMARINE_MISSILE) {
       return feedback.actorId === ownId
         ? `潜射导弹已发射至 ${target}；命中结果不会向你显示。`
-        : `${actorName} 使用潜射导弹攻击了 ${target}。`;
+        : receivedHits.length > 0
+          ? `${actorName} 使用潜射导弹攻击了 ${target}；${receivedHits.join("；")}。`
+          : `${actorName} 使用潜射导弹攻击了 ${target}。`;
+    }
+    if (feedback.actionType === Data.ACTION_TYPES.NUCLEAR_BOMB) {
+      return feedback.actorId === ownId
+        ? `核弹已投放至 ${target}；命中结果不会向你显示。`
+        : receivedHits.length > 0
+          ? `${actorName} 向 ${target} 投放了核弹；${receivedHits.join("；")}。`
+          : `${actorName} 向 ${target} 投放了核弹。`;
     }
     if (feedback.actionType === Data.ACTION_TYPES.SHOCK_BOMB) {
       return feedback.actorId === ownId
@@ -448,6 +472,12 @@
         : `${actorName} 以 ${target} 为中心使用了震爆弹。`;
     }
     if (feedback.result === "hit") {
+      if (feedback.actorId === ownId && exactDamage.length > 0) {
+        return `${feedback.actionName}：${target} 命中；${exactDamage.join("；")}。`;
+      }
+      if (feedback.actorId !== ownId && receivedHits.length > 0) {
+        return `${feedback.actionName}：${receivedHits.join("；")}。`;
+      }
       return `${feedback.actionName}：${target} 命中。`;
     }
     if (feedback.result === "miss") {
@@ -462,6 +492,12 @@
     if (Array.isArray(feedback.cellResults)) {
       const hits = feedback.cellResults.filter((cell) => cell.result === "hit").length;
       const misses = feedback.cellResults.filter((cell) => cell.result === "miss").length;
+      if (feedback.actorId === ownId && exactDamage.length > 0) {
+        return `直升机扫射完成：命中 ${hits} 格，未命中 ${misses} 格；${exactDamage.join("；")}。`;
+      }
+      if (feedback.actorId !== ownId && receivedHits.length > 0) {
+        return `直升机扫射完成：${receivedHits.join("；")}。`;
+      }
       return `直升机扫射完成：命中 ${hits} 格，未命中 ${misses} 格。`;
     }
     return `${feedback.actionName}已经完成结算。`;
@@ -513,6 +549,10 @@
     }
 
     state.room = nextRoom;
+    const availableTargets = nextRoom.battle?.opponentIds ?? [];
+    if (!availableTargets.includes(state.battle.targetPlayerId)) {
+      state.battle.targetPlayerId = availableTargets[0] ?? null;
+    }
     document.title = nextRoom.turn?.canAct
       ? "轮到你行动 · 海战 OCEAN"
       : "海战 OCEAN";
@@ -693,8 +733,15 @@
             <form id="create-form" class="entry-action-block">
               <div>
                 <strong>创建新房间</strong>
-                <span>生成 6 位房间码，等待另一名玩家加入。</span>
+                <span>生成 6 位房间码，可选择双人或三人对战。</span>
               </div>
+              <label class="field field--compact">
+                <span>对战人数</span>
+                <select id="max-players-input" ${pending ? "disabled" : ""}>
+                  <option value="2" ${state.entry.maxPlayers === 2 ? "selected" : ""}>双人对战</option>
+                  <option value="3" ${state.entry.maxPlayers === 3 ? "selected" : ""}>三人对战</option>
+                </select>
+              </label>
               <button class="button button--primary" type="submit" ${!state.connected || pending ? "disabled" : ""}>
                 ${pending === "create" ? "正在创建…" : "创建房间"}
               </button>
@@ -759,7 +806,7 @@
   function renderSeats(room, compact = false) {
     return `
       <div class="seat-list ${compact ? "seat-list--compact" : ""}">
-        ${[0, 1].map((index) => {
+        ${Array.from({ length: room.maxPlayers ?? 2 }, (_, index) => {
           const seat = room.seats[index];
           if (!seat) {
             return `
@@ -790,7 +837,7 @@
     const inviteUrl = `${window.location.origin}/?room=${room.roomCode}`;
     return `
       <section class="waiting-page page-enter" aria-labelledby="waiting-title">
-        ${renderRoomTop("等待舰队接入", "第二名玩家加入后，服务器将同时启动 180 秒舰队部署。", {
+        ${renderRoomTop("等待舰队接入", `坐满 ${room.maxPlayers ?? 2} 名玩家后，服务器将同时启动 180 秒舰队部署。`, {
           kicker: "P02 / 房间等待",
         })}
         <div class="waiting-layout">
@@ -1239,12 +1286,6 @@
 
   function ownBattleCellMap(snapshot) {
     const map = new Map();
-    if (snapshot?.radar) {
-      const definition = Data.getUnitDefinitionByType(Data.UNIT_TYPES.RADAR);
-      for (const coordinate of snapshot.radar.cells) {
-        map.set(coordinate, { kind: "radar", radar: snapshot.radar, definition });
-      }
-    }
     for (const unit of snapshot?.units ?? []) {
       const definition = Data.getUnitDefinitionByType(unit.type);
       for (const coordinate of unit.cells) {
@@ -1293,10 +1334,6 @@
         if (entry.decoy.destroyed) classes.push("board-cell--wreck");
         content = `<span class="unit-glyph">雷</span>${entry.decoy.destroyed ? '<span class="cell-state-glyph">×</span>' : ""}`;
         label = `${coordinate}，诱饵鱼雷${entry.decoy.destroyed ? "，已摧毁" : "，有效"}`;
-      } else if (entry?.kind === "radar") {
-        classes.push("board-cell--unit", "board-cell--radar");
-        content = '<span class="unit-glyph">达</span>';
-        label = `${coordinate}，雷达部署物，不受攻击伤害`;
       }
       return {
         classes,
@@ -1309,7 +1346,9 @@
   }
 
   function currentIntelligenceArea(ownBattle) {
-    const areas = ownBattle?.intelligenceAreas ?? [];
+    const areas = (ownBattle?.intelligenceAreas ?? []).filter(
+      (area) => !area.defenderId || area.defenderId === state.battle.targetPlayerId,
+    );
     if (areas.length === 0) {
       return null;
     }
@@ -1342,9 +1381,13 @@
   }
 
   function renderEnemyBoard(ownBattle) {
-    const results = ownBattle.enemyMap?.cellResults ?? {};
-    const missiles = new Set(ownBattle.enemyMap?.submarineMissileMarkers ?? []);
-    const legal = legalTargetCells(ownBattle);
+    const enemyMap = ownBattle.enemyMapsByPlayer?.[state.battle.targetPlayerId]
+      ?? ownBattle.enemyMap;
+    const results = enemyMap?.cellResults ?? {};
+    const missiles = new Set(enemyMap?.submarineMissileMarkers ?? []);
+    const nuclearBombs = new Set(enemyMap?.nuclearBombMarkers ?? []);
+    const effectiveOwnBattle = { ...ownBattle, enemyMap };
+    const legal = legalTargetCells(effectiveOwnBattle);
     const preview = new Set(
       Data.previewCells(state.battle.selectedAction, state.battle.target),
     );
@@ -1354,6 +1397,7 @@
       const result = results[coordinate];
       const resolved = result === "hit" || result === "miss";
       const hasMissile = missiles.has(coordinate) && !resolved;
+      const hasNuclearBomb = nuclearBombs.has(coordinate) && !resolved;
       const marker = !resolved ? state.battle.markers.get(coordinate) : null;
       const hasMarker = Boolean(marker);
       const classes = [];
@@ -1371,6 +1415,10 @@
         classes.push("board-cell--missile");
         content = '<span class="missile-glyph">↗</span>';
         stateText = "导弹已发射，仍未结算";
+      } else if (hasNuclearBomb) {
+        classes.push("board-cell--missile");
+        content = '<span class="missile-glyph">☢</span>';
+        stateText = "核弹已投放，命中情况保密";
       } else if (hasMarker) {
         classes.push("board-cell--marker", `board-cell--marker-${marker}`);
         content = marker === "occupied" ? '<span class="marker-glyph">●</span>' : '<span class="marker-half marker-half--top"></span><span class="marker-half marker-half--bottom"></span>';
@@ -1457,6 +1505,16 @@
           <span class="drawer-chevron" aria-hidden="true">⌃</span>
         </button>
         <div class="action-rail__content">
+        ${(room.battle.opponentIds?.length ?? 0) > 1 ? `
+          <label class="field target-player-field">
+            <span>本回合攻击对象</span>
+            <select id="target-player-input">
+              ${room.battle.opponentIds.map((playerId) => `
+                <option value="${escapeHtml(playerId)}" ${state.battle.targetPlayerId === playerId ? "selected" : ""}>
+                  ${escapeHtml(Model.nicknameFor(room, playerId))}
+                </option>`).join("")}
+            </select>
+          </label>` : ""}
         <div class="action-list">
           ${Data.ACTION_DEFINITIONS.map((definition) => {
             const status = Model.deriveActionStatus(room, definition);
@@ -1621,6 +1679,10 @@
     }
     const ownActive = state.battle.mobileMap === "own";
     const finalSalvo = room.roomPhase === "FINAL_SALVO";
+    const finalSalvoState = battle.match?.finalSalvo;
+    const availableFinalDecoys = (battle.own.decoys ?? []).filter(
+      (decoy) => finalSalvoState?.availableDecoyIds?.includes(decoy.id),
+    );
     const intel = currentIntelligenceArea(battle.own);
     return `
       <section class="battle-page page-enter" aria-labelledby="battle-page-title">
@@ -1629,7 +1691,17 @@
         ${finalSalvo ? `
           <div class="final-salvo-banner">
             <span class="sonar sonar--small"></span>
-            <div><strong>终局鱼雷齐射</strong><p>双方有效诱饵正在同时攻击同名坐标，全部操作已锁定。</p></div>
+            <div>
+              <strong>手动鱼雷引爆 · 第 ${finalSalvoState?.round ?? "—"} 轮</strong>
+              ${finalSalvoState?.status === "selecting"
+                ? finalSalvoState.ownSubmitted
+                  ? `<p>本轮选择已秘密提交，正在等待对方。${finalSalvoState.opponentSubmitted ? "双方选择已齐，服务器正在同时结算。" : ""}</p>`
+                  : availableFinalDecoys.length > 0
+                    ? `<p>选择一枚尚未触发的己方诱饵鱼雷。双方提交后同时攻击各自对应坐标。</p>
+                       <div class="final-salvo-actions">${availableFinalDecoys.map((decoy) => `<button class="button button--secondary" data-action="submit-final-salvo" data-decoy-id="${escapeHtml(decoy.id)}">引爆 ${escapeHtml(decoy.cell)}</button>`).join("")}</div>`
+                    : "<p>本方已无可引爆鱼雷，服务器将自动跳过并等待对方。</p>"
+                : "<p>全部鱼雷已经结算，正在生成最终结果。</p>"}
+            </div>
           </div>` : ""}
         ${renderLatestFeedback(room)}
 
@@ -1785,7 +1857,7 @@
     if (!finalSalvo) return "";
     return `
       <section class="salvo-replay">
-        <div class="panel-heading"><span>终局鱼雷齐射</span><small>同时结算</small></div>
+        <div class="panel-heading"><span>终局手动鱼雷记录</span><small>逐轮同时结算</small></div>
         <div class="salvo-shot-list">
           ${finalSalvo.shots.map((shot) => `
             <article>
@@ -1937,7 +2009,7 @@
           ${beforeMatch ? '<button class="button button--danger-quiet" data-action="leave-room">离开房间</button>' : ""}
           ${playing ? '<button class="button button--danger" data-action="surrender-and-leave">投降并离开</button>' : ""}
           ${finished ? '<button class="button button--danger-quiet" data-action="leave-room">离开房间</button>' : ""}
-          ${room.roomPhase === "FINAL_SALVO" ? '<button class="button button--secondary" disabled>等待终局鱼雷齐射完成</button>' : ""}
+          ${room.roomPhase === "FINAL_SALVO" ? '<button class="button button--secondary" disabled>等待终局鱼雷选择或结算完成</button>' : ""}
         </div>
       </section>`;
   }
@@ -2235,6 +2307,9 @@
     const remaining = state.room.battle.own.remainingUses?.[definition.type];
     const paragraphs = [
       `目标：${Model.formatTarget(target)}`,
+      ...(state.room.battle.opponentIds?.length > 1
+        ? [`敌方玩家：${Model.nicknameFor(state.room, state.battle.targetPlayerId)}`]
+        : []),
       definition.warning,
     ];
     if (definition.initialUses !== null) {
@@ -2259,9 +2334,9 @@
     if (!definition || !state.battle.target) {
       throw { message: "行动或目标已经失效，请重新选择。" };
     }
-    const source = definition.sourceType === Data.UNIT_TYPES.RADAR
-      ? room.battle.own.radar
-      : room.battle.own.units.find((unit) => unit.type === definition.sourceType);
+    const source = room.battle.own.units.find(
+      (unit) => unit.type === definition.sourceType && unit.hp > 0,
+    );
     if (!source) {
       throw { message: "找不到该行动的己方来源单位。" };
     }
@@ -2277,6 +2352,7 @@
           actionId: state.battle.actionId,
           actionType: definition.type,
           sourceId: source.id,
+          targetPlayerId: state.battle.targetPlayerId,
           target: clone(state.battle.target),
         },
       });
@@ -2288,6 +2364,25 @@
       state.pendingRequest = null;
       render();
       throw error;
+    }
+  }
+
+  async function submitFinalSalvo(decoyId) {
+    const room = state.room;
+    if (room?.roomPhase !== "FINAL_SALVO" || !decoyId) return;
+    state.pendingRequest = "final-salvo";
+    render();
+    try {
+      const response = await emitRequest("final-salvo:submit", {
+        expectedVersion: room.stateVersion,
+        decoyId,
+      });
+      await ensureStateVersion(response.stateVersion);
+    } catch (error) {
+      showToast(humanizeSocketError(error), "error");
+    } finally {
+      state.pendingRequest = null;
+      render();
     }
   }
 
@@ -2445,7 +2540,10 @@
     state.pendingRequest = "create";
     render();
     try {
-      await emitRequest("room:create", { nickname: nickname.value });
+      await emitRequest("room:create", {
+        nickname: nickname.value,
+        maxPlayers: state.entry.maxPlayers,
+      });
     } catch (error) {
       state.entry.error = humanizeSocketError(error);
     } finally {
@@ -2656,6 +2754,17 @@
       event.target.value = normalized;
       state.entry.roomCode = normalized;
     }
+    if (event.target.id === "max-players-input") {
+      state.entry.maxPlayers = Number(event.target.value) === 3 ? 3 : 2;
+    }
+    if (event.target.id === "target-player-input") {
+      saveMarkers();
+      state.battle.targetPlayerId = event.target.value;
+      state.battle.markerContext = null;
+      state.battle.target = null;
+      state.battle.actionId = null;
+      render();
+    }
   });
 
   document.addEventListener("change", (event) => {
@@ -2852,6 +2961,10 @@
     }
     if (action === "select-action") {
       selectAction(control.dataset.actionType);
+      return;
+    }
+    if (action === "submit-final-salvo") {
+      void submitFinalSalvo(control.dataset.decoyId);
       return;
     }
     if (action === "toggle-action-drawer") {

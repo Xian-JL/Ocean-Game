@@ -126,7 +126,7 @@ test("海盗船特殊胜负原因保持冻结规则用语", () => {
   );
 });
 
-test("潜射导弹与震爆弹公开记录不添加命中或生效结果", () => {
+test("潜射导弹、核弹与震爆弹公开记录不添加命中或生效结果", () => {
   const room = createRoom();
   const missile = Model.publicActionText(
     {
@@ -141,6 +141,20 @@ test("潜射导弹与震爆弹公开记录不添加命中或生效结果", () =>
   );
   assert.equal(missile, "甲 使用潜射导弹攻击了 B3");
   assert.equal(missile.includes("命中"), false);
+
+  const nuclear = Model.publicActionText(
+    {
+      sequence: 2,
+      actorId: "player-1",
+      actionType: Data.ACTION_TYPES.NUCLEAR_BOMB,
+      actionName: "核弹",
+      target: { kind: "cell", coordinate: "B3" },
+      result: null,
+    },
+    room,
+  );
+  assert.equal(nuclear, "甲 向 B3 投放了核弹");
+  assert.equal(nuclear.includes("命中"), false);
 
   const shock = Model.publicActionText(
     {

@@ -60,7 +60,11 @@ function createPlayingRoom(nowMs = 1_000) {
   room = setPlayerReady(room, "player-2", nowMs);
   const rolls = [0.9, 0.1];
   room = determineFirstPlayer(room, () => rolls.shift());
-  return startPlaying(room, nowMs);
+  room = startPlaying(room, nowMs);
+  for (const playerId of room.battleState.playerIds) {
+    room.battleState.players[playerId].remainingUses.radar_scan = 0;
+  }
+  return room;
 }
 
 test("断线等待参数固定为 120 秒，WAITING 座位进入阻塞暂停", () => {

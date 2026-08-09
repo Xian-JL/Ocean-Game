@@ -37,7 +37,7 @@ function decoy(battle, playerId, decoyId) {
   );
 }
 
-test("驱逐舰Ⅰ命中作战单位时双方各受 1 点伤害", () => {
+test("驱逐舰Ⅰ命中作战单位时目标受 1、己方受 0.5 点伤害", () => {
   const initial = createTestBattle();
   const resolved = resolveAction(
     initial,
@@ -55,7 +55,7 @@ test("驱逐舰Ⅰ命中作战单位时双方各受 1 点伤害", () => {
     unit(resolved.state, "player-2", "submarine").hitCells,
     ["D4"],
   );
-  assert.equal(unit(resolved.state, "player-1", "destroyer-i").hp, 2);
+  assert.equal(unit(resolved.state, "player-1", "destroyer-i").hp, 2.5);
   assert.deepEqual(player(resolved.state, "player-1").resolvedTargetCells, [
     "D4",
   ]);
@@ -68,7 +68,7 @@ test("驱逐舰Ⅰ命中作战单位时双方各受 1 点伤害", () => {
   assert.equal(resolved.state.nextActionSequence, 2);
 });
 
-test("驱逐舰Ⅱ命中航空母舰时双方各受 1 点伤害", () => {
+test("驱逐舰Ⅱ命中航空母舰时目标受 1、己方受 0.5 点伤害", () => {
   const resolved = resolveAction(
     createTestBattle(),
     "player-1",
@@ -80,7 +80,7 @@ test("驱逐舰Ⅱ命中航空母舰时双方各受 1 点伤害", () => {
     ),
   );
   assert.equal(unit(resolved.state, "player-2", "carrier").hp, 5);
-  assert.equal(unit(resolved.state, "player-1", "destroyer-ii").hp, 2);
+  assert.equal(unit(resolved.state, "player-1", "destroyer-ii").hp, 2.5);
   assert.equal(resolved.result.outcome.actualResult, "hit");
 });
 
@@ -122,7 +122,7 @@ test("驱逐舰命中诱饵时摧毁诱饵并自损，未命中时不自损", ()
   );
 });
 
-test("海盗船直接命中航空母舰时三项伤害同时完整结算", () => {
+test("海盗船命中航空母舰后自损，并触发己方航母 0.5 联动伤害", () => {
   const resolved = resolveAction(
     createTestBattle(),
     "player-1",
@@ -135,11 +135,11 @@ test("海盗船直接命中航空母舰时三项伤害同时完整结算", () =>
   );
   assert.equal(unit(resolved.state, "player-2", "carrier").hp, 4);
   assert.equal(unit(resolved.state, "player-1", "pirate").hp, 1);
-  assert.equal(unit(resolved.state, "player-1", "carrier").hp, 5);
+  assert.equal(unit(resolved.state, "player-1", "carrier").hp, 5.5);
   assert.equal(resolved.result.outcome.damageEvents.length, 3);
 });
 
-test("海盗船命中其他作战单位时目标扣 2、敌方航母扣 0.5、海盗船扣 1", () => {
+test("海盗船命中其他作战单位时目标扣 2、海盗船扣 1、己方航母扣 0.5", () => {
   const resolved = resolveAction(
     createTestBattle(),
     "player-1",
@@ -151,12 +151,12 @@ test("海盗船命中其他作战单位时目标扣 2、敌方航母扣 0.5、�
     ),
   );
   assert.equal(unit(resolved.state, "player-2", "destroyer-i").hp, 1);
-  assert.equal(unit(resolved.state, "player-2", "carrier").hp, 5.5);
+  assert.equal(unit(resolved.state, "player-2", "carrier").hp, 6);
   assert.equal(unit(resolved.state, "player-1", "pirate").hp, 1);
-  assert.equal(unit(resolved.state, "player-1", "carrier").hp, 6);
+  assert.equal(unit(resolved.state, "player-1", "carrier").hp, 5.5);
 });
 
-test("海盗船命中诱饵时摧毁诱饵、敌方航母扣 0.5、海盗船共扣 2", () => {
+test("海盗船命中诱饵时摧毁诱饵、海盗船受爆炸伤害 1、己方航母扣 0.5", () => {
   const resolved = resolveAction(
     createTestBattle(),
     "player-1",
@@ -168,9 +168,9 @@ test("海盗船命中诱饵时摧毁诱饵、敌方航母扣 0.5、海盗船共�
     ),
   );
   assert.equal(decoy(resolved.state, "player-2", "decoy-1").destroyed, true);
-  assert.equal(unit(resolved.state, "player-2", "carrier").hp, 5.5);
-  assert.equal(unit(resolved.state, "player-1", "pirate").hp, 0);
-  assert.equal(unit(resolved.state, "player-1", "carrier").hp, 6);
+  assert.equal(unit(resolved.state, "player-2", "carrier").hp, 6);
+  assert.equal(unit(resolved.state, "player-1", "pirate").hp, 1);
+  assert.equal(unit(resolved.state, "player-1", "carrier").hp, 5.5);
 });
 
 test("海盗船未命中时目标、双方航母和海盗船均不受伤害", () => {
@@ -193,7 +193,7 @@ test("海盗船未命中时目标、双方航母和海盗船均不受伤害", ()
 
 test("海盗船行动即使造成双方航空母舰同时沉没也完整结算", () => {
   let battle = createTestBattle();
-  battle = damageBattleUnit(battle, "player-1", "carrier", 5);
+  battle = damageBattleUnit(battle, "player-1", "carrier", 5.5);
   battle = damageBattleUnit(battle, "player-1", "pirate", 1);
   battle = damageBattleUnit(battle, "player-2", "carrier", 4);
 
@@ -311,7 +311,7 @@ test("潜射导弹造成实际伤害但只留下潜射标记，不产生已结�
   assert.equal(unit(second.state, "player-2", "destroyer-i").hp, 2);
   assert.equal(
     player(second.state, "player-1").remainingUses.submarine_missile,
-    1,
+    2,
   );
   assert.equal(second.result.outcome.damageEvents.length, 0);
 });

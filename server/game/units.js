@@ -11,7 +11,6 @@ const DEPLOYABLE_TYPES = Object.freeze({
   NUCLEAR_SUBMARINE: "nuclear_submarine",
   AIRCRAFT_CARRIER: "aircraft_carrier",
   DECOY_TORPEDO: "decoy_torpedo",
-  RADAR: "radar",
 });
 
 const DEPLOYABLE_CATEGORIES = Object.freeze({
@@ -23,7 +22,6 @@ const DEPLOYABLE_CATEGORIES = Object.freeze({
 const DEPLOYMENT_SHAPES = Object.freeze({
   LINE: "line",
   SQUARE_2X2: "square_2x2",
-  SQUARE_3X3: "square_3x3",
   SINGLE: "single",
   FOUR_CONNECTED: "four_connected",
 });
@@ -73,7 +71,7 @@ const DEPLOYABLE_DEFINITIONS = Object.freeze({
     type: DEPLOYABLE_TYPES.MOTORBOAT,
     name: "摩托艇",
     category: DEPLOYABLE_CATEGORIES.SURFACE_UNIT,
-    count: 1,
+    count: 2,
     cellCount: 1,
     initialHp: 1,
     shape: DEPLOYMENT_SHAPES.SINGLE,
@@ -84,7 +82,7 @@ const DEPLOYABLE_DEFINITIONS = Object.freeze({
     category: DEPLOYABLE_CATEGORIES.UNDERWATER_UNIT,
     count: 1,
     cellCount: 4,
-    initialHp: 2,
+    initialHp: 3,
     shape: DEPLOYMENT_SHAPES.SQUARE_2X2,
   }),
   [DEPLOYABLE_TYPES.AIRCRAFT_CARRIER]: freezeDefinition({
@@ -105,15 +103,6 @@ const DEPLOYABLE_DEFINITIONS = Object.freeze({
     initialHp: null,
     shape: DEPLOYMENT_SHAPES.SINGLE,
   }),
-  [DEPLOYABLE_TYPES.RADAR]: freezeDefinition({
-    type: DEPLOYABLE_TYPES.RADAR,
-    name: "雷达",
-    category: DEPLOYABLE_CATEGORIES.DEPLOYMENT,
-    count: 1,
-    cellCount: 9,
-    initialHp: null,
-    shape: DEPLOYMENT_SHAPES.SQUARE_3X3,
-  }),
 });
 
 const DEPLOYABLE_TYPE_ORDER = Object.freeze([
@@ -125,7 +114,6 @@ const DEPLOYABLE_TYPE_ORDER = Object.freeze([
   DEPLOYABLE_TYPES.NUCLEAR_SUBMARINE,
   DEPLOYABLE_TYPES.AIRCRAFT_CARRIER,
   DEPLOYABLE_TYPES.DECOY_TORPEDO,
-  DEPLOYABLE_TYPES.RADAR,
 ]);
 
 const FLEET_REQUIREMENTS = Object.freeze(

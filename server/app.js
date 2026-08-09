@@ -97,7 +97,7 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ok",
       service: "ocean",
-      stage: "postlaunch-v0.4",
+      stage: "postlaunch-v0.6",
       socketProtocol: "1.2",
       timestamp: nowIso(),
     });
@@ -108,7 +108,7 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ok",
       service: "ocean",
-      stage: "postlaunch-v0.4",
+      stage: "postlaunch-v0.6",
       socketProtocol: "1.2",
       uptimeSeconds: Math.max(0, Math.floor((clock() - startedAtMs) / 1000)),
       connections: io?.engine?.clientsCount ?? 0,
@@ -122,7 +122,7 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ready",
       service: "ocean",
-      stage: "postlaunch-v0.4",
+      stage: "postlaunch-v0.6",
       timestamp: nowIso(),
     });
   });
@@ -133,7 +133,7 @@ function createOceanServer(options = {}) {
     response.status(200).json({
       status: "ok",
       service: "ocean",
-      stage: "postlaunch-v0.4",
+      stage: "postlaunch-v0.6",
       uptimeSeconds: Math.max(0, Math.floor((clock() - startedAtMs) / 1000)),
       memoryMb: {
         rss: Math.round(memory.rss / 1024 / 1024),

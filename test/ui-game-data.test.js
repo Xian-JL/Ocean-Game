@@ -40,7 +40,7 @@ test("正式页面坐标模型固定生成 A1～L12 的 144 格", () => {
   assert.equal(Data.parseCoordinate("M1"), null);
 });
 
-test("正式页面定义七个作战单位、三个诱饵、一个雷达和十项行动", () => {
+test("正式页面定义八个作战单位、三个诱饵和十项行动", () => {
   assert.equal(Data.UNIT_DEFINITIONS.length, 11);
   assert.equal(
     Data.UNIT_DEFINITIONS.filter((unit) => unit.category !== "decoy").length,
@@ -127,17 +127,17 @@ test("部署锚点按横向、纵向、2×2 和单格生成完整预览", () => 
   );
 });
 
-test("驱逐舰Ⅰ和驱逐舰Ⅱ客户端范围与 7×7、8×8 规则一致", () => {
+test("驱逐舰Ⅰ和驱逐舰Ⅱ客户端范围与 11×7、8×10 规则一致", () => {
   const first = Data.destroyerRange(["E4", "E5", "E6"], Data.UNIT_TYPES.DESTROYER_I);
-  assert.equal(first.length, 49);
+  assert.equal(first.length, 70);
   assert.ok(first.includes("B2"));
-  assert.ok(first.includes("H8"));
+  assert.ok(first.includes("H10"));
   assert.equal(first.includes("A1"), false);
 
   const second = Data.destroyerRange(["D5", "E5", "F5", "G5"], Data.UNIT_TYPES.DESTROYER_II);
-  assert.equal(second.length, 64);
+  assert.equal(second.length, 80);
   assert.ok(second.includes("B2"));
-  assert.ok(second.includes("I9"));
+  assert.ok(second.includes("J9"));
 });
 
 test("震爆弹、探测弹在 12×12 地图提供完整区域中心格", () => {

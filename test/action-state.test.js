@@ -14,13 +14,13 @@ const {
 } = require("../server/game/action-state");
 const { createValidDeployment } = require("../test-fixtures/valid-deployment");
 
-test("合法部署生成七个作战单位及全部初始资源", () => {
+test("合法部署生成八个作战单位及全部初始资源", () => {
   const state = createInitialActionState(createValidDeployment());
-  assert.equal(state.units.length, 7);
+  assert.equal(state.units.length, 8);
   assert.equal(getUnitById(state, "carrier").hp, 6);
   assert.equal(getUnitById(state, "submarine").paralyzed, false);
   assert.deepEqual(state.remainingUses, {
-    submarine_missile: 3,
+    submarine_missile: 4,
     nuclear_bomb: 2,
     shock_bomb: 1,
     detection_bomb: 1,

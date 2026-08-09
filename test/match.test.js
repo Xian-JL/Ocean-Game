@@ -17,6 +17,7 @@ const {
   createRoomView,
   determineFirstPlayer,
   startPlaying,
+  submitFinalSalvoSelection,
 } = require("../server/game/match");
 const {
   ROOM_PHASES,
@@ -60,7 +61,11 @@ function createPlayingRoom(firstPlayerId = "player-1") {
   const random = firstPlayerId === "player-1"
     ? sequenceRandom([0.9, 0.1])
     : sequenceRandom([0.1, 0.9]);
-  return startPlaying(determineFirstPlayer(createRollingRoom(), random));
+  const room = startPlaying(determineFirstPlayer(createRollingRoom(), random));
+  for (const playerId of room.battleState.playerIds) {
+    room.battleState.players[playerId].remainingUses.radar_scan = 0;
+  }
+  return room;
 }
 
 function pirateMiss(actionId = "pirate-miss") {
@@ -105,6 +110,7 @@ function prepareLastSubmarineMissile(battle) {
     "destroyer-ii",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "nuclear",
   ]);
   next = setRemainingUses(next, "player-1", {
@@ -118,6 +124,7 @@ function prepareLastSubmarineMissile(battle) {
     "submarine",
     "pirate",
     "motorboat",
+    "motorboat-2",
     "nuclear",
   ]);
   return setRemainingUses(next, "player-2", {
@@ -133,6 +140,7 @@ function preparePlayerTwoForAutomaticSkip(battle) {
     "destroyer-ii",
     "pirate",
     "motorboat",
+    "motorboat-2",
   ]);
   next = setRemainingUses(next, "player-2", {
     helicopter_strafe: 0,
@@ -175,6 +183,23 @@ test("未确定先手不能开始，确定后进入 PLAYING/ACTIVE 且回合数�
   assert.equal(playing.currentPlayerId, "player-1");
   assert.equal(playing.turnNumber, 1);
   assert.equal(playing.battleState.actionLog.length, 0);
+});
+
+test("每名玩家的首个行动回合只能使用航空母舰雷达扫描", () => {
+  const playing = startPlaying(
+    determineFirstPlayer(createRollingRoom(), sequenceRandom([0.9, 0.1])),
+  );
+  assert.throws(
+    () => beginPlayerAction(playing, "player-1", pirateMiss("opening-pirate")),
+    (error) => error.code === "OPENING_RADAR_REQUIRED",
+  );
+  const resolving = beginPlayerAction(playing, "player-1", {
+    actionId: "opening-radar",
+    actionType: ACTION_TYPES.RADAR_SCAN,
+    sourceId: "carrier",
+    target: { kind: "cell", coordinate: "A1" },
+  });
+  assert.equal(resolving.turnPhase, TURN_PHASES.RESOLVING);
 });
 
 test("只有当前玩家能提交行动，非法行动不进入 RESOLVING", () => {
@@ -319,11 +344,24 @@ test("最后攻击手段耗尽后先进入 FINAL_SALVO，展示完成后才进�
     sourceId: "submarine",
     target: { kind: "cell", coordinate: "J1" },
   });
-  const finalSalvo = completePlayerAction(room);
+  let finalSalvo = completePlayerAction(room);
 
   assert.equal(finalSalvo.roomPhase, ROOM_PHASES.FINAL_SALVO);
   assert.equal(finalSalvo.turnPhase, null);
   assert.ok(finalSalvo.battleState.match.finalSalvo);
+  for (let number = 1; number <= 3; number += 1) {
+    finalSalvo = submitFinalSalvoSelection(
+      finalSalvo,
+      "player-1",
+      `decoy-${number}`,
+    );
+    finalSalvo = submitFinalSalvoSelection(
+      finalSalvo,
+      "player-2",
+      `decoy-${number}`,
+    );
+  }
+  assert.equal(finalSalvo.battleState.match.status, "finished");
   const finished = completeFinalSalvo(finalSalvo);
   assert.equal(finished.roomPhase, ROOM_PHASES.FINISHED);
   assert.equal(

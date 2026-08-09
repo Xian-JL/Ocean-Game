@@ -56,6 +56,7 @@ function createPublicActionRecord(actionRecord) {
 
   switch (definition.type) {
     case ACTION_TYPES.SUBMARINE_MISSILE:
+    case ACTION_TYPES.NUCLEAR_BOMB:
       return {
         ...record,
         result: null,
@@ -111,6 +112,31 @@ function createOwnDamageNotifications(actionRecord, side) {
     }));
 }
 
+function createInflictedDamageNotifications(actionRecord) {
+  return (actionRecord.outcome.damageEvents ?? [])
+    .filter((event) => event.side === "defender")
+    .map((event) => ({
+      playerId: event.playerId,
+      unitId: event.unitId,
+      unitType: event.unitType,
+      beforeHp: event.beforeHp,
+      appliedDamage: event.appliedDamage,
+      afterHp: event.afterHp,
+      sunk: event.sunk,
+    }));
+}
+
+function createReceivedHitNotifications(actionRecord) {
+  return (actionRecord.outcome.damageEvents ?? [])
+    .filter((event) => event.side === "defender" && event.appliedDamage > 0)
+    .map((event) => ({
+      unitId: event.unitId,
+      unitType: event.unitType,
+      hit: true,
+      sunk: event.sunk,
+    }));
+}
+
 function createOwnDecoyNotifications(actionRecord, side) {
   return (actionRecord.outcome.decoyEvents ?? [])
     .filter((event) => event.side === side && event.destroyed)
@@ -140,9 +166,17 @@ function createActorFeedback(battleState, actionRecord) {
     sourceId: actionRecord.action.sourceId,
     remainingUses,
     ownDamage: createOwnDamageNotifications(actionRecord, "actor"),
+    inflictedDamage: [ACTION_TYPES.SUBMARINE_MISSILE, ACTION_TYPES.NUCLEAR_BOMB]
+      .includes(definition.type)
+      ? []
+      : createInflictedDamageNotifications(actionRecord),
     ownDecoyChanges: createOwnDecoyNotifications(actionRecord, "actor"),
     submarineMissileMarker:
       definition.type === ACTION_TYPES.SUBMARINE_MISSILE
+        ? actionRecord.action.target.coordinate
+        : null,
+    nuclearBombMarker:
+      definition.type === ACTION_TYPES.NUCLEAR_BOMB
         ? actionRecord.action.target.coordinate
         : null,
   };
@@ -152,7 +186,8 @@ function createDefenderFeedback(actionRecord) {
   assertActionRecord(actionRecord);
   return {
     ...createPublicActionRecord(actionRecord),
-    ownDamage: createOwnDamageNotifications(actionRecord, "defender"),
+    ownDamage: [],
+    receivedHits: createReceivedHitNotifications(actionRecord),
     ownDecoyChanges: createOwnDecoyNotifications(
       actionRecord,
       "defender",
@@ -170,6 +205,7 @@ function createOwnPlayerSnapshot(battleState, playerId) {
         return [
           {
             sequence: record.sequence,
+            defenderId: record.defenderId,
             kind: "shock",
             center: record.outcome.center,
             area: [...record.outcome.area],
@@ -180,6 +216,7 @@ function createOwnPlayerSnapshot(battleState, playerId) {
         return [
           {
             sequence: record.sequence,
+            defenderId: record.defenderId,
             kind: "detection",
             center: record.outcome.center,
             area: [...record.outcome.area],
@@ -190,6 +227,7 @@ function createOwnPlayerSnapshot(battleState, playerId) {
       if (record.action.actionType === ACTION_TYPES.RADAR_SCAN) {
         return [{
           sequence: record.sequence,
+          defenderId: record.defenderId,
           kind: "radar",
           center: record.outcome.anchor,
           area: [...record.outcome.area],
@@ -199,8 +237,43 @@ function createOwnPlayerSnapshot(battleState, playerId) {
       return [];
     });
 
+  const opponentIds = battleState.playerIds.filter((id) => id !== playerId);
+  const enemyMapsByPlayer = Object.fromEntries(opponentIds.map((opponentId) => {
+    const records = battleState.actionLog.filter(
+      (record) => record.actorId === playerId && record.defenderId === opponentId,
+    );
+    const cellResults = {};
+    const submarineMissileMarkers = [];
+    const nuclearBombMarkers = [];
+    const destroyerTargetCells = [];
+    for (const record of records) {
+      const type = record.action.actionType;
+      if ([ACTION_TYPES.SUBMARINE_MISSILE].includes(type)) {
+        submarineMissileMarkers.push(record.action.target.coordinate);
+      }
+      if (type === ACTION_TYPES.NUCLEAR_BOMB) {
+        nuclearBombMarkers.push(record.action.target.coordinate);
+      }
+      if ([ACTION_TYPES.DESTROYER_I_RAM, ACTION_TYPES.DESTROYER_II_RAM].includes(type)) {
+        destroyerTargetCells.push(record.action.target.coordinate);
+      }
+      if (![ACTION_TYPES.SUBMARINE_MISSILE, ACTION_TYPES.NUCLEAR_BOMB,
+        ACTION_TYPES.SHOCK_BOMB, ACTION_TYPES.DETECTION_BOMB,
+        ACTION_TYPES.RADAR_SCAN].includes(type)) {
+        for (const item of record.outcome.cellResults ?? [record.outcome.cellResult].filter(Boolean)) {
+          if (["hit", "miss"].includes(item.result)) cellResults[item.coordinate] = item.result;
+        }
+      }
+    }
+    return [opponentId, {
+      cellResults,
+      submarineMissileMarkers: [...new Set(submarineMissileMarkers)],
+      nuclearBombMarkers: [...new Set(nuclearBombMarkers)],
+      destroyerTargetCells: [...new Set(destroyerTargetCells)],
+    }];
+  }));
+
   return {
-    radar: { ...playerState.radar, cells: [...playerState.radar.cells] },
     units: playerState.units.map((unit) => ({
       id: unit.id,
       type: unit.type,
@@ -216,7 +289,10 @@ function createOwnPlayerSnapshot(battleState, playerId) {
       submarineMissileMarkers: [
         ...playerState.submarineMissileMarkers,
       ],
+      nuclearBombMarkers: [...playerState.nuclearBombMarkers],
+      destroyerTargetCells: [...playerState.destroyerTargetCells],
     },
+    enemyMapsByPlayer,
     intelligenceAreas,
     actionsLocked,
     actionAvailability: actionsLocked
@@ -227,7 +303,6 @@ function createOwnPlayerSnapshot(battleState, playerId) {
 
 function createRevealPlayerSnapshot(playerState) {
   return {
-    radar: { ...playerState.radar, cells: [...playerState.radar.cells] },
     units: playerState.units.map((unit) => ({
       id: unit.id,
       type: unit.type,
@@ -260,20 +335,52 @@ function createFinishedReplay(battleState) {
 
 function createPlayerView(battleState, viewerId) {
   assertBattleState(battleState);
-  getBattlePlayerState(battleState, viewerId);
-  const opponentId = getOpponentPlayerId(battleState, viewerId);
+  if (!battleState.playerIds.includes(viewerId)) {
+    throw new RuleValidationError(
+      "ACTION_VIEWER_NOT_INVOLVED",
+      "只有当前对局玩家可以取得行动反馈。",
+      { viewerId },
+    );
+  }
+  const opponentIds = battleState.playerIds.filter((id) => id !== viewerId);
+  const opponentId = opponentIds[0] ?? null;
+  const finalSalvo = battleState.match.finalSalvo;
+  const safeFinalSalvo = finalSalvo?.status === "selecting"
+    ? {
+        status: "selecting",
+        round: finalSalvo.round,
+        ownSubmitted: finalSalvo.selectionsByPlayer[viewerId] !== null,
+        ownSelectedDecoyId:
+          finalSalvo.selectionsByPlayer[viewerId] === "pass"
+            ? null
+            : finalSalvo.selectionsByPlayer[viewerId],
+        opponentSubmitted: opponentIds.every(
+          (id) => finalSalvo.selectionsByPlayer[id] !== null,
+        ),
+        submittedPlayerIds: battleState.playerIds.filter(
+          (id) => finalSalvo.selectionsByPlayer[id] !== null,
+        ),
+        availableDecoyIds: battleState.players[viewerId].decoys
+          .filter((decoy) => !decoy.destroyed)
+          .map((decoy) => decoy.id),
+        completedShots: finalSalvo.shots.length,
+      }
+    : finalSalvo?.status === "completed"
+      ? { status: "completed", round: finalSalvo.round }
+      : null;
 
   return {
     viewerId,
     opponentId,
+    opponentIds,
     match: {
       status: battleState.match.status,
       result: clone(battleState.match.result),
+      finalSalvo: safeFinalSalvo,
     },
     own: createOwnPlayerSnapshot(battleState, viewerId),
-    opponent: {
-      id: opponentId,
-    },
+    opponent: { id: opponentId },
+    opponents: opponentIds.map((id) => ({ id })),
     publicActionLog: battleState.actionLog.map(createPublicActionRecord),
     replay: createFinishedReplay(battleState),
   };
@@ -284,10 +391,10 @@ function createResolutionDelivery(battleState, actionRecord, viewerId) {
   assertActionRecord(actionRecord);
   const actorId = actionRecord.actorId;
   const defenderId = actionRecord.defenderId;
-  if (![actorId, defenderId].includes(viewerId)) {
+  if (!battleState.playerIds.includes(viewerId)) {
     throw new RuleValidationError(
       "ACTION_VIEWER_NOT_INVOLVED",
-      "只有本次行动的两名玩家可以取得行动反馈。",
+      "只有当前对局玩家可以取得行动反馈。",
       { viewerId },
     );
   }
@@ -298,10 +405,11 @@ function createResolutionDelivery(battleState, actionRecord, viewerId) {
       result: clone(battleState.match.result),
     },
     publicRecord: createPublicActionRecord(actionRecord),
-    feedback:
-      viewerId === actorId
-        ? createActorFeedback(battleState, actionRecord)
-        : createDefenderFeedback(actionRecord),
+    feedback: viewerId === actorId
+      ? createActorFeedback(battleState, actionRecord)
+      : viewerId === defenderId
+        ? createDefenderFeedback(actionRecord)
+        : { ...createPublicActionRecord(actionRecord), observer: true },
     view: createPlayerView(battleState, viewerId),
   };
 }
@@ -310,7 +418,7 @@ function createResolutionDeliveries(battleState, actionRecord) {
   assertBattleState(battleState);
   assertActionRecord(actionRecord);
   return Object.fromEntries(
-    [actionRecord.actorId, actionRecord.defenderId].map((playerId) => [
+    battleState.playerIds.map((playerId) => [
       playerId,
       createResolutionDelivery(battleState, actionRecord, playerId),
     ]),

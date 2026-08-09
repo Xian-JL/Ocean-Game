@@ -30,6 +30,7 @@ const {
   determineFirstPlayer,
   processActionTimeout,
   startPlaying,
+  submitFinalSalvoSelection,
   TURN_PHASES,
 } = require("./match");
 const { generateRandomDeployment } = require("./random-deployment");
@@ -122,7 +123,7 @@ class InMemoryRoomService {
     }
   }
 
-  createRoom({ nickname }) {
+  createRoom({ nickname, maxPlayers = 2 }) {
     const nowMs = this.#readNow();
     if (this.rooms.size >= this.maxRooms) {
       fail(
@@ -133,7 +134,7 @@ class InMemoryRoomService {
     }
     const playerId = this.#createUniquePlayerId(null);
     const roomCode = this.#createUniqueRoomCode();
-    const room = createRoomState({ roomCode, playerId, nickname });
+    const room = createRoomState({ roomCode, playerId, nickname, maxPlayers });
     this.rooms.set(roomCode, room);
     this.roomActivityAt.set(roomCode, nowMs);
     const reconnectToken = this.#issueReconnectToken(roomCode, playerId);
@@ -266,6 +267,13 @@ class InMemoryRoomService {
   disconnect({ roomCode, playerId }) {
     const nowMs = this.#readNow();
     const current = this.#getRoom(roomCode);
+    if (!current.seats.some((seat) => seat.playerId === playerId)) {
+      return {
+        changed: false,
+        roomCode: current.roomCode,
+        viewsByPlayer: createRoomViewsByPlayer(current, nowMs),
+      };
+    }
     if (current.roomPhase === ROOM_PHASES.CLOSED) {
       return {
         changed: false,
@@ -374,6 +382,16 @@ class InMemoryRoomService {
       roomCode,
       expectedVersion,
       completeFinalSalvo,
+    );
+    return createRoomViewsByPlayer(next, nowMs);
+  }
+
+  submitFinalSalvo({ roomCode, playerId, decoyId, expectedVersion }) {
+    const nowMs = this.#readNow();
+    const next = this.#mutate(
+      roomCode,
+      expectedVersion,
+      (room) => submitFinalSalvoSelection(room, playerId, decoyId, nowMs),
     );
     return createRoomViewsByPlayer(next, nowMs);
   }

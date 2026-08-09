@@ -154,7 +154,7 @@ async function randomizeAndReady(dom, requireSelectiveShock = false) {
     );
     if (overwrite) click(window, overwrite);
     await waitFor(
-      () => window.document.querySelectorAll("[data-deployment-cell]").length === 37,
+      () => window.document.querySelectorAll("[data-deployment-cell]").length === 29,
       "随机部署没有生成完整十一对象部署",
     );
     shockCenter = selectiveShockCenter(dom);
@@ -346,6 +346,11 @@ test("两个正式页面客户端完成整局、保密、重连、复盘、再�
   assert.equal(firstCarrier.length, 6);
   assert.equal(secondCarrier.length, 6);
 
+  await performAction(firstMover, Data.ACTION_TYPES.RADAR_SCAN, "A1");
+  await waitFor(() => canAct(secondMover), "第一方首回合雷达后未切换回合");
+  await performAction(secondMover, Data.ACTION_TYPES.RADAR_SCAN, "A1");
+  await waitFor(() => canAct(firstMover), "第二方首回合雷达后未切换回合");
+
   for (const browser of [firstMover, secondMover]) {
     const enemyPanel = browser.window.document.querySelector(
       ".battle-map-card--enemy",
@@ -441,18 +446,18 @@ test("两个正式页面客户端完成整局、保密、重连、复盘、再�
   ]);
   assert.match(
     secondMover.window.document.querySelector(".result-hero").textContent,
-    /胜利.*双方航空母舰同时沉没.*海盗船一方获胜/s,
+    /胜利.*海盗船攻击使敌方航空母舰沉没/s,
   );
   assert.match(
     firstMover.window.document.querySelector(".result-hero").textContent,
-    /失败.*双方航空母舰同时沉没.*海盗船一方获胜/s,
+    /失败.*海盗船攻击使敌方航空母舰沉没/s,
   );
   for (const browser of [firstMover, secondMover]) {
     const carrierResults = [...browser.window.document.querySelectorAll(
       ".carrier-result strong",
-    )].map((item) => item.textContent.trim());
-    assert.deepEqual(carrierResults, ["0", "0"]);
-    assert.equal(browser.window.document.querySelectorAll(".replay-log > li").length, 8);
+    )].map((item) => item.textContent.trim()).sort();
+    assert.deepEqual(carrierResults, ["0", "0.5"]);
+    assert.equal(browser.window.document.querySelectorAll(".replay-log > li").length, 10);
     assert.match(browser.window.document.querySelector(".replay-layout").textContent, /完整部署复盘/);
   }
 

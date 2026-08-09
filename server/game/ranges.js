@@ -77,13 +77,10 @@ function getDestroyerIRange(cells) {
   );
   const center = points[1];
 
-  return getRectangle(
-    center.row - 3,
-    center.row + 3,
-    center.column - 3,
-    center.column + 3,
-    { clip: true },
-  );
+  const horizontal = points[0].row === points[2].row;
+  return horizontal
+    ? getRectangle(center.row - 3, center.row + 3, center.column - 5, center.column + 5, { clip: true })
+    : getRectangle(center.row - 5, center.row + 5, center.column - 3, center.column + 3, { clip: true });
 }
 
 function getDestroyerIIRange(cells) {
@@ -96,13 +93,10 @@ function getDestroyerIIRange(cells) {
     (points[1].column + points[2].column) / 2,
   );
 
-  return getRectangle(
-    centerRow - 3,
-    centerRow + 4,
-    centerColumn - 3,
-    centerColumn + 4,
-    { clip: true },
-  );
+  const horizontal = points[0].row === points[3].row;
+  return horizontal
+    ? getRectangle(centerRow - 3, centerRow + 4, centerColumn - 4, centerColumn + 5, { clip: true })
+    : getRectangle(centerRow - 4, centerRow + 5, centerColumn - 3, centerColumn + 4, { clip: true });
 }
 
 function getDestroyerRange(type, cells) {

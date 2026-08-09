@@ -59,7 +59,11 @@ function createPlayingRoom(nowMs = 1_000) {
   room = setPlayerReady(room, "player-2", nowMs);
   const rolls = [0.9, 0.1];
   room = determineFirstPlayer(room, () => rolls.shift());
-  return startPlaying(room, nowMs);
+  room = startPlaying(room, nowMs);
+  for (const playerId of room.battleState.playerIds) {
+    room.battleState.players[playerId].remainingUses.radar_scan = 0;
+  }
+  return room;
 }
 
 function pirateMiss(actionId) {
@@ -281,6 +285,16 @@ test("服务在赛后只注销离开方凭证，留下方可恢复且房间可�
     playerId: joined.playerId,
     expectedVersion: views[joined.playerId].stateVersion,
   });
+  const staleDisconnect = service.disconnect({
+    roomCode: created.roomCode,
+    playerId: joined.playerId,
+  });
+  assert.equal(staleDisconnect.changed, false);
+  assert.equal(
+    service.getServerState(created.roomCode).connectionPhase,
+    "CONNECTED",
+  );
+  assert.equal(service.getServerState(created.roomCode).roomPhase, "WAITING");
 
   assert.throws(
     () => service.resume({

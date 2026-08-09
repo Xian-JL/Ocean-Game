@@ -1,8 +1,8 @@
 {
   "name": "ocean-game",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "private": true,
-  "description": "《海战 OCEAN》12×12 地图、一次伤害格、雷达扫描与分层私人标记版本",
+  "description": "《海战 OCEAN》双人/三人对战、分级战报与新平衡数值版本",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
