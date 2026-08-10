@@ -454,7 +454,7 @@ test("两个正式页面客户端完成整局、保密、重连、复盘、再�
   );
   for (const browser of [firstMover, secondMover]) {
     const carrierResults = [...browser.window.document.querySelectorAll(
-      ".carrier-result strong",
+      ".result-player-card__hp strong",
     )].map((item) => item.textContent.trim()).sort();
     assert.deepEqual(carrierResults, ["0", "0.5"]);
     assert.equal(browser.window.document.querySelectorAll(".replay-log > li").length, 10);
@@ -466,7 +466,7 @@ test("两个正式页面客户端完成整局、保密、重连、复盘、再�
     firstMover.window.document.querySelector('[data-action="request-rematch"]'),
   );
   await waitFor(
-    () => /已申请/.test(secondMover.window.document.querySelector(".rematch-status")?.textContent ?? ""),
+    () => /已申请/.test(secondMover.window.document.querySelector(".rematch-panel--v075")?.textContent ?? ""),
     "单方再来一局申请未同步",
   );
   click(

@@ -120,6 +120,8 @@
   function deriveActionStatus(roomState, actionDefinition) {
     const ownBattle = roomState?.battle?.own;
     const source = ownBattle?.units?.find(
+      (unit) => unit.type === actionDefinition.sourceType && unit.hp > 0,
+    ) ?? ownBattle?.units?.find(
       (unit) => unit.type === actionDefinition.sourceType,
     );
     if (!source || (typeof source.hp === "number" && source.hp <= 0)) {

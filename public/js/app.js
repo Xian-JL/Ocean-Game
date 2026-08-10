@@ -84,6 +84,7 @@
       cycleKey: null,
       drag: null,
       hoverCoordinate: null,
+      mapCollapsed: false,
     },
     battle: {
       targetPlayerId: null,
@@ -97,7 +98,9 @@
       mobileMap: "enemy",
       actionDrawerOpen: false,
       logOpen: false,
+      eventChannel: "combat",
       ownMapAlert: false,
+      collapsedMaps: {},
       selectedIntelligenceSequence: null,
       lastResolutionKey: null,
     },
@@ -115,6 +118,23 @@
       .replaceAll(">", "&gt;")
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
+  }
+
+  function uiIcon(name, className = "") {
+    return `<svg class="ui-svg-icon ${escapeHtml(className)}" aria-hidden="true" focusable="false"><use href="/assets/icons/ocean-ui.svg#${escapeHtml(name)}"></use></svg>`;
+  }
+
+  function unitIconName(unitType) {
+    return {
+      [Data.UNIT_TYPES.DESTROYER_I]: "ship-destroyer-i",
+      [Data.UNIT_TYPES.DESTROYER_II]: "ship-destroyer-ii",
+      [Data.UNIT_TYPES.SUBMARINE]: "ship-submarine",
+      [Data.UNIT_TYPES.NUCLEAR_SUBMARINE]: "ship-nuclear-submarine",
+      [Data.UNIT_TYPES.PIRATE_SHIP]: "ship-pirate",
+      [Data.UNIT_TYPES.MOTORBOAT]: "ship-motorboat",
+      [Data.UNIT_TYPES.AIRCRAFT_CARRIER]: "ship-aircraft-carrier",
+      [Data.UNIT_TYPES.DECOY_TORPEDO]: "ship-decoy",
+    }[unitType] ?? "ship-destroyer-i";
   }
 
   function clone(value) {
@@ -251,13 +271,31 @@
     writeBooleanPreference(MOTION_STORAGE_KEY, enabled);
   }
 
+  function toastPresentation(kind) {
+    return {
+      info: { icon: "action-radar", title: "提示" },
+      success: { icon: "status-online", title: "完成" },
+      warning: { icon: "status-unknown", title: "注意" },
+      error: { icon: "status-loss", title: "操作未完成" },
+      result: { icon: "action-radar", title: "战场更新" },
+      hit: { icon: "status-hit", title: "命中" },
+      miss: { icon: "status-miss", title: "未命中" },
+      unknown: { icon: "status-unknown", title: "结果未知" },
+      private: { icon: "status-private", title: "私人情报" },
+    }[kind] ?? { icon: "action-radar", title: "提示" };
+  }
+
   function showToast(message, kind = "info", duration = 5_000) {
     if (!message) {
       return;
     }
+    const meta = toastPresentation(kind);
     const toast = document.createElement("div");
     toast.className = `toast toast--${kind}`;
-    toast.textContent = message;
+    toast.setAttribute("role", kind === "error" ? "alert" : "status");
+    toast.innerHTML = `
+      <span class="toast__icon" aria-hidden="true">${uiIcon(meta.icon)}</span>
+      <div class="toast__content"><strong>${escapeHtml(meta.title)}</strong><p>${escapeHtml(message)}</p></div>`;
     toastRegion.append(toast);
     window.setTimeout(() => toast.remove(), duration);
   }
@@ -395,6 +433,7 @@
     state.deployment.history = [];
     state.deployment.dirty = false;
     state.deployment.hoverCoordinate = null;
+    state.deployment.mapCollapsed = false;
     state.deployment.serverDigest = placementDigest(nextRoom?.own?.deployment);
     state.deployment.cycleKey = nextRoom
       ? `${nextRoom.roomCode}:${nextRoom.matchSummary?.startedAt ?? "new"}:${nextRoom.stateVersion}`
@@ -608,12 +647,31 @@
       clearBattleDraft();
     }
 
+    const resumedFromPause = Boolean(
+      previous?.roomCode === nextRoom.roomCode &&
+      previous?.connectionPhase &&
+      previous.connectionPhase !== "CONNECTED" &&
+      nextRoom.connectionPhase === "CONNECTED"
+    );
+    const previousEliminated = new Set(previous?.battle?.match?.eliminatedPlayerIds ?? []);
+    const newlyEliminated = (nextRoom.battle?.match?.eliminatedPlayerIds ?? []).filter((id) => !previousEliminated.has(id));
+
     state.room = nextRoom;
+    if (resumedFromPause) {
+      showToast("连接已恢复，对局继续。", "success", 3_500);
+    }
+    for (const playerId of newlyEliminated) {
+      showToast(`${Model.nicknameFor(nextRoom, playerId)} 已淘汰`, "warning", 4_500);
+    }
     const availableTargets = nextRoom.turn?.canAct && nextRoom.maxPlayers === 3
       ? (nextRoom.turn.remainingTargetPlayerIds ?? [])
-      : (nextRoom.battle?.opponentIds ?? []);
+      : battleOpponentIds(nextRoom.battle);
     if (!availableTargets.includes(state.battle.targetPlayerId)) {
       state.battle.targetPlayerId = availableTargets[0] ?? null;
+    }
+    const visibleBattleMaps = ["own", ...battleOpponentIds(nextRoom.battle)];
+    if (!visibleBattleMaps.includes(state.battle.mobileMap)) {
+      state.battle.mobileMap = state.battle.targetPlayerId ?? "own";
     }
     document.title = nextRoom.turn?.canAct
       ? "轮到你行动 · 海战 OCEAN"
@@ -634,7 +692,7 @@
       }
       const description = describeLatestResolution(nextRoom);
       if (description) {
-        showToast(description, "result", 7_000);
+        showToast(description, resolutionVisualState(nextRoom), 7_000);
       }
       state.battle.lastResolutionKey = nextResolutionKey;
     }
@@ -1193,35 +1251,67 @@
   }
 
   function renderDeploymentInventory(locked) {
+    const groups = [
+      {
+        key: "surface",
+        label: "水面舰队",
+        definitions: Data.UNIT_DEFINITIONS.filter((definition) => definition.category === "surface"),
+      },
+      {
+        key: "underwater",
+        label: "水下单位",
+        definitions: Data.UNIT_DEFINITIONS.filter((definition) => definition.category === "underwater"),
+      },
+      {
+        key: "decoy",
+        label: "战术装置",
+        definitions: Data.UNIT_DEFINITIONS.filter((definition) => definition.category === "decoy"),
+      },
+    ];
+
+    const renderItem = (definition) => {
+      const placement = placementById(definition.id);
+      const count = placement?.cells.length ?? 0;
+      const complete = count === definition.cellCount;
+      const selected = state.deployment.selectedId === definition.id;
+      const orientation = definition.shape === "line"
+        ? state.deployment.orientations[definition.id] ?? "horizontal"
+        : null;
+      return `
+        <button
+          type="button"
+          class="fleet-item ${selected ? "fleet-item--selected" : ""} ${complete ? "fleet-item--placed" : ""}"
+          data-action="select-placement"
+          data-placement-id="${definition.id}"
+          aria-pressed="${selected}"
+          ${locked ? "disabled" : ""}
+        >
+          <span class="fleet-item__icon fleet-item__icon--${definition.category}">${escapeHtml(definition.shortName)}</span>
+          <span class="fleet-item__body">
+            <strong>${escapeHtml(definition.name)}</strong>
+            <small>${escapeHtml(definition.shapeText)}${orientation ? ` · ${orientation === "horizontal" ? "横" : "纵"}` : ""}</small>
+          </span>
+          <span class="fleet-item__state" data-complete="${complete}">
+            ${complete ? "✓ 已部署" : count > 0 ? `${count}/${definition.cellCount}` : "待部署"}
+          </span>
+        </button>`;
+    };
+
     return `
-      <div class="fleet-inventory">
-        ${Data.UNIT_DEFINITIONS.map((definition) => {
-          const placement = placementById(definition.id);
-          const count = placement?.cells.length ?? 0;
-          const complete = count === definition.cellCount;
-          const selected = state.deployment.selectedId === definition.id;
-          const orientation = definition.shape === "line"
-            ? state.deployment.orientations[definition.id] ?? "horizontal"
-            : null;
-          return `
-            <button
-              type="button"
-              class="fleet-item ${selected ? "fleet-item--selected" : ""} ${complete ? "fleet-item--placed" : ""}"
-              data-action="select-placement"
-              data-placement-id="${definition.id}"
-              aria-pressed="${selected}"
-              ${locked ? "disabled" : ""}
-            >
-              <span class="fleet-item__icon fleet-item__icon--${definition.category}">${escapeHtml(definition.shortName)}</span>
-              <span class="fleet-item__body">
-                <strong>${escapeHtml(definition.name)}</strong>
-                <small>${escapeHtml(definition.shapeText)}${orientation ? ` · ${orientation === "horizontal" ? "横向" : "纵向"}` : ""}</small>
-              </span>
-              <span class="fleet-item__state" data-complete="${complete}">
-                ${complete ? "已放置" : count > 0 ? `${count}/${definition.cellCount}` : "未放置"}
-              </span>
-            </button>`;
-        }).join("")}
+      <div class="fleet-inventory fleet-inventory--grouped">
+        ${groups.map((group) => `
+          <section class="fleet-group fleet-group--${group.key}">
+            <div class="fleet-group__heading">
+              <span>${group.label}</span>
+              <small>${group.definitions.filter((definition) => {
+                const placement = placementById(definition.id);
+                return (placement?.cells.length ?? 0) === definition.cellCount;
+              }).length}/${group.definitions.length}</small>
+            </div>
+            <div class="fleet-group__items">
+              ${group.definitions.map(renderItem).join("")}
+            </div>
+          </section>`).join("")}
       </div>`;
   }
 
@@ -1233,88 +1323,140 @@
     const selectedDefinition = Data.getUnitDefinitionById(
       state.deployment.selectedId,
     );
+    const completeCount = Data.UNIT_DEFINITIONS.filter((definition) => {
+      const placement = placementById(definition.id);
+      return (placement?.cells.length ?? 0) === definition.cellCount;
+    }).length;
+    const totalCount = Data.UNIT_DEFINITIONS.length;
+    const progress = Math.round((completeCount / totalCount) * 100);
+    const readyCount = room.seats.filter((seat) => seat.ready).length;
     const latestAutoEvent = [...room.systemEvents]
       .reverse()
       .find((event) => event.kind === "deployment_timeout_auto_ready");
     const pausedRemaining = room.connection?.pausedTimer?.kind === "deployment"
       ? Math.ceil(room.connection.pausedTimer.remainingMs / 1000)
       : null;
+    const collapsed = state.deployment.mapCollapsed;
+    const selectedPlacement = selectedDefinition
+      ? placementById(selectedDefinition.id)
+      : null;
+    const selectedPlacedCells = selectedPlacement?.cells.length ?? 0;
+    const selectedComplete = Boolean(
+      selectedDefinition && selectedPlacedCells === selectedDefinition.cellCount,
+    );
+
     return `
-      <section class="deployment-page page-enter" aria-labelledby="deployment-title">
-        ${renderRoomTop("部署己方舰队", "全部对象可以相邻，但不能重叠或越界。提交准备后仍由服务器完整验证。", {
-          kicker: "P03 / 舰队部署",
+      <section class="deployment-page deployment-page--v071 page-enter" aria-labelledby="deployment-title">
+        ${renderRoomTop("部署舰队", "布置完成后提交准备。", {
+          kicker: "舰队部署",
           deadline: room.deadlines.deploymentDeadlineAt,
           timerLabel: "部署剩余",
         })}
-        ${pausedRemaining !== null ? `<div class="status-banner status-banner--warning">部署计时已暂停，恢复后剩余 ${formatCountdown(pausedRemaining)}。</div>` : ""}
+        ${pausedRemaining !== null ? `<div class="status-banner status-banner--warning">部署计时已暂停 · ${formatCountdown(pausedRemaining)}</div>` : ""}
         ${latestAutoEvent ? `<div class="status-banner">${escapeHtml(latestAutoEvent.message)}</div>` : ""}
         ${renderSeats(room, true)}
 
-        <div class="deployment-layout">
+        <section class="deployment-progress-strip" aria-label="部署进度">
+          <div class="deployment-progress-strip__summary">
+            <span class="status-kicker">部署进度</span>
+            <strong>${completeCount} / ${totalCount}</strong>
+          </div>
+          <div class="deployment-progress-track" aria-hidden="true">
+            <i style="width:${progress}%"></i>
+          </div>
+          <div class="deployment-progress-strip__status">
+            <span>${validation.valid ? "舰队已就绪" : "继续部署"}</span>
+            <small>${readyCount}/${room.seats.length} 玩家已准备</small>
+          </div>
+        </section>
+
+        <div class="deployment-layout deployment-layout--v071">
           <aside class="deployment-panel deployment-panel--fleet">
-            <div class="panel-heading">
-              <span>舰队清单</span><small>8 个作战单位 · 3 枚诱饵</small>
+            <div class="panel-heading panel-heading--compact">
+              <div>
+                <span>舰队</span>
+                <small>8 个单位 · 3 枚诱饵</small>
+              </div>
+              <span class="panel-counter">${completeCount}/${totalCount}</span>
             </div>
             ${renderDeploymentInventory(locked)}
           </aside>
 
-          <section class="deployment-map-card">
-            <div class="map-card__heading">
-              <div>
+          <section class="deployment-map-card collapsible-map ${collapsed ? "collapsible-map--collapsed" : ""}">
+            <div class="map-card__heading map-card__heading--with-toggle">
+              <button
+                type="button"
+                class="map-collapse-button"
+                data-action="toggle-deployment-map"
+                aria-expanded="${!collapsed}"
+                aria-label="${collapsed ? "展开部署地图" : "最小化部署地图"}"
+                data-tooltip="${collapsed ? "展开地图" : "最小化地图"}"
+              >${collapsed ? "+" : "−"}</button>
+              <div class="map-card__title">
                 <span class="status-kicker">己方海域</span>
                 <h2>12×12 部署图</h2>
               </div>
-              <span class="map-state" data-ready="${locked}">${locked ? "部署已锁定" : "编辑中"}</span>
+              <span class="map-state" data-ready="${locked}">${locked ? "已锁定" : "编辑中"}</span>
             </div>
-            ${renderDeploymentBoard(locked)}
-            <p class="board-help">
-              ${locked
-                ? "本方已准备。尚无其他玩家准备时可取消准备并继续编辑。"
-                : selectedDefinition?.shape === "connected"
-                  ? "航空母舰：依次选择 6 个四向连通格；点击已选的最后一格可撤销。"
-                  : "选中对象后点击地图起点；桌面端也可拖动已放置对象。按 R 旋转直线单位。"}
-            </p>
+            ${collapsed
+              ? `<button class="collapsed-map-summary" type="button" data-action="toggle-deployment-map">
+                   <span>部署地图已最小化</span>
+                   <strong>${completeCount}/${totalCount} 已完成</strong>
+                 </button>`
+              : `${renderDeploymentBoard(locked)}
+                 <p class="board-help">
+                   ${locked
+                     ? "部署已锁定。"
+                     : selectedDefinition?.shape === "connected"
+                       ? `航空母舰 · ${selectedPlacedCells}/${selectedDefinition.cellCount} 格`
+                       : "点击放置 · R 旋转 · 可拖动已放置单位"}
+                 </p>`}
           </section>
 
           <aside class="deployment-panel deployment-panel--guide">
-            <div class="panel-heading"><span>当前操作</span><small>提交前均可撤销</small></div>
-            <div class="selected-placement-card">
+            <div class="panel-heading panel-heading--compact">
+              <div>
+                <span>当前操作</span>
+                <small>${selectedComplete ? "已部署" : "待完成"}</small>
+              </div>
+              <button class="icon-button icon-button--small" type="button" data-action="open-rules" aria-label="查看部署规则" data-tooltip="部署规则">?</button>
+            </div>
+            <div class="selected-placement-card ${selectedComplete ? "selected-placement-card--complete" : ""}">
               <span class="selected-placement-card__icon">${escapeHtml(selectedDefinition?.shortName ?? "—")}</span>
               <div>
                 <strong>${escapeHtml(selectedDefinition?.name ?? "未选择")}</strong>
-                <small>${escapeHtml(selectedDefinition?.shapeText ?? "")}</small>
+                <small>${escapeHtml(selectedDefinition?.shapeText ?? "")}${selectedDefinition ? ` · ${selectedPlacedCells}/${selectedDefinition.cellCount}` : ""}</small>
               </div>
+              <span class="selected-placement-card__state">${selectedComplete ? "✓" : "○"}</span>
             </div>
-            <div class="guide-actions">
+            <div class="guide-actions guide-actions--modern">
               <button class="button button--secondary button--compact" data-action="rotate-placement" ${locked || !selectedDefinition ? "disabled" : ""}>旋转 <kbd>R</kbd></button>
               <button class="button button--quiet button--compact" data-action="remove-placement" ${locked || !placementById(state.deployment.selectedId) ? "disabled" : ""}>撤回</button>
               <button class="button button--quiet button--compact" data-action="undo-deployment" ${locked || state.deployment.history.length === 0 ? "disabled" : ""}>撤销</button>
             </div>
-            <div class="validation-card" data-valid="${validation.valid}">
-              <strong>${validation.valid ? "部署完整合法" : `还需处理 ${validation.errors.length} 项`}</strong>
+            <div class="validation-card validation-card--compact" data-valid="${validation.valid}">
+              <strong>${validation.valid ? "✓ 部署完整合法" : `${validation.errors.length} 项待处理`}</strong>
               ${validation.valid
-                ? "<p>可以提交并准备。</p>"
-                : `<ul>${validation.errors.slice(0, 5).map((error) => `<li>${escapeHtml(error)}</li>`).join("")}</ul>`}
+                ? "<p>可以提交准备。</p>"
+                : `<p>${escapeHtml(validation.errors[0] ?? "继续完成舰队部署。")}</p>`}
             </div>
-            <div class="deployment-tips">
-              <strong>部署约束</strong>
-              <span>直线单位必须水平或垂直连续</span>
-              <span>潜水艇与核潜艇均为完整 2×2</span>
-              <span>航空母舰六格必须全部四向连通</span>
+            <div class="deployment-utility-actions">
+              <button class="button button--secondary button--compact" data-action="random-deployment" ${locked ? "disabled" : ""}>随机部署</button>
+              <button class="button button--quiet button--compact" data-action="clear-deployment" ${locked || state.deployment.placements.length === 0 ? "disabled" : ""}>清空</button>
             </div>
           </aside>
         </div>
 
-        <div class="deployment-toolbar">
-          <div>
-            <button class="button button--secondary" data-action="random-deployment" ${locked ? "disabled" : ""}>随机部署</button>
-            <button class="button button--quiet" data-action="clear-deployment" ${locked || state.deployment.placements.length === 0 ? "disabled" : ""}>清空部署</button>
+        <div class="deployment-toolbar deployment-toolbar--v071">
+          <div class="deployment-toolbar__status">
+            <span>${validation.valid ? "部署完成" : `已完成 ${completeCount}/${totalCount}`}</span>
+            <small>${locked ? "等待其他玩家" : "提交前仍可调整"}</small>
           </div>
-          <div>
-            <button class="button button--danger-quiet" data-action="leave-room">离开房间</button>
+          <div class="deployment-toolbar__actions">
+            <button class="button button--danger-quiet" data-action="leave-room">离开</button>
             ${ownSeat?.ready
               ? `<button class="button button--secondary" data-action="cancel-ready" ${room.deploymentsLocked ? "disabled" : ""}>取消准备</button>`
-              : `<button class="button button--primary" data-action="ready-deployment" ${!validation.valid || state.pendingRequest ? "disabled" : ""}>${state.pendingRequest === "ready" ? "正在提交…" : "准备"}</button>`}
+              : `<button class="button button--primary button--ready" data-action="ready-deployment" ${!validation.valid || state.pendingRequest ? "disabled" : ""}>${state.pendingRequest === "ready" ? '<span class="button-spinner" aria-hidden="true"></span>提交中' : "准备"}</button>`}
           </div>
         </div>
       </section>`;
@@ -1396,6 +1538,7 @@
       const classes = [];
       let content = "";
       let label = `${coordinate}，空海域`;
+      let cellState = "empty";
       if (entry?.kind === "unit") {
         const { unit, definition } = entry;
         const hit = unit.hitCells.includes(coordinate);
@@ -1404,6 +1547,8 @@
         if (hit) classes.push("board-cell--own-hit");
         if (sunk) classes.push("board-cell--wreck");
         if (unit.paralyzed) classes.push("board-cell--paralyzed");
+        cellState = sunk ? "sunk-unit" : unit.paralyzed ? "paralyzed-unit" : hit ? "damaged-unit" : "own-unit";
+        classes.push(`cell-state--${cellState}`);
         if (selectedDefinition?.sourceType === unit.type) {
           classes.push("board-cell--source");
         }
@@ -1415,6 +1560,8 @@
       } else if (entry?.kind === "decoy") {
         classes.push("board-cell--unit", "board-cell--decoy");
         if (entry.decoy.destroyed) classes.push("board-cell--wreck");
+        cellState = entry.decoy.destroyed ? "destroyed-decoy" : "decoy";
+        classes.push(`cell-state--${cellState}`);
         content = `<span class="unit-glyph">雷</span>${entry.decoy.destroyed ? '<span class="cell-state-glyph">×</span>' : ""}`;
         label = `${coordinate}，诱饵鱼雷${entry.decoy.destroyed ? "，已摧毁" : "，有效"}`;
       }
@@ -1423,14 +1570,14 @@
         content,
         label,
         disabled: true,
-        attributes: { "data-coordinate": coordinate },
+        attributes: { "data-coordinate": coordinate, "data-cell-state": cellState },
       };
     }, options.replay ? "board-frame--replay" : "");
   }
 
-  function currentIntelligenceArea(ownBattle) {
+  function currentIntelligenceArea(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
     const areas = (ownBattle?.intelligenceAreas ?? []).filter(
-      (area) => !area.defenderId || area.defenderId === state.battle.targetPlayerId,
+      (area) => !area.defenderId || area.defenderId === targetPlayerId,
     );
     if (areas.length === 0) {
       return null;
@@ -1441,16 +1588,39 @@
     if (state.battle.selectedIntelligenceSequence !== null) {
       return areas.find(
         (area) => area.sequence === state.battle.selectedIntelligenceSequence,
-      ) ?? areas.at(-1);
+      ) ?? null;
     }
     return areas.at(-1);
   }
 
-  function legalTargetCells(ownBattle) {
+  function enemyMapFor(ownBattle, targetPlayerId) {
+    return ownBattle.enemyMapsByPlayer?.[targetPlayerId] ?? ownBattle.enemyMap;
+  }
+
+  function isGlobalHelicopterSelection(room = state.room) {
+    return Boolean(
+      room?.maxPlayers === 3 &&
+      state.battle.selectedAction === Data.ACTION_TYPES.HELICOPTER_STRAFE &&
+      (room.turn?.remainingTargetPlayerIds?.length ?? 0) > 1,
+    );
+  }
+
+  function markersForTarget(targetPlayerId) {
+    if (targetPlayerId === state.battle.targetPlayerId) {
+      return state.battle.markers;
+    }
+    const room = state.room;
+    if (!room?.roomCode || !room?.own?.playerId) return new Map();
+    return readMarkers(room.roomCode, room.own.playerId, targetPlayerId);
+  }
+
+  function legalTargetCells(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
     if (!state.battle.selectedAction) {
       return new Set();
     }
-    const options = Data.getTargetOptions(state.battle.selectedAction, ownBattle);
+    const enemyMap = enemyMapFor(ownBattle, targetPlayerId);
+    const effectiveOwnBattle = { ...ownBattle, enemyMap };
+    const options = Data.getTargetOptions(state.battle.selectedAction, effectiveOwnBattle);
     const definition = Data.getActionDefinition(state.battle.selectedAction);
     if (definition.targetMode !== "line") {
       return new Set(options.map((option) => option.coordinate));
@@ -1463,47 +1633,58 @@
     );
   }
 
-  function renderEnemyBoard(ownBattle) {
-    const enemyMap = ownBattle.enemyMapsByPlayer?.[state.battle.targetPlayerId]
-      ?? ownBattle.enemyMap;
+  function renderEnemyBoard(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
+    const enemyMap = enemyMapFor(ownBattle, targetPlayerId);
     const results = enemyMap?.cellResults ?? {};
     const missiles = new Set(enemyMap?.submarineMissileMarkers ?? []);
     const nuclearBombs = new Set(enemyMap?.nuclearBombMarkers ?? []);
     const effectiveOwnBattle = { ...ownBattle, enemyMap };
-    const legal = legalTargetCells(effectiveOwnBattle);
-    const preview = new Set(
-      Data.previewCells(state.battle.selectedAction, state.battle.target),
-    );
-    const intelligence = currentIntelligenceArea(ownBattle);
+    const selectedForThisMap = targetPlayerId === state.battle.targetPlayerId;
+    const globalHelicopter = isGlobalHelicopterSelection();
+    const interactiveForThisMap = selectedForThisMap || globalHelicopter;
+    const legal = interactiveForThisMap
+      ? legalTargetCells(ownBattle, targetPlayerId)
+      : new Set();
+    const preview = interactiveForThisMap
+      ? new Set(Data.previewCells(state.battle.selectedAction, state.battle.target))
+      : new Set();
+    const intelligence = currentIntelligenceArea(ownBattle, targetPlayerId);
     const intelligenceCells = new Set(intelligence?.area ?? []);
+    const targetMarkers = markersForTarget(targetPlayerId);
     return renderGrid("敌方地图", (coordinate) => {
       const result = results[coordinate];
       const resolved = result === "hit" || result === "miss";
       const hasMissile = missiles.has(coordinate) && !resolved;
       const hasNuclearBomb = nuclearBombs.has(coordinate) && !resolved;
-      const marker = !resolved ? state.battle.markers.get(coordinate) : null;
+      const marker = !resolved ? targetMarkers.get(coordinate) : null;
       const hasMarker = Boolean(marker);
       const classes = [];
       let content = "";
       let stateText = "未知";
+      let cellState = "unknown";
       if (result === "hit") {
         classes.push("board-cell--enemy-hit");
+        cellState = "public-hit";
         content = '<span class="enemy-result">✦</span>';
         stateText = "命中，已结算";
       } else if (result === "miss") {
         classes.push("board-cell--enemy-miss");
+        cellState = "public-miss";
         content = '<span class="enemy-result">×</span>';
         stateText = "未命中，已结算";
       } else if (hasMissile) {
         classes.push("board-cell--missile");
+        cellState = "fired-unknown";
         content = '<span class="missile-glyph">↗</span>';
         stateText = "导弹已发射，仍未结算";
       } else if (hasNuclearBomb) {
         classes.push("board-cell--missile");
+        cellState = "fired-unknown";
         content = '<span class="missile-glyph">☢</span>';
         stateText = "核弹已投放，命中情况保密";
       } else if (hasMarker) {
         classes.push("board-cell--marker", `board-cell--marker-${marker}`);
+        cellState = "private-marker";
         content = marker === "occupied" ? '<span class="marker-glyph">●</span>' : '<span class="marker-half marker-half--top"></span><span class="marker-half marker-half--bottom"></span>';
         const markerText = { occupied: "确定有布局", surface_yes: "水面有布局", surface_no: "水面无布局", underwater_yes: "水下有布局", underwater_no: "水下无布局" }[marker];
         stateText = `未知，本机标记：${markerText}`;
@@ -1515,11 +1696,13 @@
             : "board-cell--intel-detection",
         );
       }
+      classes.push(`cell-state--${cellState}`);
+      const rangeState = preview.has(coordinate) ? "selected" : legal.has(coordinate) ? "valid" : "none";
       if (legal.has(coordinate)) {
-        classes.push("board-cell--legal-target");
+        classes.push("board-cell--legal-target", "range-state--valid");
       }
       if (preview.has(coordinate)) {
-        classes.push("board-cell--target-preview");
+        classes.push("board-cell--target-preview", "range-state--selected");
       }
       const targetMode = state.battle.markerMode
         ? "切换私人标记"
@@ -1533,16 +1716,48 @@
         attributes: {
           "data-action": "enemy-cell",
           "data-coordinate": coordinate,
+          "data-target-player-id": targetPlayerId,
+          "data-cell-state": cellState,
+          "data-range-state": rangeState,
+          "data-intel-state": intelligenceCells.has(coordinate) ? intelligence?.kind ?? "none" : "none",
           "aria-pressed": preview.has(coordinate) || hasMarker ? "true" : "false",
         },
       };
     });
   }
 
-  function unitStatusText(unit) {
-    if (unit.hp <= 0) return "已沉没";
-    if (unit.paralyzed) return "瘫痪：本回合不能行动";
-    return "可行动";
+  function unitStateCode(unit, definition) {
+    if (unit.hp <= 0) return "sunk";
+    if (unit.paralyzed) return "paralyzed";
+    if (unit.hp < definition.initialHp) return "damaged";
+    return "ready";
+  }
+
+  function unitStatusText(unit, definition) {
+    const code = unitStateCode(unit, definition);
+    return {
+      sunk: "已沉没",
+      paralyzed: "瘫痪",
+      damaged: "受伤",
+      ready: "作战中",
+    }[code];
+  }
+
+  function unitResourceBadges(ownBattle, unit) {
+    return Data.ACTION_DEFINITIONS
+      .filter((action) => action.sourceType === unit.type && action.initialUses !== null)
+      .map((action) => {
+        const remaining = ownBattle.remainingUses?.[action.type] ?? 0;
+        const short = {
+          [Data.ACTION_TYPES.SUBMARINE_MISSILE]: "导弹",
+          [Data.ACTION_TYPES.NUCLEAR_BOMB]: "核弹",
+          [Data.ACTION_TYPES.SHOCK_BOMB]: "震爆",
+          [Data.ACTION_TYPES.DETECTION_BOMB]: "探测",
+          [Data.ACTION_TYPES.HELICOPTER_STRAFE]: "直升机",
+          [Data.ACTION_TYPES.RADAR_SCAN]: "雷达",
+        }[action.type] ?? action.name;
+        return `<span class="unit-resource-badge" data-empty="${remaining <= 0}">${escapeHtml(short)} <b>${remaining}</b></span>`;
+      }).join("");
   }
 
   function renderOwnUnitStatus(ownBattle) {
@@ -1552,104 +1767,211 @@
       return leftIndex - rightIndex;
     });
     return `
-      <div class="unit-status-list">
+      <div class="unit-status-list unit-status-list--v073">
         ${units.map((unit) => {
           const definition = Data.getUnitDefinitionByType(unit.type);
+          const stateCode = unitStateCode(unit, definition);
+          const hpPercent = Math.max(0, Math.min(100, (unit.hp / definition.initialHp) * 100));
           return `
-            <article class="unit-status ${unit.hp <= 0 ? "unit-status--sunk" : ""} ${unit.paralyzed ? "unit-status--paralyzed" : ""}">
-              <span class="unit-status__icon">${escapeHtml(definition.shortName)}</span>
-              <div>
-                <strong>${escapeHtml(definition.name)}</strong>
-                <small>${escapeHtml(unitStatusText(unit))}</small>
+            <article class="unit-status unit-status--v073 unit-status--${stateCode} ${unit.hp <= 0 ? "unit-status--sunk" : ""} ${unit.paralyzed ? "unit-status--paralyzed" : ""}" data-unit-state="${stateCode}">
+              <span class="unit-status__icon unit-status__icon--${definition.category}" aria-hidden="true">${uiIcon(unitIconName(unit.type))}</span>
+              <div class="unit-status__main">
+                <div class="unit-status__title"><strong>${escapeHtml(definition.name)}</strong><small>${escapeHtml(unitStatusText(unit, definition))}</small></div>
+                <div class="hp-track" aria-label="生命值 ${Model.formatHp(unit.hp)} / ${definition.initialHp}"><i style="--hp-percent:${hpPercent}%"></i></div>
+                <div class="unit-resource-row">${unitResourceBadges(ownBattle, unit)}</div>
               </div>
-              <span class="hp-meter" aria-label="生命值 ${Model.formatHp(unit.hp)} / ${definition.initialHp}">
-                <b>${Model.formatHp(unit.hp)}</b><i>/ ${definition.initialHp}</i>
-              </span>
+              <span class="hp-meter" aria-label="生命值 ${Model.formatHp(unit.hp)} / ${definition.initialHp}"><b>${Model.formatHp(unit.hp)}</b><i>/ ${definition.initialHp}</i></span>
             </article>`;
         }).join("")}
-        <article class="decoy-status">
-          <strong>诱饵鱼雷</strong>
-          <span>${ownBattle.decoys.filter((decoy) => !decoy.destroyed).length} / 3 有效</span>
+        <article class="decoy-status decoy-status--v073">
+          <span class="unit-status__icon unit-status__icon--decoy" aria-hidden="true">${uiIcon("ship-decoy")}</span>
+          <div><strong>诱饵鱼雷</strong><small>仍有效</small></div>
+          <b>${ownBattle.decoys.filter((decoy) => !decoy.destroyed).length} / 3</b>
         </article>
+      </div>`;
+  }
+
+  function openingRadarRequired(room) {
+    if (!room?.turn?.canAct) return false;
+    const availability = room.battle?.own?.actionAvailability ?? [];
+    const radar = availability.find((item) => item.actionType === Data.ACTION_TYPES.RADAR_SCAN);
+    return Boolean(
+      radar?.available &&
+      availability.some((item) =>
+        item.actionType !== Data.ACTION_TYPES.RADAR_SCAN &&
+        item.issues?.some((issue) => issue.code === "OPENING_RADAR_REQUIRED"),
+      )
+    );
+  }
+
+  function actionVisualMeta(definition) {
+    const table = {
+      [Data.ACTION_TYPES.DESTROYER_I_RAM]: { group: "surface", glyph: "Ⅰ", icon: "action-destroyer-i", groupName: "舰艇攻击" },
+      [Data.ACTION_TYPES.DESTROYER_II_RAM]: { group: "surface", glyph: "Ⅱ", icon: "action-destroyer-ii", groupName: "舰艇攻击" },
+      [Data.ACTION_TYPES.PIRATE_ATTACK]: { group: "surface", glyph: "盗", icon: "action-pirate", groupName: "舰艇攻击" },
+      [Data.ACTION_TYPES.MOTORBOAT_RAM]: { group: "surface", glyph: "摩", icon: "action-motorboat", groupName: "舰艇攻击" },
+      [Data.ACTION_TYPES.SUBMARINE_MISSILE]: { group: "underwater", glyph: "↗", icon: "action-missile", groupName: "潜航武器" },
+      [Data.ACTION_TYPES.NUCLEAR_BOMB]: { group: "underwater", glyph: "☢", icon: "action-nuclear", groupName: "潜航武器" },
+      [Data.ACTION_TYPES.SHOCK_BOMB]: { group: "underwater", glyph: "震", icon: "action-shock", groupName: "潜航武器" },
+      [Data.ACTION_TYPES.DETECTION_BOMB]: { group: "underwater", glyph: "探", icon: "action-detection", groupName: "潜航武器" },
+      [Data.ACTION_TYPES.HELICOPTER_STRAFE]: { group: "carrier", glyph: "✦", icon: "action-helicopter", groupName: "舰载系统" },
+      [Data.ACTION_TYPES.RADAR_SCAN]: { group: "carrier", glyph: "◎", icon: "action-radar", groupName: "舰载系统" },
+    };
+    return table[definition.type] ?? { group: "surface", glyph: "•", icon: "action-radar", groupName: "行动" };
+  }
+
+  function compactActionStatus(status) {
+    if (status.code === "available") return "可用";
+    if (status.code === "submitting") return "结算中";
+    if (status.code === "waiting") return "等待回合";
+    if (status.code === "sunk") return "单位沉没";
+    if (status.code === "paralyzed") return "单位瘫痪";
+    if (status.code === "empty") return "已耗尽";
+    if (status.label.includes("首个行动") || status.label.includes("先扫描")) return "需先雷达";
+    if (status.label.includes("首个行动并同时")) return "须首项使用";
+    if (status.label.includes("驱逐舰均沉没")) return "尚未解锁";
+    return status.label;
+  }
+
+  function renderActionCard(room, definition) {
+    const status = Model.deriveActionStatus(room, definition);
+    const selected = definition.type === state.battle.selectedAction;
+    const meta = actionVisualMeta(definition);
+    const sourceDefinition = Data.getUnitDefinitionByType(definition.sourceType);
+    const global = definition.type === Data.ACTION_TYPES.HELICOPTER_STRAFE && isGlobalHelicopterSelection(room);
+    return `
+      <button
+        type="button"
+        class="action-card action-card--v073 ${selected ? "action-card--selected" : ""}"
+        data-action="select-action"
+        data-action-type="${definition.type}"
+        data-status="${status.code}"
+        data-action-group="${meta.group}"
+        title="${escapeHtml(definition.warning)}"
+        ${status.enabled ? "" : "disabled"}
+      >
+        <span class="action-card__icon action-card__icon--${meta.group}" aria-hidden="true">${uiIcon(meta.icon)}</span>
+        <span class="action-card__body">
+          <strong>${escapeHtml(definition.name)}</strong>
+          <small>${escapeHtml(sourceDefinition?.name ?? "作战单位")}${global ? " · 双目标" : ""}</small>
+        </span>
+        <span class="action-card__meta">
+          <span class="action-card__state">${escapeHtml(compactActionStatus(status))}</span>
+          <span class="action-card__resource">${escapeHtml(Model.actionResourceLabel(room, definition))}</span>
+        </span>
+      </button>`;
+  }
+
+  function renderActionGroups(room) {
+    const groups = [
+      { key: "surface", label: "舰艇攻击" },
+      { key: "underwater", label: "潜航武器" },
+      { key: "carrier", label: "舰载系统" },
+    ];
+    return `
+      <div class="action-list action-list--v073">
+        ${groups.map((group) => {
+          const actions = Data.ACTION_DEFINITIONS.filter((definition) => actionVisualMeta(definition).group === group.key);
+          return `<section class="action-group action-group--${group.key}" aria-label="${group.label}">
+            <div class="action-group__heading"><span>${group.label}</span><b>${actions.filter((definition) => Model.deriveActionStatus(room, definition).enabled).length}</b></div>
+            <div class="action-group__grid">${actions.map((definition) => renderActionCard(room, definition)).join("")}</div>
+          </section>`;
+        }).join("")}
       </div>`;
   }
 
   function renderActionPanel(room) {
     const ownBattle = room.battle.own;
     const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
+    const radarRequired = openingRadarRequired(room);
+    const globalHelicopter = selectedDefinition?.type === Data.ACTION_TYPES.HELICOPTER_STRAFE && isGlobalHelicopterSelection(room);
+    const remainingNames = (room.turn?.remainingTargetPlayerIds ?? [])
+      .map((playerId) => Model.nicknameFor(room, playerId));
     return `
-      <aside class="action-rail ${state.battle.actionDrawerOpen ? "action-rail--open" : ""}" aria-label="行动与单位状态">
+      <aside class="action-rail action-rail--v073 ${state.battle.actionDrawerOpen ? "action-rail--open" : ""}" aria-label="行动与单位状态">
         <button class="action-rail__heading" type="button" data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}">
           <div>
             <span class="status-kicker">行动面板</span>
-            <h2>${room.turn?.canAct ? "选择本回合行动" : "等待行动"}</h2>
+            <h2>${room.turn?.canAct ? (radarRequired ? "完成首次雷达" : "选择行动") : "等待行动"}</h2>
           </div>
           <span class="turn-lock" data-active="${room.turn?.canAct}">${room.turn?.canAct ? "你的回合" : "已锁定"}</span>
           <span class="drawer-chevron" aria-hidden="true">⌃</span>
         </button>
         <div class="action-rail__content">
-        ${(room.battle.opponentIds?.length ?? 0) > 1 ? `
-          <label class="field target-player-field">
-            <span>本回合目标${room.turn?.canAct ? ` · 剩余 ${room.turn.remainingTargetPlayerIds?.length ?? 0}` : ""}</span>
-            <select id="target-player-input">
-              ${(room.turn?.canAct
-                ? (room.turn.remainingTargetPlayerIds ?? [])
-                : room.battle.opponentIds).map((playerId) => `
-                <option value="${escapeHtml(playerId)}" ${state.battle.targetPlayerId === playerId ? "selected" : ""}>
-                  ${escapeHtml(Model.nicknameFor(room, playerId))}
-                </option>`).join("")}
-            </select>
-          </label>` : ""}
-        <div class="action-list">
-          ${Data.ACTION_DEFINITIONS.map((definition) => {
-            const status = Model.deriveActionStatus(room, definition);
-            const selected = definition.type === state.battle.selectedAction;
-            return `
-              <button
-                type="button"
-                class="action-card ${selected ? "action-card--selected" : ""}"
-                data-action="select-action"
-                data-action-type="${definition.type}"
-                data-status="${status.code}"
-                ${status.enabled ? "" : "disabled"}
-              >
-                <span class="action-card__index">${String(Data.ACTION_DEFINITIONS.indexOf(definition) + 1).padStart(2, "0")}</span>
-                <span class="action-card__body">
-                  <strong>${escapeHtml(definition.name)}</strong>
-                  <small>${escapeHtml(status.label)}</small>
-                </span>
-                <span class="action-card__resource">${escapeHtml(Model.actionResourceLabel(room, definition))}</span>
-              </button>`;
-          }).join("")}
-        </div>
+        ${room.turn?.canAct && battleOpponentIds(room.battle).length > 1 ? `
+          <div class="battle-target-progress" aria-label="三人回合目标">
+            <div class="battle-target-progress__heading"><span>目标进度</span><strong>${room.turn?.completedTargetPlayerIds?.length ?? 0} / ${room.turn?.requiredTargetPlayerIds?.length ?? 0}</strong></div>
+            <div class="battle-target-progress__items">
+              ${(room.turn?.requiredTargetPlayerIds ?? battleOpponentIds(room.battle)).map((playerId) => {
+                const done = (room.turn?.completedTargetPlayerIds ?? []).includes(playerId);
+                const pending = (room.turn?.remainingTargetPlayerIds ?? []).includes(playerId);
+                const selected = state.battle.targetPlayerId === playerId;
+                return `<button type="button" data-action="select-battle-target" data-target-player-id="${escapeHtml(playerId)}" data-done="${done}" class="${selected ? "is-selected" : ""}" ${room.turn?.canAct && !pending ? "disabled" : ""}><span>${done ? "✓" : "●"}</span><strong>${escapeHtml(Model.nicknameFor(room, playerId))}</strong><small>${done ? "已完成" : pending ? "待操作" : "查看"}</small></button>`;
+              }).join("")}
+            </div>
+          </div>
+          <label class="sr-only" for="target-player-input">当前敌方目标</label>
+          <select id="target-player-input" class="sr-only" tabindex="-1" aria-hidden="true">
+            ${battleOpponentIds(room.battle).map((playerId) => `<option value="${escapeHtml(playerId)}" ${state.battle.targetPlayerId === playerId ? "selected" : ""}>${escapeHtml(Model.nicknameFor(room, playerId))}</option>`).join("")}
+          </select>` : ""}
+
+        ${radarRequired ? `
+          <section class="opening-radar-task" aria-label="首次雷达任务">
+            <span class="opening-radar-task__icon" aria-hidden="true">${uiIcon("action-radar")}</span>
+            <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `先选择 ${escapeHtml(remainingNames.join(" / "))} 中的一名敌人` : "选择敌方 4×4 海域"}</small></div>
+            <button class="button button--primary button--compact" data-action="select-action" data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}">${state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN ? "已选择" : "开始扫描"}</button>
+          </section>` : ""}
+
+        ${renderActionGroups(room)}
 
         ${selectedDefinition ? `
-          <div class="target-instruction">
-            <strong>${escapeHtml(selectedDefinition.name)}</strong>
+          <div class="target-instruction target-instruction--v073" data-target-mode="${selectedDefinition.targetMode}">
+            <div class="target-instruction__heading"><span class="action-card__icon action-card__icon--${actionVisualMeta(selectedDefinition).group}" aria-hidden="true">${uiIcon(actionVisualMeta(selectedDefinition).icon)}</span><div><small>当前行动</small><strong>${escapeHtml(selectedDefinition.name)}</strong></div></div>
+            ${globalHelicopter ? `<div class="multi-target-action multi-target-action--v073"><span>同时作用</span>${(room.turn?.remainingTargetPlayerIds ?? []).map((playerId) => `<b>${escapeHtml(Model.nicknameFor(room, playerId))}</b>`).join("")}<small>消耗 1 次</small></div>` : ""}
             <p>${selectedDefinition.targetMode === "line"
-              ? "先选择行或列，再点击敌方地图中的任意一格。"
+              ? "选择行或列，再点地图。"
               : selectedDefinition.targetMode === "area"
-                ? "在敌方地图选择能形成完整作用区域的中心格。"
-                : "在敌方地图选择一个高亮的合法目标格。"}</p>
+                ? "选择高亮中心格。"
+                : "选择高亮目标格。"}</p>
             ${selectedDefinition.targetMode === "line" ? `
               <div class="axis-switch" role="group" aria-label="直升机扫射方向">
-                <button class="button button--compact ${state.battle.helicopterAxis === "row" ? "button--primary" : "button--quiet"}" data-action="set-helicopter-axis" data-axis="row">选择一行</button>
-                <button class="button button--compact ${state.battle.helicopterAxis === "column" ? "button--primary" : "button--quiet"}" data-action="set-helicopter-axis" data-axis="column">选择一列</button>
+                <button class="button button--compact ${state.battle.helicopterAxis === "row" ? "button--primary" : "button--quiet"}" data-action="set-helicopter-axis" data-axis="row">按行</button>
+                <button class="button button--compact ${state.battle.helicopterAxis === "column" ? "button--primary" : "button--quiet"}" data-action="set-helicopter-axis" data-axis="column">按列</button>
               </div>` : ""}
             ${state.battle.target ? `
-              <div class="chosen-target">
-                <span>已选目标</span><strong>${escapeHtml(Model.formatTarget(state.battle.target))}</strong>
-                <button class="text-button" data-action="reopen-action-confirm">确认提交</button>
+              <div class="chosen-target chosen-target--v073">
+                <span>目标</span><strong>${escapeHtml(Model.formatTarget(state.battle.target))}</strong>
+                <button class="button button--primary button--compact" data-action="reopen-action-confirm">确认</button>
               </div>` : ""}
-            <button class="text-button" data-action="cancel-action-selection">取消行动选择</button>
+            <button class="text-button" data-action="cancel-action-selection">取消选择</button>
           </div>` : ""}
 
-        <details class="unit-drawer">
-          <summary>己方单位状态</summary>
+        <section class="fleet-status-panel fleet-status-panel--v073" aria-label="己方舰队状态">
+          <div class="fleet-status-panel__heading"><div><span class="status-kicker">己方舰队</span><h3>状态与资源</h3></div><span>${ownBattle.units.filter((unit) => unit.hp > 0).length} / ${ownBattle.units.length}</span></div>
           ${renderOwnUnitStatus(ownBattle)}
-        </details>
+        </section>
         </div>
       </aside>`;
+  }
+
+  function renderTurnProgress(room) {
+    const required = room.turn?.requiredTargetPlayerIds ?? [];
+    if (required.length <= 1) return "";
+    const completed = new Set(room.turn?.completedTargetPlayerIds ?? []);
+    return `
+      <div class="battle-turn-progress" aria-label="本回合双目标进度">
+        <div class="battle-turn-progress__summary">
+          <span>本回合</span>
+          <strong>${completed.size} / ${required.length}</strong>
+        </div>
+        <div class="battle-turn-progress__targets">
+          ${required.map((playerId) => {
+            const done = completed.has(playerId);
+            const currentTarget = room.turn?.canAct && state.battle.targetPlayerId === playerId;
+            return `<span data-complete="${done}" data-current="${currentTarget}">${done ? "✓" : "●"} ${escapeHtml(Model.nicknameFor(room, playerId))}</span>`;
+          }).join("")}
+        </div>
+      </div>`;
   }
 
   function renderBattleHeader(room) {
@@ -1657,7 +1979,7 @@
     const currentName = current ? Model.nicknameFor(room, current) : "服务器";
     const canAct = room.turn?.canAct;
     return `
-      <header class="battle-header">
+      <header class="battle-header battle-header--v072">
         <div class="battle-header__room">
           <span>房间 ${escapeHtml(room.roomCode)}</span>
           <button class="text-button" data-action="copy-room">复制</button>
@@ -1666,6 +1988,7 @@
           <small>第 ${room.turn?.turnNumber ?? room.matchSummary.turnCount} 回合</small>
           <strong>${canAct ? "你的回合" : `等待 ${escapeHtml(currentName)}`}</strong>
         </div>
+        ${renderTurnProgress(room)}
         <div class="battle-header__timer">
           <span>行动剩余</span>
           ${room.deadlines.actionDeadlineAt
@@ -1673,13 +1996,50 @@
             : `<strong>${room.turnPhase === "RESOLVING" ? "结算中" : room.turnPhase === "AUTO_SKIPPING" ? "自动跳过" : "暂停"}</strong>`}
         </div>
         <div class="battle-header__players">
-          ${room.seats.map((seat) => `
-            <span data-online="${seat.online}"><i></i>${escapeHtml(seat.nickname)}${seat.playerId === room.own.playerId ? "（你）" : ""}</span>`).join("")}
+          ${room.seats.map((seat) => {
+            const eliminated = (room.battle?.match?.eliminatedPlayerIds ?? []).includes(seat.playerId);
+            const playerState = eliminated ? "eliminated" : !seat.online ? "offline" : seat.playerId === current ? "active" : "online";
+            const stateText = eliminated ? "已淘汰" : !seat.online ? "离线" : seat.playerId === current ? "行动中" : "在线";
+            return `<span data-online="${seat.online}" data-player-state="${playerState}"><i></i><b>${escapeHtml(seat.nickname)}${seat.playerId === room.own.playerId ? "（你）" : ""}</b><small>${stateText}</small></span>`;
+          }).join("")}
         </div>
         <div class="battle-header__timeouts">
-          <span>本方连续超时</span><strong>${room.own.consecutiveActionTimeouts} / 3</strong>
+          <span>连续超时</span><strong>${room.own.consecutiveActionTimeouts} / 3</strong>
         </div>
       </header>`;
+  }
+
+  function resolutionVisualState(room) {
+    const feedback = room?.latestResolution?.feedback;
+    if (!feedback) return "result";
+    const ownId = room.own.playerId;
+    const isActor = feedback.actorId === ownId;
+    if (isActor && [Data.ACTION_TYPES.DETECTION_BOMB, Data.ACTION_TYPES.RADAR_SCAN].includes(feedback.actionType)) {
+      return "private";
+    }
+    if (isActor && [Data.ACTION_TYPES.SUBMARINE_MISSILE, Data.ACTION_TYPES.NUCLEAR_BOMB, Data.ACTION_TYPES.SHOCK_BOMB].includes(feedback.actionType)) {
+      return "unknown";
+    }
+    if (feedback.result === "hit" || (feedback.receivedHits ?? []).length > 0) return "hit";
+    if (feedback.result === "miss") return "miss";
+    const cells = Array.isArray(feedback.cellResults)
+      ? feedback.cellResults
+      : Object.values(feedback.cellResultsByDefender ?? {}).flat();
+    if (cells.length > 0) {
+      return cells.some((cell) => cell.result === "hit") ? "hit" : "miss";
+    }
+    return "result";
+  }
+
+  function resolutionVisualMeta(room) {
+    const stateCode = resolutionVisualState(room);
+    return {
+      hit: { label: "命中", icon: "✦" },
+      miss: { label: "未命中", icon: "○" },
+      unknown: { label: "结果未知", icon: "↗" },
+      private: { label: "私人情报", icon: "⌾" },
+      result: { label: "结算完成", icon: "✓" },
+    }[stateCode];
   }
 
   function renderLatestFeedback(room) {
@@ -1689,69 +2049,311 @@
     }
     const ownDamage = feedback.ownDamage ?? [];
     const decoys = feedback.ownDecoyChanges ?? [];
+    const visualState = resolutionVisualState(room);
+    const meta = resolutionVisualMeta(room);
     return `
-      <section class="resolution-strip" aria-label="最近一次行动反馈">
-        <div>
-          <span class="status-kicker">最近结算</span>
+      <section class="resolution-strip resolution-strip--v074 resolution-strip--${visualState}" data-feedback-state="${visualState}" aria-label="最近一次行动反馈">
+        <span class="resolution-strip__icon" aria-hidden="true">${escapeHtml(meta.icon)}</span>
+        <div class="resolution-strip__content">
+          <div class="resolution-strip__meta"><span>${escapeHtml(meta.label)}</span><small>行动 ${feedback.sequence ?? "—"}</small></div>
           <strong>${escapeHtml(describeLatestResolution(room))}</strong>
+          ${ownDamage.length || decoys.length ? `
+            <ul>
+              ${ownDamage.map((event) => {
+                const definition = Data.getUnitDefinitionByType(event.unitType);
+                return `<li>${escapeHtml(definition?.name ?? event.unitId)}：${Model.formatHp(event.beforeHp)} → ${Model.formatHp(event.afterHp)}${event.sunk ? " · 已沉没" : ""}</li>`;
+              }).join("")}
+              ${decoys.map((event) => `<li>诱饵鱼雷 ${escapeHtml(event.decoyId)} · ${escapeHtml(event.cell)} 已摧毁</li>`).join("")}
+            </ul>` : ""}
         </div>
-        ${ownDamage.length || decoys.length ? `
-          <ul>
-            ${ownDamage.map((event) => {
-              const definition = Data.getUnitDefinitionByType(event.unitType);
-              return `<li>${escapeHtml(definition?.name ?? event.unitId)}：生命值 ${Model.formatHp(event.beforeHp)} → ${Model.formatHp(event.afterHp)}${event.sunk ? "，已沉没" : ""}</li>`;
-            }).join("")}
-            ${decoys.map((event) => `<li>诱饵鱼雷 ${escapeHtml(event.decoyId)}（${escapeHtml(event.cell)}）已被摧毁</li>`).join("")}
-          </ul>` : ""}
       </section>`;
   }
 
-  function renderPublicLog(room) {
-    const actions = room.battle?.publicActionLog ?? [];
+  function publicActionState(record) {
+    if ([Data.ACTION_TYPES.SUBMARINE_MISSILE, Data.ACTION_TYPES.NUCLEAR_BOMB, Data.ACTION_TYPES.SHOCK_BOMB, Data.ACTION_TYPES.DETECTION_BOMB, Data.ACTION_TYPES.RADAR_SCAN].includes(record.actionType)) {
+      return "unknown";
+    }
+    if (record.result === "hit") return "hit";
+    if (record.result === "miss") return "miss";
+    const cells = Array.isArray(record.cellResults)
+      ? record.cellResults
+      : Object.values(record.cellResultsByDefender ?? {}).flat();
+    if (cells.length > 0) return cells.some((cell) => cell.result === "hit") ? "hit" : "miss";
+    return "resolved";
+  }
+
+  function renderCombatEventList(room) {
+    const actions = [...(room.battle?.publicActionLog ?? [])].reverse();
+    if (actions.length === 0) return '<p class="empty-state">暂无战况。</p>';
+    return `<ol class="event-list event-list--combat">
+      ${actions.map((record) => {
+        const actorName = Model.nicknameFor(room, record.actorId);
+        const defenderIds = record.defenderIds ?? [record.defenderId].filter(Boolean);
+        const defenders = defenderIds.map((id) => Model.nicknameFor(room, id)).join(" + ") || "目标";
+        const stateCode = publicActionState(record);
+        const stateLabel = { hit: "命中", miss: "未命中", unknown: "结果隐藏", resolved: "已结算" }[stateCode];
+        return `<li class="event-item event-item--combat" data-event-state="${stateCode}">
+          <span class="event-item__marker" aria-hidden="true"></span>
+          <div class="event-item__body">
+            <div class="event-item__route"><b>${escapeHtml(actorName)}</b><span>→</span><b>${escapeHtml(defenders)}</b><em>${escapeHtml(record.actionName)}</em></div>
+            <p>${escapeHtml(Model.publicActionText(record, room))}</p>
+          </div>
+          <div class="event-item__meta"><span>${escapeHtml(stateLabel)}</span><small>#${record.sequence}</small></div>
+        </li>`;
+      }).join("")}
+    </ol>`;
+  }
+
+  function privateIntelligenceLabel(area) {
+    if (area.kind === "radar") return area.detected ? "发现布局" : "未发现布局";
+    if (area.kind === "detection") return area.detected ? "探测到水下信号" : "未探测到水下信号";
+    return "震爆区域已记录";
+  }
+
+  function privateIntelligenceName(area) {
+    if (area.kind === "radar") return "雷达";
+    if (area.kind === "detection") return "探测";
+    return "震爆";
+  }
+
+  function renderPrivateEventList(room) {
+    const areas = [...(room.battle?.own?.intelligenceAreas ?? [])].reverse();
+    const markerCount = state.battle.markers?.size ?? 0;
+    if (areas.length === 0 && markerCount === 0) return '<p class="empty-state">暂无私人情报。</p>';
+    return `<div class="private-event-stack">
+      ${markerCount > 0 ? `<div class="private-marker-summary"><span aria-hidden="true">⌖</span><div><strong>本机标记 ${markerCount}</strong><small>${escapeHtml(Model.nicknameFor(room, state.battle.targetPlayerId))} 海域</small></div></div>` : ""}
+      ${areas.length ? `<ol class="event-list event-list--private">
+        ${areas.map((area) => `<li class="event-item event-item--private" data-intelligence-kind="${escapeHtml(area.kind)}">
+          <span class="event-item__marker" aria-hidden="true">⌾</span>
+          <div class="event-item__body">
+            <div class="event-item__route"><b>${escapeHtml(privateIntelligenceName(area))}</b><span>→</span><b>${escapeHtml(Model.nicknameFor(room, area.defenderId))}</b><em>${escapeHtml(area.center ?? "区域")}</em></div>
+            <p>${escapeHtml(privateIntelligenceLabel(area))}</p>
+          </div>
+          <button class="text-button" data-action="select-intelligence" data-sequence="${area.sequence}">高亮</button>
+        </li>`).join("")}
+      </ol>` : ""}
+    </div>`;
+  }
+
+  function systemEventTone(kind) {
+    if (["action_timeout", "surrender", "disconnect_timeout"].includes(kind)) return "danger";
+    if (["automatic_skip", "deployment_timeout_auto_ready"].includes(kind)) return "warning";
+    return "neutral";
+  }
+
+  function renderSystemEventList(room) {
     const turnEvents = room.turnEvents ?? [];
     const systemEvents = room.systemEvents ?? [];
     const items = [
-      ...actions.map((record) => ({
-        sort: record.sequence * 3,
-        kind: "action",
-        record,
-        text: Model.publicActionText(record, room),
-      })),
-      ...turnEvents.map((event) => ({
-        sort: event.sequence * 3 + 1,
-        kind: event.kind,
-        event,
-        text: Model.turnEventText(event, room),
-      })),
-      ...systemEvents.map((event) => ({
-        sort: event.sequence * 3 + 2,
-        kind: "system",
-        event,
-        text: event.message,
-      })),
-    ].sort((left, right) => right.sort - left.sort);
+      ...turnEvents.map((event) => ({ sequence: event.sequence, kind: event.kind, text: Model.turnEventText(event, room), playerId: event.playerId })),
+      ...systemEvents.map((event) => ({ sequence: event.sequence, kind: event.kind, text: event.message, playerIds: event.playerIds })),
+    ].sort((left, right) => right.sequence - left.sequence);
+    const eliminated = room.battle?.match?.eliminatedPlayerIds ?? [];
+    if (items.length === 0 && eliminated.length === 0) return '<p class="empty-state">暂无系统消息。</p>';
+    return `<div class="system-event-stack">
+      ${eliminated.length ? `<div class="elimination-summary"><span>已淘汰</span>${eliminated.map((id) => `<b>${escapeHtml(Model.nicknameFor(room, id))}</b>`).join("")}</div>` : ""}
+      ${items.length ? `<ol class="event-list event-list--system">
+        ${items.map((item) => `<li class="event-item event-item--system" data-event-tone="${systemEventTone(item.kind)}">
+          <span class="event-item__marker" aria-hidden="true"></span>
+          <div class="event-item__body"><small>${escapeHtml(item.kind.replaceAll("_", " "))}</small><p>${escapeHtml(item.text)}</p></div>
+          <div class="event-item__meta"><small>#${item.sequence}</small></div>
+        </li>`).join("")}
+      </ol>` : ""}
+    </div>`;
+  }
+
+  function renderPublicLog(room, options = {}) {
+    const publicOnly = Boolean(options.publicOnly);
+    const active = publicOnly ? "combat" : state.battle.eventChannel;
+    const channelContent = active === "private"
+      ? renderPrivateEventList(room)
+      : active === "system"
+        ? renderSystemEventList(room)
+        : renderCombatEventList(room);
     return `
-      <section class="log-panel ${state.battle.logOpen ? "log-panel--open" : ""}">
+      <section class="log-panel event-center event-center--v074 ${state.battle.logOpen ? "log-panel--open" : ""}" data-event-channel="${escapeHtml(active)}">
         <button class="panel-heading log-panel__toggle" type="button" data-action="toggle-log" aria-expanded="${state.battle.logOpen}">
-          <span>公开行动记录</span><small>不包含敌方秘密信息</small><i aria-hidden="true">⌃</i>
+          <span>${publicOnly ? "公开行动记录" : "战场动态"}</span><small>${publicOnly ? "对局中公开可见的信息" : "战况 · 私人情报 · 系统"}</small><i aria-hidden="true">⌃</i>
         </button>
-        <div class="log-panel__content">
-        ${items.length === 0
-          ? '<p class="empty-state">尚无公开记录。</p>'
-          : `<ol class="action-log">
-              ${items.map((item) => {
-                const record = item.record;
-                const intelligence = record &&
-                  record.actorId === room.own.playerId &&
-                  [Data.ACTION_TYPES.SHOCK_BOMB, Data.ACTION_TYPES.DETECTION_BOMB].includes(record.actionType);
-                return `
-                  <li data-kind="${escapeHtml(item.kind)}">
-                    <span class="log-dot"></span>
-                    <div><small>${record ? `行动 ${record.sequence}` : "系统"}</small><p>${escapeHtml(item.text)}</p></div>
-                    ${intelligence ? `<button class="text-button" data-action="select-intelligence" data-sequence="${record.sequence}">高亮区域</button>` : ""}
-                  </li>`;
+        ${publicOnly ? "" : `<div class="event-tabs" role="tablist" aria-label="战场动态分类">
+          <button role="tab" aria-selected="${active === "combat"}" class="${active === "combat" ? "is-active" : ""}" data-action="set-event-channel" data-channel="combat"><span>战况</span><b>${room.battle?.publicActionLog?.length ?? 0}</b></button>
+          <button role="tab" aria-selected="${active === "private"}" class="${active === "private" ? "is-active" : ""}" data-action="set-event-channel" data-channel="private"><span>私人情报</span><b>${room.battle?.own?.intelligenceAreas?.length ?? 0}</b></button>
+          <button role="tab" aria-selected="${active === "system"}" class="${active === "system" ? "is-active" : ""}" data-action="set-event-channel" data-channel="system"><span>系统</span><b>${(room.turnEvents?.length ?? 0) + (room.systemEvents?.length ?? 0)}</b></button>
+        </div>`}
+        <div class="log-panel__content event-center__content">${channelContent}</div>
+      </section>`;
+  }
+
+  function battleOpponentIds(battle) {
+    if (Array.isArray(battle?.opponentIds) && battle.opponentIds.length > 0) {
+      return battle.opponentIds;
+    }
+    const legacyOpponentId = battle?.opponentId ?? battle?.opponent?.id;
+    return legacyOpponentId ? [legacyOpponentId] : [];
+  }
+
+  function isRemainingTurnTarget(room, playerId) {
+    const remaining = room?.turn?.remainingTargetPlayerIds;
+    return !Array.isArray(remaining) || remaining.includes(playerId);
+  }
+
+  function battleMapIsCollapsed(mapId) {
+    return Boolean(state.battle.collapsedMaps?.[mapId]);
+  }
+
+  function enemyTurnStatus(room, playerId) {
+    if (!room.turn?.canAct) return "查看";
+    if ((room.turn.completedTargetPlayerIds ?? []).includes(playerId)) return "已完成";
+    if (isRemainingTurnTarget(room, playerId)) return "待操作";
+    return "查看";
+  }
+
+  function renderRangeLegend(room, playerId) {
+    const definition = Data.getActionDefinition(state.battle.selectedAction);
+    if (!definition) return "";
+    const applies = state.battle.targetPlayerId === playerId || isGlobalHelicopterSelection(room);
+    if (!applies) return "";
+    const global = definition.type === Data.ACTION_TYPES.HELICOPTER_STRAFE && isGlobalHelicopterSelection(room);
+    return `
+      <div class="range-legend range-legend--v073" aria-label="攻击范围图例">
+        <span><i data-kind="valid"></i>可选</span>
+        <span><i data-kind="selected"></i>${state.battle.target ? "已选范围" : "目标预览"}</span>
+        ${global ? '<b>双目标同步预览</b>' : ""}
+      </div>`;
+  }
+
+  function renderEnemyMapCard(room, playerId) {
+    const ownBattle = room.battle.own;
+    const nickname = Model.nicknameFor(room, playerId);
+    const collapsed = battleMapIsCollapsed(playerId);
+    const selected = state.battle.targetPlayerId === playerId;
+    const status = enemyTurnStatus(room, playerId);
+    const canTarget = !room.turn?.canAct || isRemainingTurnTarget(room, playerId);
+    const mobileActive = state.battle.mobileMap === playerId;
+    const intel = currentIntelligenceArea(ownBattle, playerId);
+    return `
+      <section
+        class="battle-map-card battle-map-card--enemy battle-map-card--v072 battle-map-card--v073 ${selected ? "battle-map-card--targeted" : ""} ${collapsed ? "battle-map-card--collapsed" : ""} ${mobileActive ? "is-mobile-active" : ""}"
+        data-map-panel="enemy"
+        data-player-id="${escapeHtml(playerId)}"
+      >
+        <div class="map-card__heading map-card__heading--v072">
+          <button class="map-collapse-button" type="button" data-action="toggle-battle-map" data-map-id="${escapeHtml(playerId)}" aria-label="${collapsed ? "展开" : "最小化"}${escapeHtml(nickname)}的敌方地图" aria-expanded="${!collapsed}">${collapsed ? "+" : "−"}</button>
+          <button
+            class="map-target-heading"
+            type="button"
+            data-action="select-battle-target"
+            data-target-player-id="${escapeHtml(playerId)}"
+            ${canTarget ? "" : 'aria-disabled="true"'}
+          >
+            <span class="status-kicker">敌方海域</span>
+            <h2>${escapeHtml(nickname)}</h2>
+          </button>
+          <span class="map-turn-state" data-state="${status === "已完成" ? "done" : status === "待操作" ? "pending" : "view"}">${status === "已完成" ? "✓" : status === "待操作" ? "●" : "○"} ${status}</span>
+          <button
+            class="marker-toggle ${state.battle.markerMode && selected ? "marker-toggle--active" : ""}"
+            data-action="toggle-marker-mode"
+            data-target-player-id="${escapeHtml(playerId)}"
+            aria-pressed="${state.battle.markerMode && selected}"
+            title="私人标记"
+          >标记</button>
+        </div>
+        ${collapsed
+          ? `<button class="battle-map-collapsed-summary" type="button" data-action="toggle-battle-map" data-map-id="${escapeHtml(playerId)}"><span>${escapeHtml(nickname)} · 独立记录</span><strong>${status}</strong></button>`
+          : `${renderEnemyBoard(ownBattle, playerId)}
+             ${renderRangeLegend(room, playerId)}
+             <div class="map-caption map-caption--v072">
+               <span>${selected ? (state.battle.selectedAction ? "当前目标" : "已选中") : "独立敌方记录"}</span>
+               ${intel ? `<button class="intel-chip" data-action="clear-intelligence" data-kind="${intel.kind}">${intel.kind === "shock" ? "震爆区域" : intel.kind === "radar" ? `雷达 · ${intel.detected ? "发现" : "未发现"}` : `探测 · ${intel.detected ? "有信号" : "无信号"}`} ×</button>` : ""}
+             </div>`}
+      </section>`;
+  }
+
+  function renderOwnMapCard(room) {
+    const collapsed = battleMapIsCollapsed("own");
+    const mobileActive = state.battle.mobileMap === "own";
+    return `
+      <section class="battle-map-card battle-map-card--own battle-map-card--v072 battle-map-card--v073 ${collapsed ? "battle-map-card--collapsed" : ""} ${mobileActive ? "is-mobile-active" : ""}" data-map-panel="own">
+        <div class="map-card__heading map-card__heading--v072">
+          <button class="map-collapse-button" type="button" data-action="toggle-battle-map" data-map-id="own" aria-label="${collapsed ? "展开" : "最小化"}己方地图" aria-expanded="${!collapsed}">${collapsed ? "+" : "−"}</button>
+          <div class="map-target-heading map-target-heading--static"><span class="status-kicker">己方海域</span><h2>己方地图</h2></div>
+          <span class="map-turn-state" data-state="own">私密</span>
+        </div>
+        ${collapsed
+          ? `<button class="battle-map-collapsed-summary" type="button" data-action="toggle-battle-map" data-map-id="own"><span>己方海域</span><strong>完整情报</strong></button>`
+          : `${renderOwnBattleBoard(room.battle.own)}<div class="map-caption map-caption--v072"><span>己方完整情报</span></div>`}
+      </section>`;
+  }
+
+  function renderBattleMapTabs(room) {
+    const opponents = battleOpponentIds(room.battle);
+    const tabs = [
+      { id: "own", label: "己方" },
+      ...opponents.map((playerId) => ({ id: playerId, label: Model.nicknameFor(room, playerId) })),
+    ];
+    return `
+      <div class="mobile-map-tabs mobile-map-tabs--v072" data-tab-count="${tabs.length}" role="tablist" aria-label="地图切换">
+        ${tabs.map((tab) => `
+          <button role="tab" aria-selected="${state.battle.mobileMap === tab.id}" class="${state.battle.mobileMap === tab.id ? "is-active" : ""}" data-action="switch-map" data-map="${escapeHtml(tab.id)}">
+            ${escapeHtml(tab.label)}${tab.id === "own" && state.battle.ownMapAlert ? '<i class="alert-dot" aria-label="有新的己方受击信息"></i>' : ""}
+          </button>`).join("")}
+      </div>`;
+  }
+
+  function renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) {
+    if (!finalSalvoState) return "";
+    const submitted = new Set(finalSalvoState.submittedPlayerIds ?? []);
+    const ownSelected = (room.battle?.own?.decoys ?? []).find(
+      (decoy) => decoy.id === finalSalvoState.ownSelectedDecoyId,
+    );
+    const selecting = finalSalvoState.status === "selecting";
+    const waiting = selecting && finalSalvoState.ownSubmitted;
+    const allReady = room.seats.every((seat) => submitted.has(seat.playerId));
+    return `
+      <section class="final-salvo-stage final-salvo-stage--v075" data-final-salvo-status="${escapeHtml(finalSalvoState.status)}" aria-labelledby="final-salvo-title" aria-live="polite">
+        <header class="final-salvo-stage__header">
+          <span class="final-salvo-stage__emblem" aria-hidden="true">${uiIcon("status-final-salvo")}</span>
+          <div>
+            <span class="status-kicker">FINAL SALVO · 第 ${finalSalvoState.round ?? "—"} 轮</span>
+            <h2 id="final-salvo-title">最终齐射</h2>
+            <p>${selecting ? "秘密选择一枚尚未引爆的己方诱饵鱼雷。" : "全部鱼雷已经结算，正在生成最终结果。"}</p>
+          </div>
+          <span class="final-salvo-stage__state" data-state="${waiting ? "waiting" : selecting ? "selecting" : "resolving"}">${waiting ? "等待其他玩家" : selecting ? "等待选择" : "终局结算中"}</span>
+        </header>
+
+        <div class="final-salvo-stage__grid">
+          <div class="salvo-choice-panel">
+            <div class="salvo-choice-panel__heading">
+              <div><span class="status-kicker">己方鱼雷</span><strong>${waiting ? "选择已锁定" : "选择引爆坐标"}</strong></div>
+              <span>${availableFinalDecoys.length} 枚可用</span>
+            </div>
+            ${waiting
+              ? `<div class="salvo-locked-choice">${uiIcon("status-private")}<div><strong>${ownSelected ? `已选择 ${escapeHtml(ownSelected.cell)}` : "已秘密提交"}</strong><small>其他玩家无法看到你的选择；本轮会同时结算。</small></div></div>`
+              : availableFinalDecoys.length > 0
+                ? `<div class="salvo-decoy-grid">${availableFinalDecoys.map((decoy) => `
+                    <button class="salvo-decoy-card" type="button" data-action="submit-final-salvo" data-decoy-id="${escapeHtml(decoy.id)}">
+                      <span aria-hidden="true">${uiIcon("ship-decoy")}</span>
+                      <strong>${escapeHtml(decoy.cell)}</strong>
+                      <small>引爆鱼雷</small>
+                    </button>`).join("")}</div>`
+                : `<div class="salvo-empty-choice">${uiIcon("status-sunk")}<div><strong>本方无可用鱼雷</strong><small>无需选择，等待服务器推进。</small></div></div>`}
+            <div class="salvo-multi-target-note">${uiIcon("status-final-salvo")}<span>同一坐标同时作用于<strong>其他所有仍在局玩家</strong></span></div>
+          </div>
+
+          <aside class="salvo-submit-panel" aria-label="本轮提交状态">
+            <div class="salvo-submit-panel__heading"><span>本轮状态</span><strong>${submitted.size} / ${room.seats.length}</strong></div>
+            <div class="salvo-player-list">
+              ${room.seats.map((seat) => {
+                const own = seat.playerId === room.own.playerId;
+                const ready = submitted.has(seat.playerId);
+                return `<div class="salvo-player-status" data-ready="${ready}" data-own="${own}">
+                  <span>${ready ? uiIcon("status-online") : uiIcon("status-unknown")}</span>
+                  <div><strong>${escapeHtml(seat.nickname)}${own ? "（你）" : ""}</strong><small>${own && ready ? "已秘密提交" : ready ? "已就绪" : "等待选择"}</small></div>
+                </div>`;
               }).join("")}
-            </ol>`}
+            </div>
+            <div class="salvo-submit-summary" data-ready="${allReady}">${allReady ? "所有玩家已就绪，等待同时结算。" : "其他玩家的具体鱼雷坐标始终保密。"}</div>
+          </aside>
         </div>
       </section>`;
   }
@@ -1762,79 +2364,33 @@
     if (!battle) {
       return '<section class="boot-card"><span class="sonar"></span><p>正在同步安全战场视图……</p></section>';
     }
-    const ownActive = state.battle.mobileMap === "own";
     const finalSalvo = room.roomPhase === "FINAL_SALVO";
     const finalSalvoState = battle.match?.finalSalvo;
     const availableFinalDecoys = (battle.own.decoys ?? []).filter(
       (decoy) => finalSalvoState?.availableDecoyIds?.includes(decoy.id),
     );
-    const intel = currentIntelligenceArea(battle.own);
+    const opponents = battleOpponentIds(battle);
     return `
-      <section class="battle-page page-enter" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 page-enter" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         ${renderBattleHeader(room)}
-        ${finalSalvo ? `
-          <div class="final-salvo-banner">
-            <span class="sonar sonar--small"></span>
-            <div>
-              <strong>手动鱼雷引爆 · 第 ${finalSalvoState?.round ?? "—"} 轮</strong>
-              ${finalSalvoState?.status === "selecting"
-                ? finalSalvoState.ownSubmitted
-                  ? `<p>本轮选择已秘密提交，正在等待其他仍在局玩家。${finalSalvoState.opponentSubmitted ? "本轮所有玩家选择已齐，服务器正在同时结算。" : ""}</p>`
-                  : availableFinalDecoys.length > 0
-                    ? `<p>选择一枚尚未触发的己方诱饵鱼雷。所有仍在局玩家提交后同时攻击各自对应坐标。</p>
-                       <div class="final-salvo-actions">${availableFinalDecoys.map((decoy) => `<button class="button button--secondary" data-action="submit-final-salvo" data-decoy-id="${escapeHtml(decoy.id)}">引爆 ${escapeHtml(decoy.cell)}</button>`).join("")}</div>`
-                    : "<p>本方已无可引爆鱼雷，服务器将自动跳过并等待其他仍在局玩家。</p>"
-                : "<p>全部鱼雷已经结算，正在生成最终结果。</p>"}
-            </div>
-          </div>` : ""}
+        ${finalSalvo ? renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) : ""}
         ${renderLatestFeedback(room)}
+        ${renderBattleMapTabs(room)}
 
-        <div class="mobile-map-tabs" role="tablist" aria-label="地图切换">
-          <button role="tab" aria-selected="${!ownActive}" class="${!ownActive ? "is-active" : ""}" data-action="switch-map" data-map="enemy">敌方地图</button>
-          <button role="tab" aria-selected="${ownActive}" class="${ownActive ? "is-active" : ""}" data-action="switch-map" data-map="own">
-            己方地图 ${state.battle.ownMapAlert ? '<i class="alert-dot" aria-label="有新的己方受击信息"></i>' : ""}
-          </button>
-        </div>
-
-        <div class="battle-layout">
-          <div class="battle-maps">
-            <section class="battle-map-card battle-map-card--enemy ${!ownActive ? "is-mobile-active" : ""}" data-map-panel="enemy">
-              <div class="map-card__heading">
-                <div><span class="status-kicker">目标海域</span><h2>敌方地图</h2></div>
-                <button
-                  class="marker-toggle ${state.battle.markerMode ? "marker-toggle--active" : ""}"
-                  data-action="toggle-marker-mode"
-                  aria-pressed="${state.battle.markerMode}"
-                >标记模式 <kbd>M</kbd></button>
-              </div>
-              ${renderEnemyBoard(battle.own)}
-              <div class="map-caption">
-                <span>${state.battle.markerMode ? "标记模式：反复点击切换确定有、海面有/无、水下有/无和清除。" : state.battle.selectedAction ? "高亮格为当前行动合法目标。" : "选择行动后显示合法目标。"}</span>
-                ${intel ? `<button class="intel-chip" data-action="clear-intelligence" data-kind="${intel.kind}">${intel.kind === "shock" ? "5×5 震爆区域" : intel.kind === "radar" ? `4×4 雷达区域 · ${intel.detected ? "发现布局" : "未发现布局"}` : `3×3 探测区域 · ${intel.detected ? "有水下信号" : "无水下信号"}`} ×</button>` : ""}
-              </div>
-            </section>
-
-            <section class="battle-map-card battle-map-card--own ${ownActive ? "is-mobile-active" : ""}" data-map-panel="own">
-              <div class="map-card__heading">
-                <div><span class="status-kicker">防守海域</span><h2>己方地图</h2></div>
-                <span class="map-state">完整己方情报</span>
-              </div>
-              ${renderOwnBattleBoard(battle.own)}
-              <div class="map-caption"><span>敌方无法看到此处的单位类型、生命值、弹药与瘫痪状态。</span></div>
-            </section>
+        <div class="battle-layout battle-layout--v072 battle-layout--v073 ${finalSalvo ? "battle-layout--final" : ""}">
+          <div class="battle-maps battle-maps--v072 battle-maps--v073" data-map-count="${1 + opponents.length}">
+            ${renderOwnMapCard(room)}
+            ${opponents.map((playerId) => renderEnemyMapCard(room, playerId)).join("")}
           </div>
-          ${renderActionPanel(room)}
+          ${finalSalvo ? "" : renderActionPanel(room)}
         </div>
 
         <div class="battle-lower">
           ${renderPublicLog(room)}
           <aside class="battle-controls">
-            <div>
-              <span class="status-kicker">对局控制</span>
-              <strong>行动提交后不可撤销</strong>
-            </div>
-            <button class="button button--quiet" data-action="open-rules">规则与图例</button>
+            <div><span class="status-kicker">对局控制</span><strong>${room.turn?.canAct ? "完成本回合行动" : "等待战场更新"}</strong></div>
+            <button class="button button--quiet" data-action="open-rules">游戏说明</button>
             ${room.roomPhase === "PLAYING" ? '<button class="button button--danger-quiet" data-action="surrender">投降</button>' : ""}
           </aside>
         </div>
@@ -1954,6 +2510,59 @@
       </section>`;
   }
 
+  function resultIconName(code) {
+    if (code === "win") return "status-win";
+    if (code === "loss") return "status-loss";
+    return "status-draw";
+  }
+
+  function renderResultPlayers(room, result, replay) {
+    return `
+      <section class="result-player-panel" aria-label="玩家终局状态">
+        <div class="panel-heading"><span>玩家状态</span><small>航空母舰最终生命值</small></div>
+        <div class="result-player-grid">
+          ${room.seats.map((seat) => {
+            const winner = seat.playerId === result?.winnerId;
+            const own = seat.playerId === room.own.playerId;
+            const hp = resultCarrierHp(replay, seat.playerId);
+            return `<article class="result-player-card ${winner ? "result-player-card--winner" : ""}" data-winner="${winner}" data-own="${own}">
+              <span class="result-player-card__icon" aria-hidden="true">${uiIcon(winner ? "status-win" : "ship-aircraft-carrier")}</span>
+              <div class="result-player-card__identity"><strong>${escapeHtml(seat.nickname)}${own ? "（你）" : ""}</strong><small>${winner ? "胜者" : "对局结束"}</small></div>
+              <div class="result-player-card__hp"><strong>${Model.formatHp(hp)}</strong><small>航母 HP</small></div>
+            </article>`;
+          }).join("")}
+        </div>
+      </section>`;
+  }
+
+  function renderRematchPanel(room) {
+    const requested = new Set(room.rematch.requestedPlayerIds ?? []);
+    const readyCount = room.seats.filter((seat) => requested.has(seat.playerId)).length;
+    return `
+      <section class="rematch-panel rematch-panel--v075" aria-labelledby="rematch-title">
+        <div class="rematch-panel__heading">
+          <div><span class="status-kicker">REMATCH</span><h2 id="rematch-title">再来一局</h2></div>
+          <span class="rematch-progress">${readyCount} / ${room.seats.length} 已确认</span>
+        </div>
+        <div class="rematch-player-grid">
+          ${room.seats.map((seat) => {
+            const own = seat.playerId === room.own.playerId;
+            const ready = requested.has(seat.playerId);
+            return `<div class="rematch-player" data-ready="${ready}" data-own="${own}">
+              <span aria-hidden="true">${uiIcon(ready ? "status-rematch" : "status-unknown")}</span>
+              <div><strong>${escapeHtml(seat.nickname)}${own ? "（你）" : ""}</strong><small>${ready ? "已申请" : "等待确认"}</small></div>
+            </div>`;
+          }).join("")}
+        </div>
+        <div class="rematch-panel__actions">
+          ${room.rematch.ownRequested
+            ? `<button class="button button--secondary" data-action="cancel-rematch" ${state.pendingRequest ? "disabled" : ""}>取消申请</button>`
+            : `<button class="button button--primary" data-action="request-rematch" ${state.pendingRequest ? "disabled" : ""}>再来一局</button>`}
+          <button class="button button--danger-quiet" data-action="leave-room">离开房间</button>
+        </div>
+      </section>`;
+  }
+
   function renderFinishedPage() {
     const room = state.room;
     const result = room.battle?.match?.result;
@@ -1964,42 +2573,26 @@
       : room.own.playerId;
     const selectedSnapshot = replay?.players?.[selectedPlayerId];
     return `
-      <section class="finished-page page-enter" data-result="${relative.code}" aria-labelledby="result-title">
-        <header class="result-hero">
-          <div class="result-emblem" aria-hidden="true"><span></span><i></i></div>
-          <div>
-            <p class="eyebrow">P06 / 对局结算</p>
+      <section class="finished-page finished-page--v075 page-enter" data-result="${relative.code}" aria-labelledby="result-title">
+        <header class="result-hero result-hero--v075">
+          <span class="result-emblem result-emblem--v075" aria-hidden="true">${uiIcon(resultIconName(relative.code))}</span>
+          <div class="result-hero__content">
+            <span class="status-kicker">MATCH COMPLETE</span>
             <h1 id="result-title">${escapeHtml(relative.title)}</h1>
             <p>${escapeHtml(Model.endReasonForViewer(result, room.own.playerId))}</p>
+            <div class="result-hero__facts">
+              <span><b>${room.matchSummary.turnCount}</b> 回合</span>
+              <span><b>${escapeHtml(Model.formatDuration(room.matchSummary.durationMs))}</b> 对局时长</span>
+              <span><b>${room.seats.length}</b> 名玩家</span>
+            </div>
           </div>
-          <div class="result-actions">
-            ${room.rematch.ownRequested
-              ? `<button class="button button--secondary" data-action="cancel-rematch" ${state.pendingRequest ? "disabled" : ""}>取消再来一局</button>`
-              : `<button class="button button--primary" data-action="request-rematch" ${state.pendingRequest ? "disabled" : ""}>再来一局</button>`}
-            <button class="button button--danger-quiet" data-action="leave-room">离开房间</button>
-          </div>
+          <button class="button button--quiet result-hero__replay-link" type="button" data-action="focus-replay">查看复盘</button>
         </header>
 
-        <div class="result-summary-grid">
-          <article><span>总回合数</span><strong>${room.matchSummary.turnCount}</strong></article>
-          <article><span>对局持续</span><strong>${Model.formatDuration(room.matchSummary.durationMs)}</strong></article>
-          ${room.seats.map((seat) => `
-            <article class="carrier-result ${seat.playerId === result?.winnerId ? "carrier-result--winner" : ""}">
-              <span>${escapeHtml(seat.nickname)}的航空母舰</span>
-              <strong>${Model.formatHp(resultCarrierHp(replay, seat.playerId))}</strong><small>最终生命值</small>
-            </article>`).join("")}
-        </div>
+        ${renderResultPlayers(room, result, replay)}
+        ${renderRematchPanel(room)}
 
-        <div class="rematch-status" data-requested="${room.rematch.ownRequested}">
-          <span>${room.rematch.ownRequested ? "你已申请再来一局" : "你尚未申请再来一局"}</span>
-          <strong>${room.seats
-            .filter((seat) => seat.playerId !== room.own.playerId)
-            .map((seat) => `${escapeHtml(seat.nickname)} ${room.rematch.requestedPlayerIds.includes(seat.playerId) ? "已申请" : "等待确认"}`)
-            .join(" · ")}</strong>
-          <small>所有房间玩家确认且全部在线后，将清空上局部署与资源并重新开始 180 秒部署。</small>
-        </div>
-
-        <div class="replay-layout">
+        <div class="replay-layout replay-layout--v075" id="match-replay" tabindex="-1">
           <section class="replay-map-panel">
             <div class="panel-heading"><span>完整部署复盘</span><small>结算后公开真实身份</small></div>
             <div class="replay-tabs" role="tablist" aria-label="复盘玩家地图">
@@ -2025,7 +2618,7 @@
 
         <details class="public-log-after-match">
           <summary>查看对局中各玩家当时可见的公开记录</summary>
-          ${renderPublicLog(room)}
+          ${renderPublicLog(room, { publicOnly: true })}
         </details>
       </section>`;
   }
@@ -2054,22 +2647,22 @@
     if (state.restoring) {
       blockingOverlay.hidden = false;
       blockingOverlay.innerHTML = `
-        <section class="pause-card" role="alertdialog" aria-modal="true" aria-labelledby="restore-title">
-          <span class="sonar"></span>
-          <p class="eyebrow">正在恢复</p>
-          <h2 id="restore-title">正在恢复服务器确认的对局</h2>
-          <p>收到完整安全快照后才会重新开放操作。</p>
+        <section class="pause-card pause-card--connection" role="alertdialog" aria-modal="true" aria-labelledby="restore-title">
+          <div class="pause-card__icon" data-kind="sync" aria-hidden="true">↻</div>
+          <span class="connection-status-chip" data-state="syncing">同步中</span>
+          <h2 id="restore-title">正在恢复对局</h2>
+          <p>等待服务器同步</p>
         </section>`;
       return;
     }
     if (!state.connected && state.room) {
       blockingOverlay.hidden = false;
       blockingOverlay.innerHTML = `
-        <section class="pause-card" role="alertdialog" aria-modal="true" aria-labelledby="offline-title">
-          <span class="sonar"></span>
-          <p class="eyebrow">连接中断</p>
-          <h2 id="offline-title">正在重新连接服务器</h2>
-          <p>当前操作已锁定。连接恢复后将使用本机私密凭证同步唯一状态。</p>
+        <section class="pause-card pause-card--connection" role="alertdialog" aria-modal="true" aria-labelledby="offline-title">
+          <div class="pause-card__icon" data-kind="offline" aria-hidden="true">⌁</div>
+          <span class="connection-status-chip" data-state="offline">连接中断</span>
+          <h2 id="offline-title">正在重新连接</h2>
+          <p>操作暂时锁定</p>
         </section>`;
       return;
     }
@@ -2080,23 +2673,25 @@
       return;
     }
     const offlineSeats = room.seats.filter((seat) => !seat.online);
+    const offlineNames = offlineSeats.map((seat) => seat.nickname).join("、");
     const deadline = earliestReconnectDeadline(room);
     const beforeMatch = ["WAITING", "DEPLOYING", "ROLLING"].includes(room.roomPhase);
     const playing = room.roomPhase === "PLAYING";
     const finished = room.roomPhase === "FINISHED";
     blockingOverlay.hidden = false;
     blockingOverlay.innerHTML = `
-      <section class="pause-card" role="alertdialog" aria-modal="true" aria-labelledby="pause-title">
-        <div class="pause-card__icon" aria-hidden="true">⌁</div>
-        <p class="eyebrow">O02 / 断线暂停</p>
-        <h2 id="pause-title">${escapeHtml(offlineSeats.map((seat) => seat.nickname).join("、"))} 已断线</h2>
-        <p>正在等待重连，当前操作与游戏计时均已暂停。</p>
-        ${deadline ? `<div class="reconnect-timer"><span>服务器保留座位</span><strong data-deadline="${deadline}">—</strong></div>` : '<div class="reconnect-timer"><span>当前阶段无判负倒计时</span><strong>等待在线</strong></div>'}
+      <section class="pause-card pause-card--connection" role="alertdialog" aria-modal="true" aria-labelledby="pause-title">
+        <div class="pause-card__icon" data-kind="paused" aria-hidden="true">Ⅱ</div>
+        <span class="connection-status-chip" data-state="offline">${escapeHtml(offlineNames)} 已断线</span>
+        <h2 id="pause-title">对局已暂停</h2>
+        <p>等待玩家重连</p>
+        ${deadline ? `<div class="reconnect-timer reconnect-timer--v074"><span>重连剩余</span><strong data-deadline="${deadline}">—</strong></div>` : '<div class="reconnect-timer reconnect-timer--v074"><span>状态</span><strong>等待在线</strong></div>'}
+        <div class="pause-player-list">${offlineSeats.map((seat) => `<span><i></i>${escapeHtml(seat.nickname)}<small>离线</small></span>`).join("")}</div>
         <div class="modal__actions">
           ${beforeMatch ? '<button class="button button--danger-quiet" data-action="leave-room">离开房间</button>' : ""}
           ${playing ? '<button class="button button--danger" data-action="surrender-and-leave">投降并离开</button>' : ""}
           ${finished ? '<button class="button button--danger-quiet" data-action="leave-room">离开房间</button>' : ""}
-          ${room.roomPhase === "FINAL_SALVO" ? '<button class="button button--secondary" disabled>等待终局鱼雷选择或结算完成</button>' : ""}
+          ${room.roomPhase === "FINAL_SALVO" ? '<button class="button button--secondary" disabled>等待终局结算</button>' : ""}
         </div>
       </section>`;
   }
@@ -2400,10 +2995,9 @@
       `目标：${Model.formatTarget(target)}`,
       ...(globalHelicopter
         ? [`敌方玩家：${state.room.turn.remainingTargetPlayerIds.map((playerId) => Model.nicknameFor(state.room, playerId)).join("、")}（同时生效）`]
-        : state.room.battle.opponentIds?.length > 1
+        : battleOpponentIds(state.room.battle).length > 1
         ? [`敌方玩家：${Model.nicknameFor(state.room, state.battle.targetPlayerId)}`]
         : []),
-      definition.warning,
     ];
     if (definition.initialUses !== null) {
       paragraphs.push(`提交成功后剩余 ${Math.max(0, remaining - 1)} 次。`);
@@ -2560,11 +3154,23 @@
     render();
   }
 
-  function handleEnemyCell(coordinate) {
+  function handleEnemyCell(coordinate, targetPlayerId = state.battle.targetPlayerId) {
     const ownBattle = state.room?.battle?.own;
-    if (!ownBattle) return;
-    const selectedEnemyMap =
-      ownBattle.enemyMapsByPlayer?.[state.battle.targetPlayerId] ?? ownBattle.enemyMap;
+    if (!ownBattle || !targetPlayerId) return;
+    const globalHelicopter = isGlobalHelicopterSelection();
+    if (state.room?.turn?.canAct && !globalHelicopter && !isRemainingTurnTarget(state.room, targetPlayerId) && !state.battle.markerMode) {
+      showToast("该敌方玩家本回合已完成操作。", "info");
+      return;
+    }
+    if (targetPlayerId !== state.battle.targetPlayerId) {
+      saveMarkers();
+      state.battle.targetPlayerId = targetPlayerId;
+      state.battle.markerContext = null;
+      prepareMarkerContext(state.room);
+      state.battle.target = null;
+      state.battle.actionId = null;
+    }
+    const selectedEnemyMap = enemyMapFor(ownBattle, targetPlayerId);
     const effectiveOwnBattle = { ...ownBattle, enemyMap: selectedEnemyMap };
     const resolved = Data.resolvedTargetSet(effectiveOwnBattle);
     if (state.battle.markerMode) {
@@ -2965,6 +3571,11 @@
       void shareInvite(control);
       return;
     }
+    if (action === "toggle-deployment-map") {
+      state.deployment.mapCollapsed = !state.deployment.mapCollapsed;
+      render();
+      return;
+    }
     if (action === "select-placement") {
       state.deployment.selectedId = control.dataset.placementId;
       updateDeploymentSelectionUi();
@@ -3066,8 +3677,47 @@
       return;
     }
     if (action === "switch-map") {
-      state.battle.mobileMap = control.dataset.map;
-      if (control.dataset.map === "own") state.battle.ownMapAlert = false;
+      const mapId = control.dataset.map;
+      state.battle.mobileMap = mapId;
+      if (mapId === "own") {
+        state.battle.ownMapAlert = false;
+      } else if ((state.room?.turn?.remainingTargetPlayerIds ?? []).includes(mapId)) {
+        saveMarkers();
+        state.battle.targetPlayerId = mapId;
+        state.battle.markerContext = null;
+        state.battle.target = null;
+        state.battle.actionId = null;
+      }
+      render();
+      return;
+    }
+    if (action === "toggle-battle-map") {
+      const mapId = control.dataset.mapId;
+      const mapIds = ["own", ...battleOpponentIds(state.room?.battle)];
+      const currentlyCollapsed = Boolean(state.battle.collapsedMaps[mapId]);
+      if (!currentlyCollapsed) {
+        const expandedCount = mapIds.filter((id) => !state.battle.collapsedMaps[id]).length;
+        if (expandedCount <= 1) {
+          showToast("至少保留一张地图展开。", "info");
+          return;
+        }
+      }
+      state.battle.collapsedMaps[mapId] = !currentlyCollapsed;
+      render();
+      return;
+    }
+    if (action === "select-battle-target") {
+      const playerId = control.dataset.targetPlayerId;
+      if (state.room?.turn?.canAct && !isRemainingTurnTarget(state.room, playerId)) {
+        showToast("该敌方玩家本回合已完成操作。", "info");
+        return;
+      }
+      saveMarkers();
+      state.battle.targetPlayerId = playerId;
+      state.battle.mobileMap = playerId;
+      state.battle.markerContext = null;
+      state.battle.target = null;
+      state.battle.actionId = null;
       render();
       return;
     }
@@ -3089,6 +3739,12 @@
       render();
       return;
     }
+    if (action === "set-event-channel") {
+      state.battle.eventChannel = control.dataset.channel ?? "combat";
+      state.battle.logOpen = true;
+      render();
+      return;
+    }
     if (action === "set-helicopter-axis") {
       state.battle.helicopterAxis = control.dataset.axis;
       state.battle.target = null;
@@ -3097,10 +3753,18 @@
       return;
     }
     if (action === "enemy-cell") {
-      handleEnemyCell(control.dataset.coordinate);
+      handleEnemyCell(control.dataset.coordinate, control.dataset.targetPlayerId);
       return;
     }
     if (action === "toggle-marker-mode") {
+      const markerTarget = control.dataset.targetPlayerId;
+      if (markerTarget && markerTarget !== state.battle.targetPlayerId) {
+        saveMarkers();
+        state.battle.targetPlayerId = markerTarget;
+        state.battle.mobileMap = markerTarget;
+        state.battle.markerContext = null;
+        prepareMarkerContext(state.room);
+      }
       state.battle.markerMode = !state.battle.markerMode;
       if (state.battle.markerMode) {
         state.battle.selectedAction = null;
@@ -3159,6 +3823,12 @@
       void emitRequest("rematch:cancel", {
         expectedVersion: state.room.stateVersion,
       }).catch((error) => showToast(humanizeSocketError(error), "error"));
+      return;
+    }
+    if (action === "focus-replay") {
+      const replay = document.querySelector("#match-replay");
+      replay?.scrollIntoView({ behavior: state.reduceMotion ? "auto" : "smooth", block: "start" });
+      replay?.focus({ preventScroll: true });
       return;
     }
     if (action === "select-replay-player") {

@@ -255,7 +255,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "postlaunch-v0.7.0",
+    stage: "postlaunch-v0.7.5",
     protocolVersion: "1.5",
   });
 
@@ -341,6 +341,11 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   assert.ok(
     deploymentA2.classList.contains("board-cell--placement-preview-valid"),
   );
+  click(window, window.document.querySelector('[data-action="toggle-deployment-map"]'));
+  assert.equal(window.document.querySelectorAll('[data-action="deployment-cell"]').length, 0);
+  assert.ok(window.document.querySelector(".collapsible-map--collapsed"));
+  click(window, window.document.querySelector(".collapsed-map-summary"));
+  assert.equal(window.document.querySelectorAll('[data-action="deployment-cell"]').length, 144);
   click(window, window.document.querySelector('[data-action="random-deployment"]'));
   assert.match(window.document.querySelector(".validation-card").textContent, /部署完整合法/);
   assert.equal(
@@ -380,7 +385,8 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   );
   click(window, enemyA1);
   assert.equal(window.document.querySelector("#confirm-dialog").open, true);
-  assert.match(window.document.querySelector("#confirm-body").textContent, /未命中无伤害/);
+  assert.match(window.document.querySelector("#confirm-body").textContent, /目标：A1/);
+  assert.equal(window.document.querySelector("#confirm-body").textContent.includes("未命中无伤害"), false);
   click(window, window.document.querySelector("#confirm-cancel"));
 
   click(window, window.document.querySelector('[data-action="toggle-marker-mode"]'));

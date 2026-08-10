@@ -20,15 +20,15 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("v0.7.0 前后端发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "0.7.0");
-  assert.equal(RELEASE_VERSION, "0.7.0");
-  assert.equal(RELEASE_STAGE, "postlaunch-v0.7.0");
+test("v0.7.5 前后端发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "0.7.5");
+  assert.equal(RELEASE_VERSION, "0.7.5");
+  assert.equal(RELEASE_STAGE, "postlaunch-v0.7.5");
   assert.equal(RULE_VERSION, "1.4");
   assert.equal(SOCKET_PROTOCOL_VERSION, "1.5");
   assert.deepEqual(Data.RELEASE, {
-    version: "0.7.0",
-    stage: "postlaunch-v0.7.0",
+    version: "0.7.5",
+    stage: "postlaunch-v0.7.5",
     ruleVersion: "1.4",
     socketProtocolVersion: "1.5",
   });
@@ -56,7 +56,7 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   }
 
   for (const current of [
-    "postlaunch-v0.7.0",
+    "postlaunch-v0.7.5",
     "12×12",
     'data-max-players="3"',
     "游戏说明",
@@ -79,7 +79,7 @@ test("当前规则与页面流程文档不再保留已废弃的核心数值", ()
     read("README.md"),
     read("docs/rule-v1.4.md"),
     read("docs/page-flow-v1.4.md"),
-    read("docs/release-manifest-postlaunch-v0.7.0.md"),
+    read("docs/release-manifest-postlaunch-v0.7.5.md"),
   ].join("\n");
 
   for (const stale of ["10×10", "7×7", "8×8", "postlaunch-v0.3", "协议 1.2"]) {
