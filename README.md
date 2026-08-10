@@ -1,35 +1,40 @@
-# 海战 OCEAN · postlaunch-v0.7.6
+# 海战 OCEAN · Ocean-v1.0
 
-`postlaunch-v0.7.6` 是基于 v0.7.5 的交互微调版。战斗玩法继续使用 `rule-v1.4`，三人双目标回合、独立敌方地图、直升机多目标与终局鱼雷逻辑均不改变。
+`Ocean-v1.0` 是《海战 OCEAN》的第一版正式上线版本，代码基线来自已完成 293/293 acceptance 的 `v0.7.6`。本次正式化只统一发布命名与版本元数据，不修改已经验收通过的游戏玩法。
 
-本版两项改动：
+## 正式版本基线
 
-1. 开局掷骰改为每名玩家主动点击“掷骰子”；随机点数仍完全由服务器生成。全部玩家完成当前轮后才判断先手，同点则所有玩家进入下一轮再次主动投掷。先手确定后的展示时间在原阶段停留基础上额外增加 3 秒。
-2. 对战右侧将各兵种的生命值、状态、剩余资源与其对应行动融合到同一兵种卡片，减少“行动区”和“舰队状态区”之间来回观察。
+- 产品名称：Ocean-v1.0
+- npm version：1.0.0
+- 战斗规则：rule-v1.4
+- 页面流程：page-flow-v1.5
+- Socket Protocol：1.6
+- 稳定代码基线：v0.7.6
+- 棋盘：12×12
+- 模式：2 人 / 3 人 FFA
+- Node.js：>=24
 
-## 本地运行
+## 本机运行
 
 ```powershell
-Set-Location "E:\University\University_2.5\Ocean\Ocean-project-postlaunch-v0.7.6"
+Set-Location "E:\University\University_2.5\Ocean\Ocean-v1.0"
 npm ci
-npm run acceptance
 npm start
 ```
 
-Node.js 要求 `>=24.0.0`。
+## 正式验收
 
-## 当前基线
+```powershell
+npm run acceptance
+```
 
-- 发布版本：0.7.6
-- 规则：rule-v1.4
-- 页面流程：page-flow-v1.5
-- Socket Protocol：1.6
-- 战斗玩法基线：postlaunch-v0.6.2
+正式上线前要求全部测试通过。
 
-相关文档：
+## 当前文档
 
 - `docs/rule-v1.4.md`
 - `docs/page-flow-v1.5.md`
 - `docs/socket-protocol-v0.9.md`
-- `docs/UI_design-v0.7.0.txt`
-- `docs/release-manifest-postlaunch-v0.7.6.md`
+- `docs/release-manifest-Ocean-v1.0.md`
+
+历史 postlaunch / UI 迭代文档保留用于追溯，不代表当前线上发布名称。

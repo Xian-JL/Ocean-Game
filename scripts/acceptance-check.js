@@ -20,7 +20,7 @@ const REQUIRED_PATHS = Object.freeze([
   "public/css/main.css",
   "public/js/app.js",
   "public/assets/icons/ocean-ui.svg",
-  "docs/release-manifest-postlaunch-v0.7.6.md",
+  "docs/release-manifest-Ocean-v1.0.md",
   "docs/page-flow-v1.5.md",
   "docs/socket-protocol-v0.9.md",
   "server/app.js",

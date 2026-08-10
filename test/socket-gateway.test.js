@@ -363,7 +363,7 @@ test("Socket 协议创建和加入房间，并分别发送会话与安全状态"
   const firstView = latestState(room.first.recorder);
   const secondView = latestState(room.second.recorder);
 
-  assert.equal(room.first.recorder.ready.at(-1).stage, "postlaunch-v0.7.6");
+  assert.equal(room.first.recorder.ready.at(-1).stage, "Ocean-v1.0");
   assert.equal(room.first.recorder.ready.at(-1).protocolVersion, "1.6");
   const firstSession = room.first.recorder.sessions.at(-1);
   assert.equal(firstSession.active, true);

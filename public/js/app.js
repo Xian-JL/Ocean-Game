@@ -33,7 +33,7 @@
   }
 
   if (footerRelease && Data.RELEASE) {
-    footerRelease.textContent = `v${Data.RELEASE.version}`;
+    footerRelease.textContent = Data.RELEASE.stage;
   }
   if (footerProtocol && Data.RELEASE) {
     footerProtocol.textContent = `Rule ${Data.RELEASE.ruleVersion} · Socket ${Data.RELEASE.socketProtocolVersion}`;

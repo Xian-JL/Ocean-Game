@@ -1,6 +1,6 @@
 # 《海战 OCEAN》Socket.IO 协议 v0.9
 
-> 实现版本：postlaunch-v0.7.6  
+> 实现版本：Ocean-v1.0（基于 v0.7.6）  
 > 协议版本：1.6  
 > 规则依据：rule-v1.4.md、page-flow-v1.5.md  
 > 变更重点：保留 v0.6.2 三人战斗协议，并新增玩家主动掷骰事件。
@@ -21,13 +21,13 @@
 
 ```json
 {
-  "stage": "postlaunch-v0.7.6",
+  "stage": "Ocean-v1.0",
   "protocolVersion": "1.6",
   "connectedAt": "2026-08-09T12:00:00.000Z"
 }
 ```
 
-前端发布信息应与 `postlaunch-v0.7.6 / rule-v1.4 / Socket 1.6` 一致。
+前端发布信息应与 `Ocean-v1.0 / rule-v1.4 / Socket 1.6` 一致。
 
 ## 3. 通用应答
 
