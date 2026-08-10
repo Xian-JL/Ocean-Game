@@ -10,10 +10,10 @@
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
   const RELEASE = Object.freeze({
-    version: "0.7.5",
-    stage: "postlaunch-v0.7.5",
+    version: "0.7.6",
+    stage: "postlaunch-v0.7.6",
     ruleVersion: "1.4",
-    socketProtocolVersion: "1.5",
+    socketProtocolVersion: "1.6",
   });
   const BOARD_SIZE = 12;
   const ROWS = Object.freeze("ABCDEFGHIJKL".split(""));

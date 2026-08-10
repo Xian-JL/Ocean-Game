@@ -18,6 +18,7 @@ const {
   determineFirstPlayer,
   startPlaying,
   submitFinalSalvoSelection,
+  submitPlayerRoll,
 } = require("../server/game/match");
 const {
   ROOM_PHASES,
@@ -152,6 +153,44 @@ function preparePlayerTwoForAutomaticSkip(battle) {
     pendingParalysisUnitIds: ["submarine", "nuclear"],
   });
 }
+
+
+test("玩家主动掷骰：每轮每人只能一次，全部提交后服务器确定先手", () => {
+  const rolling = createRollingRoom();
+  const first = submitPlayerRoll(rolling, "player-1", sequenceRandom([0.9]));
+  assert.equal(first.roomPhase, ROOM_PHASES.ROLLING);
+  assert.equal(first.rolling.firstPlayerId, null);
+  assert.equal(first.rolling.currentRolls["player-1"], 6);
+  assert.throws(
+    () => submitPlayerRoll(first, "player-1", sequenceRandom([0.2])),
+    (error) => error.code === "PLAYER_ALREADY_ROLLED",
+  );
+
+  const second = submitPlayerRoll(first, "player-2", sequenceRandom([0.1]));
+  assert.equal(second.rolling.rounds.length, 1);
+  assert.equal(second.rolling.rounds[0].tied, false);
+  assert.equal(second.rolling.firstPlayerId, "player-1");
+  assert.deepEqual(second.rolling.currentRolls, {
+    "player-1": 6,
+    "player-2": 1,
+  });
+});
+
+test("玩家主动掷骰同点后开启下一轮，并要求所有玩家再次交互投掷", () => {
+  let room = createRollingRoom();
+  room = submitPlayerRoll(room, "player-1", sequenceRandom([0]));
+  room = submitPlayerRoll(room, "player-2", sequenceRandom([0]));
+  assert.equal(room.rolling.rounds.length, 1);
+  assert.equal(room.rolling.rounds[0].tied, true);
+  assert.equal(room.rolling.currentRound, 2);
+  assert.deepEqual(room.rolling.currentRolls, {});
+  assert.equal(room.rolling.firstPlayerId, null);
+
+  room = submitPlayerRoll(room, "player-1", sequenceRandom([0.2]));
+  room = submitPlayerRoll(room, "player-2", sequenceRandom([0.8]));
+  assert.equal(room.rolling.rounds.length, 2);
+  assert.equal(room.rolling.firstPlayerId, "player-2");
+});
 
 test("服务器掷骰同点时重掷，并记录全部轮次和唯一先手", () => {
   const rolling = createRollingRoom();

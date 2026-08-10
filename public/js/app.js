@@ -1468,42 +1468,86 @@
 
   function renderRollingPage() {
     const room = state.room;
-    const rounds = room.rolling?.rounds ?? [];
-    const currentRound = rounds.at(-1) ?? null;
-    const firstPlayer = room.rolling?.firstPlayerId
-      ? Model.nicknameFor(room, room.rolling.firstPlayerId)
+    const rolling = room.rolling ?? {
+      rounds: [],
+      currentRound: 1,
+      currentRolls: {},
+      firstPlayerId: null,
+    };
+    const rounds = rolling.rounds ?? [];
+    const lastRound = rounds.at(-1) ?? null;
+    const firstPlayer = rolling.firstPlayerId
+      ? Model.nicknameFor(room, rolling.firstPlayerId)
       : null;
+    const currentRoundNumber = rolling.currentRound ?? Math.max(1, rounds.length + 1);
+    const currentRolls = rolling.firstPlayerId
+      ? (lastRound?.rolls ?? {})
+      : (rolling.currentRolls ?? {});
+    const ownPlayerId = room.own.playerId;
+    const ownRolled = Object.hasOwn(currentRolls, ownPlayerId);
+    const anyoneRolled = Object.keys(currentRolls).length > 0;
+    const waitingForRoll = !rolling.firstPlayerId && !ownRolled;
+    const rollingPending = state.pendingRequest === "roll-die";
+
     return `
-      <section class="rolling-page page-enter" aria-labelledby="rolling-title">
-        ${renderRoomTop("决定第一回合", "骰子由服务器一次性生成；客户端动画不会改变结果。", {
-          kicker: "P04 / 掷骰决定先手",
+      <section class="rolling-page rolling-page--v076 page-enter" aria-labelledby="rolling-title">
+        ${renderRoomTop("决定第一回合", "每位玩家亲自掷骰，点数仍由服务器生成。", {
+          kicker: `P04 / 第 ${currentRoundNumber} 轮`,
         })}
-        <div class="rolling-stage ${state.reduceMotion ? "rolling-stage--still" : ""}">
-          ${room.seats.map((seat, index) => `
-            <article class="die-player ${seat.playerId === room.rolling?.firstPlayerId ? "die-player--winner" : ""}">
-              <span class="die-player__seat">席位 0${index + 1}${seat.playerId === room.own.playerId ? " · 你" : ""}</span>
-              <strong>${escapeHtml(seat.nickname)}</strong>
-              <div class="die" aria-label="骰子点数 ${currentRound?.rolls?.[seat.playerId] ?? "等待"}">
-                ${diceGlyph(currentRound?.rolls?.[seat.playerId])}
-              </div>
-              <small>${currentRound ? `${currentRound.rolls[seat.playerId]} 点` : "服务器正在掷骰"}</small>
-            </article>`).join("")}
-          <div class="rolling-versus">VS</div>
+        <div class="rolling-stage rolling-stage--interactive ${state.reduceMotion ? "rolling-stage--still" : ""}" data-player-count="${room.seats.length}">
+          ${room.seats.map((seat, index) => {
+            const value = currentRolls[seat.playerId];
+            const hasRolled = Number.isInteger(value);
+            const isOwn = seat.playerId === ownPlayerId;
+            const isWinner = seat.playerId === rolling.firstPlayerId;
+            const status = rolling.firstPlayerId
+              ? `${value ?? "—"} 点`
+              : hasRolled
+                ? `${value} 点 · 已投掷`
+                : isOwn
+                  ? "等待你投掷"
+                  : "等待投掷";
+            return `
+              <article class="die-player die-player--interactive ${isWinner ? "die-player--winner" : ""}" data-roll-state="${hasRolled ? "rolled" : "waiting"}">
+                <span class="die-player__seat">席位 0${index + 1}${isOwn ? " · 你" : ""}</span>
+                <strong>${escapeHtml(seat.nickname)}</strong>
+                <div class="die ${hasRolled ? "die--revealed" : "die--waiting"}" aria-label="骰子点数 ${value ?? "等待"}">
+                  ${hasRolled ? diceGlyph(value) : "?"}
+                </div>
+                <small>${escapeHtml(status)}</small>
+              </article>`;
+          }).join("")}
+          ${room.seats.length === 2 ? '<div class="rolling-versus">VS</div>' : ""}
         </div>
-        <div class="rolling-result" role="status">
-          ${!currentRound
-            ? "<strong>服务器正在生成结果…</strong>"
-            : currentRound.tied
-              ? `<strong>点数相同，重新掷骰</strong><span>第 ${currentRound.round} 轮平局</span>`
-              : `<strong>${escapeHtml(firstPlayer)} 获得第一回合</strong><span>即将进入正式对战</span>`}
+
+        <div class="rolling-control" role="group" aria-label="掷骰操作">
+          ${rolling.firstPlayerId
+            ? `<span class="rolling-control__locked">结果已锁定</span>`
+            : `<button class="button button--primary roll-die-button" data-action="roll-die" ${!waitingForRoll || rollingPending ? "disabled" : ""}>
+                ${rollingPending
+                  ? '<span class="button-spinner" aria-hidden="true"></span>投掷中'
+                  : ownRolled
+                    ? "已投掷 · 等待其他玩家"
+                    : `掷骰子 · 第 ${currentRoundNumber} 轮`}
+              </button>`}
         </div>
-        ${rounds.length > 1 ? `
+
+        <div class="rolling-result rolling-result--v076" role="status">
+          ${rolling.firstPlayerId
+            ? `<strong>${escapeHtml(firstPlayer)} 获得第一回合</strong><span>结果将额外停留 3 秒后进入正式对战</span>`
+            : lastRound?.tied && !anyoneRolled
+              ? `<strong>上一轮最高点同分</strong><span>第 ${currentRoundNumber} 轮，请所有玩家再次掷骰</span>`
+              : anyoneRolled
+                ? "<strong>等待本轮其余玩家投掷</strong><span>已提交的点数会保留在当前轮次</span>"
+                : "<strong>点击“掷骰子”决定先手</strong><span>每位玩家每轮只能投掷一次</span>"}
+        </div>
+        ${rounds.length > 0 ? `
           <ol class="roll-history" aria-label="掷骰历史">
             ${rounds.map((round) => `
               <li>
                 <span>第 ${round.round} 轮</span>
-                ${room.seats.map((seat) => `<b>${escapeHtml(seat.nickname)} ${round.rolls[seat.playerId]} 点</b>`).join("")}
-                <em>${round.tied ? "同点" : "已分出先手"}</em>
+                <div class="roll-history__scores">${room.seats.map((seat) => `<b>${escapeHtml(seat.nickname)} ${round.rolls[seat.playerId]} 点</b>`).join("")}</div>
+                <em>${round.tied ? "同点 · 重投" : "先手已确定"}</em>
               </li>`).join("")}
           </ol>` : ""}
       </section>`;
@@ -1880,6 +1924,65 @@
       </div>`;
   }
 
+  const ACTION_SOURCE_ORDER = Object.freeze([
+    Data.UNIT_TYPES.DESTROYER_I,
+    Data.UNIT_TYPES.DESTROYER_II,
+    Data.UNIT_TYPES.PIRATE_SHIP,
+    Data.UNIT_TYPES.MOTORBOAT,
+    Data.UNIT_TYPES.SUBMARINE,
+    Data.UNIT_TYPES.NUCLEAR_SUBMARINE,
+    Data.UNIT_TYPES.AIRCRAFT_CARRIER,
+  ]);
+
+  function sourceUnitState(units, definition) {
+    const alive = units.filter((unit) => unit.hp > 0);
+    if (alive.length === 0) return { code: "sunk", label: "已沉没" };
+    if (alive.every((unit) => unit.paralyzed)) return { code: "paralyzed", label: "瘫痪" };
+    if (alive.length < units.length) return { code: "damaged", label: `${alive.length}/${units.length} 可用` };
+    if (alive.some((unit) => unit.hp < definition.initialHp)) return { code: "damaged", label: "受伤" };
+    return { code: "ready", label: "作战中" };
+  }
+
+  function renderUnitActionDeck(room, ownBattle) {
+    return `
+      <div class="unit-action-deck unit-action-deck--v076" aria-label="兵种行动与状态">
+        ${ACTION_SOURCE_ORDER.map((sourceType) => {
+          const definition = Data.getUnitDefinitionByType(sourceType);
+          const units = (ownBattle.units ?? []).filter((unit) => unit.type === sourceType);
+          const actions = Data.ACTION_DEFINITIONS.filter((action) => action.sourceType === sourceType);
+          if (!definition || units.length === 0 || actions.length === 0) return "";
+          const sourceState = sourceUnitState(units, definition);
+          const hp = units.reduce((sum, unit) => sum + unit.hp, 0);
+          const maxHp = units.length * definition.initialHp;
+          const hpPercent = Math.max(0, Math.min(100, (hp / maxHp) * 100));
+          const availableCount = actions.filter((action) => Model.deriveActionStatus(room, action).enabled).length;
+          return `
+            <section class="unit-action-card unit-action-card--${sourceState.code}" data-source-type="${sourceType}" data-unit-state="${sourceState.code}">
+              <header class="unit-action-card__header">
+                <span class="unit-status__icon unit-status__icon--${definition.category}" aria-hidden="true">${uiIcon(unitIconName(sourceType))}</span>
+                <div class="unit-action-card__identity">
+                  <div><strong>${escapeHtml(definition.name)}${units.length > 1 ? ` ×${units.length}` : ""}</strong><small>${escapeHtml(sourceState.label)}</small></div>
+                  <div class="hp-track hp-track--compact" aria-label="生命值 ${Model.formatHp(hp)} / ${maxHp}"><i style="--hp-percent:${hpPercent}%"></i></div>
+                </div>
+                <span class="hp-meter hp-meter--compact"><b>${Model.formatHp(hp)}</b><i>/ ${maxHp}</i></span>
+              </header>
+              ${units.length > 1 ? `<div class="unit-instance-row">${units.map((unit, index) => `<span data-unit-state="${unitStateCode(unit, definition)}">艇 ${index + 1} · ${Model.formatHp(unit.hp)}/${definition.initialHp}</span>`).join("")}</div>` : ""}
+              <div class="unit-action-card__resources">${unitResourceBadges(ownBattle, units[0]) || `<span class="unit-resource-badge">可用行动 <b>${availableCount}/${actions.length}</b></span>`}</div>
+              <div class="unit-action-card__actions">
+                ${actions.map((action) => renderActionCard(room, action)).join("")}
+              </div>
+            </section>`;
+        }).join("")}
+        <section class="unit-action-card unit-action-card--decoy" aria-label="诱饵鱼雷状态">
+          <header class="unit-action-card__header">
+            <span class="unit-status__icon unit-status__icon--decoy" aria-hidden="true">${uiIcon("ship-decoy")}</span>
+            <div class="unit-action-card__identity"><div><strong>诱饵鱼雷</strong><small>战术装置</small></div></div>
+            <span class="hp-meter hp-meter--compact"><b>${ownBattle.decoys.filter((decoy) => !decoy.destroyed).length}</b><i>/ 3</i></span>
+          </header>
+        </section>
+      </div>`;
+  }
+
   function renderActionPanel(room) {
     const ownBattle = room.battle.own;
     const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
@@ -1922,7 +2025,7 @@
             <button class="button button--primary button--compact" data-action="select-action" data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}">${state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN ? "已选择" : "开始扫描"}</button>
           </section>` : ""}
 
-        ${renderActionGroups(room)}
+        ${renderUnitActionDeck(room, ownBattle)}
 
         ${selectedDefinition ? `
           <div class="target-instruction target-instruction--v073" data-target-mode="${selectedDefinition.targetMode}">
@@ -1946,10 +2049,6 @@
             <button class="text-button" data-action="cancel-action-selection">取消选择</button>
           </div>` : ""}
 
-        <section class="fleet-status-panel fleet-status-panel--v073" aria-label="己方舰队状态">
-          <div class="fleet-status-panel__heading"><div><span class="status-kicker">己方舰队</span><h3>状态与资源</h3></div><span>${ownBattle.units.filter((unit) => unit.hp > 0).length} / ${ownBattle.units.length}</span></div>
-          ${renderOwnUnitStatus(ownBattle)}
-        </section>
         </div>
       </aside>`;
   }
@@ -2371,14 +2470,14 @@
     );
     const opponents = battleOpponentIds(battle);
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 page-enter" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 page-enter" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         ${renderBattleHeader(room)}
         ${finalSalvo ? renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) : ""}
         ${renderLatestFeedback(room)}
         ${renderBattleMapTabs(room)}
 
-        <div class="battle-layout battle-layout--v072 battle-layout--v073 ${finalSalvo ? "battle-layout--final" : ""}">
+        <div class="battle-layout battle-layout--v072 battle-layout--v073 battle-layout--v076 ${finalSalvo ? "battle-layout--final" : ""}">
           <div class="battle-maps battle-maps--v072 battle-maps--v073" data-map-count="${1 + opponents.length}">
             ${renderOwnMapCard(room)}
             ${opponents.map((playerId) => renderEnemyMapCard(room, playerId)).join("")}
@@ -3073,6 +3172,24 @@
     }
   }
 
+  async function submitOpeningRoll() {
+    const room = state.room;
+    if (!room || room.roomPhase !== "ROLLING" || room.rolling?.firstPlayerId) return;
+    state.pendingRequest = "roll-die";
+    render();
+    try {
+      const response = await emitRequest("match:roll-die", {
+        expectedVersion: room.stateVersion,
+      });
+      await ensureStateVersion(response.stateVersion);
+    } catch (error) {
+      showToast(humanizeSocketError(error), "error");
+    } finally {
+      state.pendingRequest = null;
+      render();
+    }
+  }
+
   async function submitAndReadyDeployment() {
     const validation = Data.validateDeployment(state.deployment.placements);
     if (!validation.valid) {
@@ -3674,6 +3791,10 @@
         danger: true,
         onConfirm: leaveRoom,
       });
+      return;
+    }
+    if (action === "roll-die") {
+      void submitOpeningRoll();
       return;
     }
     if (action === "switch-map") {

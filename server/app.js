@@ -169,6 +169,7 @@ function createOceanServer(options = {}) {
     telemetry,
     timerSweepMs: options.timerSweepMs,
     phasePresentationMs: options.phasePresentationMs,
+    rollResultExtraPresentationMs: options.rollResultExtraPresentationMs,
     setTimeoutFn: options.setTimeoutFn,
     clearTimeoutFn: options.clearTimeoutFn,
     setIntervalFn: options.setIntervalFn,

@@ -31,6 +31,7 @@ const {
   processActionTimeout,
   startPlaying,
   submitFinalSalvoSelection,
+  submitPlayerRoll,
   TURN_PHASES,
 } = require("./match");
 const { generateRandomDeployment } = require("./random-deployment");
@@ -333,6 +334,16 @@ class InMemoryRoomService {
       roomCode,
       expectedVersion,
       (room) => determineFirstPlayer(room, this.random),
+    );
+    return createRoomViewsByPlayer(next, nowMs);
+  }
+
+  rollDie({ roomCode, playerId, expectedVersion }) {
+    const nowMs = this.#readNow();
+    const next = this.#mutate(
+      roomCode,
+      expectedVersion,
+      (room) => submitPlayerRoll(room, playerId, this.random),
     );
     return createRoomViewsByPlayer(next, nowMs);
   }

@@ -81,6 +81,7 @@ async function createHarness(context, options = {}) {
     roomService,
     timerSweepMs: 0,
     phasePresentationMs: options.phasePresentationMs ?? 0,
+    rollResultExtraPresentationMs: options.rollResultExtraPresentationMs ?? 0,
     logger: { error() {} },
     now: () => "2026-08-07T00:00:00.000Z",
   });
@@ -205,6 +206,16 @@ async function readyDeployment(client) {
   return response;
 }
 
+async function rollOpeningDie(client) {
+  const response = await emitWithAck(
+    client.socket,
+    CLIENT_EVENTS.ROLL_DIE,
+    { expectedVersion: latestState(client.recorder).stateVersion },
+  );
+  assert.equal(response.ok, true, JSON.stringify(response));
+  return response;
+}
+
 async function preparePlayingRoom(harness) {
   const room = await createTwoPlayerRoom(harness);
   await submitDeployment(room.first);
@@ -226,11 +237,26 @@ async function preparePlayingRoom(harness) {
     "第二名玩家未收到第一方准备状态",
   );
   await readyDeployment(room.second);
+  await waitForValue(
+    () => room.first.recorder.states,
+    (state) => state.roomPhase === "ROLLING",
+    "房间没有进入等待玩家掷骰的 ROLLING",
+  );
+  const secondBeforeFirstRoll = latestState(room.second.recorder).stateVersion;
+  await rollOpeningDie(room.first);
+  await waitForValue(
+    () => room.second.recorder.states,
+    (state) =>
+      state.stateVersion > secondBeforeFirstRoll &&
+      state.rolling?.currentRolls?.[room.firstPlayerId] !== undefined,
+    "第二名玩家未收到第一方掷骰结果",
+  );
+  await rollOpeningDie(room.second);
 
   const playing = await waitForValue(
     () => room.first.recorder.states,
     (state) => state.roomPhase === "PLAYING",
-    "房间没有由服务器自动进入 PLAYING",
+    "双方主动掷骰后房间没有进入 PLAYING",
   );
   await waitForValue(
     () => room.second.recorder.states,
@@ -337,8 +363,8 @@ test("Socket 协议创建和加入房间，并分别发送会话与安全状态"
   const firstView = latestState(room.first.recorder);
   const secondView = latestState(room.second.recorder);
 
-  assert.equal(room.first.recorder.ready.at(-1).stage, "postlaunch-v0.7.5");
-  assert.equal(room.first.recorder.ready.at(-1).protocolVersion, "1.5");
+  assert.equal(room.first.recorder.ready.at(-1).stage, "postlaunch-v0.7.6");
+  assert.equal(room.first.recorder.ready.at(-1).protocolVersion, "1.6");
   const firstSession = room.first.recorder.sessions.at(-1);
   assert.equal(firstSession.active, true);
   assert.equal(firstSession.roomCode, room.roomCode);
@@ -352,7 +378,7 @@ test("Socket 协议创建和加入房间，并分别发送会话与安全状态"
   assert.equal(Object.hasOwn(secondView.seats[0], "deployment"), false);
 });
 
-test("双方通过 Socket 完成部署、自动掷骰并进入服务器权威回合", async (context) => {
+test("双方通过 Socket 完成部署、分别主动掷骰并进入服务器权威回合", async (context) => {
   const harness = await createHarness(context);
   const room = await preparePlayingRoom(harness);
   const firstView = latestState(room.first.recorder);
@@ -520,19 +546,42 @@ test("服务端扫描到期计时器后主动广播自动部署和行动超时",
 
   harness.setNow(deploymentDeadline);
   assert.deepEqual(await harness.gameGateway.sweepExpiredTimers(), [room.roomCode]);
-  const playing = await waitForValue(
+  const rolling = await waitForValue(
+    () => room.first.recorder.states,
+    (state) => state.roomPhase === "ROLLING",
+    "部署到期后没有自动部署并进入主动掷骰阶段",
+  );
+  await waitForValue(
+    () => room.second.recorder.states,
+    (state) =>
+      state.roomPhase === "ROLLING" &&
+      state.stateVersion === rolling.stateVersion,
+    "第二名玩家没有收到自动部署后的主动掷骰状态",
+  );
+  assert.equal(rolling.seats.every((seat) => seat.autoPrepared), true);
+  assert.ok(rolling.own.deployment);
+  assert.equal(Object.hasOwn(rolling.seats[1], "deployment"), false);
+
+  const secondVersionBeforeRoll = latestState(room.second.recorder).stateVersion;
+  await rollOpeningDie(room.first);
+  await waitForValue(
+    () => room.second.recorder.states,
+    (state) =>
+      state.stateVersion > secondVersionBeforeRoll &&
+      state.rolling?.currentRolls?.[room.firstPlayerId] !== undefined,
+    "自动部署后第一方主动掷骰未同步",
+  );
+  await rollOpeningDie(room.second);
+  await waitForValue(
     () => room.first.recorder.states,
     (state) => state.roomPhase === "PLAYING",
-    "部署到期后没有自动进入正式对局",
+    "双方主动掷骰后没有进入正式对局",
   );
   await waitForValue(
     () => room.second.recorder.states,
     (state) => state.roomPhase === "PLAYING",
-    "第二名玩家没有收到自动部署后的正式对局状态",
+    "第二名玩家没有收到正式对局状态",
   );
-  assert.equal(playing.seats.every((seat) => seat.autoPrepared), true);
-  assert.ok(playing.own.deployment);
-  assert.equal(Object.hasOwn(playing.seats[1], "deployment"), false);
 
   harness.setNow(deploymentDeadline + ACTION_DURATION_MS);
   assert.deepEqual(await harness.gameGateway.sweepExpiredTimers(), [room.roomCode]);
@@ -928,8 +977,23 @@ test("ROLLING 展示期间断线会取消待执行转换，重连后才进入 PL
   await readyDeployment(room.second);
   await waitForValue(
     () => room.first.recorder.states,
+    (state) => state.roomPhase === "ROLLING",
+    "未进入 ROLLING 交互阶段",
+  );
+  const secondVersionBeforeRoll = latestState(room.second.recorder).stateVersion;
+  await rollOpeningDie(room.first);
+  await waitForValue(
+    () => room.second.recorder.states,
+    (state) =>
+      state.stateVersion > secondVersionBeforeRoll &&
+      state.rolling?.currentRolls?.[room.firstPlayerId] !== undefined,
+    "第一方掷骰未同步",
+  );
+  await rollOpeningDie(room.second);
+  await waitForValue(
+    () => room.first.recorder.states,
     (state) => state.roomPhase === "ROLLING" && state.rolling?.firstPlayerId,
-    "未进入 ROLLING 展示",
+    "未进入 ROLLING 结果展示",
   );
 
   room.first.socket.disconnect();
@@ -1352,11 +1416,26 @@ test("再来一局会清除上一局行动回执，同一行动编号可作为�
   const newSecondReady = await readyDeployment(room.second);
   await waitForValue(
     () => room.first.recorder.states,
+    (state) => state.stateVersion >= newSecondReady.data.stateVersion && state.roomPhase === "ROLLING",
+    "新局没有进入主动掷骰阶段",
+  );
+  const newSecondVersionBeforeRoll = latestState(room.second.recorder).stateVersion;
+  await rollOpeningDie(room.first);
+  await waitForValue(
+    () => room.second.recorder.states,
     (state) =>
-      state.stateVersion > newSecondReady.data.stateVersion &&
+      state.stateVersion > newSecondVersionBeforeRoll &&
+      state.rolling?.currentRolls?.[room.firstPlayerId] !== undefined,
+    "新局第一方掷骰未同步",
+  );
+  const newSecondRoll = await rollOpeningDie(room.second);
+  await waitForValue(
+    () => room.first.recorder.states,
+    (state) =>
+      state.stateVersion > newSecondRoll.data.stateVersion &&
       state.roomPhase === "PLAYING" &&
       state.turn.currentPlayerId === room.firstPlayerId,
-    "新局没有重新掷骰并轮到第一方",
+    "新局主动掷骰后没有轮到第一方",
   );
 
   const reused = await emitWithAck(

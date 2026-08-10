@@ -78,9 +78,8 @@ test("v0.7.3 地图格统一暴露公开结果、未知结果、私人标记与�
   ]);
 });
 
-test("v0.7.3 己方舰队面板直接展示 HP 状态条、瘫痪沉没状态和剩余特殊资源", () => {
+test("v0.7.3 引入的 HP、瘫痪沉没与资源展示能力在后续融合面板中继续保留", () => {
   includesAll(app, [
-    "fleet-status-panel--v073",
     "unit-status-list--v073",
     "unitResourceBadges(ownBattle, unit)",
     "hp-track",

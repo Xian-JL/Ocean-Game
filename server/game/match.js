@@ -143,6 +143,87 @@ function rollDie(random) {
   return Math.floor(value * 6) + 1;
 }
 
+
+function submitPlayerRoll(room, playerId, random = Math.random) {
+  assertMatchRoomState(room);
+  assertRoomConnected(room);
+  assertRoomPhase(
+    room,
+    ROOM_PHASES.ROLLING,
+    "ROLLING_NOT_ALLOWED",
+    "只有部署锁定后的 ROLLING 阶段可以掷骰。",
+  );
+  assertPlayerId(playerId);
+  const seat = getPlayerSeat(room, playerId);
+  if (!seat.online) {
+    fail("PLAYER_OFFLINE", "离线玩家不能掷骰。", { playerId });
+  }
+  if (room.rolling?.firstPlayerId) {
+    fail("FIRST_PLAYER_ALREADY_DETERMINED", "本局先手已经由服务器确定。", {
+      firstPlayerId: room.rolling.firstPlayerId,
+    });
+  }
+
+  const rolling = room.rolling ?? {
+    rounds: [],
+    currentRound: 1,
+    currentRolls: {},
+    firstPlayerId: null,
+  };
+  const currentRound = Number.isInteger(rolling.currentRound)
+    ? rolling.currentRound
+    : rolling.rounds.length + 1;
+  const currentRolls = { ...(rolling.currentRolls ?? {}) };
+  if (Object.hasOwn(currentRolls, playerId)) {
+    fail("PLAYER_ALREADY_ROLLED", "本轮已经掷过骰子，请等待其他玩家。", {
+      playerId,
+      round: currentRound,
+    });
+  }
+
+  currentRolls[playerId] = rollDie(random);
+  const allRolled = room.seats.every((candidate) =>
+    Object.hasOwn(currentRolls, candidate.playerId),
+  );
+  let rounds = [...rolling.rounds];
+  let nextRound = currentRound;
+  let nextRolls = currentRolls;
+  let firstPlayerId = null;
+
+  if (allRolled) {
+    const highest = Math.max(...Object.values(currentRolls));
+    const leaders = room.seats.filter(
+      (candidate) => currentRolls[candidate.playerId] === highest,
+    );
+    const tied = leaders.length !== 1;
+    rounds = [
+      ...rounds,
+      {
+        round: currentRound,
+        rolls: clone(currentRolls),
+        tied,
+      },
+    ];
+    if (tied) {
+      nextRound = currentRound + 1;
+      nextRolls = {};
+    } else {
+      firstPlayerId = leaders[0].playerId;
+    }
+  }
+
+  return assertMatchRoomState(
+    bumpVersion(room, {
+      rolling: {
+        rounds,
+        currentRound: nextRound,
+        currentRolls: nextRolls,
+        firstPlayerId,
+      },
+    }),
+  );
+}
+
 function determineFirstPlayer(room, random = Math.random) {
   assertRoomState(room);
   assertRoomConnected(room);
@@ -190,6 +271,8 @@ function determineFirstPlayer(room, random = Math.random) {
     bumpVersion(room, {
       rolling: {
         rounds,
+        currentRound: rounds.length,
+        currentRolls: clone(rounds.at(-1)?.rolls ?? {}),
         firstPlayerId,
       },
     }),
@@ -712,13 +795,59 @@ function assertRollingState(room) {
   if (room.rolling === null) {
     return;
   }
+  const rolling = room.rolling;
   if (
-    typeof room.rolling !== "object" ||
-    !Array.isArray(room.rolling.rounds) ||
-    room.rolling.rounds.length < 1 ||
-    !room.seats.some((seat) => seat.playerId === room.rolling.firstPlayerId)
+    typeof rolling !== "object" ||
+    Array.isArray(rolling) ||
+    !Array.isArray(rolling.rounds)
   ) {
-    fail("INVALID_MATCH_ROOM_STATE", "服务器掷骰结果结构无效。");
+    fail("INVALID_MATCH_ROOM_STATE", "服务器掷骰状态结构无效。");
+  }
+  for (const round of rolling.rounds) {
+    if (
+      !Number.isInteger(round?.round) ||
+      round.round < 1 ||
+      typeof round.rolls !== "object" ||
+      Array.isArray(round.rolls) ||
+      typeof round.tied !== "boolean"
+    ) {
+      fail("INVALID_MATCH_ROOM_STATE", "服务器掷骰历史结构无效。");
+    }
+    for (const seat of room.seats) {
+      const value = round.rolls[seat.playerId];
+      if (!Number.isInteger(value) || value < 1 || value > 6) {
+        fail("INVALID_MATCH_ROOM_STATE", "服务器掷骰历史包含无效点数。");
+      }
+    }
+  }
+  if (rolling.currentRound !== undefined) {
+    if (!Number.isInteger(rolling.currentRound) || rolling.currentRound < 1) {
+      fail("INVALID_MATCH_ROOM_STATE", "当前掷骰轮次无效。");
+    }
+    if (
+      typeof rolling.currentRolls !== "object" ||
+      rolling.currentRolls === null ||
+      Array.isArray(rolling.currentRolls)
+    ) {
+      fail("INVALID_MATCH_ROOM_STATE", "当前掷骰结果结构无效。");
+    }
+    for (const [playerId, value] of Object.entries(rolling.currentRolls)) {
+      if (
+        !room.seats.some((seat) => seat.playerId === playerId) ||
+        !Number.isInteger(value) ||
+        value < 1 ||
+        value > 6
+      ) {
+        fail("INVALID_MATCH_ROOM_STATE", "当前掷骰结果包含无效玩家或点数。");
+      }
+    }
+  }
+  if (
+    rolling.firstPlayerId !== null &&
+    rolling.firstPlayerId !== undefined &&
+    !room.seats.some((seat) => seat.playerId === rolling.firstPlayerId)
+  ) {
+    fail("INVALID_MATCH_ROOM_STATE", "服务器掷骰先手玩家无效。");
   }
 }
 
@@ -1019,4 +1148,5 @@ module.exports = {
   rollDie,
   startPlaying,
   submitFinalSalvoSelection,
+  submitPlayerRoll,
 };

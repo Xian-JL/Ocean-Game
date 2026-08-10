@@ -21,6 +21,7 @@ const {
 
 const DEFAULT_TIMER_SWEEP_MS = 250;
 const DEFAULT_PHASE_PRESENTATION_MS = 1_000;
+const DEFAULT_ROLL_RESULT_EXTRA_PRESENTATION_MS = 3_000;
 const MAX_AUTOMATIC_TRANSITIONS = 20;
 const CLEANUP_SWEEP_MS = 30_000;
 const GENERAL_REQUEST_LIMIT = Object.freeze({ limit: 120, windowMs: 60_000 });
@@ -111,6 +112,10 @@ class SocketGameGateway {
       options.phasePresentationMs ?? DEFAULT_PHASE_PRESENTATION_MS,
       "phasePresentationMs",
     );
+    this.rollResultExtraPresentationMs = assertNonNegativeInteger(
+      options.rollResultExtraPresentationMs ?? DEFAULT_ROLL_RESULT_EXTRA_PRESENTATION_MS,
+      "rollResultExtraPresentationMs",
+    );
     this.scheduledTransitions = new Map();
     this.actionReceipts = new Map();
     this.closed = false;
@@ -185,13 +190,8 @@ class SocketGameGateway {
       }
 
       if (room.roomPhase === ROOM_PHASES.ROLLING) {
-        if (room.rolling === null) {
-          const views = this.roomService.determineFirstPlayer({
-            roomCode,
-            expectedVersion: room.stateVersion,
-          });
-          this.#emitViews(views);
-          continue;
+        if (!room.rolling?.firstPlayerId) {
+          return;
         }
         this.#scheduleTransition(
           roomCode,
@@ -213,6 +213,7 @@ class SocketGameGateway {
             this.#emitViews(views);
             await this.advanceRoom(roomCode);
           },
+          this.phasePresentationMs + this.rollResultExtraPresentationMs,
         );
         return;
       }
@@ -318,6 +319,8 @@ class SocketGameGateway {
       this.#readyDeployment(socket, payload));
     this.#registerEvent(socket, CLIENT_EVENTS.CANCEL_READY, (payload) =>
       this.#cancelReady(socket, payload));
+    this.#registerEvent(socket, CLIENT_EVENTS.ROLL_DIE, (payload) =>
+      this.#rollDie(socket, payload));
     this.#registerEvent(socket, CLIENT_EVENTS.SUBMIT_ACTION, (payload) =>
       this.#submitAction(socket, payload));
     this.#registerEvent(socket, CLIENT_EVENTS.SUBMIT_FINAL_SALVO, (payload) =>
@@ -545,6 +548,23 @@ class SocketGameGateway {
     });
     this.#broadcastCurrentRoom(session.roomCode);
     return { stateVersion: view.stateVersion };
+  }
+
+  async #rollDie(socket, payload) {
+    const session = this.#requireSession(socket);
+    const expectedVersion = requireExpectedVersion(payload);
+    const views = this.roomService.rollDie({
+      roomCode: session.roomCode,
+      playerId: session.playerId,
+      expectedVersion,
+    });
+    this.#emitViews(views);
+    await this.advanceRoom(session.roomCode);
+    const ownView = views[session.playerId];
+    return {
+      stateVersion: ownView.stateVersion,
+      rolling: structuredClone(ownView.rolling),
+    };
   }
 
   async #submitAction(socket, payload) {
@@ -784,7 +804,7 @@ class SocketGameGateway {
     }
   }
 
-  #scheduleTransition(roomCode, kind, stateVersion, operation) {
+  #scheduleTransition(roomCode, kind, stateVersion, operation, delayMs = this.phasePresentationMs) {
     const key = `${roomCode}:${kind}`;
     const existing = this.scheduledTransitions.get(key);
     if (existing?.stateVersion === stateVersion) {
@@ -802,7 +822,7 @@ class SocketGameGateway {
       void Promise.resolve()
         .then(operation)
         .catch((error) => this.#reportBackgroundError(roomCode, error));
-    }, this.phasePresentationMs);
+    }, delayMs);
     handle?.unref?.();
     this.scheduledTransitions.set(key, {
       handle,
@@ -884,6 +904,7 @@ class SocketGameGateway {
 
 module.exports = {
   DEFAULT_PHASE_PRESENTATION_MS,
+  DEFAULT_ROLL_RESULT_EXTRA_PRESENTATION_MS,
   DEFAULT_TIMER_SWEEP_MS,
   SocketGameGateway,
   playerChannel,

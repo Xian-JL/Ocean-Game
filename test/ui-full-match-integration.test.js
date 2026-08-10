@@ -66,6 +66,50 @@ function submit(window, selector) {
   );
 }
 
+async function rollOpeningDice(first, second) {
+  for (let round = 1; round <= 20; round += 1) {
+    const firstButton = await waitFor(
+      () =>
+        first.window.document.querySelector(".battle-page") ||
+        first.window.document.querySelector('[data-action="roll-die"]:not(:disabled)'),
+      `第 ${round} 轮第一客户端掷骰按钮未开放`,
+    );
+    if (firstButton.classList?.contains("battle-page")) return;
+    click(first.window, firstButton);
+
+    await waitFor(
+      () =>
+        second.window.document.querySelector(".battle-page") ||
+        second.window.document.querySelectorAll('.die-player[data-roll-state="rolled"]').length >= 1,
+      `第 ${round} 轮第一方掷骰结果未同步`,
+    );
+    if (second.window.document.querySelector(".battle-page")) return;
+
+    const secondButton = await waitFor(
+      () => second.window.document.querySelector('[data-action="roll-die"]:not(:disabled)'),
+      `第 ${round} 轮第二客户端掷骰按钮未开放`,
+    );
+    click(second.window, secondButton);
+
+    const outcome = await waitFor(
+      () => {
+        if (first.window.document.querySelector(".battle-page")) return "playing";
+        if (first.window.document.querySelector('[data-action="roll-die"]:not(:disabled)')) return "reroll";
+        return null;
+      },
+      `第 ${round} 轮掷骰后既未进入对战也未进入重投`,
+    );
+    if (outcome === "playing") {
+      await waitFor(
+        () => second.window.document.querySelector(".battle-page"),
+        "第二客户端未同步进入 P05",
+      );
+      return;
+    }
+  }
+  assert.fail("连续 20 轮掷骰仍未决出先手");
+}
+
 function createBrowser(baseUrl, clients, options = {}) {
   const html = fs
     .readFileSync(path.join(PROJECT_ROOT, "public/index.html"), "utf8")
@@ -207,7 +251,7 @@ function unitCells(dom, unitName) {
 }
 
 function unitStatus(dom, unitName) {
-  return [...dom.window.document.querySelectorAll(".unit-status")].find(
+  return [...dom.window.document.querySelectorAll(".unit-action-card, .unit-status")].find(
     (item) => item.querySelector("strong")?.textContent.trim() === unitName,
   );
 }
@@ -296,6 +340,17 @@ async function createAndEnterBattle(baseUrl, clients, browsers, options = {}) {
   );
   await Promise.all([
     waitFor(
+      () => first.window.document.querySelector(".rolling-page"),
+      "第一客户端未进入 P04",
+    ),
+    waitFor(
+      () => second.window.document.querySelector(".rolling-page"),
+      "第二客户端未进入 P04",
+    ),
+  ]);
+  await rollOpeningDice(first, second);
+  await Promise.all([
+    waitFor(
       () => first.window.document.querySelector(".battle-page"),
       "第一客户端未进入 P05",
     ),
@@ -319,6 +374,7 @@ test("两个正式页面客户端完成整局、保密、重连、复盘、再�
   const { httpServer, io } = createOceanServer({
     timerSweepMs: 0,
     phasePresentationMs: 10,
+    rollResultExtraPresentationMs: 10,
   });
   httpServer.listen(0, "127.0.0.1");
   await once(httpServer, "listening");
@@ -384,8 +440,8 @@ test("两个正式页面客户端完成整局、保密、重连、复盘、再�
   );
   assert.match(shockFeedback.textContent, /是否生效不会向你显示/);
   assert.doesNotMatch(shockFeedback.textContent, /成功|失败|潜水艇|核潜艇/);
-  assert.ok(unitStatus(firstMover, "潜水艇").classList.contains("unit-status--paralyzed"));
-  assert.ok(!unitStatus(firstMover, "核潜艇").classList.contains("unit-status--paralyzed"));
+  assert.equal(unitStatus(firstMover, "潜水艇").dataset.unitState, "paralyzed");
+  assert.notEqual(unitStatus(firstMover, "核潜艇").dataset.unitState, "paralyzed");
 
   const storedSession = firstMover.window.localStorage.getItem(SESSION_STORAGE_KEY);
   const oldToken = JSON.parse(storedSession).reconnectToken;
@@ -490,6 +546,17 @@ test("两个正式页面客户端完成整局、保密、重连、复盘、再�
 
   await randomizeAndReady(firstMover);
   await randomizeAndReady(secondMover);
+  await Promise.all([
+    waitFor(
+      () => firstMover.window.document.querySelector(".rolling-page"),
+      "再来一局后第一客户端未进入 P04",
+    ),
+    waitFor(
+      () => secondMover.window.document.querySelector(".rolling-page"),
+      "再来一局后第二客户端未进入 P04",
+    ),
+  ]);
+  await rollOpeningDice(firstMover, secondMover);
   await Promise.all([
     waitFor(
       () => firstMover.window.document.querySelector(".battle-page"),
