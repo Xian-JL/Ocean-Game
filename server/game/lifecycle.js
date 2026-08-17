@@ -20,6 +20,7 @@ const {
 } = require("./battle-state");
 const {
   CONNECTION_PHASES,
+  ROOM_MODES,
   ROOM_PHASES,
   assertRoomConnected,
   getPlayerSeat,
@@ -261,6 +262,23 @@ function leaveFinishedRoom(room, playerId, nowMs = Date.now()) {
   );
   assertOnlineSeat(room, playerId);
   const normalizedNow = normalizeServerTime(nowMs);
+  if (room.roomMode === ROOM_MODES.BOT_DUEL) {
+    return assertMatchRoomState({
+      ...room,
+      stateVersion: room.stateVersion + 1,
+      roomPhase: ROOM_PHASES.CLOSED,
+      connectionPhase: CONNECTION_PHASES.CONNECTED,
+      closedReason: "human_left_bot_match",
+      actionDeadlineAt: null,
+      deploymentDeadlineAt: null,
+      pausedTimer: null,
+      seats: room.seats.map((seat) => ({
+        ...seat,
+        disconnectedAt: null,
+        reconnectDeadlineAt: null,
+      })),
+    });
+  }
   const remaining = room.seats.filter((seat) => seat.playerId !== playerId);
   if (remaining.length < 1) {
     fail("INVALID_ROOM_STATE", "赛后离开前房间必须保留至少一名玩家。");

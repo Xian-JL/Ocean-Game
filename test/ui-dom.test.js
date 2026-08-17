@@ -34,7 +34,7 @@ class FakeSocket {
       if (eventName === "client:ping") {
         acknowledge(null, {
           ok: true,
-          protocolVersion: "1.6",
+          protocolVersion: "1.7",
         });
       } else {
         acknowledge(null, {
@@ -255,8 +255,8 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.0",
-    protocolVersion: "1.6",
+    stage: "Ocean-v1.1",
+    protocolVersion: "1.7",
   });
 
   assert.match(window.document.querySelector("#app").textContent, /创建房间/);

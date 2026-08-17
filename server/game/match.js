@@ -1028,6 +1028,7 @@ function createRoomView(room, viewerId, nowMs = Date.now()) {
   const viewerSeat = getPlayerSeat(room, viewerId);
   return {
     roomCode: room.roomCode,
+    roomMode: room.roomMode,
     maxPlayers: room.maxPlayers,
     stateVersion: room.stateVersion,
     roomPhase: room.roomPhase,
@@ -1040,6 +1041,7 @@ function createRoomView(room, viewerId, nowMs = Date.now()) {
       online: seat.online,
       ready: seat.ready,
       autoPrepared: seat.autoPrepared,
+      isBot: seat.isBot,
     })),
     own: {
       playerId: viewerSeat.playerId,

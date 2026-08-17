@@ -10,10 +10,10 @@
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
   const RELEASE = Object.freeze({
-    version: "1.0.0",
-    stage: "Ocean-v1.0",
-    ruleVersion: "1.4",
-    socketProtocolVersion: "1.6",
+    version: "1.1.0",
+    stage: "Ocean-v1.1",
+    ruleVersion: "1.5",
+    socketProtocolVersion: "1.7",
   });
   const BOARD_SIZE = 12;
   const ROWS = Object.freeze("ABCDEFGHIJKL".split(""));

@@ -39,6 +39,7 @@ const {
   CONNECTION_PHASES,
   ROOM_CODE_ALPHABET,
   ROOM_CODE_LENGTH,
+  ROOM_MODES,
   ROOM_PHASES,
   cancelPlayerReady,
   completeDeploymentTimeout,
@@ -56,6 +57,7 @@ const RECONNECT_TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,128}$/;
 const DEFAULT_MAX_ROOMS = 200;
 const DEFAULT_CLOSED_ROOM_RETENTION_MS = 10 * 60 * 1000;
 const DEFAULT_FINISHED_ROOM_RETENTION_MS = 2 * 60 * 60 * 1000;
+const BOT_NICKNAME = "OCEAN 战术机器人";
 
 function fail(code, message, details = {}) {
   throw new RuleValidationError(code, message, details);
@@ -124,7 +126,7 @@ class InMemoryRoomService {
     }
   }
 
-  createRoom({ nickname, maxPlayers = 2 }) {
+  createRoom({ nickname, maxPlayers = 2, roomMode = ROOM_MODES.PVP }) {
     const nowMs = this.#readNow();
     if (this.rooms.size >= this.maxRooms) {
       fail(
@@ -135,7 +137,28 @@ class InMemoryRoomService {
     }
     const playerId = this.#createUniquePlayerId(null);
     const roomCode = this.#createUniqueRoomCode();
-    const room = createRoomState({ roomCode, playerId, nickname, maxPlayers });
+    let room = createRoomState({
+      roomCode,
+      playerId,
+      nickname,
+      maxPlayers,
+      roomMode,
+    });
+    if (roomMode === ROOM_MODES.BOT_DUEL) {
+      const botPlayerId = this.#createUniquePlayerId(room);
+      room = joinRoomState(
+        room,
+        { playerId: botPlayerId, nickname: BOT_NICKNAME, isBot: true },
+        nowMs,
+      );
+      room = submitDeployment(
+        room,
+        botPlayerId,
+        this.randomDeploymentFactory(botPlayerId),
+        nowMs,
+      );
+      room = setPlayerReady(room, botPlayerId, nowMs);
+    }
     this.rooms.set(roomCode, room);
     this.roomActivityAt.set(roomCode, nowMs);
     const reconnectToken = this.#issueReconnectToken(roomCode, playerId);
@@ -166,6 +189,36 @@ class InMemoryRoomService {
       reconnectToken,
       view: createRoomView(next, playerId, nowMs),
     };
+  }
+
+  prepareBotDeployment({ roomCode, expectedVersion }) {
+    const nowMs = this.#readNow();
+    const next = this.#mutate(
+      roomCode,
+      expectedVersion,
+      (room) => {
+        const botSeat = room.seats.find((seat) => seat.isBot);
+        if (!botSeat || room.roomMode !== ROOM_MODES.BOT_DUEL) {
+          fail("BOT_NOT_FOUND", "当前房间没有机器人席位。");
+        }
+        let prepared = room;
+        if (botSeat.deployment === null) {
+          prepared = submitDeployment(
+            prepared,
+            botSeat.playerId,
+            this.randomDeploymentFactory(botSeat.playerId),
+            nowMs,
+          );
+        }
+        const currentBot = prepared.seats.find(
+          (seat) => seat.playerId === botSeat.playerId,
+        );
+        return currentBot.ready
+          ? prepared
+          : setPlayerReady(prepared, botSeat.playerId, nowMs);
+      },
+    );
+    return createRoomViewsByPlayer(next, nowMs);
   }
 
   submitDeployment({ roomCode, playerId, deployment, expectedVersion }) {
@@ -220,6 +273,7 @@ class InMemoryRoomService {
     return {
       roomCode: next.roomCode,
       stateVersion: next.stateVersion,
+      roomPhase: next.roomPhase,
       remainingPlayerId: next.seats[0].playerId,
       remainingPlayerIds: next.seats.map((seat) => seat.playerId),
       viewsByPlayer: createRoomViewsByPlayer(next, nowMs),

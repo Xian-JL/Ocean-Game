@@ -1,9 +1,17 @@
 "use strict";
 
 const { RuleValidationError } = require("../game/errors");
+const {
+  chooseBotFinalSalvo,
+  createBotActionIntent,
+} = require("../game/bot-strategy");
 const { RELEASE_STAGE } = require("../release");
 const { TURN_PHASES } = require("../game/match");
-const { CONNECTION_PHASES, ROOM_PHASES } = require("../game/room");
+const {
+  CONNECTION_PHASES,
+  ROOM_MODES,
+  ROOM_PHASES,
+} = require("../game/room");
 const { FixedWindowRateLimiter } = require("../operations/rate-limiter");
 const {
   OperationalTelemetry,
@@ -22,6 +30,7 @@ const {
 const DEFAULT_TIMER_SWEEP_MS = 250;
 const DEFAULT_PHASE_PRESENTATION_MS = 1_000;
 const DEFAULT_ROLL_RESULT_EXTRA_PRESENTATION_MS = 3_000;
+const DEFAULT_BOT_THINK_DELAY_MS = 1_100;
 const MAX_AUTOMATIC_TRANSITIONS = 20;
 const CLEANUP_SWEEP_MS = 30_000;
 const GENERAL_REQUEST_LIMIT = Object.freeze({ limit: 120, windowMs: 60_000 });
@@ -116,6 +125,10 @@ class SocketGameGateway {
       options.rollResultExtraPresentationMs ?? DEFAULT_ROLL_RESULT_EXTRA_PRESENTATION_MS,
       "rollResultExtraPresentationMs",
     );
+    this.botThinkDelayMs = assertNonNegativeInteger(
+      options.botThinkDelayMs ?? DEFAULT_BOT_THINK_DELAY_MS,
+      "botThinkDelayMs",
+    );
     this.scheduledTransitions = new Map();
     this.actionReceipts = new Map();
     this.closed = false;
@@ -189,8 +202,52 @@ class SocketGameGateway {
         return;
       }
 
+      const botSeat = room.roomMode === ROOM_MODES.BOT_DUEL
+        ? room.seats.find((seat) => seat.isBot)
+        : null;
+
+      if (
+        botSeat &&
+        room.roomPhase === ROOM_PHASES.DEPLOYING &&
+        (!botSeat.ready || botSeat.deployment === null)
+      ) {
+        const views = this.roomService.prepareBotDeployment({
+          roomCode,
+          expectedVersion: room.stateVersion,
+        });
+        this.#emitViews(views);
+        continue;
+      }
+
       if (room.roomPhase === ROOM_PHASES.ROLLING) {
         if (!room.rolling?.firstPlayerId) {
+          const currentRolls = room.rolling?.currentRolls ?? {};
+          const humanHasRolled = room.seats.some(
+            (seat) => !seat.isBot && Object.hasOwn(currentRolls, seat.playerId),
+          );
+          if (botSeat && humanHasRolled && !Object.hasOwn(currentRolls, botSeat.playerId)) {
+            this.#scheduleTransition(
+              roomCode,
+              "bot-roll",
+              room.stateVersion,
+              async () => {
+                const current = this.roomService.getServerState(roomCode);
+                if (
+                  current.roomPhase !== ROOM_PHASES.ROLLING ||
+                  current.stateVersion !== room.stateVersion ||
+                  current.rolling?.firstPlayerId
+                ) return;
+                const views = this.roomService.rollDie({
+                  roomCode,
+                  playerId: botSeat.playerId,
+                  expectedVersion: current.stateVersion,
+                });
+                this.#emitViews(views);
+                await this.advanceRoom(roomCode);
+              },
+              this.botThinkDelayMs,
+            );
+          }
           return;
         }
         this.#scheduleTransition(
@@ -214,6 +271,48 @@ class SocketGameGateway {
             await this.advanceRoom(roomCode);
           },
           this.phasePresentationMs + this.rollResultExtraPresentationMs,
+        );
+        return;
+      }
+
+      if (
+        botSeat &&
+        room.roomPhase === ROOM_PHASES.PLAYING &&
+        room.turnPhase === TURN_PHASES.ACTIVE &&
+        room.currentPlayerId === botSeat.playerId
+      ) {
+        this.#scheduleTransition(
+          roomCode,
+          "bot-action",
+          room.stateVersion,
+          async () => {
+            const current = this.roomService.getServerState(roomCode);
+            if (
+              current.roomPhase !== ROOM_PHASES.PLAYING ||
+              current.turnPhase !== TURN_PHASES.ACTIVE ||
+              current.currentPlayerId !== botSeat.playerId ||
+              current.stateVersion !== room.stateVersion
+            ) return;
+            const botView = this.roomService.getPlayerView(roomCode, botSeat.playerId);
+            const intent = createBotActionIntent(botView, {
+              random: this.roomService.random,
+              actionId: `bot-${current.stateVersion}-${current.turnNumber}`,
+            });
+            const resolving = this.roomService.beginAction({
+              roomCode,
+              playerId: botSeat.playerId,
+              intent,
+              expectedVersion: current.stateVersion,
+            });
+            this.#broadcastCurrentRoom(roomCode);
+            const views = this.roomService.completeAction({
+              roomCode,
+              expectedVersion: resolving.stateVersion,
+            });
+            this.#emitViews(views);
+            await this.advanceRoom(roomCode);
+          },
+          this.botThinkDelayMs,
         );
         return;
       }
@@ -255,6 +354,59 @@ class SocketGameGateway {
           },
         );
         return;
+      }
+
+      if (
+        botSeat &&
+        room.roomPhase === ROOM_PHASES.FINAL_SALVO &&
+        room.battleState.match.status !== "finished"
+      ) {
+        const botView = this.roomService.getPlayerView(roomCode, botSeat.playerId);
+        const finalSalvo = botView.battle?.match?.finalSalvo;
+        if (finalSalvo?.status === "selecting" && !finalSalvo.ownSubmitted) {
+          this.#scheduleTransition(
+            roomCode,
+            "bot-final-salvo",
+            room.stateVersion,
+            async () => {
+              const current = this.roomService.getServerState(roomCode);
+              if (
+                current.roomPhase !== ROOM_PHASES.FINAL_SALVO ||
+                current.stateVersion !== room.stateVersion
+              ) return;
+              const view = this.roomService.getPlayerView(roomCode, botSeat.playerId);
+              const decoyId = chooseBotFinalSalvo(view, this.roomService.random);
+              const views = this.roomService.submitFinalSalvo({
+                roomCode,
+                playerId: botSeat.playerId,
+                decoyId,
+                expectedVersion: current.stateVersion,
+              });
+              this.#emitViews(views);
+              await this.advanceRoom(roomCode);
+            },
+            this.botThinkDelayMs,
+          );
+          return;
+        }
+      }
+
+      if (
+        botSeat &&
+        room.roomPhase === ROOM_PHASES.FINISHED &&
+        !room.rematchRequestedByPlayer[botSeat.playerId] &&
+        room.seats.some(
+          (seat) => !seat.isBot && room.rematchRequestedByPlayer[seat.playerId],
+        )
+      ) {
+        const botView = this.roomService.requestRematch({
+          roomCode,
+          playerId: botSeat.playerId,
+          expectedVersion: room.stateVersion,
+        });
+        this.#broadcastCurrentRoom(roomCode);
+        if (!botView) return;
+        continue;
       }
 
       if (
@@ -387,6 +539,7 @@ class SocketGameGateway {
     const result = this.roomService.createRoom({
       nickname: normalized.nickname,
       maxPlayers: normalized.maxPlayers ?? 2,
+      roomMode: normalized.roomMode ?? ROOM_MODES.PVP,
     });
     await this.#bindSocket(
       socket,
@@ -395,6 +548,7 @@ class SocketGameGateway {
       result.reconnectToken,
     );
     socket.emit(SERVER_EVENTS.STATE, result.view);
+    await this.advanceRoom(result.roomCode);
     return {
       roomCode: result.roomCode,
       playerId: result.playerId,
@@ -492,7 +646,7 @@ class SocketGameGateway {
         stateVersion: result.stateVersion,
         remainingPlayerId: result.remainingPlayerId,
         remainingPlayerIds: result.remainingPlayerIds,
-        roomPhase: ROOM_PHASES.WAITING,
+        roomPhase: result.roomPhase,
       };
     }
 

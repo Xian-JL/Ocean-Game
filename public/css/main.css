@@ -4255,7 +4255,7 @@ body::before {
 
 .mode-switch {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding: 5px;
   border: 1px solid rgba(138, 204, 222, 0.14);
@@ -7262,7 +7262,7 @@ body::before {
 }
 
 /* =========================================================
-   Ocean-v1.0 · first production release · interactive opening roll + fused unit/action rail
+   Ocean-v1.1 · server-side fair 1v1 bot mode
    ========================================================= */
 
 .rolling-page--v076 {

@@ -170,6 +170,7 @@ function createOceanServer(options = {}) {
     timerSweepMs: options.timerSweepMs,
     phasePresentationMs: options.phasePresentationMs,
     rollResultExtraPresentationMs: options.rollResultExtraPresentationMs,
+    botThinkDelayMs: options.botThinkDelayMs,
     setTimeoutFn: options.setTimeoutFn,
     clearTimeoutFn: options.clearTimeoutFn,
     setIntervalFn: options.setIntervalFn,

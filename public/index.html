@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="《海战 OCEAN》服务器权威的双人/三人回合制策略游戏"
+      content="《海战 OCEAN》支持双人、三人和 1v1 人机的服务器权威回合制策略游戏"
     />
     <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
@@ -62,9 +62,9 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.0</span>
+          <span id="footer-release">Ocean-v1.1</span>
           <span aria-hidden="true">·</span>
-          <span id="footer-protocol">Rule 1.4 · Socket 1.6</span>
+          <span id="footer-protocol">Rule 1.5 · Socket 1.7</span>
         </span>
       </footer>
     </div>
@@ -108,7 +108,7 @@
         <section class="rule-section">
           <h3>胜负与回合</h3>
           <p>
-            2～3 名玩家在 12×12 海域秘密部署舰队。双人局每回合执行一次合法行动；三人局每个正常回合分别对另外两名仍在局敌人各完成一次合法操作，两次操作共享同一个 90 秒计时。每名玩家自己的首个正常回合第一项操作必须使用航空母舰雷达扫描。航空母舰沉没时，双人局直接落败，三人局该玩家出局。
+            玩家在 12×12 海域秘密部署舰队，可选择 1v1 联机、1v1 人机或三人自由战。人机对手由服务器控制，并且只能使用普通玩家可见的安全情报。双人局每回合执行一次合法行动；三人局每个正常回合分别对另外两名仍在局敌人各完成一次合法操作。每名玩家自己的首个正常回合第一项操作必须使用航空母舰雷达扫描。
           </p>
         </section>
 
@@ -136,6 +136,13 @@
             <article><strong>直升机例外</strong><span>两名敌人都在局时，一次扫射同时对两人同一行或列独立结算，并结束当前回合。</span></article>
             <article><strong>终局鱼雷例外</strong><span>手动引爆一枚己方诱饵鱼雷时，同一坐标同时作用于其他所有仍在局敌人。</span></article>
           </div>
+        </section>
+
+        <section class="rule-section">
+          <h3>人机模式</h3>
+          <p>
+            人机模式固定为 1v1。机器人自动部署、掷骰和行动，不参与三人局；其决策只读取公开战况、私人侦察结果和自身状态，不读取玩家隐藏部署。
+          </p>
         </section>
 
         <section class="rule-section">

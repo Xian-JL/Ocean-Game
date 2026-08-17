@@ -20,17 +20,17 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("Ocean-v1.0 前后端正式发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "1.0.0");
-  assert.equal(RELEASE_VERSION, "1.0.0");
-  assert.equal(RELEASE_STAGE, "Ocean-v1.0");
-  assert.equal(RULE_VERSION, "1.4");
-  assert.equal(SOCKET_PROTOCOL_VERSION, "1.6");
+test("Ocean-v1.1 前后端正式发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "1.1.0");
+  assert.equal(RELEASE_VERSION, "1.1.0");
+  assert.equal(RELEASE_STAGE, "Ocean-v1.1");
+  assert.equal(RULE_VERSION, "1.5");
+  assert.equal(SOCKET_PROTOCOL_VERSION, "1.7");
   assert.deepEqual(Data.RELEASE, {
-    version: "1.0.0",
-    stage: "Ocean-v1.0",
-    ruleVersion: "1.4",
-    socketProtocolVersion: "1.6",
+    version: "1.1.0",
+    stage: "Ocean-v1.1",
+    ruleVersion: "1.5",
+    socketProtocolVersion: "1.7",
   });
 });
 
@@ -56,9 +56,12 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   }
 
   for (const current of [
-    "Ocean-v1.0",
+    "Ocean-v1.1",
     "12×12",
     'data-max-players="3"',
+    'data-room-mode="bot_duel"',
+    "机器人准备中",
+    "机器人思考中",
     "游戏说明",
   ]) {
     assert.equal(frontend.includes(current), true, `缺少当前 UI / 发布信息：${current}`);
@@ -77,9 +80,9 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
 test("当前规则与页面流程文档不再保留已废弃的核心数值", () => {
   const currentDocs = [
     read("README.md"),
-    read("docs/rule-v1.4.md"),
-    read("docs/page-flow-v1.5.md"),
-    read("docs/release-manifest-Ocean-v1.0.md"),
+    read("docs/rule-v1.5.md"),
+    read("docs/page-flow-v1.6.md"),
+    read("docs/release-manifest-Ocean-v1.1.md"),
   ].join("\n");
 
   for (const stale of ["10×10", "7×7", "8×8", "postlaunch-v0.3", "协议 1.2"]) {

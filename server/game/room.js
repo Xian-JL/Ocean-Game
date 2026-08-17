@@ -26,6 +26,11 @@ const CONNECTION_PHASES = Object.freeze({
   PAUSED_BOTH_OFFLINE: "PAUSED_BOTH_OFFLINE",
 });
 
+const ROOM_MODES = Object.freeze({
+  PVP: "pvp",
+  BOT_DUEL: "bot_duel",
+});
+
 const ROOM_CODE_LENGTH = 6;
 const ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const ROOM_CODE_PATTERN = new RegExp(
@@ -85,7 +90,7 @@ function assertPlayerId(playerId) {
   return playerId;
 }
 
-function createSeat(playerId, nickname) {
+function createSeat(playerId, nickname, options = {}) {
   return {
     playerId: assertPlayerId(playerId),
     nickname: normalizeNickname(nickname),
@@ -95,6 +100,7 @@ function createSeat(playerId, nickname) {
     deployment: null,
     ready: false,
     autoPrepared: false,
+    isBot: options.isBot === true,
   };
 }
 
@@ -106,9 +112,21 @@ function bumpVersion(room, changes) {
   };
 }
 
-function createRoomState({ roomCode, playerId, nickname, maxPlayers = 2 }) {
+function createRoomState({
+  roomCode,
+  playerId,
+  nickname,
+  maxPlayers = 2,
+  roomMode = ROOM_MODES.PVP,
+}) {
   if (![2, 3].includes(maxPlayers)) {
     fail("INVALID_PLAYER_COUNT", "房间人数只能是 2 或 3。", { maxPlayers });
+  }
+  if (!Object.values(ROOM_MODES).includes(roomMode)) {
+    fail("INVALID_ROOM_MODE", "房间模式无效。", { roomMode });
+  }
+  if (roomMode === ROOM_MODES.BOT_DUEL && maxPlayers !== 2) {
+    fail("INVALID_BOT_PLAYER_COUNT", "人机对战固定为 1v1，不能创建三人人机房间。");
   }
   const ownerSeat = createSeat(playerId, nickname);
   return {
@@ -119,6 +137,7 @@ function createRoomState({ roomCode, playerId, nickname, maxPlayers = 2 }) {
     connectionPhase: CONNECTION_PHASES.CONNECTED,
     pausedTimer: null,
     ownerPlayerId: ownerSeat.playerId,
+    roomMode,
     maxPlayers,
     seats: [ownerSeat],
     deploymentsLocked: false,
@@ -189,7 +208,7 @@ function assertRoomConnected(room) {
   return room;
 }
 
-function joinRoomState(room, { playerId, nickname }, nowMs = Date.now()) {
+function joinRoomState(room, { playerId, nickname, isBot = false }, nowMs = Date.now()) {
   assertRoomState(room);
   assertRoomConnected(room);
   const normalizedNow = normalizeServerTime(nowMs);
@@ -199,6 +218,12 @@ function joinRoomState(room, { playerId, nickname }, nowMs = Date.now()) {
     "ROOM_NOT_JOINABLE",
     "房间已满或对局已经开始，不能加入。",
   );
+  if (room.roomMode === ROOM_MODES.BOT_DUEL && !isBot) {
+    fail("BOT_ROOM_NOT_JOINABLE", "人机房间不接受其他真人玩家加入。");
+  }
+  if (room.roomMode !== ROOM_MODES.BOT_DUEL && isBot) {
+    fail("BOT_SEAT_NOT_ALLOWED", "只有 1v1 人机房间可以加入机器人席位。");
+  }
   if (room.seats.length >= room.maxPlayers) {
     fail("ROOM_FULL", "房间席位已经坐满。", {
       seatCount: room.seats.length,
@@ -209,7 +234,7 @@ function joinRoomState(room, { playerId, nickname }, nowMs = Date.now()) {
     fail("PLAYER_ALREADY_IN_ROOM", "该玩家已经在房间中。", { playerId });
   }
 
-  const joinedSeat = createSeat(playerId, nickname);
+  const joinedSeat = createSeat(playerId, nickname, { isBot });
   const seats = [...room.seats, joinedSeat];
   const full = seats.length === room.maxPlayers;
   const next = bumpVersion(room, {
@@ -471,6 +496,11 @@ function assertSeat(seat) {
       playerId: seat.playerId,
     });
   }
+  if (typeof seat.isBot !== "boolean") {
+    fail("INVALID_ROOM_STATE", "席位必须明确标记是否为机器人。", {
+      playerId: seat.playerId,
+    });
+  }
   if (seat.online) {
     if (seat.disconnectedAt !== null || seat.reconnectDeadlineAt !== null) {
       fail("INVALID_ROOM_STATE", "在线席位不能保留断线时间。", {
@@ -537,6 +567,17 @@ function assertRoomState(room) {
   }
   if (![2, 3].includes(room.maxPlayers)) {
     fail("INVALID_ROOM_STATE", "房间人数配置只能是 2 或 3。", { maxPlayers: room.maxPlayers });
+  }
+  if (!Object.values(ROOM_MODES).includes(room.roomMode)) {
+    fail("INVALID_ROOM_STATE", "房间模式无效。", { roomMode: room.roomMode });
+  }
+  const botSeats = room.seats.filter((seat) => seat.isBot);
+  if (
+    (room.roomMode === ROOM_MODES.BOT_DUEL &&
+      (room.maxPlayers !== 2 || botSeats.length > 1)) ||
+    (room.roomMode !== ROOM_MODES.BOT_DUEL && botSeats.length > 0)
+  ) {
+    fail("INVALID_ROOM_STATE", "机器人席位与房间模式不一致。");
   }
   if (!Array.isArray(room.seats) || room.seats.length < 1 || room.seats.length > room.maxPlayers) {
     fail("INVALID_ROOM_STATE", "房间席位数量超出人数配置。", {
@@ -767,6 +808,7 @@ module.exports = {
   ROOM_CODE_ALPHABET,
   ROOM_CODE_LENGTH,
   ROOM_PHASES,
+  ROOM_MODES,
   assertPlayerId,
   assertRoomConnected,
   assertRoomState,

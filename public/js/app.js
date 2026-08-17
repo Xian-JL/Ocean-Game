@@ -57,6 +57,7 @@
     clockOffsetMs: 0,
     entry: {
       maxPlayers: 2,
+      roomMode: "pvp",
       nickname: (() => {
         try {
           return localStorage.getItem(NICKNAME_STORAGE_KEY) ?? "";
@@ -854,28 +855,42 @@
             ${state.entry.error ? `<p class="form-error" role="alert">${escapeHtml(state.entry.error)}</p>` : ""}
 
             <form id="create-form" class="create-room-panel">
-              <div class="mode-switch" role="radiogroup" aria-label="对战人数">
+              <div class="mode-switch" role="radiogroup" aria-label="对战模式">
                 <button
                   type="button"
-                  class="mode-switch__option ${state.entry.maxPlayers === 2 ? "is-active" : ""}"
+                  class="mode-switch__option ${state.entry.roomMode === "pvp" && state.entry.maxPlayers === 2 ? "is-active" : ""}"
                   role="radio"
-                  aria-checked="${state.entry.maxPlayers === 2}"
+                  aria-checked="${state.entry.roomMode === "pvp" && state.entry.maxPlayers === 2}"
                   data-action="select-mode"
                   data-max-players="2"
+                  data-room-mode="pvp"
                   ${!state.connected || pending ? "disabled" : ""}
                 >
                   <span>2 人</span><small>对战</small>
                 </button>
                 <button
                   type="button"
-                  class="mode-switch__option ${state.entry.maxPlayers === 3 ? "is-active" : ""}"
+                  class="mode-switch__option ${state.entry.roomMode === "pvp" && state.entry.maxPlayers === 3 ? "is-active" : ""}"
                   role="radio"
-                  aria-checked="${state.entry.maxPlayers === 3}"
+                  aria-checked="${state.entry.roomMode === "pvp" && state.entry.maxPlayers === 3}"
                   data-action="select-mode"
                   data-max-players="3"
+                  data-room-mode="pvp"
                   ${!state.connected || pending ? "disabled" : ""}
                 >
                   <span>3 人</span><small>自由战</small>
+                </button>
+                <button
+                  type="button"
+                  class="mode-switch__option ${state.entry.roomMode === "bot_duel" ? "is-active" : ""}"
+                  role="radio"
+                  aria-checked="${state.entry.roomMode === "bot_duel"}"
+                  data-action="select-mode"
+                  data-max-players="2"
+                  data-room-mode="bot_duel"
+                  ${!state.connected || pending ? "disabled" : ""}
+                >
+                  <span>人机</span><small>1v1</small>
                 </button>
               </div>
               <button class="button button--primary button--large" type="submit" ${!state.connected || pending ? "disabled" : ""}>
@@ -1506,7 +1521,9 @@
                 ? `${value} 点 · 已投掷`
                 : isOwn
                   ? "等待你投掷"
-                  : "等待投掷";
+                  : seat.isBot
+                    ? (anyoneRolled ? "机器人准备中" : "等待你先投掷")
+                    : "等待投掷";
             return `
               <article class="die-player die-player--interactive ${isWinner ? "die-player--winner" : ""}" data-roll-state="${hasRolled ? "rolled" : "waiting"}">
                 <span class="die-player__seat">席位 0${index + 1}${isOwn ? " · 你" : ""}</span>
@@ -1527,7 +1544,9 @@
                 ${rollingPending
                   ? '<span class="button-spinner" aria-hidden="true"></span>投掷中'
                   : ownRolled
-                    ? "已投掷 · 等待其他玩家"
+                    ? room.roomMode === "bot_duel"
+                      ? "已投掷 · 等待机器人"
+                      : "已投掷 · 等待其他玩家"
                     : `掷骰子 · 第 ${currentRoundNumber} 轮`}
               </button>`}
         </div>
@@ -2076,7 +2095,9 @@
   function renderBattleHeader(room) {
     const current = room.turn?.currentPlayerId;
     const currentName = current ? Model.nicknameFor(room, current) : "服务器";
+    const currentSeat = room.seats.find((seat) => seat.playerId === current);
     const canAct = room.turn?.canAct;
+    const botThinking = !canAct && currentSeat?.isBot && room.turnPhase === "ACTIVE";
     return `
       <header class="battle-header battle-header--v072">
         <div class="battle-header__room">
@@ -2085,7 +2106,7 @@
         </div>
         <div class="battle-header__turn" data-own-turn="${canAct}">
           <small>第 ${room.turn?.turnNumber ?? room.matchSummary.turnCount} 回合</small>
-          <strong>${canAct ? "你的回合" : `等待 ${escapeHtml(currentName)}`}</strong>
+          <strong>${canAct ? "你的回合" : botThinking ? "机器人思考中" : `等待 ${escapeHtml(currentName)}`}</strong>
         </div>
         ${renderTurnProgress(room)}
         <div class="battle-header__timer">
@@ -2098,7 +2119,7 @@
           ${room.seats.map((seat) => {
             const eliminated = (room.battle?.match?.eliminatedPlayerIds ?? []).includes(seat.playerId);
             const playerState = eliminated ? "eliminated" : !seat.online ? "offline" : seat.playerId === current ? "active" : "online";
-            const stateText = eliminated ? "已淘汰" : !seat.online ? "离线" : seat.playerId === current ? "行动中" : "在线";
+            const stateText = eliminated ? "已淘汰" : !seat.online ? "离线" : seat.playerId === current ? (seat.isBot ? "思考中" : "行动中") : (seat.isBot ? "待命" : "在线");
             return `<span data-online="${seat.online}" data-player-state="${playerState}"><i></i><b>${escapeHtml(seat.nickname)}${seat.playerId === room.own.playerId ? "（你）" : ""}</b><small>${stateText}</small></span>`;
           }).join("")}
         </div>
@@ -2649,7 +2670,7 @@
             const ready = requested.has(seat.playerId);
             return `<div class="rematch-player" data-ready="${ready}" data-own="${own}">
               <span aria-hidden="true">${uiIcon(ready ? "status-rematch" : "status-unknown")}</span>
-              <div><strong>${escapeHtml(seat.nickname)}${own ? "（你）" : ""}</strong><small>${ready ? "已申请" : "等待确认"}</small></div>
+              <div><strong>${escapeHtml(seat.nickname)}${own ? "（你）" : ""}</strong><small>${ready ? "已申请" : seat.isBot ? "将在你申请后自动确认" : "等待确认"}</small></div>
             </div>`;
           }).join("")}
         </div>
@@ -3362,6 +3383,7 @@
       await emitRequest("room:create", {
         nickname: nickname.value,
         maxPlayers: state.entry.maxPlayers,
+        roomMode: state.entry.roomMode,
       });
     } catch (error) {
       state.entry.error = humanizeSocketError(error);
@@ -3631,6 +3653,9 @@
 
     if (action === "select-mode") {
       state.entry.maxPlayers = Number(control.dataset.maxPlayers) === 3 ? 3 : 2;
+      state.entry.roomMode = control.dataset.roomMode === "bot_duel"
+        ? "bot_duel"
+        : "pvp";
       render();
       return;
     }
