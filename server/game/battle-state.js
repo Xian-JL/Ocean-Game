@@ -7,7 +7,6 @@ const {
 const { formatCoordinate, sortCoordinates } = require("./coordinates");
 const { assertValidDeployment } = require("./deployment");
 const { RuleValidationError } = require("./errors");
-const { DEFAULT_MAP_RULES, createMapRules } = require("./map-rules");
 const { hasAnyLegalAction } = require("./action-validation");
 const {
   DEPLOYABLE_TYPES,
@@ -72,10 +71,9 @@ function assertBattlePlayerState(playerState) {
   return playerState;
 }
 
-function createBattlePlayerState(deployment, mapRules = DEFAULT_MAP_RULES) {
-  const rules = createMapRules(mapRules.mapSize ?? mapRules);
-  const normalizedPlacements = assertValidDeployment(deployment, rules);
-  const actionState = createInitialActionState(deployment, rules);
+function createBattlePlayerState(deployment) {
+  const normalizedPlacements = assertValidDeployment(deployment);
+  const actionState = createInitialActionState(deployment);
 
   return {
     ...actionState,
@@ -95,8 +93,7 @@ function createBattlePlayerState(deployment, mapRules = DEFAULT_MAP_RULES) {
   };
 }
 
-function createBattleState(playerEntries, mapRules = DEFAULT_MAP_RULES) {
-  const rules = createMapRules(mapRules.mapSize ?? mapRules);
+function createBattleState(playerEntries) {
   if (!Array.isArray(playerEntries) || ![2, 3].includes(playerEntries.length)) {
     throw new RuleValidationError(
       "INVALID_BATTLE_PLAYERS",
@@ -124,12 +121,11 @@ function createBattleState(playerEntries, mapRules = DEFAULT_MAP_RULES) {
   }
 
   return {
-    mapRules: rules,
     playerIds,
     players: Object.fromEntries(
       playerEntries.map((entry) => [
         entry.id,
-        createBattlePlayerState(entry.deployment, rules),
+        createBattlePlayerState(entry.deployment),
       ]),
     ),
     actionLog: [],
@@ -277,7 +273,7 @@ function getBattleUnitById(playerState, unitId) {
 
 function getBattleUnitAtCell(playerState, coordinate) {
   assertBattlePlayerState(playerState);
-  const normalized = formatCoordinate(coordinate, playerState.mapRules);
+  const normalized = formatCoordinate(coordinate);
   return (
     playerState.units.find((unit) => unit.cells.includes(normalized)) || null
   );
@@ -285,7 +281,7 @@ function getBattleUnitAtCell(playerState, coordinate) {
 
 function getBattleDecoyAtCell(playerState, coordinate) {
   assertBattlePlayerState(playerState);
-  const normalized = formatCoordinate(coordinate, playerState.mapRules);
+  const normalized = formatCoordinate(coordinate);
   return playerState.decoys.find((decoy) => decoy.cell === normalized) || null;
 }
 
@@ -325,7 +321,7 @@ function applyDamageToUnit(
       { unitId, hitCells },
     );
   }
-  const normalizedHitCells = sortCoordinates(hitCells, playerState.mapRules);
+  const normalizedHitCells = sortCoordinates(hitCells);
   for (const cell of normalizedHitCells) {
     if (!unit.cells.includes(cell)) {
       throw new RuleValidationError(
@@ -350,7 +346,7 @@ function applyDamageToUnit(
     ...unit,
     hp: afterHp,
     hitCells: [
-      ...new Set(sortCoordinates([...unit.hitCells, ...hitCellsAdded], playerState.mapRules)),
+      ...new Set(sortCoordinates([...unit.hitCells, ...hitCellsAdded])),
     ],
     paralyzed: afterHp > 0 ? unit.paralyzed : false,
   };
@@ -436,7 +432,7 @@ function recordTargetCellResults(playerState, cellResults) {
         { cellResult },
       );
     }
-    const coordinate = formatCoordinate(cellResult.coordinate, playerState.mapRules);
+    const coordinate = formatCoordinate(cellResult.coordinate);
     const existing = nextResults[coordinate];
     // 重复攻击合法；敌方地图保留该格首次公开结论，避免历史被覆盖。
     nextResults[coordinate] = existing ?? cellResult.result;
@@ -448,7 +444,7 @@ function recordTargetCellResults(playerState, cellResults) {
     targetCellResults: nextResults,
     resolvedTargetCells: [
       ...new Set(
-        sortCoordinates([...playerState.resolvedTargetCells, ...coordinates], playerState.mapRules),
+        sortCoordinates([...playerState.resolvedTargetCells, ...coordinates]),
       ),
     ],
   };

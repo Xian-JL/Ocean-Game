@@ -7,11 +7,10 @@ const {
   sortCoordinates,
 } = require("./coordinates");
 const { RuleValidationError, createRuleIssue } = require("./errors");
-const { DEFAULT_MAP_RULES, createMapRules } = require("./map-rules");
 const {
   DEPLOYABLE_TYPE_ORDER,
   DEPLOYMENT_SHAPES,
-  getFleetRequirements,
+  FLEET_REQUIREMENTS,
   getDeployableDefinition,
 } = require("./units");
 
@@ -63,18 +62,18 @@ function isSquare3x3(points) {
     points.every((point) => rows.includes(point.row) && columns.includes(point.column));
 }
 
-function isFourConnected(points, mapRules = DEFAULT_MAP_RULES) {
+function isFourConnected(points) {
   if (points.length === 0) {
     return false;
   }
 
-  const occupied = new Set(points.map((point) => coordinateKey(point, mapRules)));
+  const occupied = new Set(points.map((point) => coordinateKey(point)));
   const visited = new Set();
   const queue = [points[0]];
 
   while (queue.length > 0) {
     const current = queue.shift();
-    const currentKey = coordinateKey(current, mapRules);
+    const currentKey = coordinateKey(current);
 
     if (visited.has(currentKey)) {
       continue;
@@ -82,10 +81,10 @@ function isFourConnected(points, mapRules = DEFAULT_MAP_RULES) {
 
     visited.add(currentKey);
 
-    for (const neighbor of getOrthogonalNeighbors(current, mapRules)) {
-      const neighborKey = coordinateKey(neighbor, mapRules);
+    for (const neighbor of getOrthogonalNeighbors(current)) {
+      const neighborKey = coordinateKey(neighbor);
       if (occupied.has(neighborKey) && !visited.has(neighborKey)) {
-        queue.push(normalizePoint(neighbor, mapRules));
+        queue.push(normalizePoint(neighbor));
       }
     }
   }
@@ -93,7 +92,7 @@ function isFourConnected(points, mapRules = DEFAULT_MAP_RULES) {
   return visited.size === points.length;
 }
 
-function hasRequiredShape(shape, points, mapRules = DEFAULT_MAP_RULES) {
+function hasRequiredShape(shape, points) {
   switch (shape) {
     case DEPLOYMENT_SHAPES.LINE:
       return isLine(points);
@@ -104,14 +103,13 @@ function hasRequiredShape(shape, points, mapRules = DEFAULT_MAP_RULES) {
     case DEPLOYMENT_SHAPES.SINGLE:
       return points.length === 1;
     case DEPLOYMENT_SHAPES.FOUR_CONNECTED:
-      return isFourConnected(points, mapRules);
+      return isFourConnected(points);
     default:
       return false;
   }
 }
 
 function validatePlacement(placement, options = {}) {
-  const mapRules = createMapRules(options.mapRules?.mapSize ?? options.mapRules ?? 12);
   const errors = [];
   const index = Number.isInteger(options.index) ? options.index : undefined;
 
@@ -139,7 +137,7 @@ function validatePlacement(placement, options = {}) {
 
   let definition = null;
   try {
-    definition = getDeployableDefinition(placement.type, mapRules);
+    definition = getDeployableDefinition(placement.type);
   } catch (error) {
     if (error instanceof RuleValidationError) {
       errors.push(
@@ -175,11 +173,11 @@ function validatePlacement(placement, options = {}) {
   const points = [];
   for (const [cellIndex, cell] of placement.cells.entries()) {
     try {
-      points.push(normalizePoint(cell, mapRules));
+      points.push(normalizePoint(cell));
     } catch (error) {
       if (error instanceof RuleValidationError) {
         errors.push(
-          createRuleIssue("OUT_OF_BOUNDS", `部署坐标必须位于 A1～${mapRules.coordinateMaximum}。`, {
+          createRuleIssue("OUT_OF_BOUNDS", "部署坐标必须位于 A1～L12。", {
             index,
             id,
             cellIndex,
@@ -194,13 +192,13 @@ function validatePlacement(placement, options = {}) {
 
   const uniqueKeys = new Set();
   for (const point of points) {
-    const key = coordinateKey(point, mapRules);
+    const key = coordinateKey(point);
     if (uniqueKeys.has(key)) {
       errors.push(
         createRuleIssue("DUPLICATE_CELL", "同一部署项不能重复占用一个格。", {
           index,
           id,
-          cell: sortCoordinates([point], mapRules)[0],
+          cell: sortCoordinates([point])[0],
         }),
       );
     }
@@ -224,7 +222,7 @@ function validatePlacement(placement, options = {}) {
     points.length === placement.cells.length &&
     uniqueKeys.size === points.length &&
     points.length === definition.cellCount &&
-    !hasRequiredShape(definition.shape, points, mapRules)
+    !hasRequiredShape(definition.shape, points)
   ) {
     errors.push(
       createRuleIssue("INVALID_SHAPE", "部署项的形状不符合单位定义。", {
@@ -242,13 +240,12 @@ function validatePlacement(placement, options = {}) {
     normalizedPlacement: {
       id,
       type: placement.type,
-      cells: sortCoordinates(points, mapRules),
+      cells: sortCoordinates(points),
     },
   };
 }
 
-function validateDeployment(placements, mapRules = DEFAULT_MAP_RULES) {
-  const rules = createMapRules(mapRules.mapSize ?? mapRules);
+function validateDeployment(placements) {
   if (!Array.isArray(placements)) {
     return {
       valid: false,
@@ -268,7 +265,7 @@ function validateDeployment(placements, mapRules = DEFAULT_MAP_RULES) {
   );
 
   for (const [index, placement] of placements.entries()) {
-    const result = validatePlacement(placement, { index, mapRules: rules });
+    const result = validatePlacement(placement, { index });
     errors.push(...result.errors);
 
     if (!result.normalizedPlacement) {
@@ -297,7 +294,7 @@ function validateDeployment(placements, mapRules = DEFAULT_MAP_RULES) {
     }
 
     for (const cell of normalized.cells) {
-      const key = coordinateKey(cell, rules);
+      const key = coordinateKey(cell);
       if (occupiedCells.has(key)) {
         const first = occupiedCells.get(key);
         errors.push(
@@ -318,9 +315,8 @@ function validateDeployment(placements, mapRules = DEFAULT_MAP_RULES) {
     }
   }
 
-  const fleetRequirements = getFleetRequirements(rules);
   for (const type of DEPLOYABLE_TYPE_ORDER) {
-    const expected = fleetRequirements[type];
+    const expected = FLEET_REQUIREMENTS[type];
     const actual = typeCounts[type];
     if (actual !== expected) {
       errors.push(
@@ -340,12 +336,12 @@ function validateDeployment(placements, mapRules = DEFAULT_MAP_RULES) {
   };
 }
 
-function assertValidDeployment(placements, mapRules = DEFAULT_MAP_RULES) {
-  const result = validateDeployment(placements, mapRules);
+function assertValidDeployment(placements) {
+  const result = validateDeployment(placements);
   if (!result.valid) {
     throw new RuleValidationError(
       "INVALID_DEPLOYMENT",
-      "部署不符合当前地图规则。",
+      "部署不符合《游戏规则 v1.4》。",
       { errors: result.errors },
     );
   }

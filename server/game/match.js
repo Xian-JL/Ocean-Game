@@ -298,7 +298,6 @@ function startPlaying(room, nowMs = Date.now()) {
       id: seat.playerId,
       deployment: seat.deployment,
     })),
-    room.mapRules,
   );
   const firstPlayerId = room.rolling.firstPlayerId;
   const begun = beginNormalTurn(battleState, firstPlayerId);
@@ -423,7 +422,7 @@ function beginPlayerAction(room, playerId, intent, nowMs = Date.now()) {
   ) {
     fail(
       "OPENING_RADAR_REQUIRED",
-      `该玩家的首个行动回合必须先使用航空母舰雷达扫描 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 海域。`,
+      "该玩家的首个行动回合必须先使用航空母舰雷达扫描 4×4 海域。",
     );
   }
   const validation = validateActionIntent(playerState, intent);
@@ -1013,7 +1012,7 @@ function createSafeBattleView(room, viewerId, nowMs) {
             issues: [
               {
                 code: "OPENING_RADAR_REQUIRED",
-                message: `首个行动回合必须先扫描 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 海域。`,
+                message: "首个行动回合必须先扫描 4×4 海域。",
                 details: {},
               },
             ],
@@ -1030,8 +1029,6 @@ function createRoomView(room, viewerId, nowMs = Date.now()) {
   return {
     roomCode: room.roomCode,
     roomMode: room.roomMode,
-    mapSize: room.mapSize,
-    mapRules: clone(room.mapRules),
     maxPlayers: room.maxPlayers,
     stateVersion: room.stateVersion,
     roomPhase: room.roomPhase,

@@ -10,17 +10,16 @@
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
   const RELEASE = Object.freeze({
-    version: "1.2.0",
-    stage: "Ocean-v1.2",
-    ruleVersion: "1.6",
-    socketProtocolVersion: "1.8",
+    version: "1.1.0",
+    stage: "Ocean-v1.1",
+    ruleVersion: "1.5",
+    socketProtocolVersion: "1.7",
   });
-  const SUPPORTED_MAP_SIZES = Object.freeze([10, 12, 15]);
-  const ALL_ROW_LABELS = "ABCDEFGHIJKLMNO";
-  let BOARD_SIZE = 12;
-  let ACTIVE_MAP_RULES = null;
-  const ROWS = [];
-  const COLUMNS = [];
+  const BOARD_SIZE = 12;
+  const ROWS = Object.freeze("ABCDEFGHIJKL".split(""));
+  const COLUMNS = Object.freeze(
+    Array.from({ length: BOARD_SIZE }, (_value, index) => index + 1),
+  );
 
   const UNIT_TYPES = Object.freeze({
     DESTROYER_I: "destroyer_i",
@@ -46,7 +45,7 @@
     RADAR_SCAN: "radar_scan",
   });
 
-  const BASE_UNIT_DEFINITIONS = Object.freeze([
+  const UNIT_DEFINITIONS = Object.freeze([
     Object.freeze({
       id: "destroyer-i",
       type: UNIT_TYPES.DESTROYER_I,
@@ -137,7 +136,7 @@
     })),
   ]);
 
-  const BASE_ACTION_DEFINITIONS = Object.freeze([
+  const ACTION_DEFINITIONS = Object.freeze([
     Object.freeze({
       type: ACTION_TYPES.DESTROYER_I_RAM,
       name: "驱逐舰Ⅰ冲撞",
@@ -230,116 +229,16 @@
     }),
   ]);
 
-  const UNIT_DEFINITIONS = [];
-  const ACTION_DEFINITIONS = [];
-  const ALL_COORDINATES = [];
-
-  function nearestWithParity(value, parity, maximum) {
-    const candidates = [];
-    for (let candidate = parity === "odd" ? 1 : 2; candidate <= maximum; candidate += 2) {
-      candidates.push(candidate);
-    }
-    return candidates.reduce((best, candidate) => {
-      const difference = Math.abs(candidate - value);
-      const bestDifference = Math.abs(best - value);
-      return difference < bestDifference || (difference === bestDifference && candidate < best)
-        ? candidate
-        : best;
-    }, candidates[0]);
-  }
-
-  function createMapRules(value = 12) {
-    const mapSize = Number(value);
-    if (!SUPPORTED_MAP_SIZES.includes(mapSize)) {
-      throw new RangeError("地图大小只能选择 10、12 或 15。");
-    }
-    const scale = mapSize / 12;
-    const rules = {
-      mapSize,
-      boardSize: mapSize,
-      rowLabels: ALL_ROW_LABELS.slice(0, mapSize),
-      coordinateMaximum: `${ALL_ROW_LABELS[mapSize - 1]}${mapSize}`,
-      carrierCellCount: Math.round(mapSize / 2),
-      carrierHp: Math.round(mapSize / 2),
-      decoyCount: Math.max(1, Math.round(3 * scale * scale)),
-      destroyerI: {
-        along: nearestWithParity(11 * scale, "odd", mapSize),
-        across: nearestWithParity(7 * scale, "odd", mapSize),
-      },
-      destroyerII: {
-        along: nearestWithParity(10 * scale, "even", mapSize),
-        across: nearestWithParity(8 * scale, "even", mapSize),
-      },
-      radarSize: Math.round(mapSize / 3),
-      shockSize: nearestWithParity(5 * scale, "odd", mapSize),
-      detectionSize: nearestWithParity(3 * scale, "odd", mapSize),
-    };
-    return rules;
-  }
-
-  function createUnitDefinitions(mapRules) {
-    const fixed = BASE_UNIT_DEFINITIONS
-      .filter((definition) => definition.type !== UNIT_TYPES.DECOY_TORPEDO)
-      .map((definition) => definition.type === UNIT_TYPES.AIRCRAFT_CARRIER
-        ? Object.freeze({
-            ...definition,
-            cellCount: mapRules.carrierCellCount,
-            initialHp: mapRules.carrierHp,
-            shapeText: `${mapRules.carrierCellCount} 格四向连通`,
-          })
-        : definition);
-    return [
-      ...fixed,
-      ...Array.from({ length: mapRules.decoyCount }, (_value, index) => Object.freeze({
-        id: `decoy-${index + 1}`,
-        type: UNIT_TYPES.DECOY_TORPEDO,
-        name: `诱饵鱼雷 ${index + 1}`,
-        shortName: "雷",
-        category: "decoy",
-        shape: "single",
-        cellCount: 1,
-        initialHp: null,
-        shapeText: "单格",
-      })),
-    ];
-  }
-
-  function createActionDefinitions(mapRules) {
-    return BASE_ACTION_DEFINITIONS.map((definition) => {
-      let warning = definition.warning;
-      if (definition.type === ACTION_TYPES.SHOCK_BOMB) {
-        warning = `以中心格形成完整 ${mapRules.shockSize}×${mapRules.shockSize} 区域。只有水下作战单位可能在其下一个正常回合瘫痪；你不会获知是否生效。`;
-      }
-      if (definition.type === ACTION_TYPES.DETECTION_BOMB) {
-        warning = `以中心格形成完整 ${mapRules.detectionSize}×${mapRules.detectionSize} 区域。潜水艇或核潜艇的未受击存活单位格，以及未被摧毁的诱饵鱼雷，都会产生水下信号；只返回是否探测到信号。`;
-      }
-      if (definition.type === ACTION_TYPES.RADAR_SCAN) {
-        warning = `每名玩家的首个行动回合必须使用航空母舰自带雷达，选择完整 ${mapRules.radarSize}×${mapRules.radarSize} 区域；只返回是否存在敌方布局。`;
-      }
-      return Object.freeze({ ...definition, warning });
-    });
-  }
-
-  function configureMap(value = 12) {
-    const mapRules = createMapRules(value);
-    BOARD_SIZE = mapRules.boardSize;
-    ACTIVE_MAP_RULES = mapRules;
-    ROWS.splice(0, ROWS.length, ...mapRules.rowLabels.split(""));
-    COLUMNS.splice(0, COLUMNS.length,
-      ...Array.from({ length: BOARD_SIZE }, (_value, index) => index + 1));
-    UNIT_DEFINITIONS.splice(0, UNIT_DEFINITIONS.length, ...createUnitDefinitions(mapRules));
-    ACTION_DEFINITIONS.splice(0, ACTION_DEFINITIONS.length, ...createActionDefinitions(mapRules));
-    ALL_COORDINATES.splice(0, ALL_COORDINATES.length,
-      ...ROWS.flatMap((row) => COLUMNS.map((column) => `${row}${column}`)));
-    return mapRules;
-  }
+  const ALL_COORDINATES = Object.freeze(
+    ROWS.flatMap((row) => COLUMNS.map((column) => `${row}${column}`)),
+  );
 
   function parseCoordinate(coordinate) {
     if (typeof coordinate !== "string") {
       return null;
     }
-    const match = /^([A-O])(1[0-5]|[1-9])$/.exec(coordinate.trim().toUpperCase());
-    if (!match || !ROWS.includes(match[1]) || Number(match[2]) > BOARD_SIZE) {
+    const match = /^([A-L])(1[0-2]|[1-9])$/.exec(coordinate.trim().toUpperCase());
+    if (!match) {
       return null;
     }
     return {
@@ -628,45 +527,24 @@
     return candidates;
   }
 
-  function carrierCandidates() {
-    if (ACTIVE_MAP_RULES.carrierCellCount === 5) {
-      const candidates = [];
-      for (const [height, width] of [[2, 3], [3, 2]]) {
-        for (const cells of rectangleCandidates(height, width)) {
-          for (let omitted = 0; omitted < cells.length; omitted += 1) {
-            candidates.push(cells.filter((_cell, index) => index !== omitted));
-          }
-        }
-      }
-      return candidates;
-    }
-    const dimensions = ACTIVE_MAP_RULES.carrierCellCount === 8
-      ? [[2, 4], [4, 2]]
-      : [[2, 3], [3, 2]];
-    return dimensions.flatMap(([height, width]) => rectangleCandidates(height, width));
-  }
+  const RANDOM_CANDIDATES = Object.freeze({
+    "destroyer-i": lineCandidates(3),
+    "destroyer-ii": lineCandidates(4),
+    submarine: rectangleCandidates(2, 2),
+    pirate: lineCandidates(3),
+    motorboat: ALL_COORDINATES.map((cell) => [cell]),
+    "motorboat-2": ALL_COORDINATES.map((cell) => [cell]),
+    nuclear: rectangleCandidates(2, 2),
+    carrier: [
+      ...rectangleCandidates(2, 3),
+      ...rectangleCandidates(3, 2),
+    ],
+    "decoy-1": ALL_COORDINATES.map((cell) => [cell]),
+    "decoy-2": ALL_COORDINATES.map((cell) => [cell]),
+    "decoy-3": ALL_COORDINATES.map((cell) => [cell]),
+  });
 
-  function randomCandidates() {
-    return {
-      "destroyer-i": lineCandidates(3),
-      "destroyer-ii": lineCandidates(4),
-      submarine: rectangleCandidates(2, 2),
-      pirate: lineCandidates(3),
-      motorboat: ALL_COORDINATES.map((cell) => [cell]),
-      "motorboat-2": ALL_COORDINATES.map((cell) => [cell]),
-      nuclear: rectangleCandidates(2, 2),
-      carrier: carrierCandidates(),
-      ...Object.fromEntries(
-        Array.from({ length: ACTIVE_MAP_RULES.decoyCount }, (_value, index) => [
-          `decoy-${index + 1}`,
-          ALL_COORDINATES.map((cell) => [cell]),
-        ]),
-      ),
-    };
-  }
-
-  function randomOrder() {
-    return [
+  const RANDOM_ORDER = Object.freeze([
     "carrier",
     "destroyer-ii",
     "submarine",
@@ -675,24 +553,23 @@
     "pirate",
     "motorboat",
     "motorboat-2",
-      ...Array.from({ length: ACTIVE_MAP_RULES.decoyCount }, (_value, index) => `decoy-${index + 1}`),
-    ];
-  }
+    "decoy-1",
+    "decoy-2",
+    "decoy-3",
+  ]);
 
   function generateRandomDeployment(random = Math.random) {
-    const order = randomOrder();
-    const definitions = randomCandidates();
     const chosen = new Map();
     const occupied = new Set();
     const candidates = Object.fromEntries(
-      order.map((id) => [id, shuffle(definitions[id], random)]),
+      RANDOM_ORDER.map((id) => [id, shuffle(RANDOM_CANDIDATES[id], random)]),
     );
 
     function place(index) {
-      if (index >= order.length) {
+      if (index >= RANDOM_ORDER.length) {
         return true;
       }
-      const id = order[index];
+      const id = RANDOM_ORDER[index];
       for (const cells of candidates[id]) {
         if (cells.some((cell) => occupied.has(cell))) {
           continue;
@@ -723,11 +600,9 @@
     if (type === UNIT_TYPES.DESTROYER_I && points.length === 3) {
       const center = points[1];
       const horizontal = points[0].row === points[2].row;
-      const halfAlong = Math.floor(ACTIVE_MAP_RULES.destroyerI.along / 2);
-      const halfAcross = Math.floor(ACTIVE_MAP_RULES.destroyerI.across / 2);
       return horizontal
-        ? rectangle(center.row - halfAcross, center.row + halfAcross, center.column - halfAlong, center.column + halfAlong, true)
-        : rectangle(center.row - halfAlong, center.row + halfAlong, center.column - halfAcross, center.column + halfAcross, true);
+        ? rectangle(center.row - 3, center.row + 3, center.column - 5, center.column + 5, true)
+        : rectangle(center.row - 5, center.row + 5, center.column - 3, center.column + 3, true);
     }
     if (type === UNIT_TYPES.DESTROYER_II && points.length === 4) {
       const centerRow = Math.floor((points[1].row + points[2].row) / 2);
@@ -735,13 +610,9 @@
         (points[1].column + points[2].column) / 2,
       );
       const horizontal = points[0].row === points[3].row;
-      const alongBefore = ACTIVE_MAP_RULES.destroyerII.along / 2 - 1;
-      const alongAfter = ACTIVE_MAP_RULES.destroyerII.along / 2;
-      const acrossBefore = ACTIVE_MAP_RULES.destroyerII.across / 2 - 1;
-      const acrossAfter = ACTIVE_MAP_RULES.destroyerII.across / 2;
       return horizontal
-        ? rectangle(centerRow - acrossBefore, centerRow + acrossAfter, centerColumn - alongBefore, centerColumn + alongAfter, true)
-        : rectangle(centerRow - alongBefore, centerRow + alongAfter, centerColumn - acrossBefore, centerColumn + acrossAfter, true);
+        ? rectangle(centerRow - 3, centerRow + 4, centerColumn - 4, centerColumn + 5, true)
+        : rectangle(centerRow - 4, centerRow + 5, centerColumn - 3, centerColumn + 4, true);
     }
     return [];
   }
@@ -752,30 +623,23 @@
       return [];
     }
     if (kind === "shock") {
-      const radius = Math.floor(ACTIVE_MAP_RULES.shockSize / 2);
       return rectangle(
-        point.row - radius,
-        point.row + radius,
-        point.column - radius,
-        point.column + radius,
+        point.row - 2,
+        point.row + 2,
+        point.column - 2,
+        point.column + 2,
       );
     }
     if (kind === "detection") {
-      const radius = Math.floor(ACTIVE_MAP_RULES.detectionSize / 2);
       return rectangle(
-        point.row - radius,
-        point.row + radius,
-        point.column - radius,
-        point.column + radius,
+        point.row - 1,
+        point.row + 1,
+        point.column - 1,
+        point.column + 1,
       );
     }
     if (kind === "radar") {
-      return rectangle(
-        point.row,
-        point.row + ACTIVE_MAP_RULES.radarSize - 1,
-        point.column,
-        point.column + ACTIVE_MAP_RULES.radarSize - 1,
-      );
+      return rectangle(point.row, point.row + 3, point.column, point.column + 3);
     }
     return [];
   }
@@ -833,21 +697,19 @@
       );
     }
     if (definition.rangeMode === "shock") {
-      const radius = Math.floor(ACTIVE_MAP_RULES.shockSize / 2);
-      return rectangle(radius, BOARD_SIZE - radius - 1, radius, BOARD_SIZE - radius - 1).map((coordinate) => ({
+      return rectangle(2, BOARD_SIZE - 3, 2, BOARD_SIZE - 3).map((coordinate) => ({
         kind: "cell",
         coordinate,
       }));
     }
     if (definition.rangeMode === "detection") {
-      const radius = Math.floor(ACTIVE_MAP_RULES.detectionSize / 2);
-      return rectangle(radius, BOARD_SIZE - radius - 1, radius, BOARD_SIZE - radius - 1).map((coordinate) => ({
+      return rectangle(1, BOARD_SIZE - 2, 1, BOARD_SIZE - 2).map((coordinate) => ({
         kind: "cell",
         coordinate,
       }));
     }
     if (definition.rangeMode === "radar") {
-      return rectangle(0, BOARD_SIZE - ACTIVE_MAP_RULES.radarSize, 0, BOARD_SIZE - ACTIVE_MAP_RULES.radarSize).map((coordinate) => ({ kind: "cell", coordinate }));
+      return rectangle(0, BOARD_SIZE - 4, 0, BOARD_SIZE - 4).map((coordinate) => ({ kind: "cell", coordinate }));
     }
     if (definition.rangeMode === "full_line") {
       return [
@@ -909,20 +771,16 @@
     return [];
   }
 
-  configureMap(12);
-
-  const api = {
+  return Object.freeze({
     ACTION_DEFINITIONS,
     ACTION_TYPES,
     ALL_COORDINATES,
+    BOARD_SIZE,
     COLUMNS,
     ROWS,
     RELEASE,
     UNIT_DEFINITIONS,
     UNIT_TYPES,
-    SUPPORTED_MAP_SIZES,
-    configureMap,
-    createMapRules,
     createAnchoredCells,
     destroyerCenterCells,
     destroyerRange,
@@ -945,10 +803,5 @@
     sortCoordinates,
     targetKey,
     validateDeployment,
-  };
-  Object.defineProperties(api, {
-    BOARD_SIZE: { enumerable: true, get: () => BOARD_SIZE },
-    MAP_RULES: { enumerable: true, get: () => ({ ...ACTIVE_MAP_RULES }) },
   });
-  return Object.freeze(api);
 });

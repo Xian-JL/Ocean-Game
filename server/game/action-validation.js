@@ -18,13 +18,13 @@ const {
   markDestroyerTarget,
   markNuclearBombTarget,
   markSubmarineMissileTarget,
-  getStateMapRules,
 } = require("./action-state");
 const {
+  BOARD_SIZE,
+  ROW_LABELS,
   formatCoordinate,
   parseCoordinate,
 } = require("./coordinates");
-const { DEFAULT_MAP_RULES } = require("./map-rules");
 const { RuleValidationError, createRuleIssue } = require("./errors");
 const {
   getDetectionArea,
@@ -37,15 +37,13 @@ const {
 } = require("./ranges");
 const { DEPLOYABLE_TYPES } = require("./units");
 
-function createAllBoardCells(mapRules) {
-  return Array.from({ length: mapRules.boardSize }, (_rowValue, row) =>
-    Array.from({ length: mapRules.boardSize }, (_columnValue, column) =>
-      formatCoordinate({ row, column }, mapRules),
+const ALL_BOARD_CELLS = Object.freeze(
+  Array.from({ length: BOARD_SIZE }, (_rowValue, row) =>
+    Array.from({ length: BOARD_SIZE }, (_columnValue, column) =>
+      formatCoordinate({ row, column }),
     ),
-  ).flat();
-}
-
-const ALL_BOARD_CELLS = Object.freeze(createAllBoardCells(DEFAULT_MAP_RULES));
+  ).flat(),
+);
 
 function isNonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
@@ -136,13 +134,13 @@ function getSourceIssues(state, definition, sourceId, options = {}) {
   return issues;
 }
 
-function createCenterTargets(minRow, maxRow, minColumn, maxColumn, mapRules) {
+function createCenterTargets(minRow, maxRow, minColumn, maxColumn) {
   const targets = [];
   for (let row = minRow; row <= maxRow; row += 1) {
     for (let column = minColumn; column <= maxColumn; column += 1) {
       targets.push({
         kind: "cell",
-        coordinate: formatCoordinate({ row, column }, mapRules),
+        coordinate: formatCoordinate({ row, column }),
       });
     }
   }
@@ -151,7 +149,6 @@ function createCenterTargets(minRow, maxRow, minColumn, maxColumn, mapRules) {
 
 function getActionTargetOptions(state, actionType, options = {}) {
   assertActionState(state);
-  const mapRules = getStateMapRules(state);
   const definition = getActionDefinition(actionType);
   const destroyerTargets = new Set(state.destroyerTargetCells);
 
@@ -161,7 +158,7 @@ function getActionTargetOptions(state, actionType, options = {}) {
       if (!source) {
         return [];
       }
-      return getDestroyerIRange(source.cells, mapRules)
+      return getDestroyerIRange(source.cells)
         .filter((coordinate) =>
           !destroyerTargets.has(coordinate) &&
           !(typeof options.targetPlayerId === "string" &&
@@ -174,7 +171,7 @@ function getActionTargetOptions(state, actionType, options = {}) {
       if (!source) {
         return [];
       }
-      return getDestroyerIIRange(source.cells, mapRules)
+      return getDestroyerIIRange(source.cells)
         .filter((coordinate) =>
           !destroyerTargets.has(coordinate) &&
           !(typeof options.targetPlayerId === "string" &&
@@ -183,39 +180,21 @@ function getActionTargetOptions(state, actionType, options = {}) {
         .map((coordinate) => ({ kind: "cell", coordinate }));
     }
     case RANGE_MODES.FULL_BOARD:
-      return createAllBoardCells(mapRules).map(
+      return ALL_BOARD_CELLS.map(
         (coordinate) => ({ kind: "cell", coordinate }),
       );
     case RANGE_MODES.SHOCK_AREA:
-      return createCenterTargets(
-        Math.floor(mapRules.shockSize / 2),
-        mapRules.boardSize - Math.ceil(mapRules.shockSize / 2),
-        Math.floor(mapRules.shockSize / 2),
-        mapRules.boardSize - Math.ceil(mapRules.shockSize / 2),
-        mapRules,
-      );
+      return createCenterTargets(2, BOARD_SIZE - 3, 2, BOARD_SIZE - 3);
     case RANGE_MODES.DETECTION_AREA:
-      return createCenterTargets(
-        Math.floor(mapRules.detectionSize / 2),
-        mapRules.boardSize - Math.ceil(mapRules.detectionSize / 2),
-        Math.floor(mapRules.detectionSize / 2),
-        mapRules.boardSize - Math.ceil(mapRules.detectionSize / 2),
-        mapRules,
-      );
+      return createCenterTargets(1, BOARD_SIZE - 2, 1, BOARD_SIZE - 2);
     case RANGE_MODES.RADAR_AREA:
-      return createCenterTargets(
-        0,
-        mapRules.boardSize - mapRules.radarSize,
-        0,
-        mapRules.boardSize - mapRules.radarSize,
-        mapRules,
-      );
+      return createCenterTargets(0, BOARD_SIZE - 4, 0, BOARD_SIZE - 4);
     case RANGE_MODES.FULL_LINE: {
       const targets = [];
-      for (const row of mapRules.rowLabels) {
+      for (const row of ROW_LABELS) {
         targets.push({ kind: "row", row });
       }
-      for (let column = 1; column <= mapRules.boardSize; column += 1) {
+      for (let column = 1; column <= BOARD_SIZE; column += 1) {
         targets.push({ kind: "column", column });
       }
       return targets;
@@ -229,7 +208,7 @@ function getActionTargetOptions(state, actionType, options = {}) {
   }
 }
 
-function normalizeCellTarget(target, mapRules) {
+function normalizeCellTarget(target) {
   if (!target || target.kind !== "cell") {
     throw new RuleValidationError(
       "INVALID_TARGET",
@@ -237,14 +216,14 @@ function normalizeCellTarget(target, mapRules) {
       { target },
     );
   }
-  const point = parseCoordinate(target.coordinate, mapRules);
+  const point = parseCoordinate(target.coordinate);
   return {
     kind: "cell",
-    coordinate: formatCoordinate(point, mapRules),
+    coordinate: formatCoordinate(point),
   };
 }
 
-function normalizeLineTarget(target, mapRules) {
+function normalizeLineTarget(target) {
   if (!target || typeof target !== "object") {
     throw new RuleValidationError(
       "INVALID_TARGET",
@@ -257,7 +236,7 @@ function normalizeLineTarget(target, mapRules) {
     const row = isNonEmptyString(target.row)
       ? target.row.trim().toUpperCase()
       : target.row;
-    const cells = getFullRow(row, mapRules);
+    const cells = getFullRow(row);
     return {
       normalizedTarget: { kind: "row", row },
       cells,
@@ -265,7 +244,7 @@ function normalizeLineTarget(target, mapRules) {
   }
 
   if (target.kind === "column") {
-    const cells = getFullColumn(target.column, mapRules);
+    const cells = getFullColumn(target.column);
     return {
       normalizedTarget: { kind: "column", column: target.column },
       cells,
@@ -280,22 +259,21 @@ function normalizeLineTarget(target, mapRules) {
 }
 
 function validateAndNormalizeTarget(state, definition, source, target, targetPlayerId = null) {
-  const mapRules = getStateMapRules(state);
   try {
     if (definition.targetMode === TARGET_MODES.SINGLE_CELL) {
-      const normalizedTarget = normalizeCellTarget(target, mapRules);
-      let allowedCells = createAllBoardCells(mapRules);
+      const normalizedTarget = normalizeCellTarget(target);
+      let allowedCells = ALL_BOARD_CELLS;
 
       if (
         definition.rangeMode === RANGE_MODES.DESTROYER_I &&
         source?.type === definition.sourceType
       ) {
-        allowedCells = getDestroyerIRange(source.cells, mapRules);
+        allowedCells = getDestroyerIRange(source.cells);
       } else if (
         definition.rangeMode === RANGE_MODES.DESTROYER_II &&
         source?.type === definition.sourceType
       ) {
-        allowedCells = getDestroyerIIRange(source.cells, mapRules);
+        allowedCells = getDestroyerIIRange(source.cells);
       }
 
       if (!allowedCells.includes(normalizedTarget.coordinate)) {
@@ -335,14 +313,14 @@ function validateAndNormalizeTarget(state, definition, source, target, targetPla
     }
 
     if (definition.targetMode === TARGET_MODES.AREA_CENTER) {
-      const normalizedTarget = normalizeCellTarget(target, mapRules);
+      const normalizedTarget = normalizeCellTarget(target);
       let cells;
       try {
         cells = definition.rangeMode === RANGE_MODES.SHOCK_AREA
-          ? getShockArea(normalizedTarget.coordinate, mapRules)
+          ? getShockArea(normalizedTarget.coordinate)
           : definition.rangeMode === RANGE_MODES.RADAR_AREA
-            ? getRadarArea(normalizedTarget.coordinate, mapRules)
-            : getDetectionArea(normalizedTarget.coordinate, mapRules);
+            ? getRadarArea(normalizedTarget.coordinate)
+            : getDetectionArea(normalizedTarget.coordinate);
       } catch (error) {
         if (error instanceof RuleValidationError) {
           return {
@@ -364,7 +342,7 @@ function validateAndNormalizeTarget(state, definition, source, target, targetPla
     }
 
     if (definition.targetMode === TARGET_MODES.ROW_OR_COLUMN) {
-      const { normalizedTarget, cells } = normalizeLineTarget(target, mapRules);
+      const { normalizedTarget, cells } = normalizeLineTarget(target);
       const pendingTargetCells = cells;
       return {
         normalizedTarget,

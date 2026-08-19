@@ -540,7 +540,6 @@ class SocketGameGateway {
       nickname: normalized.nickname,
       maxPlayers: normalized.maxPlayers ?? 2,
       roomMode: normalized.roomMode ?? ROOM_MODES.PVP,
-      mapSize: normalized.mapSize ?? 12,
     });
     await this.#bindSocket(
       socket,
