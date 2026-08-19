@@ -34,7 +34,7 @@ class FakeSocket {
       if (eventName === "client:ping") {
         acknowledge(null, {
           ok: true,
-          protocolVersion: "1.7",
+          protocolVersion: "1.8",
         });
       } else {
         acknowledge(null, {
@@ -255,12 +255,18 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.1",
-    protocolVersion: "1.7",
+    stage: "Ocean-v1.2",
+    protocolVersion: "1.8",
   });
 
   assert.match(window.document.querySelector("#app").textContent, /创建房间/);
   assert.equal(window.document.querySelectorAll("#create-form").length, 1);
+  assert.equal(window.document.querySelectorAll('[data-action="select-map-size"]').length, 3);
+  click(window, window.document.querySelector('[data-map-size="15"]'));
+  assert.equal(
+    window.document.querySelector('[data-map-size="15"]').getAttribute("aria-checked"),
+    "true",
+  );
   click(window, window.document.querySelector('[data-action="open-rules"]'));
   assert.equal(window.document.querySelector("#rules-dialog").open, true);
   click(window, window.document.querySelector('[data-action="close-rules"]'));
@@ -269,7 +275,10 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
     message: "可恢复的测试提示",
     details: {},
   });
-  assert.match(window.document.querySelector(".toast").textContent, /可恢复的测试提示/);
+  const dismissibleToast = window.document.querySelector(".toast");
+  assert.match(dismissibleToast.textContent, /可恢复的测试提示/);
+  click(window, dismissibleToast);
+  assert.equal(window.document.querySelector(".toast"), null);
 
   socket.serverEmit("room:session", {
     active: true,

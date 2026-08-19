@@ -2,11 +2,10 @@
 
 const { ACTION_TYPES } = require("./actions");
 const {
-  BOARD_SIZE,
-  ROW_LABELS,
   formatCoordinate,
   parseCoordinate,
 } = require("./coordinates");
+const { DEFAULT_MAP_RULES, createMapRules } = require("./map-rules");
 const {
   getDestroyerIRange,
   getDestroyerIIRange,
@@ -19,13 +18,19 @@ const {
 const { DEPLOYABLE_TYPES } = require("./units");
 const { RuleValidationError } = require("./errors");
 
-const ALL_CELLS = Object.freeze(
-  Array.from({ length: BOARD_SIZE }, (_value, row) =>
-    Array.from({ length: BOARD_SIZE }, (_cell, column) =>
-      formatCoordinate({ row, column }),
+function rulesForView(view) {
+  return view?.mapRules?.mapSize
+    ? createMapRules(view.mapRules.mapSize)
+    : DEFAULT_MAP_RULES;
+}
+
+function allCells(mapRules) {
+  return Array.from({ length: mapRules.boardSize }, (_value, row) =>
+    Array.from({ length: mapRules.boardSize }, (_cell, column) =>
+      formatCoordinate({ row, column }, mapRules),
     ),
-  ).flat(),
-);
+  ).flat();
+}
 
 function fail(code, message, details = {}) {
   throw new RuleValidationError(code, message, details);
@@ -56,8 +61,8 @@ function getEnemyMap(view, opponentId) {
     };
 }
 
-function neighbours(coordinate, distance = 1) {
-  const point = parseCoordinate(coordinate);
+function neighbours(coordinate, distance = 1, mapRules = DEFAULT_MAP_RULES) {
+  const point = parseCoordinate(coordinate, mapRules);
   return [
     { row: point.row - distance, column: point.column },
     { row: point.row + distance, column: point.column },
@@ -66,17 +71,19 @@ function neighbours(coordinate, distance = 1) {
   ]
     .filter(
       (item) =>
-        item.row >= 0 && item.row < BOARD_SIZE &&
-        item.column >= 0 && item.column < BOARD_SIZE,
+        item.row >= 0 && item.row < mapRules.boardSize &&
+        item.column >= 0 && item.column < mapRules.boardSize,
     )
-    .map(formatCoordinate);
+    .map((item) => formatCoordinate(item, mapRules));
 }
 
 function buildKnowledge(view, opponentId) {
+  const mapRules = rulesForView(view);
+  const cells = allCells(mapRules);
   const enemyMap = getEnemyMap(view, opponentId);
-  const general = Object.fromEntries(ALL_CELLS.map((cell) => [cell, 1]));
-  const surface = Object.fromEntries(ALL_CELLS.map((cell) => [cell, 1]));
-  const underwater = Object.fromEntries(ALL_CELLS.map((cell) => [cell, 1]));
+  const general = Object.fromEntries(cells.map((cell) => [cell, 1]));
+  const surface = Object.fromEntries(cells.map((cell) => [cell, 1]));
+  const underwater = Object.fromEntries(cells.map((cell) => [cell, 1]));
   const attempted = new Set([
     ...(enemyMap.submarineMissileMarkers ?? []),
     ...(enemyMap.nuclearBombMarkers ?? []),
@@ -105,12 +112,12 @@ function buildKnowledge(view, opponentId) {
       general[cell] = -100;
       surface[cell] = -100;
       underwater[cell] = -100;
-      for (const adjacent of neighbours(cell, 1)) {
+      for (const adjacent of neighbours(cell, 1, mapRules)) {
         general[adjacent] += 7;
         surface[adjacent] += 5;
         underwater[adjacent] += 3;
       }
-      for (const extension of neighbours(cell, 2)) {
+      for (const extension of neighbours(cell, 2, mapRules)) {
         general[extension] += 3;
         surface[extension] += 2;
         underwater[extension] += 1;
@@ -131,22 +138,26 @@ function buildKnowledge(view, opponentId) {
   return { general, surface, underwater, attempted, enemyMap };
 }
 
-function legalCenterTargets(kind) {
-  const offset = kind === "radar" ? 0 : kind === "detection" ? 1 : 2;
-  const size = kind === "radar" ? 4 : kind === "detection" ? 3 : 5;
+function legalCenterTargets(kind, mapRules) {
+  const size = kind === "radar"
+    ? mapRules.radarSize
+    : kind === "detection"
+      ? mapRules.detectionSize
+      : mapRules.shockSize;
+  const offset = kind === "radar" ? 0 : Math.floor(size / 2);
   const targets = [];
-  for (let row = offset; row <= BOARD_SIZE - size + offset; row += 1) {
-    for (let column = offset; column <= BOARD_SIZE - size + offset; column += 1) {
-      targets.push(formatCoordinate({ row, column }));
+  for (let row = offset; row <= mapRules.boardSize - size + offset; row += 1) {
+    for (let column = offset; column <= mapRules.boardSize - size + offset; column += 1) {
+      targets.push(formatCoordinate({ row, column }, mapRules));
     }
   }
   return targets;
 }
 
-function areaFor(actionType, coordinate) {
-  if (actionType === ACTION_TYPES.RADAR_SCAN) return getRadarArea(coordinate);
-  if (actionType === ACTION_TYPES.DETECTION_BOMB) return getDetectionArea(coordinate);
-  return getShockArea(coordinate);
+function areaFor(actionType, coordinate, mapRules) {
+  if (actionType === ACTION_TYPES.RADAR_SCAN) return getRadarArea(coordinate, mapRules);
+  if (actionType === ACTION_TYPES.DETECTION_BOMB) return getDetectionArea(coordinate, mapRules);
+  return getShockArea(coordinate, mapRules);
 }
 
 function unitById(view, sourceId) {
@@ -154,47 +165,48 @@ function unitById(view, sourceId) {
 }
 
 function candidatesFor(view, availability) {
+  const mapRules = rulesForView(view);
   const source = unitById(view, availability.sourceId);
   switch (availability.actionType) {
     case ACTION_TYPES.DESTROYER_I_RAM:
-      return source ? getDestroyerIRange(source.cells).map((coordinate) => ({
+      return source ? getDestroyerIRange(source.cells, mapRules).map((coordinate) => ({
         target: { kind: "cell", coordinate },
         cells: [coordinate],
       })) : [];
     case ACTION_TYPES.DESTROYER_II_RAM:
-      return source ? getDestroyerIIRange(source.cells).map((coordinate) => ({
+      return source ? getDestroyerIIRange(source.cells, mapRules).map((coordinate) => ({
         target: { kind: "cell", coordinate },
         cells: [coordinate],
       })) : [];
     case ACTION_TYPES.RADAR_SCAN:
-      return legalCenterTargets("radar").map((coordinate) => ({
+      return legalCenterTargets("radar", mapRules).map((coordinate) => ({
         target: { kind: "cell", coordinate },
-        cells: areaFor(availability.actionType, coordinate),
+        cells: areaFor(availability.actionType, coordinate, mapRules),
       }));
     case ACTION_TYPES.DETECTION_BOMB:
-      return legalCenterTargets("detection").map((coordinate) => ({
+      return legalCenterTargets("detection", mapRules).map((coordinate) => ({
         target: { kind: "cell", coordinate },
-        cells: areaFor(availability.actionType, coordinate),
+        cells: areaFor(availability.actionType, coordinate, mapRules),
       }));
     case ACTION_TYPES.SHOCK_BOMB:
-      return legalCenterTargets("shock").map((coordinate) => ({
+      return legalCenterTargets("shock", mapRules).map((coordinate) => ({
         target: { kind: "cell", coordinate },
-        cells: areaFor(availability.actionType, coordinate),
+        cells: areaFor(availability.actionType, coordinate, mapRules),
       }));
     case ACTION_TYPES.HELICOPTER_STRAFE:
       return [
-        ...ROW_LABELS.map((row) => ({
+        ...mapRules.rowLabels.split("").map((row) => ({
           target: { kind: "row", row },
-          cells: getFullRow(row),
+          cells: getFullRow(row, mapRules),
         })),
-        ...Array.from({ length: BOARD_SIZE }, (_value, index) => index + 1)
+        ...Array.from({ length: mapRules.boardSize }, (_value, index) => index + 1)
           .map((column) => ({
             target: { kind: "column", column },
-            cells: getFullColumn(column),
+            cells: getFullColumn(column, mapRules),
           })),
       ];
     default:
-      return ALL_CELLS.map((coordinate) => ({
+      return allCells(mapRules).map((coordinate) => ({
         target: { kind: "cell", coordinate },
         cells: [coordinate],
       }));

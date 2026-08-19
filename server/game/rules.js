@@ -3,8 +3,8 @@
 /**
  * 规则与对局服务统一入口。
  *
- * Ocean-v1.1 以 rule-v1.5 为服务器权威规则基线。
- * 本修订实现三人回合对每名仍在局敌方玩家分别操作，并加入直升机与终局鱼雷的多目标例外。
+ * Ocean-v1.2 以 rule-v1.6 为服务器权威规则基线。
+ * 本修订新增房间级 10×10、12×12、15×15 动态地图规则。
  */
 
 module.exports = {
@@ -20,6 +20,7 @@ module.exports = {
   ...require("./errors"),
   ...require("./information-projection"),
   ...require("./lifecycle"),
+  ...require("./map-rules"),
   ...require("./match-resolution"),
   ...require("./match"),
   ...require("./random-deployment"),

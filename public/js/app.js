@@ -3,6 +3,7 @@
 (() => {
   const Data = window.OceanGameData;
   const Model = window.OceanUiModel;
+  const Sound = window.OceanAudio;
   const app = document.querySelector("#app");
   const connectionDot = document.querySelector("#connection-dot");
   const connectionText = document.querySelector("#connection-text");
@@ -18,6 +19,10 @@
   const confirmAccept = document.querySelector("#confirm-accept");
   const rulesDialog = document.querySelector("#rules-dialog");
   const reduceMotionToggle = document.querySelector("#reduce-motion-toggle");
+  const effectsToggle = document.querySelector("#effects-toggle");
+  const musicToggle = document.querySelector("#music-toggle");
+  const effectsButton = document.querySelector("#effects-button");
+  const musicButton = document.querySelector("#music-button");
 
   const SESSION_STORAGE_KEY = "ocean.reconnect-session.v1";
   const MOTION_STORAGE_KEY = "ocean.reduce-motion.v1";
@@ -58,6 +63,7 @@
     entry: {
       maxPlayers: 2,
       roomMode: "pvp",
+      mapSize: 12,
       nickname: (() => {
         try {
           return localStorage.getItem(NICKNAME_STORAGE_KEY) ?? "";
@@ -107,6 +113,7 @@
     },
     replayPlayerId: null,
     reduceMotion: readBooleanPreference(MOTION_STORAGE_KEY),
+    audio: Sound?.preferences?.() ?? { effectsEnabled: false, musicEnabled: false },
     confirm: null,
     stateWaiters: [],
     renderedPage: null,
@@ -272,6 +279,36 @@
     writeBooleanPreference(MOTION_STORAGE_KEY, enabled);
   }
 
+  function syncAudioControls() {
+    effectsToggle.checked = state.audio.effectsEnabled;
+    musicToggle.checked = state.audio.musicEnabled;
+    effectsButton.dataset.enabled = String(state.audio.effectsEnabled);
+    musicButton.dataset.enabled = String(state.audio.musicEnabled);
+    effectsButton.setAttribute("aria-pressed", String(state.audio.effectsEnabled));
+    musicButton.setAttribute("aria-pressed", String(state.audio.musicEnabled));
+  }
+
+  function setEffectsPreference(enabled) {
+    state.audio.effectsEnabled = Sound?.setEffectsEnabled?.(enabled) ?? false;
+    syncAudioControls();
+  }
+
+  async function setMusicPreference(enabled) {
+    const result = await Sound?.setMusicEnabled?.(enabled) ?? {
+      enabled: false,
+      available: false,
+    };
+    state.audio.musicEnabled = result.enabled;
+    syncAudioControls();
+    if (enabled && !result.enabled) {
+      showToast(
+        `未能播放背景音乐。请确认已放置 ${Sound?.MUSIC_PATH ?? "背景音乐文件"}，并再次点击音乐按钮。`,
+        "warning",
+        8_000,
+      );
+    }
+  }
+
   function toastPresentation(kind) {
     return {
       info: { icon: "action-radar", title: "提示" },
@@ -294,11 +331,35 @@
     const toast = document.createElement("div");
     toast.className = `toast toast--${kind}`;
     toast.setAttribute("role", kind === "error" ? "alert" : "status");
+    toast.setAttribute("tabindex", "0");
+    toast.setAttribute("aria-label", `${meta.title}：${message}。点击关闭`);
     toast.innerHTML = `
       <span class="toast__icon" aria-hidden="true">${uiIcon(meta.icon)}</span>
-      <div class="toast__content"><strong>${escapeHtml(meta.title)}</strong><p>${escapeHtml(message)}</p></div>`;
+      <div class="toast__content"><strong>${escapeHtml(meta.title)}</strong><p>${escapeHtml(message)}</p></div>
+      <button class="toast__close" type="button" aria-label="关闭这条播报">×</button>`;
+    let timer = null;
+    const dismiss = () => {
+      if (timer !== null) window.clearTimeout(timer);
+      toast.remove();
+    };
+    toast.addEventListener("click", dismiss);
+    toast.addEventListener("keydown", (event) => {
+      if (["Enter", " ", "Escape"].includes(event.key)) {
+        event.preventDefault();
+        dismiss();
+      }
+    });
     toastRegion.append(toast);
-    window.setTimeout(() => toast.remove(), duration);
+    timer = window.setTimeout(dismiss, duration);
+    Sound?.playEffect?.({
+      success: "success",
+      warning: "warning",
+      error: "error",
+      hit: "hit",
+      miss: "miss",
+      unknown: "unknown",
+      private: "private",
+    }[kind] ?? "click");
   }
 
   function humanizeSocketError(error) {
@@ -536,7 +597,7 @@
     }
     if (feedback.actionType === Data.ACTION_TYPES.SHOCK_BOMB) {
       return isActor
-        ? `震爆弹已作用于 ${defenderName} 地图中以 ${target} 为中心的 5×5 区域；是否生效不会向你显示。`
+        ? `震爆弹已作用于 ${defenderName} 地图中以 ${target} 为中心的 ${room.mapRules.shockSize}×${room.mapRules.shockSize} 区域；是否生效不会向你显示。`
         : `${publicActorPrefix}以 ${target} 为中心使用了震爆弹。`;
     }
     if (feedback.actionType === Data.ACTION_TYPES.DETECTION_BOMB) {
@@ -550,10 +611,10 @@
     if (feedback.actionType === Data.ACTION_TYPES.RADAR_SCAN) {
       if (isActor) {
         return feedback.result === "layout_detected"
-          ? `雷达扫描：${defenderName} 的 ${target} 起始 4×4 区域发现布局。`
-          : `雷达扫描：${defenderName} 的 ${target} 起始 4×4 区域未发现布局。`;
+          ? `雷达扫描：${defenderName} 的 ${target} 起始 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 区域发现布局。`
+          : `雷达扫描：${defenderName} 的 ${target} 起始 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 区域未发现布局。`;
       }
-      return `${publicActorPrefix}从 ${target} 开始执行了 4×4 雷达扫描；扫描结果仅行动方可见。`;
+      return `${publicActorPrefix}从 ${target} 开始执行了 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 雷达扫描；扫描结果仅行动方可见。`;
     }
     if (feedback.result === "hit") {
       if (isActor && exactDamage.length > 0) {
@@ -607,6 +668,13 @@
     if (!nextRoom || typeof nextRoom.stateVersion !== "number") {
       return;
     }
+    const mapSize = nextRoom.mapSize ?? nextRoom.mapRules?.mapSize ?? 12;
+    Data.configureMap(mapSize);
+    nextRoom = {
+      ...nextRoom,
+      mapSize,
+      mapRules: nextRoom.mapRules ?? Data.createMapRules(mapSize),
+    };
     const previous = state.room;
     if (
       previous?.roomCode === nextRoom.roomCode &&
@@ -658,6 +726,22 @@
     const newlyEliminated = (nextRoom.battle?.match?.eliminatedPlayerIds ?? []).filter((id) => !previousEliminated.has(id));
 
     state.room = nextRoom;
+    if (
+      nextRoom.turn?.canAct &&
+      (!previous?.turn?.canAct || previous?.turn?.turnNumber !== nextRoom.turn.turnNumber)
+    ) {
+      Sound?.playEffect?.("turn");
+    }
+    if (nextRoom.roomPhase === "FINISHED" && previous?.roomPhase !== "FINISHED") {
+      const winnerId = nextRoom.battle?.match?.result?.winnerId;
+      Sound?.playEffect?.(
+        winnerId === nextRoom.own.playerId
+          ? "victory"
+          : winnerId === null
+            ? "unknown"
+            : "defeat",
+      );
+    }
     if (resumedFromPause) {
       showToast("连接已恢复，对局继续。", "success", 3_500);
     }
@@ -741,7 +825,7 @@
   function render() {
     headerRoomCode.hidden = !state.room?.roomCode;
     headerRoomCode.textContent = state.room?.roomCode
-      ? `${state.room.roomCode} · ${state.room.maxPlayers ?? 2}P`
+      ? `${state.room.roomCode} · ${state.room.maxPlayers ?? 2}P · ${state.room.mapSize ?? 12}×${state.room.mapSize ?? 12}`
       : "";
     const page = Model.pageForState(state.room);
     const samePage = state.renderedPage === page;
@@ -797,7 +881,7 @@
             <i></i>
           </div>
           <div class="entry-facts entry-facts--v07" aria-label="游戏特征">
-            <span><strong>12×12</strong> 海域</span>
+            <span><strong>10–15</strong> 海域</span>
             <span><strong>2–3</strong> 玩家</span>
             <span><strong>90s</strong> 回合</span>
           </div>
@@ -892,6 +976,21 @@
                 >
                   <span>人机</span><small>1v1</small>
                 </button>
+              </div>
+              <div class="map-size-picker">
+                <span>地图大小</span>
+                <div class="map-size-switch" role="radiogroup" aria-label="地图大小">
+                  ${Data.SUPPORTED_MAP_SIZES.map((mapSize) => `
+                    <button
+                      type="button"
+                      class="map-size-switch__option ${state.entry.mapSize === mapSize ? "is-active" : ""}"
+                      role="radio"
+                      aria-checked="${state.entry.mapSize === mapSize}"
+                      data-action="select-map-size"
+                      data-map-size="${mapSize}"
+                      ${!state.connected || pending ? "disabled" : ""}
+                    ><strong>${mapSize}×${mapSize}</strong><small>${mapSize === 10 ? "紧凑" : mapSize === 12 ? "标准" : "广域"}</small></button>`).join("")}
+                </div>
               </div>
               <button class="button button--primary button--large" type="submit" ${!state.connected || pending ? "disabled" : ""}>
                 ${pending === "create" ? '<span class="button-spinner" aria-hidden="true"></span> 创建中…' : '创建房间 <span aria-hidden="true">→</span>'}
@@ -1064,7 +1163,7 @@
     }
     return `
       <div class="board-frame ${className}">
-        <div class="ocean-board" role="grid" aria-label="${escapeHtml(label)}">
+        <div class="ocean-board" role="grid" aria-label="${escapeHtml(label)}" data-board-size="${Data.BOARD_SIZE}" style="--board-size:${Data.BOARD_SIZE}">
           ${contents.join("")}
         </div>
       </div>`;
@@ -1253,7 +1352,7 @@
     const boardHelp = document.querySelector(".deployment-map-card .board-help");
     if (boardHelp) {
       boardHelp.textContent = definition.shape === "connected"
-        ? "航空母舰：依次选择 6 个四向连通格；点击已选的最后一格可撤销。"
+        ? `航空母舰：依次选择 ${definition.cellCount} 个四向连通格；点击已选的最后一格可撤销。`
         : "选中对象后点击地图起点；桌面端也可拖动已放置对象。按 R 旋转直线单位。";
     }
     const removeButton = document.querySelector('[data-action="remove-placement"]');
@@ -1390,7 +1489,7 @@
             <div class="panel-heading panel-heading--compact">
               <div>
                 <span>舰队</span>
-                <small>8 个单位 · 3 枚诱饵</small>
+                <small>8 个单位 · ${room.mapRules.decoyCount} 枚诱饵</small>
               </div>
               <span class="panel-counter">${completeCount}/${totalCount}</span>
             </div>
@@ -1409,7 +1508,7 @@
               >${collapsed ? "+" : "−"}</button>
               <div class="map-card__title">
                 <span class="status-kicker">己方海域</span>
-                <h2>12×12 部署图</h2>
+                <h2>${room.mapSize}×${room.mapSize} 部署图</h2>
               </div>
               <span class="map-state" data-ready="${locked}">${locked ? "已锁定" : "编辑中"}</span>
             </div>
@@ -2040,7 +2139,7 @@
         ${radarRequired ? `
           <section class="opening-radar-task" aria-label="首次雷达任务">
             <span class="opening-radar-task__icon" aria-hidden="true">${uiIcon("action-radar")}</span>
-            <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `先选择 ${escapeHtml(remainingNames.join(" / "))} 中的一名敌人` : "选择敌方 4×4 海域"}</small></div>
+            <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `先选择 ${escapeHtml(remainingNames.join(" / "))} 中的一名敌人` : `选择敌方 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 海域`}</small></div>
             <button class="button button--primary button--compact" data-action="select-action" data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}">${state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN ? "已选择" : "开始扫描"}</button>
           </section>` : ""}
 
@@ -3384,6 +3483,7 @@
         nickname: nickname.value,
         maxPlayers: state.entry.maxPlayers,
         roomMode: state.entry.roomMode,
+        mapSize: state.entry.mapSize,
       });
     } catch (error) {
       state.entry.error = humanizeSocketError(error);
@@ -3623,6 +3723,12 @@
     if (event.target.id === "reduce-motion-toggle") {
       setReduceMotion(event.target.checked);
     }
+    if (event.target.id === "effects-toggle") {
+      setEffectsPreference(event.target.checked);
+    }
+    if (event.target.id === "music-toggle") {
+      void setMusicPreference(event.target.checked);
+    }
   });
 
   document.addEventListener("submit", (event) => {
@@ -3649,6 +3755,7 @@
     }
     const control = event.target.closest("[data-action]");
     if (!control || control.disabled) return;
+    Sound?.playEffect?.("click");
     const action = control.dataset.action;
 
     if (action === "select-mode") {
@@ -3659,8 +3766,26 @@
       render();
       return;
     }
+    if (action === "select-map-size") {
+      const mapSize = Number(control.dataset.mapSize);
+      if (Data.SUPPORTED_MAP_SIZES.includes(mapSize)) {
+        state.entry.mapSize = mapSize;
+        Data.configureMap(mapSize);
+        render();
+      }
+      return;
+    }
+    if (action === "toggle-effects") {
+      setEffectsPreference(!state.audio.effectsEnabled);
+      return;
+    }
+    if (action === "toggle-music") {
+      void setMusicPreference(!state.audio.musicEnabled);
+      return;
+    }
     if (action === "open-rules") {
       reduceMotionToggle.checked = state.reduceMotion;
+      syncAudioControls();
       if (!rulesDialog.open) rulesDialog.showModal();
       return;
     }
@@ -3776,7 +3901,7 @@
     if (action === "clear-deployment") {
       openConfirm({
         title: "清空全部部署？",
-        paragraphs: ["八个作战单位与三枚诱饵鱼雷都会撤回，清空后可以撤销。"],
+        paragraphs: [`八个作战单位与 ${state.room.mapRules.decoyCount} 枚诱饵鱼雷都会撤回，清空后可以撤销。`],
         confirmLabel: "确认清空",
         danger: true,
         onConfirm: () => {
@@ -4118,6 +4243,7 @@
     state.session = null;
     state.restoring = false;
     state.pendingRequest = null;
+    Data.configureMap(state.entry.mapSize);
     updateRoomAddress(null);
     if (state.socket) {
       state.socket.disconnect();
@@ -4130,6 +4256,16 @@
     ? "true"
     : "false";
   reduceMotionToggle.checked = state.reduceMotion;
+  syncAudioControls();
+  function resumeStoredMusicOnFirstGesture() {
+    window.removeEventListener("pointerdown", resumeStoredMusicOnFirstGesture, true);
+    window.removeEventListener("keydown", resumeStoredMusicOnFirstGesture, true);
+    if (state.audio.musicEnabled) {
+      void setMusicPreference(true);
+    }
+  }
+  window.addEventListener("pointerdown", resumeStoredMusicOnFirstGesture, true);
+  window.addEventListener("keydown", resumeStoredMusicOnFirstGesture, true);
   window.addEventListener("offline", () => {
     state.connected = false;
     setConnectionPhase(

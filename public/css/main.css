@@ -1158,8 +1158,8 @@ kbd {
 .ocean-board {
   display: grid;
   width: max-content;
-  grid-template-columns: 23px repeat(12, var(--cell-size));
-  grid-template-rows: 23px repeat(12, var(--cell-size));
+  grid-template-columns: 23px repeat(var(--board-size, 12), var(--cell-size));
+  grid-template-rows: 23px repeat(var(--board-size, 12), var(--cell-size));
   gap: 2px;
   margin: 0 auto;
   user-select: none;
@@ -3512,8 +3512,8 @@ kbd {
   }
 
   .ocean-board {
-    grid-template-columns: 21px repeat(12, var(--cell-size));
-    grid-template-rows: 21px repeat(12, var(--cell-size));
+    grid-template-columns: 21px repeat(var(--board-size, 12), var(--cell-size));
+    grid-template-rows: 21px repeat(var(--board-size, 12), var(--cell-size));
     gap: 1px;
   }
 
@@ -4300,6 +4300,46 @@ body::before {
   color: #dcfaff;
 }
 
+.map-size-picker {
+  display: grid;
+  gap: 7px;
+}
+
+.map-size-picker > span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+}
+
+.map-size-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.map-size-switch__option {
+  display: grid;
+  gap: 2px;
+  min-height: 48px;
+  padding: 7px;
+  border: 1px solid rgba(138, 204, 222, 0.14);
+  border-radius: 10px;
+  cursor: pointer;
+  background: rgba(2, 12, 19, 0.38);
+  color: #8aabb7;
+}
+
+.map-size-switch__option strong { font-size: 0.82rem; }
+.map-size-switch__option small { color: inherit; font-size: 0.6rem; opacity: 0.72; }
+.map-size-switch__option:hover:not(:disabled) { border-color: rgba(89, 217, 240, 0.28); color: #d8f8fd; }
+.map-size-switch__option.is-active {
+  border-color: rgba(89, 217, 240, 0.38);
+  background: rgba(40, 156, 183, 0.18);
+  color: #e1fbff;
+  box-shadow: inset 0 0 0 1px rgba(91, 216, 239, 0.08);
+}
+
 .entry-divider--clean {
   margin: 20px 0 16px;
 }
@@ -4557,18 +4597,25 @@ body::before {
 
 .toast-region {
   z-index: var(--z-toast);
+  top: 72px;
   right: max(16px, env(safe-area-inset-right));
-  bottom: max(18px, env(safe-area-inset-bottom));
-  gap: 8px;
+  bottom: auto;
+  width: min(300px, calc(100vw - 24px));
+  gap: 6px;
+  pointer-events: none;
 }
 
 .toast {
-  min-width: min(340px, calc(100vw - 32px));
+  min-width: 0;
+  max-width: 300px;
+  padding: 8px 9px;
   border-color: rgba(137, 205, 226, 0.16);
-  border-radius: 12px;
+  border-radius: 10px;
+  cursor: pointer;
   background: rgba(5, 19, 29, 0.96);
-  box-shadow: 0 18px 56px rgba(0, 0, 0, 0.36);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(14px);
+  pointer-events: auto;
 }
 
 /* Responsive v0.7.0 entry/lobby */
@@ -6618,15 +6665,15 @@ body::before {
 
 .toast {
   display: grid;
-  grid-template-columns: 28px minmax(0, 1fr);
-  gap: 9px;
+  grid-template-columns: 23px minmax(0, 1fr) 22px;
+  gap: 7px;
   align-items: start;
 }
 
 .toast__icon {
   display: grid;
-  width: 27px;
-  height: 27px;
+  width: 23px;
+  height: 23px;
   place-items: center;
   border: 1px solid currentColor;
   border-radius: 8px;
@@ -6637,11 +6684,32 @@ body::before {
 
 .toast__content { display: grid; gap: 2px; min-width: 0; }
 .toast__content strong { color: var(--text); font-size: 0.59rem; }
-.toast__content p { margin: 0; color: inherit; font-size: 0.68rem; line-height: 1.45; }
+.toast__content p { margin: 0; color: inherit; font-size: 0.64rem; line-height: 1.38; }
+.toast__close {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+  font: inherit;
+}
+.toast__close:hover,
+.toast__close:focus-visible { background: rgba(255, 255, 255, 0.1); color: var(--text); }
 .toast--hit .toast__icon { color: var(--red); }
 .toast--miss .toast__icon { color: rgba(202, 230, 239, 0.72); }
 .toast--unknown .toast__icon { color: var(--orange); }
 .toast--private .toast__icon { color: #d2b7ff; }
+
+.header-audio[data-enabled="true"] {
+  border-color: rgba(89, 217, 240, 0.35);
+  background: rgba(40, 156, 183, 0.18);
+  color: #ddfaff;
+}
+
+.audio-preferences { display: flex; flex-wrap: wrap; gap: 14px; }
 
 @media (max-width: 760px) {
   .event-tabs button { min-height: 40px; }
@@ -7262,7 +7330,7 @@ body::before {
 }
 
 /* =========================================================
-   Ocean-v1.1 · server-side fair 1v1 bot mode
+   Ocean-v1.2 · dynamic maps, audio and compact realtime reports
    ========================================================= */
 
 .rolling-page--v076 {

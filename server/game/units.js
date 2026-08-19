@@ -1,6 +1,7 @@
 "use strict";
 
 const { RuleValidationError } = require("./errors");
+const { DEFAULT_MAP_RULES, createMapRules } = require("./map-rules");
 
 const DEPLOYABLE_TYPES = Object.freeze({
   DESTROYER_I: "destroyer_i",
@@ -105,6 +106,22 @@ const DEPLOYABLE_DEFINITIONS = Object.freeze({
   }),
 });
 
+function createDeployableDefinitions(mapRules = DEFAULT_MAP_RULES) {
+  const rules = createMapRules(mapRules.mapSize ?? mapRules);
+  return Object.freeze({
+    ...DEPLOYABLE_DEFINITIONS,
+    [DEPLOYABLE_TYPES.AIRCRAFT_CARRIER]: freezeDefinition({
+      ...DEPLOYABLE_DEFINITIONS[DEPLOYABLE_TYPES.AIRCRAFT_CARRIER],
+      cellCount: rules.carrierCellCount,
+      initialHp: rules.carrierHp,
+    }),
+    [DEPLOYABLE_TYPES.DECOY_TORPEDO]: freezeDefinition({
+      ...DEPLOYABLE_DEFINITIONS[DEPLOYABLE_TYPES.DECOY_TORPEDO],
+      count: rules.decoyCount,
+    }),
+  });
+}
+
 const DEPLOYABLE_TYPE_ORDER = Object.freeze([
   DEPLOYABLE_TYPES.DESTROYER_I,
   DEPLOYABLE_TYPES.DESTROYER_II,
@@ -125,8 +142,8 @@ const FLEET_REQUIREMENTS = Object.freeze(
   ),
 );
 
-function getDeployableDefinition(type) {
-  const definition = DEPLOYABLE_DEFINITIONS[type];
+function getDeployableDefinition(type, mapRules = DEFAULT_MAP_RULES) {
+  const definition = createDeployableDefinitions(mapRules)[type];
 
   if (!definition) {
     throw new RuleValidationError(
@@ -145,6 +162,13 @@ function isCombatUnitType(type) {
     definition &&
       definition.category !== DEPLOYABLE_CATEGORIES.DEPLOYMENT,
   );
+}
+
+function getFleetRequirements(mapRules = DEFAULT_MAP_RULES) {
+  const definitions = createDeployableDefinitions(mapRules);
+  return Object.freeze(Object.fromEntries(
+    DEPLOYABLE_TYPE_ORDER.map((type) => [type, definitions[type].count]),
+  ));
 }
 
 function isSurfaceUnitType(type) {
@@ -168,6 +192,8 @@ module.exports = {
   DEPLOYABLE_TYPES,
   DEPLOYMENT_SHAPES,
   FLEET_REQUIREMENTS,
+  createDeployableDefinitions,
+  getFleetRequirements,
   getDeployableDefinition,
   isCombatUnitType,
   isSurfaceUnitType,

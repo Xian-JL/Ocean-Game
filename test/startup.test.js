@@ -95,6 +95,6 @@ test("LAN 启动真实监听所有接口并继续提供 HTTP 与 Socket.IO", asy
   assert.ok(address && typeof address === "object");
   const response = await fetch(`http://127.0.0.1:${address.port}/api/health`);
   assert.equal(response.status, 200);
-  assert.equal((await response.json()).stage, "Ocean-v1.1");
+  assert.equal((await response.json()).stage, "Ocean-v1.2");
   assert.ok(logs.some((line) => line.includes("局域网：http://192.168.1.20:")));
 });
