@@ -111,7 +111,7 @@
       SOURCE_PARALYZED: "该单位本回合不能行动",
       RESOURCE_EXHAUSTED: "弹药或使用次数已经耗尽",
       ACTION_LOCKED: "己方两艘驱逐舰均沉没后解锁",
-      OPENING_RADAR_REQUIRED: "首个行动回合必须先扫描 4×4 海域",
+      OPENING_RADAR_REQUIRED: `首个行动回合必须先扫描 ${data.MAP_RULES.radarSize}×${data.MAP_RULES.radarSize} 海域`,
       NO_LEGAL_TARGET: "攻击范围内没有合法目标",
     };
     return map[issue?.code] ?? issue?.message ?? "当前不可用";

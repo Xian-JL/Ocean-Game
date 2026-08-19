@@ -1,56 +1,72 @@
 "use strict";
 
 const { RuleValidationError } = require("./errors");
+const {
+  ALL_ROW_LABELS,
+  DEFAULT_MAP_RULES,
+  DEFAULT_MAP_SIZE,
+  createMapRules,
+} = require("./map-rules");
 
-const BOARD_SIZE = 12;
-const ROW_LABELS = "ABCDEFGHIJKL";
+const BOARD_SIZE = DEFAULT_MAP_SIZE;
+const ROW_LABELS = DEFAULT_MAP_RULES.rowLabels;
 
-function isPointInBounds(row, column) {
+function resolveMapRules(value = DEFAULT_MAP_RULES) {
+  if (typeof value === "number" || typeof value === "string") {
+    return createMapRules(value);
+  }
+  return value?.mapSize ? createMapRules(value.mapSize) : DEFAULT_MAP_RULES;
+}
+
+function isPointInBounds(row, column, mapRules = DEFAULT_MAP_RULES) {
+  const rules = resolveMapRules(mapRules);
   return (
     Number.isInteger(row) &&
     Number.isInteger(column) &&
     row >= 0 &&
-    row < BOARD_SIZE &&
+    row < rules.boardSize &&
     column >= 0 &&
-    column < BOARD_SIZE
+    column < rules.boardSize
   );
 }
 
-function parseCoordinate(value) {
+function parseCoordinate(value, mapRules = DEFAULT_MAP_RULES) {
+  const rules = resolveMapRules(mapRules);
   if (typeof value !== "string") {
     throw new RuleValidationError(
       "INVALID_COORDINATE",
-      "坐标必须是 A1～L12 格式的字符串。",
+      `坐标必须是 A1～${rules.coordinateMaximum} 格式的字符串。`,
       { value },
     );
   }
 
   const normalized = value.trim().toUpperCase();
-  const match = /^([A-L])(1[0-2]|[1-9])$/.exec(normalized);
+  const match = /^([A-O])(1[0-5]|[1-9])$/.exec(normalized);
 
-  if (!match) {
+  if (!match || !rules.rowLabels.includes(match[1]) || Number(match[2]) > rules.boardSize) {
     throw new RuleValidationError(
       "INVALID_COORDINATE",
-      "坐标必须位于 A1～L12。",
+      `坐标必须位于 A1～${rules.coordinateMaximum}。`,
       { value },
     );
   }
 
   return {
-    row: ROW_LABELS.indexOf(match[1]),
+    row: ALL_ROW_LABELS.indexOf(match[1]),
     column: Number(match[2]) - 1,
   };
 }
 
-function normalizePoint(value) {
+function normalizePoint(value, mapRules = DEFAULT_MAP_RULES) {
+  const rules = resolveMapRules(mapRules);
   if (typeof value === "string") {
-    return parseCoordinate(value);
+    return parseCoordinate(value, rules);
   }
 
   if (
     value &&
     typeof value === "object" &&
-    isPointInBounds(value.row, value.column)
+    isPointInBounds(value.row, value.column, rules)
   ) {
     return {
       row: value.row,
@@ -60,18 +76,19 @@ function normalizePoint(value) {
 
   throw new RuleValidationError(
     "INVALID_COORDINATE",
-    "坐标必须位于 A1～L12。",
+    `坐标必须位于 A1～${rules.coordinateMaximum}。`,
     { value },
   );
 }
 
-function formatCoordinate(value) {
-  const point = normalizePoint(value);
-  return `${ROW_LABELS[point.row]}${point.column + 1}`;
+function formatCoordinate(value, mapRules = DEFAULT_MAP_RULES) {
+  const rules = resolveMapRules(mapRules);
+  const point = normalizePoint(value, rules);
+  return `${rules.rowLabels[point.row]}${point.column + 1}`;
 }
 
-function coordinateKey(value) {
-  const point = normalizePoint(value);
+function coordinateKey(value, mapRules = DEFAULT_MAP_RULES) {
+  const point = normalizePoint(value, mapRules);
   return `${point.row}:${point.column}`;
 }
 
@@ -79,15 +96,17 @@ function comparePoints(left, right) {
   return left.row - right.row || left.column - right.column;
 }
 
-function sortCoordinates(coordinates) {
+function sortCoordinates(coordinates, mapRules = DEFAULT_MAP_RULES) {
+  const rules = resolveMapRules(mapRules);
   return coordinates
-    .map((coordinate) => normalizePoint(coordinate))
+    .map((coordinate) => normalizePoint(coordinate, rules))
     .sort(comparePoints)
-    .map((point) => formatCoordinate(point));
+    .map((point) => formatCoordinate(point, rules));
 }
 
-function getOrthogonalNeighbors(value) {
-  const point = normalizePoint(value);
+function getOrthogonalNeighbors(value, mapRules = DEFAULT_MAP_RULES) {
+  const rules = resolveMapRules(mapRules);
+  const point = normalizePoint(value, rules);
   const candidates = [
     { row: point.row - 1, column: point.column },
     { row: point.row + 1, column: point.column },
@@ -97,9 +116,9 @@ function getOrthogonalNeighbors(value) {
 
   return candidates
     .filter((candidate) =>
-      isPointInBounds(candidate.row, candidate.column),
+      isPointInBounds(candidate.row, candidate.column, rules),
     )
-    .map((candidate) => formatCoordinate(candidate));
+    .map((candidate) => formatCoordinate(candidate, rules));
 }
 
 module.exports = {
@@ -112,5 +131,6 @@ module.exports = {
   isPointInBounds,
   normalizePoint,
   parseCoordinate,
+  resolveMapRules,
   sortCoordinates,
 };

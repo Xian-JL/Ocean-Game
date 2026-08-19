@@ -1,12 +1,13 @@
 "use strict";
 
-const { BOARD_SIZE, formatCoordinate, sortCoordinates } = require("./coordinates");
+const { formatCoordinate, sortCoordinates } = require("./coordinates");
 const { assertValidDeployment } = require("./deployment");
 const { RuleValidationError } = require("./errors");
+const { DEFAULT_MAP_RULES, createMapRules } = require("./map-rules");
 const { DEPLOYABLE_TYPES: TYPES } = require("./units");
 
-const PLACEMENT_SPECS = Object.freeze([
-  { id: "carrier", type: TYPES.AIRCRAFT_CARRIER, shape: "rectangle_2x3" },
+const BASE_PLACEMENT_SPECS = Object.freeze([
+  { id: "carrier", type: TYPES.AIRCRAFT_CARRIER, shape: "carrier" },
   { id: "destroyer-ii", type: TYPES.DESTROYER_II, shape: "line_4" },
   { id: "submarine", type: TYPES.SUBMARINE, shape: "square_2x2" },
   { id: "nuclear", type: TYPES.NUCLEAR_SUBMARINE, shape: "square_2x2" },
@@ -14,12 +15,9 @@ const PLACEMENT_SPECS = Object.freeze([
   { id: "pirate", type: TYPES.PIRATE_SHIP, shape: "line_3" },
   { id: "motorboat", type: TYPES.MOTORBOAT, shape: "single" },
   { id: "motorboat-2", type: TYPES.MOTORBOAT, shape: "single" },
-  { id: "decoy-1", type: TYPES.DECOY_TORPEDO, shape: "single" },
-  { id: "decoy-2", type: TYPES.DECOY_TORPEDO, shape: "single" },
-  { id: "decoy-3", type: TYPES.DECOY_TORPEDO, shape: "single" },
 ]);
 
-const OUTPUT_ID_ORDER = Object.freeze([
+const BASE_OUTPUT_ID_ORDER = Object.freeze([
   "destroyer-i",
   "destroyer-ii",
   "submarine",
@@ -28,10 +26,25 @@ const OUTPUT_ID_ORDER = Object.freeze([
   "motorboat-2",
   "nuclear",
   "carrier",
-  "decoy-1",
-  "decoy-2",
-  "decoy-3",
 ]);
+
+function createPlacementSpecs(mapRules) {
+  return [
+    ...BASE_PLACEMENT_SPECS,
+    ...Array.from({ length: mapRules.decoyCount }, (_value, index) => ({
+      id: `decoy-${index + 1}`,
+      type: TYPES.DECOY_TORPEDO,
+      shape: "single",
+    })),
+  ];
+}
+
+function createOutputIdOrder(mapRules) {
+  return [
+    ...BASE_OUTPUT_ID_ORDER,
+    ...Array.from({ length: mapRules.decoyCount }, (_value, index) => `decoy-${index + 1}`),
+  ];
+}
 
 function readRandom(random) {
   if (typeof random !== "function") {
@@ -60,55 +73,71 @@ function shuffle(values, random) {
   return result;
 }
 
-function cellsFromRectangle(startRow, startColumn, height, width) {
+function cellsFromRectangle(startRow, startColumn, height, width, mapRules) {
   const cells = [];
   for (let rowOffset = 0; rowOffset < height; rowOffset += 1) {
     for (let columnOffset = 0; columnOffset < width; columnOffset += 1) {
       cells.push(formatCoordinate({
         row: startRow + rowOffset,
         column: startColumn + columnOffset,
-      }));
+      }, mapRules));
     }
   }
-  return sortCoordinates(cells);
+  return sortCoordinates(cells, mapRules);
 }
 
-function createLineCandidates(length) {
+function createLineCandidates(length, mapRules) {
   const candidates = [];
-  for (let row = 0; row < BOARD_SIZE; row += 1) {
-    for (let column = 0; column <= BOARD_SIZE - length; column += 1) {
-      candidates.push(cellsFromRectangle(row, column, 1, length));
+  for (let row = 0; row < mapRules.boardSize; row += 1) {
+    for (let column = 0; column <= mapRules.boardSize - length; column += 1) {
+      candidates.push(cellsFromRectangle(row, column, 1, length, mapRules));
     }
   }
-  for (let row = 0; row <= BOARD_SIZE - length; row += 1) {
-    for (let column = 0; column < BOARD_SIZE; column += 1) {
-      candidates.push(cellsFromRectangle(row, column, length, 1));
+  for (let row = 0; row <= mapRules.boardSize - length; row += 1) {
+    for (let column = 0; column < mapRules.boardSize; column += 1) {
+      candidates.push(cellsFromRectangle(row, column, length, 1, mapRules));
     }
   }
   return candidates;
 }
 
-function createRectangleCandidates(height, width) {
+function createRectangleCandidates(height, width, mapRules) {
   const candidates = [];
-  for (let row = 0; row <= BOARD_SIZE - height; row += 1) {
-    for (let column = 0; column <= BOARD_SIZE - width; column += 1) {
-      candidates.push(cellsFromRectangle(row, column, height, width));
+  for (let row = 0; row <= mapRules.boardSize - height; row += 1) {
+    for (let column = 0; column <= mapRules.boardSize - width; column += 1) {
+      candidates.push(cellsFromRectangle(row, column, height, width, mapRules));
     }
   }
   return candidates;
 }
 
-const CANDIDATES_BY_SHAPE = Object.freeze({
-  rectangle_2x3: Object.freeze([
-    ...createRectangleCandidates(2, 3),
-    ...createRectangleCandidates(3, 2),
-  ]),
-  line_4: Object.freeze(createLineCandidates(4)),
-  line_3: Object.freeze(createLineCandidates(3)),
-  square_2x2: Object.freeze(createRectangleCandidates(2, 2)),
-  square_3x3: Object.freeze(createRectangleCandidates(3, 3)),
-  single: Object.freeze(createRectangleCandidates(1, 1)),
-});
+function createCarrierCandidates(mapRules) {
+  if (mapRules.carrierCellCount === 5) {
+    const candidates = [];
+    for (const [height, width] of [[2, 3], [3, 2]]) {
+      for (const rectangleCells of createRectangleCandidates(height, width, mapRules)) {
+        for (let omitted = 0; omitted < rectangleCells.length; omitted += 1) {
+          candidates.push(rectangleCells.filter((_cell, index) => index !== omitted));
+        }
+      }
+    }
+    return candidates;
+  }
+  const dimensions = mapRules.carrierCellCount === 8 ? [[2, 4], [4, 2]] : [[2, 3], [3, 2]];
+  return dimensions.flatMap(([height, width]) =>
+    createRectangleCandidates(height, width, mapRules));
+}
+
+function createCandidatesByShape(mapRules) {
+  return {
+    carrier: createCarrierCandidates(mapRules),
+    line_4: createLineCandidates(4, mapRules),
+    line_3: createLineCandidates(3, mapRules),
+    square_2x2: createRectangleCandidates(2, 2, mapRules),
+    square_3x3: createRectangleCandidates(3, 3, mapRules),
+    single: createRectangleCandidates(1, 1, mapRules),
+  };
+}
 
 function cellsAreFree(cells, occupied) {
   return cells.every((cell) => !occupied.has(cell));
@@ -142,16 +171,19 @@ function placeRecursively(specs, candidatesById, index, occupied, placements) {
   return false;
 }
 
-function generateRandomDeployment(random = Math.random) {
+function generateRandomDeployment(random = Math.random, mapRules = DEFAULT_MAP_RULES) {
+  const rules = createMapRules(mapRules.mapSize ?? mapRules);
+  const placementSpecs = createPlacementSpecs(rules);
+  const candidatesByShape = createCandidatesByShape(rules);
   const candidatesById = Object.fromEntries(
-    PLACEMENT_SPECS.map((spec) => [
+    placementSpecs.map((spec) => [
       spec.id,
-      shuffle(CANDIDATES_BY_SHAPE[spec.shape], random),
+      shuffle(candidatesByShape[spec.shape], random),
     ]),
   );
   const placements = new Map();
   const placed = placeRecursively(
-    PLACEMENT_SPECS,
+    placementSpecs,
     candidatesById,
     0,
     new Set(),
@@ -166,7 +198,8 @@ function generateRandomDeployment(random = Math.random) {
   }
 
   return assertValidDeployment(
-    OUTPUT_ID_ORDER.map((id) => placements.get(id)),
+    createOutputIdOrder(rules).map((id) => placements.get(id)),
+    rules,
   );
 }
 

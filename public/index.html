@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="《海战 OCEAN》支持双人、三人和 1v1 人机的服务器权威回合制策略游戏"
+      content="《海战 OCEAN》v1.2.1 支持动态地图、双人、三人和 1v1 人机的服务器权威回合制策略游戏"
     />
     <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
@@ -13,6 +13,7 @@
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="/js/game-data.js" defer></script>
     <script src="/js/ui-model.js" defer></script>
+    <script src="/js/audio-system.js" defer></script>
     <script src="/js/app.js" defer></script>
   </head>
   <body>
@@ -41,6 +42,8 @@
             ></span>
             <span id="connection-text">正在连接</span>
           </div>
+          <button class="icon-button icon-button--small header-audio" id="effects-button" type="button" data-action="toggle-effects" aria-label="切换音效" data-tooltip="音效">♪</button>
+          <button class="icon-button icon-button--small header-audio" id="music-button" type="button" data-action="toggle-music" aria-label="切换背景音乐" data-tooltip="背景音乐">♫</button>
           <button
             class="button button--quiet button--compact header-help"
             data-action="open-rules"
@@ -62,9 +65,9 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.1</span>
+          <span id="footer-release">Ocean-v1.2.1</span>
           <span aria-hidden="true">·</span>
-          <span id="footer-protocol">Rule 1.5 · Socket 1.7</span>
+          <span id="footer-protocol">Rule 1.6 · Socket 1.8</span>
         </span>
       </footer>
     </div>
@@ -108,23 +111,32 @@
         <section class="rule-section">
           <h3>胜负与回合</h3>
           <p>
-            玩家在 12×12 海域秘密部署舰队，可选择 1v1 联机、1v1 人机或三人自由战。人机对手由服务器控制，并且只能使用普通玩家可见的安全情报。双人局每回合执行一次合法行动；三人局每个正常回合分别对另外两名仍在局敌人各完成一次合法操作。每名玩家自己的首个正常回合第一项操作必须使用航空母舰雷达扫描。
+            房主可选择 10×10、12×12 或 15×15 海域，然后秘密部署舰队；可选择 1v1 联机、1v1 人机或三人自由战。人机对手由服务器控制，并且只能使用普通玩家可见的安全情报。双人局每回合执行一次合法行动；三人局每个正常回合分别对另外两名仍在局敌人各完成一次合法操作。每名玩家自己的首个正常回合第一项操作必须使用航空母舰雷达扫描。
           </p>
+        </section>
+
+        <section class="rule-section">
+          <h3>地图动态参数</h3>
+          <div class="quick-rule-grid quick-rule-grid--compact">
+            <article><strong>10×10 紧凑图</strong><span>航母 5 格/5 HP，诱饵 2 枚，雷达 3×3，驱Ⅰ 9×5，驱Ⅱ 8×6。</span></article>
+            <article><strong>12×12 标准图</strong><span>航母 6 格/6 HP，诱饵 3 枚，雷达 4×4，驱Ⅰ 11×7，驱Ⅱ 10×8。</span></article>
+            <article><strong>15×15 广域图</strong><span>航母 8 格/8 HP，诱饵 5 枚，雷达 5×5，驱Ⅰ 13×9，驱Ⅱ 12×10。</span></article>
+          </div>
         </section>
 
         <section class="rule-section">
           <h3>十项行动</h3>
           <div class="quick-rule-grid">
-            <article><strong>驱逐舰Ⅰ冲撞</strong><span>沿舰身 11 格、垂直舰身 7 格；命中存活作战单位自身 −0.5，命中诱饵自身 −1。</span></article>
-            <article><strong>驱逐舰Ⅱ冲撞</strong><span>沿舰身 10 格、垂直舰身 8 格；命中存活作战单位自身 −0.5，命中诱饵自身 −1。</span></article>
+            <article><strong>驱逐舰Ⅰ冲撞</strong><span>范围随地图为 9×5 / 11×7 / 13×9；命中存活作战单位自身 −0.5，命中诱饵自身 −1。</span></article>
+            <article><strong>驱逐舰Ⅱ冲撞</strong><span>范围随地图为 8×6 / 10×8 / 12×10；命中存活作战单位自身 −0.5，命中诱饵自身 −1。</span></article>
             <article><strong>海盗船攻击</strong><span>命中才触发目标、海盗船及相关航空母舰伤害；特殊同时沉没时海盗船一方胜。</span></article>
             <article><strong>摩托艇冲撞</strong><span>只对航空母舰造成 1 点伤害；撞到水面单位或诱饵后自身沉没。</span></article>
             <article><strong>潜射导弹</strong><span>共 4 枚；发射方只知道“导弹已发射”，目标格仍未结算。</span></article>
             <article><strong>核弹</strong><span>共 2 枚；航空母舰 −2，其他作战单位 −1，摧毁诱饵鱼雷。</span></article>
-            <article><strong>震爆弹</strong><span>完整 5×5；只有水下作战单位可能在下个正常回合瘫痪，施加方不知道结果。</span></article>
+            <article><strong>震爆弹</strong><span>10/12 图为 5×5，15 图为 7×7；只有水下作战单位可能在下个正常回合瘫痪，施加方不知道结果。</span></article>
             <article><strong>探测弹</strong><span>完整 3×3；存活水下作战单位的未受击格与有效诱饵鱼雷均产生信号，只返回是否探测到信号。</span></article>
             <article><strong>直升机扫射</strong><span>两艘驱逐舰均沉没后解锁；扫射一整行或列，只命中水面单位，航空母舰最多 −2。</span></article>
-            <article><strong>雷达扫描</strong><span>每名玩家首个行动回合强制使用；完整 4×4，只向行动方返回是否存在敌方布局。</span></article>
+            <article><strong>雷达扫描</strong><span>每名玩家首个行动回合强制使用；随地图为 3×3 / 4×4 / 5×5，只向行动方返回是否存在敌方布局。</span></article>
           </div>
         </section>
 
@@ -165,6 +177,52 @@
             <input id="reduce-motion-toggle" type="checkbox" />
             <span>减少动画</span>
           </label>
+        </section>
+        <section class="rule-section rule-section--preference">
+          <div>
+            <h3>声音</h3>
+            <p>音效已内置；背景音乐需要在项目指定目录放入 MP3 文件。</p>
+          </div>
+          <div class="audio-preferences" aria-label="声音设置">
+            <div class="audio-channel-control">
+              <label class="switch-row">
+                <input id="effects-toggle" type="checkbox" />
+                <span>音效</span>
+              </label>
+              <div class="volume-control">
+                <label for="effects-volume">音量</label>
+                <input
+                  id="effects-volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="100"
+                  aria-label="音效音量"
+                />
+                <output id="effects-volume-output" for="effects-volume">100%</output>
+              </div>
+            </div>
+            <div class="audio-channel-control">
+              <label class="switch-row">
+                <input id="music-toggle" type="checkbox" />
+                <span>背景音乐</span>
+              </label>
+              <div class="volume-control">
+                <label for="music-volume">音量</label>
+                <input
+                  id="music-volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="28"
+                  aria-label="背景音乐音量"
+                />
+                <output id="music-volume-output" for="music-volume">28%</output>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
 

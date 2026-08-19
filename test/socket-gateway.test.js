@@ -136,13 +136,13 @@ async function createHarness(context, options = {}) {
   };
 }
 
-async function createTwoPlayerRoom(harness) {
+async function createTwoPlayerRoom(harness, mapSize = 12) {
   const first = await harness.connect();
   const second = await harness.connect();
   const created = await emitWithAck(
     first.socket,
     CLIENT_EVENTS.CREATE_ROOM,
-    { nickname: "甲方" },
+    { nickname: "甲方", mapSize },
   );
   assert.equal(created.ok, true);
   await waitForValue(
@@ -363,8 +363,8 @@ test("Socket 协议创建和加入房间，并分别发送会话与安全状态"
   const firstView = latestState(room.first.recorder);
   const secondView = latestState(room.second.recorder);
 
-  assert.equal(room.first.recorder.ready.at(-1).stage, "Ocean-v1.1");
-  assert.equal(room.first.recorder.ready.at(-1).protocolVersion, "1.7");
+  assert.equal(room.first.recorder.ready.at(-1).stage, "Ocean-v1.2.1");
+  assert.equal(room.first.recorder.ready.at(-1).protocolVersion, "1.8");
   const firstSession = room.first.recorder.sessions.at(-1);
   assert.equal(firstSession.active, true);
   assert.equal(firstSession.roomCode, room.roomCode);
@@ -376,6 +376,21 @@ test("Socket 协议创建和加入房间，并分别发送会话与安全状态"
   assert.equal(firstView.seats.length, 2);
   assert.equal(Object.hasOwn(firstView.seats[1], "deployment"), false);
   assert.equal(Object.hasOwn(secondView.seats[0], "deployment"), false);
+});
+
+test("Socket 创建 15×15 房间并向创建者和加入者下发同一动态规则", async (context) => {
+  const harness = await createHarness(context);
+  const room = await createTwoPlayerRoom(harness, 15);
+  for (const recorder of [room.first.recorder, room.second.recorder]) {
+    const view = latestState(recorder);
+    assert.equal(view.mapSize, 15);
+    assert.equal(view.mapRules.coordinateMaximum, "O15");
+    assert.equal(view.mapRules.carrierCellCount, 8);
+    assert.equal(view.mapRules.decoyCount, 5);
+    assert.deepEqual(view.mapRules.destroyerI, { along: 13, across: 9 });
+    assert.deepEqual(view.mapRules.destroyerII, { along: 12, across: 10 });
+    assert.equal(view.mapRules.radarSize, 5);
+  }
 });
 
 test("双方通过 Socket 完成部署、分别主动掷骰并进入服务器权威回合", async (context) => {

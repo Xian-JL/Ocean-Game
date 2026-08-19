@@ -107,7 +107,7 @@ class InMemoryRoomService {
       (() => randomBytes(32).toString("base64url"));
     this.now = options.now ?? Date.now;
     this.randomDeploymentFactory = options.randomDeploymentFactory ??
-      (() => generateRandomDeployment(this.random));
+      ((_playerId, mapRules) => generateRandomDeployment(this.random, mapRules));
     this.reconnectCredentialDigests = new Map();
     this.roomActivityAt = new Map();
     this.maxRooms = options.maxRooms ?? DEFAULT_MAX_ROOMS;
@@ -126,7 +126,7 @@ class InMemoryRoomService {
     }
   }
 
-  createRoom({ nickname, maxPlayers = 2, roomMode = ROOM_MODES.PVP }) {
+  createRoom({ nickname, maxPlayers = 2, roomMode = ROOM_MODES.PVP, mapSize = 12 }) {
     const nowMs = this.#readNow();
     if (this.rooms.size >= this.maxRooms) {
       fail(
@@ -143,6 +143,7 @@ class InMemoryRoomService {
       nickname,
       maxPlayers,
       roomMode,
+      mapSize,
     });
     if (roomMode === ROOM_MODES.BOT_DUEL) {
       const botPlayerId = this.#createUniquePlayerId(room);
@@ -154,7 +155,7 @@ class InMemoryRoomService {
       room = submitDeployment(
         room,
         botPlayerId,
-        this.randomDeploymentFactory(botPlayerId),
+        this.randomDeploymentFactory(botPlayerId, room.mapRules),
         nowMs,
       );
       room = setPlayerReady(room, botPlayerId, nowMs);
@@ -206,7 +207,7 @@ class InMemoryRoomService {
           prepared = submitDeployment(
             prepared,
             botSeat.playerId,
-            this.randomDeploymentFactory(botSeat.playerId),
+            this.randomDeploymentFactory(botSeat.playerId, room.mapRules),
             nowMs,
           );
         }
@@ -470,7 +471,7 @@ class InMemoryRoomService {
       (room) => completeDeploymentTimeout(
         room,
         nowMs,
-        (playerId) => this.randomDeploymentFactory(playerId),
+        (playerId, mapRules) => this.randomDeploymentFactory(playerId, mapRules),
       ),
     );
     return createRoomViewsByPlayer(next, nowMs);
@@ -502,7 +503,7 @@ class InMemoryRoomService {
         next = completeDeploymentTimeout(
           room,
           nowMs,
-          (playerId) => this.randomDeploymentFactory(playerId),
+          (playerId, mapRules) => this.randomDeploymentFactory(playerId, mapRules),
         );
       } else if (
         room.roomPhase === ROOM_PHASES.PLAYING &&

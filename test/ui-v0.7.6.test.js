@@ -19,7 +19,7 @@ function includesAll(source, values) {
 
 test("v0.7.6 开局掷骰由每名玩家主动触发且结果仍由服务器生成", () => {
   assert.equal(protocol.CLIENT_EVENTS.ROLL_DIE, "match:roll-die");
-  assert.equal(protocol.SOCKET_PROTOCOL_VERSION, "1.7");
+  assert.equal(protocol.SOCKET_PROTOCOL_VERSION, "1.8");
   includesAll(app, [
     'data-action="roll-die"',
     'emitRequest("match:roll-die"',

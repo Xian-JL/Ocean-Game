@@ -34,7 +34,7 @@ class FakeSocket {
       if (eventName === "client:ping") {
         acknowledge(null, {
           ok: true,
-          protocolVersion: "1.7",
+          protocolVersion: "1.8",
         });
       } else {
         acknowledge(null, {
@@ -248,28 +248,47 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
 
   const socket = new FakeSocket();
   window.io = () => socket;
-  for (const script of ["game-data.js", "ui-model.js", "app.js"]) {
+  for (const script of ["game-data.js", "ui-model.js", "audio-system.js", "app.js"]) {
     window.eval(
       fs.readFileSync(path.join(PROJECT_ROOT, "public/js", script), "utf8"),
     );
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.1",
-    protocolVersion: "1.7",
+    stage: "Ocean-v1.2.1",
+    protocolVersion: "1.8",
   });
 
   assert.match(window.document.querySelector("#app").textContent, /创建房间/);
   assert.equal(window.document.querySelectorAll("#create-form").length, 1);
+  assert.equal(window.document.querySelectorAll('[data-action="select-map-size"]').length, 3);
+  click(window, window.document.querySelector('[data-map-size="15"]'));
+  assert.equal(
+    window.document.querySelector('[data-map-size="15"]').getAttribute("aria-checked"),
+    "true",
+  );
   click(window, window.document.querySelector('[data-action="open-rules"]'));
   assert.equal(window.document.querySelector("#rules-dialog").open, true);
+  const effectsVolume = window.document.querySelector("#effects-volume");
+  effectsVolume.value = "37";
+  effectsVolume.dispatchEvent(new window.Event("input", { bubbles: true }));
+  assert.equal(window.document.querySelector("#effects-volume-output").textContent, "37%");
+  assert.equal(window.localStorage.getItem("ocean.audio.effects-volume.v1"), "0.37");
+  const musicVolume = window.document.querySelector("#music-volume");
+  musicVolume.value = "64";
+  musicVolume.dispatchEvent(new window.Event("input", { bubbles: true }));
+  assert.equal(window.document.querySelector("#music-volume-output").textContent, "64%");
+  assert.equal(window.localStorage.getItem("ocean.audio.music-volume.v1"), "0.64");
   click(window, window.document.querySelector('[data-action="close-rules"]'));
   socket.serverEmit("room:error", {
     code: "TEST_MESSAGE",
     message: "可恢复的测试提示",
     details: {},
   });
-  assert.match(window.document.querySelector(".toast").textContent, /可恢复的测试提示/);
+  const dismissibleToast = window.document.querySelector(".toast");
+  assert.match(dismissibleToast.textContent, /可恢复的测试提示/);
+  click(window, dismissibleToast);
+  assert.equal(window.document.querySelector(".toast"), null);
 
   socket.serverEmit("room:session", {
     active: true,
@@ -376,6 +395,11 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   socket.serverEmit("room:state", playingRoom());
   assert.equal(window.document.querySelectorAll(".action-card").length, 10);
   assert.equal(window.document.querySelectorAll('.battle-map-card [data-action="enemy-cell"]').length, 144);
+  const battleMainColumn = window.document.querySelector(".battle-main-column");
+  assert.ok(battleMainColumn);
+  assert.ok(battleMainColumn.firstElementChild.classList.contains("battle-maps"));
+  assert.ok(battleMainColumn.lastElementChild.classList.contains("event-center"));
+  assert.equal(window.document.querySelector(".battle-lower .event-center"), null);
   const pirate = window.document.querySelector(
     `[data-action="select-action"][data-action-type="${Data.ACTION_TYPES.PIRATE_ATTACK}"]`,
   );

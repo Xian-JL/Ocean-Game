@@ -4,6 +4,7 @@ const { createInitialRemainingUses, getActionDefinition } = require("./actions")
 const { sortCoordinates } = require("./coordinates");
 const { assertValidDeployment } = require("./deployment");
 const { RuleValidationError } = require("./errors");
+const { DEFAULT_MAP_RULES, createMapRules } = require("./map-rules");
 const {
   getDeployableDefinition,
   isCombatUnitType,
@@ -49,12 +50,17 @@ function assertActionState(state) {
   return state;
 }
 
-function createInitialActionState(deployment) {
-  const normalizedPlacements = assertValidDeployment(deployment);
+function getStateMapRules(state) {
+  return state?.mapRules?.mapSize ? createMapRules(state.mapRules.mapSize) : DEFAULT_MAP_RULES;
+}
+
+function createInitialActionState(deployment, mapRules = DEFAULT_MAP_RULES) {
+  const rules = createMapRules(mapRules.mapSize ?? mapRules);
+  const normalizedPlacements = assertValidDeployment(deployment, rules);
   const units = normalizedPlacements
     .filter((placement) => isCombatUnitType(placement.type))
     .map((placement) => {
-      const definition = getDeployableDefinition(placement.type);
+      const definition = getDeployableDefinition(placement.type, rules);
       return {
         id: placement.id,
         type: placement.type,
@@ -65,6 +71,7 @@ function createInitialActionState(deployment) {
     });
 
   return {
+    mapRules: rules,
     units,
     remainingUses: createInitialRemainingUses(),
     resolvedTargetCells: [],
@@ -96,7 +103,7 @@ function getRemainingUses(state, actionType) {
 
 function hasResolvedTargetCell(state, coordinate) {
   assertActionState(state);
-  const [normalized] = sortCoordinates([coordinate]);
+  const [normalized] = sortCoordinates([coordinate], getStateMapRules(state));
   return state.resolvedTargetCells.includes(normalized);
 }
 
@@ -118,7 +125,7 @@ function markTargetCellsResolved(state, coordinates) {
   const merged = sortCoordinates([
     ...state.resolvedTargetCells,
     ...coordinates,
-  ]);
+  ], getStateMapRules(state));
 
   return {
     ...state,
@@ -128,12 +135,13 @@ function markTargetCellsResolved(state, coordinates) {
 
 function markSubmarineMissileTarget(state, coordinate) {
   assertActionState(state);
-  const [normalized] = sortCoordinates([coordinate]);
+  const rules = getStateMapRules(state);
+  const [normalized] = sortCoordinates([coordinate], rules);
   return {
     ...state,
     submarineMissileMarkers: [
       ...new Set(
-        sortCoordinates([...state.submarineMissileMarkers, normalized]),
+        sortCoordinates([...state.submarineMissileMarkers, normalized], rules),
       ),
     ],
   };
@@ -141,18 +149,19 @@ function markSubmarineMissileTarget(state, coordinate) {
 
 function markNuclearBombTarget(state, coordinate) {
   assertActionState(state);
-  const [normalized] = sortCoordinates([coordinate]);
+  const rules = getStateMapRules(state);
+  const [normalized] = sortCoordinates([coordinate], rules);
   return {
     ...state,
     nuclearBombMarkers: [
-      ...new Set(sortCoordinates([...state.nuclearBombMarkers, normalized])),
+      ...new Set(sortCoordinates([...state.nuclearBombMarkers, normalized], rules)),
     ],
   };
 }
 
 function markDestroyerTarget(state, coordinate, targetPlayerId = null) {
   assertActionState(state);
-  const [normalized] = sortCoordinates([coordinate]);
+  const [normalized] = sortCoordinates([coordinate], getStateMapRules(state));
   const stored = typeof targetPlayerId === "string"
     ? `${targetPlayerId}:${normalized}`
     : normalized;
@@ -184,7 +193,7 @@ function setUnitStatus(state, unitId, changes) {
 
   const nextUnit = { ...unit };
   if (Object.hasOwn(changes, "hp")) {
-    const maximumHp = getDeployableDefinition(unit.type).initialHp;
+    const maximumHp = getDeployableDefinition(unit.type, getStateMapRules(state)).initialHp;
     if (
       typeof changes.hp !== "number" ||
       !Number.isFinite(changes.hp) ||
@@ -248,6 +257,7 @@ module.exports = {
   assertActionState,
   createInitialActionState,
   getRemainingUses,
+  getStateMapRules,
   getUnitById,
   getUnitByType,
   hasProcessedActionId,

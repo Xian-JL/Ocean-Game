@@ -4,6 +4,12 @@ const { assertValidDeployment } = require("./deployment");
 const { RuleValidationError } = require("./errors");
 const { generateRandomDeployment } = require("./random-deployment");
 const {
+  DEFAULT_MAP_SIZE,
+  assertMapRules,
+  createMapRules,
+  normalizeMapSize,
+} = require("./map-rules");
+const {
   DEPLOYMENT_DURATION_MS,
   createDeadline,
   isDeadlineReached,
@@ -118,6 +124,7 @@ function createRoomState({
   nickname,
   maxPlayers = 2,
   roomMode = ROOM_MODES.PVP,
+  mapSize = DEFAULT_MAP_SIZE,
 }) {
   if (![2, 3].includes(maxPlayers)) {
     fail("INVALID_PLAYER_COUNT", "房间人数只能是 2 或 3。", { maxPlayers });
@@ -129,6 +136,8 @@ function createRoomState({
     fail("INVALID_BOT_PLAYER_COUNT", "人机对战固定为 1v1，不能创建三人人机房间。");
   }
   const ownerSeat = createSeat(playerId, nickname);
+  const normalizedMapSize = normalizeMapSize(mapSize);
+  const mapRules = createMapRules(normalizedMapSize);
   return {
     roomCode: normalizeRoomCode(roomCode),
     stateVersion: 1,
@@ -138,6 +147,8 @@ function createRoomState({
     pausedTimer: null,
     ownerPlayerId: ownerSeat.playerId,
     roomMode,
+    mapSize: normalizedMapSize,
+    mapRules,
     maxPlayers,
     seats: [ownerSeat],
     deploymentsLocked: false,
@@ -291,7 +302,7 @@ function submitDeployment(room, playerId, deployment, nowMs = Date.now()) {
     });
   }
 
-  const normalizedDeployment = assertValidDeployment(deployment);
+  const normalizedDeployment = assertValidDeployment(deployment, room.mapRules);
   const nextSeat = {
     ...seat,
     deployment: clone(normalizedDeployment),
@@ -328,7 +339,7 @@ function setPlayerReady(room, playerId, nowMs = Date.now()) {
   }
 
   // 准备是信任边界：即使部署先前通过，也必须在此再次完整校验。
-  const normalizedDeployment = assertValidDeployment(seat.deployment);
+  const normalizedDeployment = assertValidDeployment(seat.deployment, room.mapRules);
   const readySeat = {
     ...seat,
     deployment: clone(normalizedDeployment),
@@ -411,7 +422,7 @@ function leaveRoomBeforeMatch(room, playerId) {
 function completeDeploymentTimeout(
   room,
   nowMs = Date.now(),
-  deploymentFactory = () => generateRandomDeployment(),
+  deploymentFactory = null,
 ) {
   assertRoomState(room);
   assertRoomConnected(room);
@@ -432,7 +443,9 @@ function completeDeploymentTimeout(
       },
     );
   }
-  if (typeof deploymentFactory !== "function") {
+  const factory = deploymentFactory ?? ((_playerId, mapRules) =>
+    generateRandomDeployment(Math.random, mapRules));
+  if (typeof factory !== "function") {
     fail("INVALID_DEPLOYMENT_FACTORY", "自动部署生成器必须是函数。");
   }
 
@@ -442,8 +455,8 @@ function completeDeploymentTimeout(
       return seat;
     }
 
-    const candidate = seat.deployment ?? deploymentFactory(seat.playerId);
-    const deployment = assertValidDeployment(candidate);
+    const candidate = seat.deployment ?? factory(seat.playerId, room.mapRules);
+    const deployment = assertValidDeployment(candidate, room.mapRules);
     autoPreparedPlayerIds.push(seat.playerId);
     return {
       ...seat,
@@ -471,7 +484,7 @@ function completeDeploymentTimeout(
   );
 }
 
-function assertSeat(seat) {
+function assertSeat(seat, mapRules = createMapRules(DEFAULT_MAP_SIZE)) {
   if (!seat || typeof seat !== "object" || Array.isArray(seat)) {
     fail("INVALID_ROOM_STATE", "房间包含无效玩家席位。", { seat });
   }
@@ -527,7 +540,7 @@ function assertSeat(seat) {
     }
   }
   if (seat.deployment !== null) {
-    assertValidDeployment(seat.deployment);
+    assertValidDeployment(seat.deployment, mapRules);
   }
   if (seat.ready && seat.deployment === null) {
     fail("INVALID_ROOM_STATE", "已准备玩家必须具有完整合法部署。", {
@@ -571,6 +584,16 @@ function assertRoomState(room) {
   if (!Object.values(ROOM_MODES).includes(room.roomMode)) {
     fail("INVALID_ROOM_STATE", "房间模式无效。", { roomMode: room.roomMode });
   }
+  if (normalizeMapSize(room.mapSize) !== room.mapSize) {
+    fail("INVALID_ROOM_STATE", "房间地图大小无效。", { mapSize: room.mapSize });
+  }
+  assertMapRules(room.mapRules);
+  if (room.mapRules.mapSize !== room.mapSize) {
+    fail("INVALID_ROOM_STATE", "房间地图大小与规则配置不一致。", {
+      mapSize: room.mapSize,
+      mapRules: room.mapRules,
+    });
+  }
   const botSeats = room.seats.filter((seat) => seat.isBot);
   if (
     (room.roomMode === ROOM_MODES.BOT_DUEL &&
@@ -585,7 +608,7 @@ function assertRoomState(room) {
     });
   }
 
-  room.seats.forEach(assertSeat);
+  room.seats.forEach((seat) => assertSeat(seat, room.mapRules));
   const eliminatedIds = new Set(room.battleState?.match?.eliminatedPlayerIds ?? []);
   const connectionSeats = room.seats.filter((seat) => !eliminatedIds.has(seat.playerId));
   const offlineCount = connectionSeats.filter((seat) => !seat.online).length;
