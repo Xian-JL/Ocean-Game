@@ -1155,6 +1155,23 @@ kbd {
   scrollbar-color: rgba(99, 221, 245, 0.28) transparent;
 }
 
+/*
+ * The production CSP intentionally blocks inline style attributes. Derive the
+ * track count from the server-backed data attribute in the stylesheet so all
+ * supported maps use the same row-major DOM layout without implicit tracks.
+ */
+.ocean-board[data-board-size="10"] {
+  --board-size: 10;
+}
+
+.ocean-board[data-board-size="12"] {
+  --board-size: 12;
+}
+
+.ocean-board[data-board-size="15"] {
+  --board-size: 15;
+}
+
 .ocean-board {
   display: grid;
   width: max-content;

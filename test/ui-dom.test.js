@@ -250,29 +250,32 @@ function threePlayerPlayingRoom() {
 
 function assertBoardCoordinateAlignment(board, size = 12) {
   assert.equal(board.dataset.boardSize, String(size));
+  assert.equal(board.hasAttribute("style"), false);
   const columnAxes = [...board.querySelectorAll(".board-axis--column")];
   const rowAxes = [...board.querySelectorAll(".board-axis--row")];
   assert.deepEqual(columnAxes.map((axis) => axis.textContent),
     Array.from({ length: size }, (_value, index) => String(index + 1)));
   assert.deepEqual(rowAxes.map((axis) => axis.textContent),
     "ABCDEFGHIJKLMNO".slice(0, size).split(""));
+  const children = [...board.children];
+  assert.ok(children[0].classList.contains("board-corner"));
   columnAxes.forEach((axis, index) => {
-    assert.equal(axis.style.gridRow, "1");
-    assert.equal(axis.style.gridColumn, String(index + 2));
-  });
-  rowAxes.forEach((axis, index) => {
-    assert.equal(axis.style.gridRow, String(index + 2));
-    assert.equal(axis.style.gridColumn, "1");
+    assert.equal(children[index + 1], axis);
+    assert.equal(axis.hasAttribute("style"), false);
   });
   for (const [rowIndex, row] of rowAxes.entries()) {
+    const rowStart = size + 1 + rowIndex * (size + 1);
+    assert.equal(children[rowStart], row);
+    assert.equal(row.hasAttribute("style"), false);
     for (let columnIndex = 0; columnIndex < size; columnIndex += 1) {
       const coordinate = `${row.textContent}${columnIndex + 1}`;
       const cell = board.querySelector(`[data-coordinate="${coordinate}"]`);
       assert.ok(cell, `缺少地图格 ${coordinate}`);
-      assert.equal(cell.style.gridRow, String(rowIndex + 2));
-      assert.equal(cell.style.gridColumn, String(columnIndex + 2));
+      assert.equal(children[rowStart + columnIndex + 1], cell);
+      assert.equal(cell.hasAttribute("style"), false);
     }
   }
+  assert.equal(children.length, (size + 1) ** 2);
 }
 
 function click(window, element) {
@@ -589,8 +592,66 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
     assertBoardCoordinateAlignment(board);
   }
 
+  let dynamicStateVersion = 9;
+  for (const mapSize of [10, 15]) {
+    const mapRules = Data.createMapRules(mapSize);
+    const deployment = baseRoom({
+      stateVersion: dynamicStateVersion++,
+      roomPhase: "DEPLOYING",
+      mapSize,
+      mapRules,
+      seats: [
+        { playerId: "player-1", nickname: "甲", online: true, ready: false, autoPrepared: false },
+        { playerId: "player-2", nickname: "乙", online: true, ready: false, autoPrepared: false },
+      ],
+      deadlines: {
+        deploymentDeadlineAt: 190_000,
+        actionDeadlineAt: null,
+        reconnectDeadlineAtByPlayer: {},
+      },
+    });
+    socket.serverEmit("room:state", deployment);
+    assertBoardCoordinateAlignment(
+      window.document.querySelector(".deployment-map-card .ocean-board"),
+      mapSize,
+    );
+
+    const online = playingRoom();
+    online.stateVersion = dynamicStateVersion++;
+    online.mapSize = mapSize;
+    online.mapRules = mapRules;
+    socket.serverEmit("room:state", online);
+    assert.equal(window.document.querySelectorAll(".battle-map-card .ocean-board").length, 2);
+    for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
+      assertBoardCoordinateAlignment(board, mapSize);
+    }
+
+    const bot = playingRoom();
+    bot.stateVersion = dynamicStateVersion++;
+    bot.roomMode = "bot_duel";
+    bot.mapSize = mapSize;
+    bot.mapRules = mapRules;
+    bot.seats[0].isBot = false;
+    bot.seats[1].isBot = true;
+    socket.serverEmit("room:state", bot);
+    assert.equal(window.document.querySelectorAll(".battle-map-card .ocean-board").length, 2);
+    for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
+      assertBoardCoordinateAlignment(board, mapSize);
+    }
+
+    const threePlayer = threePlayerPlayingRoom();
+    threePlayer.stateVersion = dynamicStateVersion++;
+    threePlayer.mapSize = mapSize;
+    threePlayer.mapRules = mapRules;
+    socket.serverEmit("room:state", threePlayer);
+    assert.equal(window.document.querySelectorAll(".battle-map-card .ocean-board").length, 3);
+    for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
+      assertBoardCoordinateAlignment(board, mapSize);
+    }
+  }
+
   const paused = playingRoom();
-  paused.stateVersion = 9;
+  paused.stateVersion = dynamicStateVersion++;
   paused.connectionPhase = "PAUSED_ONE_OFFLINE";
   paused.seats[1].online = false;
   paused.connection = {
@@ -607,14 +668,14 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   assert.match(window.document.querySelector(".pause-card").textContent, /投降并离开/);
 
   const resumed = playingRoom();
-  resumed.stateVersion = 10;
+  resumed.stateVersion = dynamicStateVersion++;
   socket.serverEmit("room:state", resumed);
   assert.equal(window.document.querySelector("#blocking-overlay").hidden, true);
 
   const replayOne = createSnapshot();
   const replayTwo = createSnapshot();
   const finished = playingRoom();
-  finished.stateVersion = 11;
+  finished.stateVersion = dynamicStateVersion++;
   finished.roomPhase = "FINISHED";
   finished.turnPhase = null;
   finished.turn = null;
@@ -648,7 +709,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   assert.equal(window.document.querySelectorAll(".replay-resources span").length, 6);
 
   socket.serverEmit("room:state", baseRoom({
-    stateVersion: 12,
+    stateVersion: dynamicStateVersion++,
     roomPhase: "CLOSED",
     closedReason: "disconnect_timeout_before_match",
   }));

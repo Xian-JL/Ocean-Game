@@ -7,6 +7,7 @@ const test = require("node:test");
 
 const pkg = require("../package.json");
 const Data = require("../public/js/game-data");
+const { SECURITY_HEADERS } = require("../server/app");
 const {
   RELEASE_STAGE,
   RELEASE_VERSION,
@@ -108,7 +109,7 @@ test("当前规则与页面流程文档冻结三种地图和 v1.2.4 交互边界
   }
 });
 
-test("独立声音设置、显式地图坐标与分角色播报均打包在正式前端", () => {
+test("独立声音设置、CSP 兼容动态地图与分角色播报均打包在正式前端", () => {
   const html = read("public/index.html");
   const app = read("public/js/app.js");
   const audio = read("public/js/audio-system.js");
@@ -139,8 +140,20 @@ test("独立声音设置、显式地图坐标与分角色播报均打包在正�
   assert.match(app, /class="battle-main-column"/);
   assert.match(app, /battle-main-column[\s\S]*renderPublicLog\(room\)/);
   assert.match(css, /\.battle-main-column\s*\{/);
-  assert.match(app, /style="grid-row:1;grid-column:1"/);
-  assert.match(app, /grid-row:\$\{rowIndex \+ 2\};grid-column:\$\{columnIndex \+ 2\}/);
+  for (const mapSize of [10, 12, 15]) {
+    assert.match(
+      css,
+      new RegExp(`\\.ocean-board\\[data-board-size="${mapSize}"\\]\\s*\\{[^}]*--board-size:\\s*${mapSize}`),
+    );
+  }
+  assert.match(css, /repeat\(var\(--board-size, 12\), var\(--cell-size\)\)/);
+  assert.equal(app.includes('style="grid-row'), false);
+  assert.equal(app.includes('style="--board-size'), false);
+  assert.match(SECURITY_HEADERS["Content-Security-Policy"], /style-src 'self'/);
+  assert.equal(
+    SECURITY_HEADERS["Content-Security-Policy"].includes("'unsafe-inline'"),
+    false,
+  );
   assert.equal(app.includes("feedback.inflictedDamage"), false);
   assert.equal(projection.includes("inflictedDamage"), false);
   assert.match(projection, /receivedHits:\s*createReceivedHitNotifications/);

@@ -1172,14 +1172,14 @@
 
   function renderGrid(label, cellRenderer, className = "") {
     const contents = [
-      '<span class="board-corner" aria-hidden="true" style="grid-row:1;grid-column:1"></span>',
+      '<span class="board-corner" aria-hidden="true"></span>',
       ...Data.COLUMNS.map(
-        (column, columnIndex) => `<span class="board-axis board-axis--column" style="grid-row:1;grid-column:${columnIndex + 2}">${column}</span>`,
+        (column) => `<span class="board-axis board-axis--column">${column}</span>`,
       ),
     ];
-    for (const [rowIndex, row] of Data.ROWS.entries()) {
-      contents.push(`<span class="board-axis board-axis--row" style="grid-row:${rowIndex + 2};grid-column:1">${row}</span>`);
-      for (const [columnIndex, column] of Data.COLUMNS.entries()) {
+    for (const row of Data.ROWS) {
+      contents.push(`<span class="board-axis board-axis--row">${row}</span>`);
+      for (const column of Data.COLUMNS) {
         const coordinate = `${row}${column}`;
         const cell = cellRenderer(coordinate) ?? {};
         const classes = ["board-cell", ...(cell.classes ?? [])].join(" ");
@@ -1191,7 +1191,6 @@
             type="button"
             class="${classes}"
             role="gridcell"
-            style="grid-row:${rowIndex + 2};grid-column:${columnIndex + 2}"
             aria-label="${escapeHtml(cell.label ?? coordinate)}"
             ${cell.disabled ? "disabled" : ""}
             ${cell.draggable ? 'draggable="true"' : ""}
@@ -1201,7 +1200,7 @@
     }
     return `
       <div class="board-frame ${className}">
-        <div class="ocean-board" role="grid" aria-label="${escapeHtml(label)}" data-board-size="${Data.BOARD_SIZE}" style="--board-size:${Data.BOARD_SIZE}">
+        <div class="ocean-board" role="grid" aria-label="${escapeHtml(label)}" data-board-size="${Data.BOARD_SIZE}">
           ${contents.join("")}
         </div>
       </div>`;
