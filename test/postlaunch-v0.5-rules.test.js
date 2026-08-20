@@ -52,7 +52,9 @@ test("核弹命中结果对发射方保密，但防守方仍收到实际伤害",
   assert.deepEqual(actor.view.own.enemyMap.nuclearBombMarkers, ["G5"]);
   assert.equal(defender.feedback.result, null);
   assert.equal(defender.feedback.receivedHits[0].unitType, "aircraft_carrier");
-  assert.equal(Object.hasOwn(defender.feedback.receivedHits[0], "appliedDamage"), false);
+  assert.equal(defender.feedback.receivedHits[0].appliedDamage, 2);
+  assert.equal(defender.feedback.receivedHits[0].beforeHp, 6);
+  assert.equal(defender.feedback.receivedHits[0].afterHp, 4);
 });
 
 test("海盗船受到敌方伤害时，己方航空母舰每次行动联动损失 0.5", () => {

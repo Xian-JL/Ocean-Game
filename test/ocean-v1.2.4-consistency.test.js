@@ -20,17 +20,17 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("Ocean-v1.2.1 前后端正式发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "1.2.1");
-  assert.equal(RELEASE_VERSION, "1.2.1");
-  assert.equal(RELEASE_STAGE, "Ocean-v1.2.1");
-  assert.equal(RULE_VERSION, "1.6");
-  assert.equal(SOCKET_PROTOCOL_VERSION, "1.8");
+test("Ocean-v1.2.4 前后端正式发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "1.2.4");
+  assert.equal(RELEASE_VERSION, "1.2.4");
+  assert.equal(RELEASE_STAGE, "Ocean-v1.2.4");
+  assert.equal(RULE_VERSION, "1.7");
+  assert.equal(SOCKET_PROTOCOL_VERSION, "1.9");
   assert.deepEqual(Data.RELEASE, {
-    version: "1.2.1",
-    stage: "Ocean-v1.2.1",
-    ruleVersion: "1.6",
-    socketProtocolVersion: "1.8",
+    version: "1.2.4",
+    stage: "Ocean-v1.2.4",
+    ruleVersion: "1.7",
+    socketProtocolVersion: "1.9",
   });
 });
 
@@ -53,7 +53,7 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   }
 
   for (const current of [
-    "Ocean-v1.2.1",
+    "Ocean-v1.2.4",
     "10×10",
     "12×12",
     "15×15",
@@ -77,13 +77,13 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   );
 });
 
-test("当前规则与页面流程文档冻结三种地图和 v1.2.1 交互边界", () => {
+test("当前规则与页面流程文档冻结三种地图和 v1.2.4 交互边界", () => {
   const currentDocs = [
     read("README.md"),
-    read("docs/rule-v1.6.md"),
-    read("docs/page-flow-v1.8.md"),
-    read("docs/socket-protocol-v1.1.md"),
-    read("docs/release-manifest-Ocean-v1.2.1.md"),
+    read("docs/rule-v1.7.md"),
+    read("docs/page-flow-v1.9.md"),
+    read("docs/socket-protocol-v1.2.md"),
+    read("docs/release-manifest-Ocean-v1.2.4.md"),
   ].join("\n");
 
   for (const stale of ["postlaunch-v0.3", "协议 1.2"]) {
@@ -91,9 +91,9 @@ test("当前规则与页面流程文档冻结三种地图和 v1.2.1 交互边界
   }
 
   for (const current of [
-    "Ocean-v1.2.1",
-    "rule-v1.6",
-    "page-flow-v1.8",
+    "Ocean-v1.2.4",
+    "rule-v1.7",
+    "page-flow-v1.9",
     "10×10",
     "12×12",
     "15×15",
@@ -108,17 +108,25 @@ test("当前规则与页面流程文档冻结三种地图和 v1.2.1 交互边界
   }
 });
 
-test("独立音量、地图邻接三频道与可关闭实时播报均打包在正式前端", () => {
+test("独立声音设置、显式地图坐标与分角色播报均打包在正式前端", () => {
   const html = read("public/index.html");
   const app = read("public/js/app.js");
   const audio = read("public/js/audio-system.js");
   const css = read("public/css/main.css");
+  const projection = read("server/game/information-projection.js");
 
   assert.match(html, /\/js\/audio-system\.js/);
   assert.match(html, /id="effects-toggle"/);
   assert.match(html, /id="music-toggle"/);
   assert.match(html, /id="effects-volume"/);
   assert.match(html, /id="music-volume"/);
+  assert.match(html, /id="audio-dialog"/);
+  assert.match(html, /data-action="open-audio-settings" data-audio-focus="effects"/);
+  assert.match(html, /data-action="open-audio-settings" data-audio-focus="music"/);
+  const rulesStart = html.indexOf('id="rules-dialog"');
+  const rulesEnd = html.indexOf("</dialog>", rulesStart);
+  assert.ok(rulesStart >= 0 && rulesEnd > rulesStart);
+  assert.ok(html.indexOf('id="effects-volume"') > rulesEnd);
   assert.match(audio, /\/assets\/audio\/music\/ocean-theme\.mp3/);
   assert.match(audio, /createOscillator/);
   assert.match(audio, /setEffectsVolume/);
@@ -131,6 +139,11 @@ test("独立音量、地图邻接三频道与可关闭实时播报均打包在�
   assert.match(app, /class="battle-main-column"/);
   assert.match(app, /battle-main-column[\s\S]*renderPublicLog\(room\)/);
   assert.match(css, /\.battle-main-column\s*\{/);
+  assert.match(app, /style="grid-row:1;grid-column:1"/);
+  assert.match(app, /grid-row:\$\{rowIndex \+ 2\};grid-column:\$\{columnIndex \+ 2\}/);
+  assert.equal(app.includes("feedback.inflictedDamage"), false);
+  assert.equal(projection.includes("inflictedDamage"), false);
+  assert.match(projection, /receivedHits:\s*createReceivedHitNotifications/);
 
   for (const channel of ["战况", "私人情报", "系统"]) {
     assert.equal(app.includes(channel), true, `底部频道被意外删除：${channel}`);

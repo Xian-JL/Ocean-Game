@@ -18,6 +18,7 @@
   const confirmCancel = document.querySelector("#confirm-cancel");
   const confirmAccept = document.querySelector("#confirm-accept");
   const rulesDialog = document.querySelector("#rules-dialog");
+  const audioDialog = document.querySelector("#audio-dialog");
   const reduceMotionToggle = document.querySelector("#reduce-motion-toggle");
   const effectsToggle = document.querySelector("#effects-toggle");
   const musicToggle = document.querySelector("#music-toggle");
@@ -299,16 +300,21 @@
     musicVolumeOutput.textContent = `${musicPercent}%`;
     effectsButton.dataset.enabled = String(state.audio.effectsEnabled);
     musicButton.dataset.enabled = String(state.audio.musicEnabled);
-    effectsButton.setAttribute("aria-pressed", String(state.audio.effectsEnabled));
-    musicButton.setAttribute("aria-pressed", String(state.audio.musicEnabled));
     effectsButton.setAttribute(
       "aria-label",
-      `音效${state.audio.effectsEnabled ? "已开启" : "已关闭"}，音量 ${effectsPercent}%`,
+      `打开音效设置；当前${state.audio.effectsEnabled ? "已开启" : "已关闭"}，音量 ${effectsPercent}%`,
     );
     musicButton.setAttribute(
       "aria-label",
-      `背景音乐${state.audio.musicEnabled ? "已开启" : "已关闭"}，音量 ${musicPercent}%`,
+      `打开背景音乐设置；当前${state.audio.musicEnabled ? "已开启" : "已关闭"}，音量 ${musicPercent}%`,
     );
+  }
+
+  function openAudioSettings(channel = "effects") {
+    syncAudioControls();
+    if (!audioDialog.open) audioDialog.showModal();
+    const focusTarget = channel === "music" ? musicVolumeInput : effectsVolumeInput;
+    focusTarget?.focus();
   }
 
   function setEffectsPreference(enabled) {
@@ -611,16 +617,13 @@
       ? `${actorName} 对你`
       : `${actorName} 对 ${defenderName}`;
     const actorTargetPrefix = `${feedback.actionName} → ${defenderName}`;
-    const exactDamage = (feedback.inflictedDamage ?? [])
-      .filter((event) => event.appliedDamage > 0)
-      .map((event) => {
-        const unit = Data.getUnitDefinitionByType(event.unitType);
-        return `${unit?.name ?? "目标单位"}生命值变为 ${Model.formatHp(event.afterHp)}`;
-      });
     const receivedHits = (feedback.receivedHits ?? [])
       .map((event) => {
         const unit = Data.getUnitDefinitionByType(event.unitType);
-        return `${unit?.name ?? "己方单位"}被命中${event.sunk ? "并沉没" : ""}`;
+        const hpText = event.appliedDamage > 0
+          ? `生命值 ${Model.formatHp(event.beforeHp)} → ${Model.formatHp(event.afterHp)}`
+          : `生命值保持 ${Model.formatHp(event.afterHp)}`;
+        return `${unit?.name ?? "己方单位"}被命中，${hpText}${event.sunk ? "，已沉没" : ""}`;
       });
 
     if (feedback.actionType === Data.ACTION_TYPES.SUBMARINE_MISSILE) {
@@ -659,9 +662,6 @@
       return `${publicActorPrefix}从 ${target} 开始执行了 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 雷达扫描；扫描结果仅行动方可见。`;
     }
     if (feedback.result === "hit") {
-      if (isActor && exactDamage.length > 0) {
-        return `${actorTargetPrefix}：${target} 命中；${exactDamage.join("；")}。`;
-      }
       if (isDefender && receivedHits.length > 0) {
         return `${actorName} 使用${feedback.actionName}：${receivedHits.join("；")}。`;
       }
@@ -680,9 +680,6 @@
         const misses = cells.filter((cell) => cell.result === "miss").length;
         return `${Model.nicknameFor(room, playerId)}：命中 ${hits} 格，未命中 ${misses} 格`;
       });
-      if (isActor && exactDamage.length > 0) {
-        return `直升机同时扫射 ${defenderName}：${counts.join("；")}；${exactDamage.join("；")}。`;
-      }
       if (isDefender && receivedHits.length > 0) {
         return `${actorName} 对所有敌方玩家执行直升机扫射：${receivedHits.join("；")}。`;
       }
@@ -691,9 +688,6 @@
     if (Array.isArray(feedback.cellResults)) {
       const hits = feedback.cellResults.filter((cell) => cell.result === "hit").length;
       const misses = feedback.cellResults.filter((cell) => cell.result === "miss").length;
-      if (isActor && exactDamage.length > 0) {
-        return `直升机扫射 → ${defenderName}：命中 ${hits} 格，未命中 ${misses} 格；${exactDamage.join("；")}。`;
-      }
       if (isDefender && receivedHits.length > 0) {
         return `${actorName} 对你执行直升机扫射：${receivedHits.join("；")}。`;
       }
@@ -1178,14 +1172,14 @@
 
   function renderGrid(label, cellRenderer, className = "") {
     const contents = [
-      '<span class="board-corner" aria-hidden="true"></span>',
+      '<span class="board-corner" aria-hidden="true" style="grid-row:1;grid-column:1"></span>',
       ...Data.COLUMNS.map(
-        (column) => `<span class="board-axis board-axis--column">${column}</span>`,
+        (column, columnIndex) => `<span class="board-axis board-axis--column" style="grid-row:1;grid-column:${columnIndex + 2}">${column}</span>`,
       ),
     ];
-    for (const row of Data.ROWS) {
-      contents.push(`<span class="board-axis board-axis--row">${row}</span>`);
-      for (const column of Data.COLUMNS) {
+    for (const [rowIndex, row] of Data.ROWS.entries()) {
+      contents.push(`<span class="board-axis board-axis--row" style="grid-row:${rowIndex + 2};grid-column:1">${row}</span>`);
+      for (const [columnIndex, column] of Data.COLUMNS.entries()) {
         const coordinate = `${row}${column}`;
         const cell = cellRenderer(coordinate) ?? {};
         const classes = ["board-cell", ...(cell.classes ?? [])].join(" ");
@@ -1196,6 +1190,8 @@
           <button
             type="button"
             class="${classes}"
+            role="gridcell"
+            style="grid-row:${rowIndex + 2};grid-column:${columnIndex + 2}"
             aria-label="${escapeHtml(cell.label ?? coordinate)}"
             ${cell.disabled ? "disabled" : ""}
             ${cell.draggable ? 'draggable="true"' : ""}
@@ -3828,12 +3824,12 @@
       }
       return;
     }
-    if (action === "toggle-effects") {
-      setEffectsPreference(!state.audio.effectsEnabled);
+    if (action === "open-audio-settings") {
+      openAudioSettings(control.dataset.audioFocus);
       return;
     }
-    if (action === "toggle-music") {
-      void setMusicPreference(!state.audio.musicEnabled);
+    if (action === "close-audio-settings") {
+      audioDialog.close();
       return;
     }
     if (action === "open-rules") {

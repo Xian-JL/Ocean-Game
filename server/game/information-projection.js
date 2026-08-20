@@ -128,32 +128,21 @@ function createOwnDamageNotifications(actionRecord, side) {
     }));
 }
 
-function createInflictedDamageNotifications(actionRecord) {
-  return (actionRecord.outcome.damageEvents ?? [])
-    .filter((event) => event.side === "defender")
-    .map((event) => ({
-      playerId: event.playerId,
-      unitId: event.unitId,
-      unitType: event.unitType,
-      beforeHp: event.beforeHp,
-      appliedDamage: event.appliedDamage,
-      afterHp: event.afterHp,
-      sunk: event.sunk,
-    }));
-}
-
 function createReceivedHitNotifications(actionRecord, playerId = null) {
   return (actionRecord.outcome.damageEvents ?? [])
     .filter(
       (event) =>
         event.side === "defender" &&
-        event.appliedDamage > 0 &&
+        (event.appliedDamage > 0 || event.hitCellsAdded.length > 0) &&
         (playerId === null || event.playerId === playerId),
     )
     .map((event) => ({
       unitId: event.unitId,
       unitType: event.unitType,
       hit: true,
+      beforeHp: event.beforeHp,
+      appliedDamage: event.appliedDamage,
+      afterHp: event.afterHp,
       sunk: event.sunk,
     }));
 }
@@ -202,10 +191,6 @@ function createActorFeedback(battleState, actionRecord) {
     sourceId: actionRecord.action.sourceId,
     remainingUses,
     ownDamage: createOwnDamageNotifications(actionRecord, "actor"),
-    inflictedDamage: [ACTION_TYPES.SUBMARINE_MISSILE, ACTION_TYPES.NUCLEAR_BOMB]
-      .includes(definition.type)
-      ? []
-      : createInflictedDamageNotifications(actionRecord),
     ownDecoyChanges: createOwnDecoyNotifications(actionRecord, "actor"),
     submarineMissileMarker:
       definition.type === ACTION_TYPES.SUBMARINE_MISSILE

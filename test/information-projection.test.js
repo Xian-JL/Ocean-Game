@@ -90,7 +90,7 @@ test("进行中的玩家视图只包含己方完整状态和敌方公开 ID", ()
   assertNoInternalKeys(view);
 });
 
-test("普通单格攻击只向攻击方公开命中结论，防守方看到己方实际受伤", () => {
+test("普通单格攻击只向攻击方公开命中结论，防守方看到己方精确生命值变化", () => {
   const resolved = resolveBattleAction(
     createSecretBattle(),
     "player-1",
@@ -106,10 +106,12 @@ test("普通单格攻击只向攻击方公开命中结论，防守方看到己�
 
   assert.equal(actor.feedback.result, "hit");
   assert.equal(actor.feedback.ownDamage[0].unitId, "destroyer-i");
-  assert.equal(actor.feedback.inflictedDamage[0].unitId, "enemy-submarine");
-  assert.equal(actor.feedback.inflictedDamage[0].afterHp, 1);
+  assert.equal(Object.hasOwn(actor.feedback, "inflictedDamage"), false);
+  assert.equal(JSON.stringify(actor.feedback).includes("enemy-submarine"), false);
   assert.equal(defender.feedback.receivedHits[0].unitId, "enemy-submarine");
-  assert.equal(Object.hasOwn(defender.feedback.receivedHits[0], "afterHp"), false);
+  assert.equal(defender.feedback.receivedHits[0].beforeHp, 2);
+  assert.equal(defender.feedback.receivedHits[0].appliedDamage, 1);
+  assert.equal(defender.feedback.receivedHits[0].afterHp, 1);
   assertNoInternalKeys(actor);
   assertNoInternalKeys(defender);
 });
@@ -235,7 +237,7 @@ test("雷达扫描布尔结果只发给行动方，公共记录和防守方不�
   assertNoInternalKeys(defender);
 });
 
-test("直升机公开逐格结果，并向攻击方单独提供精确伤害", () => {
+test("直升机向攻击方公开逐格结果但不公开单位和生命值", () => {
   let battle = createSecretBattle();
   battle = damageBattleUnit(battle, "player-1", "destroyer-i", 3);
   battle = damageBattleUnit(battle, "player-1", "destroyer-ii", 3);
@@ -246,13 +248,17 @@ test("直升机公开逐格结果，并向攻击方单独提供精确伤害", ()
     target: { kind: "column", column: 1 },
   });
   const actor = resolved.deliveriesByPlayer["player-1"];
+  const defender = resolved.deliveriesByPlayer["player-2"];
 
   assert.equal(actor.feedback.cellResults.length, 12);
   assert.deepEqual(Object.keys(actor.feedback.cellResults[0]).sort(), [
     "coordinate",
     "result",
   ]);
-  assert.equal(actor.feedback.inflictedDamage[0].unitId, "enemy-destroyer-i");
+  assert.equal(Object.hasOwn(actor.feedback, "inflictedDamage"), false);
+  assert.equal(JSON.stringify(actor.feedback).includes("enemy-destroyer-i"), false);
+  assert.equal(defender.feedback.receivedHits[0].unitId, "enemy-destroyer-i");
+  assert.equal(typeof defender.feedback.receivedHits[0].afterHp, "number");
   assertNoInternalKeys(actor);
 });
 
@@ -279,7 +285,9 @@ test("海盗船自身与己方航空母舰伤害只作为攻击方己方通知�
     defender.feedback.receivedHits.map((event) => event.unitId),
     ["enemy-carrier"],
   );
-  assert.equal(actor.feedback.inflictedDamage[0].unitId, "enemy-carrier");
+  assert.equal(Object.hasOwn(actor.feedback, "inflictedDamage"), false);
+  assert.equal(JSON.stringify(actor.feedback).includes("enemy-carrier"), false);
+  assert.equal(defender.feedback.receivedHits[0].afterHp, 4);
 });
 
 test("对局结束后双方视图才公开完整部署与服务器复盘", () => {

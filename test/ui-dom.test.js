@@ -34,7 +34,7 @@ class FakeSocket {
       if (eventName === "client:ping") {
         acknowledge(null, {
           ok: true,
-          protocolVersion: "1.8",
+          protocolVersion: "1.9",
         });
       } else {
         acknowledge(null, {
@@ -216,13 +216,72 @@ function playingRoom() {
   });
 }
 
+function threePlayerPlayingRoom() {
+  const room = playingRoom();
+  const emptyEnemyMap = {
+    cellResults: {},
+    submarineMissileMarkers: [],
+    nuclearBombMarkers: [],
+    destroyerTargetCells: [],
+  };
+  room.stateVersion = 8;
+  room.maxPlayers = 3;
+  room.seats.push({
+    playerId: "player-3",
+    nickname: "丙",
+    online: true,
+    ready: true,
+    autoPrepared: false,
+  });
+  room.turn = {
+    ...room.turn,
+    requiredTargetPlayerIds: ["player-2", "player-3"],
+    completedTargetPlayerIds: [],
+    remainingTargetPlayerIds: ["player-2", "player-3"],
+  };
+  room.battle.opponentIds = ["player-2", "player-3"];
+  room.battle.opponents = [{ id: "player-2" }, { id: "player-3" }];
+  room.battle.own.enemyMapsByPlayer = {
+    "player-2": structuredClone(room.battle.own.enemyMap),
+    "player-3": emptyEnemyMap,
+  };
+  return room;
+}
+
+function assertBoardCoordinateAlignment(board, size = 12) {
+  assert.equal(board.dataset.boardSize, String(size));
+  const columnAxes = [...board.querySelectorAll(".board-axis--column")];
+  const rowAxes = [...board.querySelectorAll(".board-axis--row")];
+  assert.deepEqual(columnAxes.map((axis) => axis.textContent),
+    Array.from({ length: size }, (_value, index) => String(index + 1)));
+  assert.deepEqual(rowAxes.map((axis) => axis.textContent),
+    "ABCDEFGHIJKLMNO".slice(0, size).split(""));
+  columnAxes.forEach((axis, index) => {
+    assert.equal(axis.style.gridRow, "1");
+    assert.equal(axis.style.gridColumn, String(index + 2));
+  });
+  rowAxes.forEach((axis, index) => {
+    assert.equal(axis.style.gridRow, String(index + 2));
+    assert.equal(axis.style.gridColumn, "1");
+  });
+  for (const [rowIndex, row] of rowAxes.entries()) {
+    for (let columnIndex = 0; columnIndex < size; columnIndex += 1) {
+      const coordinate = `${row.textContent}${columnIndex + 1}`;
+      const cell = board.querySelector(`[data-coordinate="${coordinate}"]`);
+      assert.ok(cell, `缺少地图格 ${coordinate}`);
+      assert.equal(cell.style.gridRow, String(rowIndex + 2));
+      assert.equal(cell.style.gridColumn, String(columnIndex + 2));
+    }
+  }
+}
+
 function click(window, element) {
   element.dispatchEvent(
     new window.MouseEvent("click", { bubbles: true, cancelable: true }),
   );
 }
 
-test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 与核心交互", async (context) => {
+test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 与核心交互", async (context) => {
   const html = fs
     .readFileSync(path.join(PROJECT_ROOT, "public/index.html"), "utf8")
     .replaceAll(/<script[^>]+src="[^"]+"[^>]*><\/script>/g, "");
@@ -255,8 +314,8 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.2.1",
-    protocolVersion: "1.8",
+    stage: "Ocean-v1.2.4",
+    protocolVersion: "1.9",
   });
 
   assert.match(window.document.querySelector("#app").textContent, /创建房间/);
@@ -269,17 +328,29 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   );
   click(window, window.document.querySelector('[data-action="open-rules"]'));
   assert.equal(window.document.querySelector("#rules-dialog").open, true);
+  assert.equal(window.document.querySelector("#rules-dialog #effects-volume"), null);
+  click(window, window.document.querySelector('[data-action="close-rules"]'));
+
+  const effectsEnabledBeforeOpen = window.document.querySelector("#effects-toggle").checked;
+  click(window, window.document.querySelector("#effects-button"));
+  assert.equal(window.document.querySelector("#audio-dialog").open, true);
+  assert.equal(window.document.querySelector("#effects-toggle").checked, effectsEnabledBeforeOpen);
+  assert.equal(window.document.activeElement.id, "effects-volume");
   const effectsVolume = window.document.querySelector("#effects-volume");
   effectsVolume.value = "37";
   effectsVolume.dispatchEvent(new window.Event("input", { bubbles: true }));
   assert.equal(window.document.querySelector("#effects-volume-output").textContent, "37%");
   assert.equal(window.localStorage.getItem("ocean.audio.effects-volume.v1"), "0.37");
+  click(window, window.document.querySelector('[data-action="close-audio-settings"]'));
+  click(window, window.document.querySelector("#music-button"));
+  assert.equal(window.document.querySelector("#audio-dialog").open, true);
+  assert.equal(window.document.activeElement.id, "music-volume");
   const musicVolume = window.document.querySelector("#music-volume");
   musicVolume.value = "64";
   musicVolume.dispatchEvent(new window.Event("input", { bubbles: true }));
   assert.equal(window.document.querySelector("#music-volume-output").textContent, "64%");
   assert.equal(window.localStorage.getItem("ocean.audio.music-volume.v1"), "0.64");
-  click(window, window.document.querySelector('[data-action="close-rules"]'));
+  click(window, window.document.querySelector('[data-action="close-audio-settings"]'));
   socket.serverEmit("room:error", {
     code: "TEST_MESSAGE",
     message: "可恢复的测试提示",
@@ -322,6 +393,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   const deploymentBoard = window.document.querySelector(
     ".deployment-map-card .ocean-board",
   );
+  assertBoardCoordinateAlignment(deploymentBoard);
   click(
     window,
     window.document.querySelector(
@@ -400,6 +472,9 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   assert.ok(battleMainColumn.firstElementChild.classList.contains("battle-maps"));
   assert.ok(battleMainColumn.lastElementChild.classList.contains("event-center"));
   assert.equal(window.document.querySelector(".battle-lower .event-center"), null);
+  for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
+    assertBoardCoordinateAlignment(board);
+  }
   const pirate = window.document.querySelector(
     `[data-action="select-action"][data-action-type="${Data.ACTION_TYPES.PIRATE_ATTACK}"]`,
   );
@@ -425,8 +500,97 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
     /本机标记：确定有布局/,
   );
 
+  const actorFeedbackRoom = playingRoom();
+  actorFeedbackRoom.stateVersion = 5;
+  actorFeedbackRoom.latestResolution = {
+    feedback: {
+      sequence: 1,
+      actorId: "player-1",
+      defenderId: "player-2",
+      defenderIds: ["player-2"],
+      actionType: Data.ACTION_TYPES.DESTROYER_I_RAM,
+      actionName: "驱逐舰Ⅰ冲撞",
+      target: { kind: "cell", coordinate: "A1" },
+      result: "hit",
+      ownDamage: [],
+      receivedHits: [],
+      inflictedDamage: [{
+        unitType: Data.UNIT_TYPES.AIRCRAFT_CARRIER,
+        beforeHp: 6,
+        appliedDamage: 1,
+        afterHp: 5,
+      }],
+    },
+  };
+  socket.serverEmit("room:state", actorFeedbackRoom);
+  const attackerToast = window.document.querySelector("#toast-region").lastElementChild;
+  assert.match(attackerToast.textContent, /A1 命中/);
+  assert.equal(attackerToast.textContent.includes("航空母舰"), false);
+  assert.equal(attackerToast.textContent.includes("生命值"), false);
+  assert.equal(window.document.querySelector(".resolution-strip").textContent.includes("航空母舰"), false);
+
+  const defenderFeedbackRoom = playingRoom();
+  defenderFeedbackRoom.stateVersion = 6;
+  defenderFeedbackRoom.latestResolution = {
+    feedback: {
+      sequence: 2,
+      actorId: "player-2",
+      defenderId: "player-1",
+      defenderIds: ["player-1"],
+      actionType: Data.ACTION_TYPES.DESTROYER_I_RAM,
+      actionName: "驱逐舰Ⅰ冲撞",
+      target: { kind: "cell", coordinate: "G5" },
+      result: "hit",
+      ownDamage: [],
+      receivedHits: [{
+        unitId: "carrier",
+        unitType: Data.UNIT_TYPES.AIRCRAFT_CARRIER,
+        beforeHp: 6,
+        appliedDamage: 1,
+        afterHp: 5,
+        sunk: false,
+      }],
+    },
+  };
+  socket.serverEmit("room:state", defenderFeedbackRoom);
+  const defenderToast = window.document.querySelector("#toast-region").lastElementChild;
+  assert.match(defenderToast.textContent, /航空母舰被命中，生命值 6 → 5/);
+
+  const nuclearFeedbackRoom = playingRoom();
+  nuclearFeedbackRoom.stateVersion = 7;
+  nuclearFeedbackRoom.latestResolution = {
+    feedback: {
+      sequence: 3,
+      actorId: "player-1",
+      defenderId: "player-2",
+      defenderIds: ["player-2"],
+      actionType: Data.ACTION_TYPES.NUCLEAR_BOMB,
+      actionName: "核弹",
+      target: { kind: "cell", coordinate: "G5" },
+      result: null,
+      ownDamage: [],
+      receivedHits: [],
+      inflictedDamage: [{
+        unitType: Data.UNIT_TYPES.AIRCRAFT_CARRIER,
+        beforeHp: 6,
+        appliedDamage: 2,
+        afterHp: 4,
+      }],
+    },
+  };
+  socket.serverEmit("room:state", nuclearFeedbackRoom);
+  const nuclearToast = window.document.querySelector("#toast-region").lastElementChild;
+  assert.match(nuclearToast.textContent, /命中结果不会向你显示/);
+  assert.equal(nuclearToast.textContent.includes("生命值"), false);
+
+  socket.serverEmit("room:state", threePlayerPlayingRoom());
+  assert.equal(window.document.querySelectorAll(".battle-map-card .ocean-board").length, 3);
+  for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
+    assertBoardCoordinateAlignment(board);
+  }
+
   const paused = playingRoom();
-  paused.stateVersion = 5;
+  paused.stateVersion = 9;
   paused.connectionPhase = "PAUSED_ONE_OFFLINE";
   paused.seats[1].online = false;
   paused.connection = {
@@ -443,14 +607,14 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   assert.match(window.document.querySelector(".pause-card").textContent, /投降并离开/);
 
   const resumed = playingRoom();
-  resumed.stateVersion = 6;
+  resumed.stateVersion = 10;
   socket.serverEmit("room:state", resumed);
   assert.equal(window.document.querySelector("#blocking-overlay").hidden, true);
 
   const replayOne = createSnapshot();
   const replayTwo = createSnapshot();
   const finished = playingRoom();
-  finished.stateVersion = 7;
+  finished.stateVersion = 11;
   finished.roomPhase = "FINISHED";
   finished.turnPhase = null;
   finished.turn = null;
@@ -484,7 +648,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O05 �
   assert.equal(window.document.querySelectorAll(".replay-resources span").length, 6);
 
   socket.serverEmit("room:state", baseRoom({
-    stateVersion: 8,
+    stateVersion: 12,
     roomPhase: "CLOSED",
     closedReason: "disconnect_timeout_before_match",
   }));

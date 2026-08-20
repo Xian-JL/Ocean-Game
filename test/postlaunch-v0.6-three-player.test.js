@@ -88,12 +88,16 @@ test("三人行动必须选择仍存活的敌方玩家，第三方取得旁观�
     "player-1",
     cellIntent("target-p2", ACTION_TYPES.PIRATE_ATTACK, "pirate", "player-2", "D4"),
   );
-  assert.equal(resolved.deliveriesByPlayer["player-1"].feedback.inflictedDamage[0].afterHp, 0);
+  assert.equal(
+    Object.hasOwn(resolved.deliveriesByPlayer["player-1"].feedback, "inflictedDamage"),
+    false,
+  );
+  assert.equal(resolved.deliveriesByPlayer["player-2"].feedback.receivedHits[0].afterHp, 0);
   assert.equal(resolved.deliveriesByPlayer["player-2"].feedback.receivedHits[0].unitType, "submarine");
   assert.equal(Object.hasOwn(
     resolved.deliveriesByPlayer["player-2"].feedback.receivedHits[0],
     "afterHp",
-  ), false);
+  ), true);
   assert.equal(resolved.deliveriesByPlayer["player-3"].feedback.observer, true);
   assert.equal(resolved.deliveriesByPlayer["player-3"].publicRecord.defenderId, "player-2");
   assert.equal(resolved.deliveriesByPlayer["player-3"].feedback.defenderId, "player-2");
@@ -179,4 +183,3 @@ test("三人局赛后一名玩家离开时保留其余两名玩家并重置为�
   });
   assert.equal(waiting.battleState, null);
 });
-

@@ -1160,6 +1160,7 @@ kbd {
   width: max-content;
   grid-template-columns: 23px repeat(var(--board-size, 12), var(--cell-size));
   grid-template-rows: 23px repeat(var(--board-size, 12), var(--cell-size));
+  grid-auto-flow: row;
   gap: 2px;
   margin: 0 auto;
   user-select: none;
@@ -6711,15 +6712,28 @@ body::before {
 
 .audio-preferences {
   display: grid;
-  min-width: min(100%, 330px);
-  gap: 10px;
+  gap: 12px;
 }
 
 .audio-channel-control {
   display: grid;
-  grid-template-columns: minmax(92px, auto) minmax(170px, 1fr);
-  gap: 14px;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid rgba(137, 205, 226, 0.13);
+  border-radius: 12px;
+  background: rgba(3, 18, 28, 0.48);
+}
+
+.audio-channel-control__heading {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.audio-channel-control__heading strong {
+  color: var(--text);
+  font-size: 0.82rem;
 }
 
 .volume-control {
@@ -6742,6 +6756,39 @@ body::before {
   color: var(--cyan);
   font-family: Consolas, monospace;
   text-align: right;
+}
+
+.modal--audio {
+  width: min(560px, calc(100% - 28px));
+}
+
+.audio-dialog__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.audio-dialog__header h2 {
+  margin-bottom: 5px;
+}
+
+.audio-dialog__header p:last-child,
+.audio-dialog__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.audio-dialog__hint {
+  margin-top: 14px;
+}
+
+.audio-dialog__hint code {
+  color: var(--cyan);
+  overflow-wrap: anywhere;
 }
 
 .battle-main-column {
@@ -6770,11 +6817,6 @@ body::before {
   .rule-section--preference {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .audio-channel-control {
-    grid-template-columns: 1fr;
-    gap: 7px;
   }
 
   .battle-lower--controls-only .battle-controls {
@@ -7403,7 +7445,7 @@ body::before {
 }
 
 /* =========================================================
-   Ocean-v1.2.1 · independent volume controls and map-adjacent event channels
+   Ocean-v1.2.4 · coordinate alignment, audio panel and secure battle reports
    ========================================================= */
 
 .rolling-page--v076 {

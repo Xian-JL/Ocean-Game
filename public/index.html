@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="《海战 OCEAN》v1.2.1 支持动态地图、双人、三人和 1v1 人机的服务器权威回合制策略游戏"
+      content="《海战 OCEAN》v1.2.4 支持动态地图、双人、三人和 1v1 人机的服务器权威回合制策略游戏"
     />
     <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
@@ -42,8 +42,8 @@
             ></span>
             <span id="connection-text">正在连接</span>
           </div>
-          <button class="icon-button icon-button--small header-audio" id="effects-button" type="button" data-action="toggle-effects" aria-label="切换音效" data-tooltip="音效">♪</button>
-          <button class="icon-button icon-button--small header-audio" id="music-button" type="button" data-action="toggle-music" aria-label="切换背景音乐" data-tooltip="背景音乐">♫</button>
+          <button class="icon-button icon-button--small header-audio" id="effects-button" type="button" data-action="open-audio-settings" data-audio-focus="effects" aria-haspopup="dialog" aria-controls="audio-dialog" aria-label="打开音效设置" data-tooltip="音效设置">♪</button>
+          <button class="icon-button icon-button--small header-audio" id="music-button" type="button" data-action="open-audio-settings" data-audio-focus="music" aria-haspopup="dialog" aria-controls="audio-dialog" aria-label="打开背景音乐设置" data-tooltip="音乐设置">♫</button>
           <button
             class="button button--quiet button--compact header-help"
             data-action="open-rules"
@@ -65,9 +65,9 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.2.1</span>
+          <span id="footer-release">Ocean-v1.2.4</span>
           <span aria-hidden="true">·</span>
-          <span id="footer-protocol">Rule 1.6 · Socket 1.8</span>
+          <span id="footer-protocol">Rule 1.7 · Socket 1.9</span>
         </span>
       </footer>
     </div>
@@ -178,58 +178,61 @@
             <span>减少动画</span>
           </label>
         </section>
-        <section class="rule-section rule-section--preference">
-          <div>
-            <h3>声音</h3>
-            <p>音效已内置；背景音乐需要在项目指定目录放入 MP3 文件。</p>
-          </div>
-          <div class="audio-preferences" aria-label="声音设置">
-            <div class="audio-channel-control">
-              <label class="switch-row">
-                <input id="effects-toggle" type="checkbox" />
-                <span>音效</span>
-              </label>
-              <div class="volume-control">
-                <label for="effects-volume">音量</label>
-                <input
-                  id="effects-volume"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value="100"
-                  aria-label="音效音量"
-                />
-                <output id="effects-volume-output" for="effects-volume">100%</output>
-              </div>
-            </div>
-            <div class="audio-channel-control">
-              <label class="switch-row">
-                <input id="music-toggle" type="checkbox" />
-                <span>背景音乐</span>
-              </label>
-              <div class="volume-control">
-                <label for="music-volume">音量</label>
-                <input
-                  id="music-volume"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="1"
-                  value="28"
-                  aria-label="背景音乐音量"
-                />
-                <output id="music-volume-output" for="music-volume">28%</output>
-              </div>
-            </div>
-          </div>
-        </section>
       </div>
 
       <div class="modal__actions">
         <button class="button button--primary" type="button" data-action="close-rules">
           完成
         </button>
+      </div>
+    </dialog>
+
+    <dialog id="audio-dialog" class="modal modal--audio" aria-labelledby="audio-title">
+      <div class="audio-dialog__header">
+        <div>
+          <p class="eyebrow">OCEAN AUDIO</p>
+          <h2 id="audio-title">声音设置</h2>
+          <p>音效与背景音乐可以独立开关、独立调节。</p>
+        </div>
+        <button class="icon-button" type="button" data-action="close-audio-settings" aria-label="关闭声音设置">×</button>
+      </div>
+
+      <div class="audio-preferences" aria-label="声音设置">
+        <section class="audio-channel-control" data-audio-channel="effects">
+          <div class="audio-channel-control__heading">
+            <strong>音效</strong>
+            <label class="switch-row">
+              <input id="effects-toggle" type="checkbox" />
+              <span>启用</span>
+            </label>
+          </div>
+          <div class="volume-control">
+            <label for="effects-volume">音量</label>
+            <input id="effects-volume" type="range" min="0" max="100" step="1" value="100" aria-label="音效音量" />
+            <output id="effects-volume-output" for="effects-volume">100%</output>
+          </div>
+        </section>
+        <section class="audio-channel-control" data-audio-channel="music">
+          <div class="audio-channel-control__heading">
+            <strong>背景音乐</strong>
+            <label class="switch-row">
+              <input id="music-toggle" type="checkbox" />
+              <span>启用</span>
+            </label>
+          </div>
+          <div class="volume-control">
+            <label for="music-volume">音量</label>
+            <input id="music-volume" type="range" min="0" max="100" step="1" value="28" aria-label="背景音乐音量" />
+            <output id="music-volume-output" for="music-volume">28%</output>
+          </div>
+        </section>
+      </div>
+
+      <p class="audio-dialog__hint">
+        背景音乐文件位置：<code>public/assets/audio/music/ocean-theme.mp3</code>
+      </p>
+      <div class="modal__actions">
+        <button class="button button--primary" type="button" data-action="close-audio-settings">完成</button>
       </div>
     </dialog>
 
