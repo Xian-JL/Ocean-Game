@@ -4,8 +4,8 @@ const { version } = require("../package.json");
 const { SOCKET_PROTOCOL_VERSION } = require("./socket/protocol");
 
 const RELEASE_VERSION = version;
-const RELEASE_STAGE = "Ocean-v1.2.4";
-const RULE_VERSION = "1.7";
+const RELEASE_STAGE = "Ocean-v1.2.6";
+const RULE_VERSION = "1.8";
 
 module.exports = Object.freeze({
   RELEASE_STAGE,

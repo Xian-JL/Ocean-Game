@@ -46,14 +46,14 @@ test("v0.7.3 首次行动使用独立雷达任务卡且普通确认框不再堆�
   assert.equal(confirmation.includes("definition.warning"), false);
 });
 
-test("v0.7.3 直升机双目标状态拥有明确多目标提示和两张地图同步范围图例", () => {
+test("v1.2.6 三人全部行动拥有同步双目标提示和两张地图范围图例", () => {
   includesAll(app, [
     "multi-target-action--v073",
     "同时作用",
-    "消耗 1 次",
+    "资源与自损只结算 1 次",
     "renderRangeLegend(room, playerId)",
-    "双目标同步预览",
-    "isGlobalHelicopterSelection(room)",
+    "两张敌方地图同步预览",
+    "isSimultaneousThreePlayerSelection(room)",
   ]);
   includesAll(css, [
     ".multi-target-action--v073",

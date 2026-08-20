@@ -566,7 +566,7 @@ function commitActionUsage(state, intent) {
   if (!validation.valid) {
     throw new RuleValidationError(
       "INVALID_ACTION",
-      "行动请求不符合《游戏规则 v1.4》。",
+      "行动请求不符合《游戏规则 v1.8》。",
       { errors: validation.errors },
     );
   }

@@ -87,21 +87,14 @@ function hasLegalActionForTurnTargets(
   battleState,
   playerId,
   targetPlayerIds,
-  turnActionState = null,
+  _turnActionState = null,
 ) {
   if (!Array.isArray(targetPlayerIds) || targetPlayerIds.length === 0) {
     return false;
   }
   const playerState = getBattlePlayerState(battleState, playerId);
-  const excludeActionTypes =
-    (turnActionState?.requiredTargetPlayerIds?.length ?? 0) > 1 &&
-    (turnActionState?.actionCount ?? 0) > 0
-      ? [ACTION_TYPES.HELICOPTER_STRAFE]
-      : [];
   return targetPlayerIds.some((targetPlayerId) =>
-    hasAnyLegalActionForTarget(playerState, targetPlayerId, {
-      excludeActionTypes,
-    }),
+    hasAnyLegalActionForTarget(playerState, targetPlayerId),
   );
 }
 
@@ -388,32 +381,19 @@ function beginPlayerAction(room, playerId, intent, nowMs = Date.now()) {
     turnActionState,
   );
   const isThreePlayerTurn = room.battleState.playerIds.length === 3;
-  const isHelicopter = intent?.actionType === ACTION_TYPES.HELICOPTER_STRAFE;
-  const helicopterHadMultipleRequiredTargets =
-    isThreePlayerTurn && turnActionState.requiredTargetPlayerIds.length > 1;
-  const isGlobalHelicopterNow =
-    isThreePlayerTurn && isHelicopter && remainingTargetPlayerIds.length > 1;
   if (
-    helicopterHadMultipleRequiredTargets &&
-    isHelicopter &&
-    turnActionState.actionCount > 0
+    isThreePlayerTurn &&
+    typeof intent?.targetPlayerId === "string" &&
+    !remainingTargetPlayerIds.includes(intent.targetPlayerId)
   ) {
     fail(
-      "HELICOPTER_REQUIRES_FRESH_TURN",
-      "三人对战中直升机扫射必须作为本回合的首个且唯一行动，并同时作用于所有仍在局敌方玩家。",
+      "INVALID_SIMULTANEOUS_TARGET",
+      "三人对战只能从仍在局敌方玩家的地图选择坐标；该坐标会同时作用于全部仍在局敌方玩家。",
+      {
+        targetPlayerId: intent.targetPlayerId,
+        remainingTargetPlayerIds,
+      },
     );
-  }
-  if (isThreePlayerTurn && !isGlobalHelicopterNow) {
-    if (!remainingTargetPlayerIds.includes(intent?.targetPlayerId)) {
-      fail(
-        "TURN_TARGET_ALREADY_RESOLVED",
-        "本回合必须对每名仍在局敌方玩家分别执行一次行动，已完成的目标不能再次作为本回合目标。",
-        {
-          targetPlayerId: intent?.targetPlayerId ?? null,
-          remainingTargetPlayerIds,
-        },
-      );
-    }
   }
 
   const playerState = getBattlePlayerState(room.battleState, playerId);
@@ -428,7 +408,7 @@ function beginPlayerAction(room, playerId, intent, nowMs = Date.now()) {
   }
   const validation = validateActionIntent(playerState, intent);
   if (!validation.valid) {
-    fail("INVALID_ACTION", "行动请求不符合《游戏规则 v1.4》。", {
+    fail("INVALID_ACTION", "行动请求不符合《游戏规则 v1.8》。", {
       errors: validation.errors,
     });
   }

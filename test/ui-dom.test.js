@@ -34,7 +34,7 @@ class FakeSocket {
       if (eventName === "client:ping") {
         acknowledge(null, {
           ok: true,
-          protocolVersion: "1.9",
+          protocolVersion: "2.0",
         });
       } else {
         acknowledge(null, {
@@ -317,8 +317,8 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.2.4",
-    protocolVersion: "1.9",
+    stage: "Ocean-v1.2.6",
+    protocolVersion: "2.0",
   });
 
   assert.match(window.document.querySelector("#app").textContent, /创建房间/);
@@ -491,7 +491,13 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   assert.equal(window.document.querySelector("#confirm-body").textContent.includes("未命中无伤害"), false);
   click(window, window.document.querySelector("#confirm-cancel"));
 
-  click(window, window.document.querySelector('[data-action="toggle-marker-mode"]'));
+  assert.equal(
+    window.document.querySelectorAll('[data-action="select-marker-tool"]').length,
+    5,
+  );
+  click(window, window.document.querySelector(
+    '[data-action="select-marker-tool"][data-marker="surface_yes"]',
+  ));
   const enemyA2 = window.document.querySelector(
     '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A2"]',
   );
@@ -500,7 +506,20 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
     window.document.querySelector(
       '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A2"]',
     ).getAttribute("aria-label"),
-    /本机标记：确定有布局/,
+    /本机标记：水面有布局/,
+  );
+  window.document.querySelector(
+    '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A2"]',
+  ).dispatchEvent(new window.MouseEvent("contextmenu", {
+    bubbles: true,
+    cancelable: true,
+    button: 2,
+  }));
+  assert.doesNotMatch(
+    window.document.querySelector(
+      '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A2"]',
+    ).getAttribute("aria-label"),
+    /本机标记/,
   );
 
   const actorFeedbackRoom = playingRoom();
@@ -588,9 +607,28 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
 
   socket.serverEmit("room:state", threePlayerPlayingRoom());
   assert.equal(window.document.querySelectorAll(".battle-map-card .ocean-board").length, 3);
+  assert.equal(
+    window.document.querySelectorAll('[data-action="select-marker-tool"]').length,
+    10,
+  );
   for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
     assertBoardCoordinateAlignment(board);
   }
+  click(window, window.document.querySelector(
+    `[data-action="select-action"][data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}"]`,
+  ));
+  click(window, window.document.querySelector(
+    '.battle-map-card--enemy[data-player-id="player-2"] [data-action="enemy-cell"][data-coordinate="A1"]',
+  ));
+  assert.equal(
+    window.document.querySelectorAll(
+      '.battle-map-card--enemy [data-action="enemy-cell"].board-cell--target-preview',
+    ).length,
+    32,
+  );
+  assert.match(window.document.querySelector("#confirm-body").textContent, /乙、丙（同时生效）/);
+  assert.match(window.document.querySelector("#confirm-body").textContent, /自损只结算一次/);
+  click(window, window.document.querySelector("#confirm-cancel"));
 
   let dynamicStateVersion = 9;
   for (const mapSize of [10, 15]) {

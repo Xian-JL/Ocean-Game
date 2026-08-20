@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="《海战 OCEAN》v1.2.4 支持动态地图、双人、三人和 1v1 人机的服务器权威回合制策略游戏"
+      content="《海战 OCEAN》v1.2.6 支持动态地图、双人、三人同步行动和 1v1 人机的服务器权威回合制策略游戏"
     />
     <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
@@ -65,9 +65,9 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.2.4</span>
+          <span id="footer-release">Ocean-v1.2.6</span>
           <span aria-hidden="true">·</span>
-          <span id="footer-protocol">Rule 1.7 · Socket 1.9</span>
+          <span id="footer-protocol">Rule 1.8 · Socket 2.0</span>
         </span>
       </footer>
     </div>
@@ -111,7 +111,7 @@
         <section class="rule-section">
           <h3>胜负与回合</h3>
           <p>
-            房主可选择 10×10、12×12 或 15×15 海域，然后秘密部署舰队；可选择 1v1 联机、1v1 人机或三人自由战。人机对手由服务器控制，并且只能使用普通玩家可见的安全情报。双人局每回合执行一次合法行动；三人局每个正常回合分别对另外两名仍在局敌人各完成一次合法操作。每名玩家自己的首个正常回合第一项操作必须使用航空母舰雷达扫描。
+            房主可选择 10×10、12×12 或 15×15 海域，然后秘密部署舰队；可选择 1v1 联机、1v1 人机或三人自由战。人机对手由服务器控制，并且只能使用普通玩家可见的安全情报。双人局与三人局每名玩家每回合都只提交一次合法行动；三人局的同一坐标或范围会同时作用于另外两名仍在局敌人。每名玩家自己的首个正常回合必须使用航空母舰雷达扫描。
           </p>
         </section>
 
@@ -143,9 +143,10 @@
         <section class="rule-section">
           <h3>三人模式</h3>
           <div class="quick-rule-grid quick-rule-grid--compact">
-            <article><strong>双目标回合</strong><span>分别对两名仍在局敌人各完成一次操作；行动组合可以不同。</span></article>
+            <article><strong>一次同步行动</strong><span>每回合只选一次行动与坐标；同一效果同时作用于两名仍在局敌人。</span></article>
+            <article><strong>各方独立结算</strong><span>两名防守方按各自布局分别判定命中、伤害、诱饵、侦察与瘫痪结果。</span></article>
+            <article><strong>成本只算一次</strong><span>弹药、使用次数以及驱逐舰、海盗船等行动方自损不因两名防守方而翻倍。</span></article>
             <article><strong>独立敌方地图</strong><span>两名敌人的命中、未命中、导弹标记与私人标记分别记录。</span></article>
-            <article><strong>直升机例外</strong><span>两名敌人都在局时，一次扫射同时对两人同一行或列独立结算，并结束当前回合。</span></article>
             <article><strong>终局鱼雷例外</strong><span>手动引爆一枚己方诱饵鱼雷时，同一坐标同时作用于其他所有仍在局敌人。</span></article>
           </div>
         </section>
@@ -164,7 +165,7 @@
             <span><i class="legend-swatch legend-swatch--hit">✦</i>命中，已结算</span>
             <span><i class="legend-swatch legend-swatch--miss">×</i>未命中，已结算</span>
             <span><i class="legend-swatch legend-swatch--missile">↗</i>导弹已发射，仍可成为目标</span>
-            <span><i class="legend-swatch legend-swatch--marker">O</i>本机私人标记</span>
+            <span><i class="legend-swatch legend-swatch--marker">O</i>本机私人标记；地图上方选类型，右键删除</span>
           </div>
         </section>
 

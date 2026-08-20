@@ -153,17 +153,6 @@
           enabled: false,
         };
       }
-      if (
-        roomState?.maxPlayers === 3 &&
-        (roomState?.turn?.requiredTargetPlayerIds?.length ?? 0) > 1 &&
-        (roomState?.turn?.actionCount ?? 0) > 0
-      ) {
-        return {
-          code: "locked",
-          label: "三人局直升机须作为本回合首个行动并同时攻击两名敌方玩家",
-          enabled: false,
-        };
-      }
     }
     if (roomState?.turnPhase === "RESOLVING") {
       return { code: "submitting", label: "服务器正在结算", enabled: false };

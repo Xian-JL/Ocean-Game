@@ -7746,3 +7746,142 @@ body::before {
     grid-template-columns: 1fr;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Ocean-v1.2.6 · flexible private markers and compact battle boards          */
+/* -------------------------------------------------------------------------- */
+
+.marker-palette {
+  display: grid;
+  gap: 7px;
+  margin: 0 2px 9px;
+  padding: 8px;
+  border: 1px solid rgba(137, 205, 226, 0.11);
+  border-radius: 10px;
+  background: rgba(2, 13, 21, 0.42);
+}
+
+.marker-palette[data-active="true"] {
+  border-color: rgba(99, 221, 245, 0.3);
+  background: rgba(21, 91, 110, 0.1);
+}
+
+.marker-palette__heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.marker-palette__heading strong {
+  color: #bcecf4;
+  font-size: 0.66rem;
+}
+
+.marker-palette__heading small {
+  color: var(--color-text-muted);
+  font-size: 0.55rem;
+  text-align: right;
+}
+
+.marker-palette__tools {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.marker-tool {
+  display: grid;
+  min-width: 0;
+  min-height: 42px;
+  place-items: center;
+  gap: 2px;
+  padding: 4px 2px;
+  border: 1px solid rgba(137, 205, 226, 0.11);
+  border-radius: 8px;
+  cursor: pointer;
+  color: #8cabb6;
+  background: rgba(4, 18, 28, 0.52);
+  font-size: 0.54rem;
+}
+
+.marker-tool:hover,
+.marker-tool:focus-visible {
+  border-color: rgba(99, 221, 245, 0.38);
+  color: #d9f8fd;
+}
+
+.marker-tool--selected {
+  border-color: rgba(99, 221, 245, 0.54);
+  color: #e0fbff;
+  background: rgba(29, 125, 148, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(99, 221, 245, 0.08);
+}
+
+.marker-tool__swatch {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(184, 237, 248, 0.28);
+  border-radius: 4px;
+  background: rgba(7, 31, 44, 0.9);
+}
+
+.marker-tool__swatch--occupied::after {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: #ff6b77;
+  box-shadow: 0 0 7px rgba(255, 107, 119, 0.52);
+  content: "";
+}
+
+.marker-tool__swatch--surface_yes {
+  background: linear-gradient(to bottom, #ff6b77 0 48%, rgba(7, 31, 44, 0.9) 48% 100%);
+}
+
+.marker-tool__swatch--surface_no {
+  background: linear-gradient(to bottom, #eefaff 0 48%, rgba(7, 31, 44, 0.9) 48% 100%);
+}
+
+.marker-tool__swatch--underwater_yes {
+  background: linear-gradient(to bottom, rgba(7, 31, 44, 0.9) 0 52%, #ff6b77 52% 100%);
+}
+
+.marker-tool__swatch--underwater_no {
+  background: linear-gradient(to bottom, rgba(7, 31, 44, 0.9) 0 52%, #eefaff 52% 100%);
+}
+
+/* `zoom` changes the board's layout footprint as well as its visual size, so
+ * the requested reduction removes desktop scrollbars instead of leaving an
+ * unscaled box behind as transform: scale() would. Chromium/Edge are the
+ * supported production browsers for this low-cost release. */
+.battle-page[data-player-count="3"] .battle-map-card .ocean-board {
+  zoom: 0.85;
+}
+
+.ocean-board[data-board-size="15"] {
+  zoom: 0.9;
+}
+
+.battle-page[data-player-count="3"][data-map-size="15"] .battle-map-card .ocean-board {
+  zoom: 0.765;
+}
+
+@media (max-width: 700px) {
+  .marker-palette__heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .marker-palette__heading small {
+    text-align: left;
+  }
+
+  .marker-tool {
+    min-height: 46px;
+  }
+}

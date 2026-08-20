@@ -33,7 +33,14 @@
   const MOTION_STORAGE_KEY = "ocean.reduce-motion.v1";
   const NICKNAME_STORAGE_KEY = "ocean.nickname.v1";
   const MARKER_STORAGE_PREFIX = "ocean.private-markers.v2";
-  const MARKER_CYCLE = ["occupied", "surface_yes", "surface_no", "underwater_yes", "underwater_no"];
+  const MARKER_DEFINITIONS = Object.freeze([
+    { value: "occupied", label: "确定有目标", shortLabel: "确定有" },
+    { value: "surface_yes", label: "水面有目标", shortLabel: "水面有" },
+    { value: "surface_no", label: "水面无目标", shortLabel: "水面无" },
+    { value: "underwater_yes", label: "水下有目标", shortLabel: "水下有" },
+    { value: "underwater_no", label: "水下无目标", shortLabel: "水下无" },
+  ]);
+  const MARKER_CYCLE = MARKER_DEFINITIONS.map((marker) => marker.value);
   const ROOM_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
   const REQUEST_TIMEOUT_MS = 8_000;
 
@@ -105,6 +112,7 @@
       actionId: null,
       helicopterAxis: null,
       markerMode: false,
+      selectedMarker: "occupied",
       markers: new Map(),
       markerContext: null,
       mobileMap: "enemy",
@@ -647,6 +655,11 @@
     }
     if (feedback.actionType === Data.ACTION_TYPES.DETECTION_BOMB) {
       if (isActor) {
+        if (feedback.privateResultsByDefender) {
+          const results = Object.entries(feedback.privateResultsByDefender)
+            .map(([playerId, result]) => `${Model.nicknameFor(room, playerId)}：${result === "underwater_signal_detected" ? "有水下信号" : "无水下信号"}`);
+          return `探测弹同时完成：${results.join("；")}。`;
+        }
         return feedback.result === "underwater_signal_detected"
           ? `探测弹：${defenderName} 的 ${target} 周围探测到水下信号。`
           : `探测弹：${defenderName} 的 ${target} 周围未探测到水下信号。`;
@@ -655,11 +668,21 @@
     }
     if (feedback.actionType === Data.ACTION_TYPES.RADAR_SCAN) {
       if (isActor) {
+        if (feedback.privateResultsByDefender) {
+          const results = Object.entries(feedback.privateResultsByDefender)
+            .map(([playerId, result]) => `${Model.nicknameFor(room, playerId)}：${result === "layout_detected" ? "发现布局" : "未发现布局"}`);
+          return `雷达从 ${target} 开始同时扫描：${results.join("；")}。`;
+        }
         return feedback.result === "layout_detected"
           ? `雷达扫描：${defenderName} 的 ${target} 起始 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 区域发现布局。`
           : `雷达扫描：${defenderName} 的 ${target} 起始 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 区域未发现布局。`;
       }
       return `${publicActorPrefix}从 ${target} 开始执行了 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 雷达扫描；扫描结果仅行动方可见。`;
+    }
+    if (isActor && feedback.resultsByDefender) {
+      const results = Object.entries(feedback.resultsByDefender)
+        .map(([playerId, result]) => `${Model.nicknameFor(room, playerId)}：${result === "hit" ? "命中" : "未命中"}`);
+      return `${feedback.actionName} → ${target} 同时结算：${results.join("；")}。`;
     }
     if (feedback.result === "hit") {
       if (isDefender && receivedHits.length > 0) {
@@ -1798,8 +1821,17 @@
 
   function isGlobalHelicopterSelection(room = state.room) {
     return Boolean(
-      room?.maxPlayers === 3 &&
+      isSimultaneousThreePlayerSelection(room) &&
       state.battle.selectedAction === Data.ACTION_TYPES.HELICOPTER_STRAFE &&
+      (room.turn?.remainingTargetPlayerIds?.length ?? 0) > 1,
+    );
+  }
+
+  function isSimultaneousThreePlayerSelection(room = state.room) {
+    return Boolean(
+      room?.maxPlayers === 3 &&
+      room?.turn?.canAct &&
+      state.battle.selectedAction &&
       (room.turn?.remainingTargetPlayerIds?.length ?? 0) > 1,
     );
   }
@@ -1839,8 +1871,8 @@
     const nuclearBombs = new Set(enemyMap?.nuclearBombMarkers ?? []);
     const effectiveOwnBattle = { ...ownBattle, enemyMap };
     const selectedForThisMap = targetPlayerId === state.battle.targetPlayerId;
-    const globalHelicopter = isGlobalHelicopterSelection();
-    const interactiveForThisMap = selectedForThisMap || globalHelicopter;
+    const simultaneousAction = isSimultaneousThreePlayerSelection();
+    const interactiveForThisMap = selectedForThisMap || simultaneousAction;
     const legal = interactiveForThisMap
       ? legalTargetCells(ownBattle, targetPlayerId)
       : new Set();
@@ -2037,7 +2069,7 @@
     const selected = definition.type === state.battle.selectedAction;
     const meta = actionVisualMeta(definition);
     const sourceDefinition = Data.getUnitDefinitionByType(definition.sourceType);
-    const global = definition.type === Data.ACTION_TYPES.HELICOPTER_STRAFE && isGlobalHelicopterSelection(room);
+    const global = isSimultaneousThreePlayerSelection(room);
     return `
       <button
         type="button"
@@ -2052,7 +2084,7 @@
         <span class="action-card__icon action-card__icon--${meta.group}" aria-hidden="true">${uiIcon(meta.icon)}</span>
         <span class="action-card__body">
           <strong>${escapeHtml(definition.name)}</strong>
-          <small>${escapeHtml(sourceDefinition?.name ?? "作战单位")}${global ? " · 双目标" : ""}</small>
+          <small>${escapeHtml(sourceDefinition?.name ?? "作战单位")}${global ? " · 同步两方" : ""}</small>
         </span>
         <span class="action-card__meta">
           <span class="action-card__state">${escapeHtml(compactActionStatus(status))}</span>
@@ -2142,7 +2174,9 @@
     const ownBattle = room.battle.own;
     const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
     const radarRequired = openingRadarRequired(room);
-    const globalHelicopter = selectedDefinition?.type === Data.ACTION_TYPES.HELICOPTER_STRAFE && isGlobalHelicopterSelection(room);
+    const simultaneousAction = Boolean(
+      selectedDefinition && isSimultaneousThreePlayerSelection(room),
+    );
     const remainingNames = (room.turn?.remainingTargetPlayerIds ?? [])
       .map((playerId) => Model.nicknameFor(room, playerId));
     return `
@@ -2158,13 +2192,12 @@
         <div class="action-rail__content">
         ${room.turn?.canAct && battleOpponentIds(room.battle).length > 1 ? `
           <div class="battle-target-progress" aria-label="三人回合目标">
-            <div class="battle-target-progress__heading"><span>目标进度</span><strong>${room.turn?.completedTargetPlayerIds?.length ?? 0} / ${room.turn?.requiredTargetPlayerIds?.length ?? 0}</strong></div>
+            <div class="battle-target-progress__heading"><span>同步目标</span><strong>一次行动</strong></div>
             <div class="battle-target-progress__items">
               ${(room.turn?.requiredTargetPlayerIds ?? battleOpponentIds(room.battle)).map((playerId) => {
-                const done = (room.turn?.completedTargetPlayerIds ?? []).includes(playerId);
                 const pending = (room.turn?.remainingTargetPlayerIds ?? []).includes(playerId);
                 const selected = state.battle.targetPlayerId === playerId;
-                return `<button type="button" data-action="select-battle-target" data-target-player-id="${escapeHtml(playerId)}" data-done="${done}" class="${selected ? "is-selected" : ""}" ${room.turn?.canAct && !pending ? "disabled" : ""}><span>${done ? "✓" : "●"}</span><strong>${escapeHtml(Model.nicknameFor(room, playerId))}</strong><small>${done ? "已完成" : pending ? "待操作" : "查看"}</small></button>`;
+                return `<button type="button" data-action="select-battle-target" data-target-player-id="${escapeHtml(playerId)}" data-done="${!pending}" class="${selected ? "is-selected" : ""}" ${room.turn?.canAct && !pending ? "disabled" : ""}><span>${pending ? "⇉" : "○"}</span><strong>${escapeHtml(Model.nicknameFor(room, playerId))}</strong><small>${pending ? "同步生效" : "查看"}</small></button>`;
               }).join("")}
             </div>
           </div>
@@ -2176,7 +2209,7 @@
         ${radarRequired ? `
           <section class="opening-radar-task" aria-label="首次雷达任务">
             <span class="opening-radar-task__icon" aria-hidden="true">${uiIcon("action-radar")}</span>
-            <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `先选择 ${escapeHtml(remainingNames.join(" / "))} 中的一名敌人` : `选择敌方 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 海域`}</small></div>
+            <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `选择任一敌方地图坐标，同时扫描 ${escapeHtml(remainingNames.join(" / "))}` : `选择敌方 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 海域`}</small></div>
             <button class="button button--primary button--compact" data-action="select-action" data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}">${state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN ? "已选择" : "开始扫描"}</button>
           </section>` : ""}
 
@@ -2185,7 +2218,7 @@
         ${selectedDefinition ? `
           <div class="target-instruction target-instruction--v073" data-target-mode="${selectedDefinition.targetMode}">
             <div class="target-instruction__heading"><span class="action-card__icon action-card__icon--${actionVisualMeta(selectedDefinition).group}" aria-hidden="true">${uiIcon(actionVisualMeta(selectedDefinition).icon)}</span><div><small>当前行动</small><strong>${escapeHtml(selectedDefinition.name)}</strong></div></div>
-            ${globalHelicopter ? `<div class="multi-target-action multi-target-action--v073"><span>同时作用</span>${(room.turn?.remainingTargetPlayerIds ?? []).map((playerId) => `<b>${escapeHtml(Model.nicknameFor(room, playerId))}</b>`).join("")}<small>消耗 1 次</small></div>` : ""}
+            ${simultaneousAction ? `<div class="multi-target-action multi-target-action--v073"><span>同时作用</span>${(room.turn?.remainingTargetPlayerIds ?? []).map((playerId) => `<b>${escapeHtml(Model.nicknameFor(room, playerId))}</b>`).join("")}<small>资源与自损只结算 1 次</small></div>` : ""}
             <p>${selectedDefinition.targetMode === "line"
               ? "选择行或列，再点地图。"
               : selectedDefinition.targetMode === "area"
@@ -2211,18 +2244,16 @@
   function renderTurnProgress(room) {
     const required = room.turn?.requiredTargetPlayerIds ?? [];
     if (required.length <= 1) return "";
-    const completed = new Set(room.turn?.completedTargetPlayerIds ?? []);
     return `
-      <div class="battle-turn-progress" aria-label="本回合双目标进度">
+      <div class="battle-turn-progress" aria-label="本回合同步目标">
         <div class="battle-turn-progress__summary">
-          <span>本回合</span>
-          <strong>${completed.size} / ${required.length}</strong>
+          <span>一次行动</span>
+          <strong>同步 ×${required.length}</strong>
         </div>
         <div class="battle-turn-progress__targets">
           ${required.map((playerId) => {
-            const done = completed.has(playerId);
             const currentTarget = room.turn?.canAct && state.battle.targetPlayerId === playerId;
-            return `<span data-complete="${done}" data-current="${currentTarget}">${done ? "✓" : "●"} ${escapeHtml(Model.nicknameFor(room, playerId))}</span>`;
+            return `<span data-complete="false" data-current="${currentTarget}">⇉ ${escapeHtml(Model.nicknameFor(room, playerId))}</span>`;
           }).join("")}
         </div>
       </div>`;
@@ -2278,6 +2309,11 @@
     }
     if (feedback.result === "hit" || (feedback.receivedHits ?? []).length > 0) return "hit";
     if (feedback.result === "miss") return "miss";
+    if (feedback.resultsByDefender) {
+      return Object.values(feedback.resultsByDefender).includes("hit")
+        ? "hit"
+        : "miss";
+    }
     const cells = Array.isArray(feedback.cellResults)
       ? feedback.cellResults
       : Object.values(feedback.cellResultsByDefender ?? {}).flat();
@@ -2460,21 +2496,49 @@
   function enemyTurnStatus(room, playerId) {
     if (!room.turn?.canAct) return "查看";
     if ((room.turn.completedTargetPlayerIds ?? []).includes(playerId)) return "已完成";
-    if (isRemainingTurnTarget(room, playerId)) return "待操作";
+    if (isRemainingTurnTarget(room, playerId)) {
+      return room.maxPlayers === 3 ? "同步目标" : "待操作";
+    }
     return "查看";
   }
 
   function renderRangeLegend(room, playerId) {
     const definition = Data.getActionDefinition(state.battle.selectedAction);
     if (!definition) return "";
-    const applies = state.battle.targetPlayerId === playerId || isGlobalHelicopterSelection(room);
+    const simultaneous = isSimultaneousThreePlayerSelection(room);
+    const applies = state.battle.targetPlayerId === playerId || simultaneous;
     if (!applies) return "";
-    const global = definition.type === Data.ACTION_TYPES.HELICOPTER_STRAFE && isGlobalHelicopterSelection(room);
     return `
       <div class="range-legend range-legend--v073" aria-label="攻击范围图例">
         <span><i data-kind="valid"></i>可选</span>
         <span><i data-kind="selected"></i>${state.battle.target ? "已选范围" : "目标预览"}</span>
-        ${global ? '<b>双目标同步预览</b>' : ""}
+        ${simultaneous ? '<b>两张敌方地图同步预览</b>' : ""}
+      </div>`;
+  }
+
+  function renderMarkerPalette(playerId) {
+    const activeForMap =
+      state.battle.markerMode && state.battle.targetPlayerId === playerId;
+    return `
+      <div class="marker-palette" data-active="${activeForMap}" aria-label="${escapeHtml(Model.nicknameFor(state.room, playerId))}海域自定义标记">
+        <div class="marker-palette__heading">
+          <strong>自定义标记</strong>
+          <small>选择类型后左键添加；右键已标记格删除</small>
+        </div>
+        <div class="marker-palette__tools" role="toolbar" aria-label="标记类型">
+          ${MARKER_DEFINITIONS.map((marker) => {
+            const selected = activeForMap && state.battle.selectedMarker === marker.value;
+            return `<button
+              type="button"
+              class="marker-tool ${selected ? "marker-tool--selected" : ""}"
+              data-action="select-marker-tool"
+              data-marker="${marker.value}"
+              data-target-player-id="${escapeHtml(playerId)}"
+              aria-pressed="${selected}"
+              title="${escapeHtml(marker.label)}"
+            ><i class="marker-tool__swatch marker-tool__swatch--${marker.value}" aria-hidden="true"></i><span>${escapeHtml(marker.shortLabel)}</span></button>`;
+          }).join("")}
+        </div>
       </div>`;
   }
 
@@ -2505,7 +2569,7 @@
             <span class="status-kicker">敌方海域</span>
             <h2>${escapeHtml(nickname)}</h2>
           </button>
-          <span class="map-turn-state" data-state="${status === "已完成" ? "done" : status === "待操作" ? "pending" : "view"}">${status === "已完成" ? "✓" : status === "待操作" ? "●" : "○"} ${status}</span>
+          <span class="map-turn-state" data-state="${status === "已完成" ? "done" : ["待操作", "同步目标"].includes(status) ? "pending" : "view"}">${status === "已完成" ? "✓" : ["待操作", "同步目标"].includes(status) ? "●" : "○"} ${status}</span>
           <button
             class="marker-toggle ${state.battle.markerMode && selected ? "marker-toggle--active" : ""}"
             data-action="toggle-marker-mode"
@@ -2516,7 +2580,8 @@
         </div>
         ${collapsed
           ? `<button class="battle-map-collapsed-summary" type="button" data-action="toggle-battle-map" data-map-id="${escapeHtml(playerId)}"><span>${escapeHtml(nickname)} · 独立记录</span><strong>${status}</strong></button>`
-          : `${renderEnemyBoard(ownBattle, playerId)}
+          : `${renderMarkerPalette(playerId)}
+             ${renderEnemyBoard(ownBattle, playerId)}
              ${renderRangeLegend(room, playerId)}
              <div class="map-caption map-caption--v072">
                <span>${selected ? (state.battle.selectedAction ? "当前目标" : "已选中") : "独立敌方记录"}</span>
@@ -2627,7 +2692,7 @@
     );
     const opponents = battleOpponentIds(battle);
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 page-enter" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         ${renderBattleHeader(room)}
         ${finalSalvo ? renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) : ""}
@@ -3245,13 +3310,12 @@
     const target = state.battle.target;
     if (!definition || !target) return;
     const remaining = state.room.battle.own.remainingUses?.[definition.type];
-    const globalHelicopter =
-      definition.type === Data.ACTION_TYPES.HELICOPTER_STRAFE &&
+    const simultaneousAction =
       state.room.maxPlayers === 3 &&
       (state.room.turn?.remainingTargetPlayerIds?.length ?? 0) > 1;
     const paragraphs = [
       `目标：${Model.formatTarget(target)}`,
-      ...(globalHelicopter
+      ...(simultaneousAction
         ? [`敌方玩家：${state.room.turn.remainingTargetPlayerIds.map((playerId) => Model.nicknameFor(state.room, playerId)).join("、")}（同时生效）`]
         : battleOpponentIds(state.room.battle).length > 1
         ? [`敌方玩家：${Model.nicknameFor(state.room, state.battle.targetPlayerId)}`]
@@ -3259,6 +3323,9 @@
     ];
     if (definition.initialUses !== null) {
       paragraphs.push(`提交成功后剩余 ${Math.max(0, remaining - 1)} 次。`);
+    }
+    if (simultaneousAction) {
+      paragraphs.push("行动资源以及行动方可能产生的自损只结算一次。");
     }
     openConfirm({
       title: `确认${definition.name}`,
@@ -3433,8 +3500,8 @@
   function handleEnemyCell(coordinate, targetPlayerId = state.battle.targetPlayerId) {
     const ownBattle = state.room?.battle?.own;
     if (!ownBattle || !targetPlayerId) return;
-    const globalHelicopter = isGlobalHelicopterSelection();
-    if (state.room?.turn?.canAct && !globalHelicopter && !isRemainingTurnTarget(state.room, targetPlayerId) && !state.battle.markerMode) {
+    const simultaneousAction = isSimultaneousThreePlayerSelection();
+    if (state.room?.turn?.canAct && !simultaneousAction && !isRemainingTurnTarget(state.room, targetPlayerId) && !state.battle.markerMode) {
       showToast("该敌方玩家本回合已完成操作。", "info");
       return;
     }
@@ -3454,10 +3521,7 @@
         showToast("命中或未命中格不能添加私人标记。", "warning");
         return;
       }
-      const current = state.battle.markers.get(coordinate);
-      const nextIndex = current ? MARKER_CYCLE.indexOf(current) + 1 : 0;
-      if (nextIndex >= MARKER_CYCLE.length) state.battle.markers.delete(coordinate);
-      else state.battle.markers.set(coordinate, MARKER_CYCLE[nextIndex]);
+      state.battle.markers.set(coordinate, state.battle.selectedMarker);
       saveMarkers();
       render();
       return;
@@ -4075,6 +4139,26 @@
       handleEnemyCell(control.dataset.coordinate, control.dataset.targetPlayerId);
       return;
     }
+    if (action === "select-marker-tool") {
+      const markerTarget = control.dataset.targetPlayerId;
+      const marker = control.dataset.marker;
+      if (!MARKER_CYCLE.includes(marker) || !markerTarget) return;
+      if (markerTarget !== state.battle.targetPlayerId) {
+        saveMarkers();
+        state.battle.targetPlayerId = markerTarget;
+        state.battle.mobileMap = markerTarget;
+        state.battle.markerContext = null;
+        prepareMarkerContext(state.room);
+      }
+      state.battle.selectedMarker = marker;
+      state.battle.markerMode = true;
+      state.battle.selectedAction = null;
+      state.battle.target = null;
+      state.battle.actionId = null;
+      state.battle.helicopterAxis = null;
+      render();
+      return;
+    }
     if (action === "toggle-marker-mode") {
       const markerTarget = control.dataset.targetPlayerId;
       if (markerTarget && markerTarget !== state.battle.targetPlayerId) {
@@ -4158,6 +4242,29 @@
     if (action === "return-home") {
       returnHome();
     }
+  });
+
+  document.addEventListener("contextmenu", (event) => {
+    const control = event.target.closest?.('[data-action="enemy-cell"]');
+    if (!control) return;
+    const coordinate = control.dataset.coordinate;
+    const targetPlayerId = control.dataset.targetPlayerId;
+    if (control.dataset.cellState !== "private-marker" ||
+      !coordinate || !targetPlayerId ||
+      !markersForTarget(targetPlayerId).has(coordinate)) {
+      return;
+    }
+    event.preventDefault();
+    if (targetPlayerId !== state.battle.targetPlayerId) {
+      saveMarkers();
+      state.battle.targetPlayerId = targetPlayerId;
+      state.battle.mobileMap = targetPlayerId;
+      state.battle.markerContext = null;
+      prepareMarkerContext(state.room);
+    }
+    state.battle.markers.delete(coordinate);
+    saveMarkers();
+    render();
   });
 
   document.addEventListener("dragstart", (event) => {

@@ -74,19 +74,11 @@ test("三人房间在第三名玩家加入后才进入部署阶段", () => {
   assert.equal(room.seats.length, 3);
 });
 
-test("三人行动必须选择仍存活的敌方玩家，第三方取得旁观战报", () => {
-  assert.throws(
-    () => resolveBattleAction(
-      threePlayerBattle(),
-      "player-1",
-      cellIntent("missing-target", ACTION_TYPES.PIRATE_ATTACK, "pirate", null, "D4"),
-    ),
-    (error) => error.code === "INVALID_TARGET_PLAYER",
-  );
+test("v1.2.6 三人行动以同一坐标同步结算两名敌人，不再产生第三方旁观者", () => {
   const resolved = resolveBattleAction(
     threePlayerBattle(),
     "player-1",
-    cellIntent("target-p2", ACTION_TYPES.PIRATE_ATTACK, "pirate", "player-2", "D4"),
+    cellIntent("target-both", ACTION_TYPES.PIRATE_ATTACK, "pirate", null, "D4"),
   );
   assert.equal(
     Object.hasOwn(resolved.deliveriesByPlayer["player-1"].feedback, "inflictedDamage"),
@@ -98,31 +90,32 @@ test("三人行动必须选择仍存活的敌方玩家，第三方取得旁观�
     resolved.deliveriesByPlayer["player-2"].feedback.receivedHits[0],
     "afterHp",
   ), true);
-  assert.equal(resolved.deliveriesByPlayer["player-3"].feedback.observer, true);
-  assert.equal(resolved.deliveriesByPlayer["player-3"].publicRecord.defenderId, "player-2");
-  assert.equal(resolved.deliveriesByPlayer["player-3"].feedback.defenderId, "player-2");
-  assert.equal(Object.hasOwn(resolved.deliveriesByPlayer["player-3"].feedback, "ownDamage"), false);
+  assert.equal(resolved.deliveriesByPlayer["player-3"].feedback.receivedHits[0].afterHp, 0);
+  assert.equal(resolved.deliveriesByPlayer["player-3"].feedback.observer, undefined);
+  assert.equal(resolved.deliveriesByPlayer["player-3"].publicRecord.defenderId, null);
+  assert.deepEqual(
+    resolved.deliveriesByPlayer["player-3"].publicRecord.defenderIds,
+    ["player-2", "player-3"],
+  );
 });
 
-test("同一驱逐舰坐标按敌方玩家分别记录，不会错误锁死另一张敌方地图", () => {
+test("v1.2.6 同一驱逐舰坐标同步用于两张敌方地图，并在之后全局锁定", () => {
   const first = resolveBattleAction(
     threePlayerBattle(),
     "player-1",
     cellIntent("destroyer-p2", ACTION_TYPES.DESTROYER_I_RAM, "destroyer-i", "player-2", "D4"),
   );
-  assert.doesNotThrow(() => resolveBattleAction(
-    first.state,
-    "player-1",
-    cellIntent("destroyer-p3", ACTION_TYPES.DESTROYER_I_RAM, "destroyer-i", "player-3", "D4"),
-  ));
   assert.throws(
     () => resolveBattleAction(
       first.state,
       "player-1",
-      cellIntent("destroyer-repeat", ACTION_TYPES.DESTROYER_II_RAM, "destroyer-ii", "player-2", "D4"),
+      cellIntent("destroyer-repeat", ACTION_TYPES.DESTROYER_II_RAM, "destroyer-ii", "player-3", "D4"),
     ),
     (error) => error.code === "INVALID_ACTION",
   );
+  const own = first.deliveriesByPlayer["player-1"].view.own;
+  assert.deepEqual(own.enemyMapsByPlayer["player-2"].destroyerTargetCells, ["D4"]);
+  assert.deepEqual(own.enemyMapsByPlayer["player-3"].destroyerTargetCells, ["D4"]);
 });
 
 test("三人局首个航空母舰沉没只令该玩家出局，对局继续", () => {
@@ -140,7 +133,7 @@ test("三人局首个航空母舰沉没只令该玩家出局，对局继续", ()
   assert.equal(resolved.state.match.result, null);
 });
 
-test("三人探测弹结果只向行动方公开，防守方和第三方只知道行动与目标玩家", () => {
+test("v1.2.6 三人探测弹分别产生两份私人结果，两名防守方均看不到探测结论", () => {
   const resolved = resolveBattleAction(
     threePlayerBattle(),
     "player-1",
@@ -148,16 +141,20 @@ test("三人探测弹结果只向行动方公开，防守方和第三方只知�
   );
   const actor = resolved.deliveriesByPlayer["player-1"];
   const defender = resolved.deliveriesByPlayer["player-2"];
-  const observer = resolved.deliveriesByPlayer["player-3"];
+  const secondDefender = resolved.deliveriesByPlayer["player-3"];
 
-  assert.ok(["underwater_signal_detected", "no_underwater_signal"].includes(actor.feedback.result));
+  assert.deepEqual(actor.feedback.privateResultsByDefender, {
+    "player-2": "underwater_signal_detected",
+    "player-3": "underwater_signal_detected",
+  });
+  assert.equal(actor.feedback.result, null);
   assert.equal(actor.publicRecord.result, null);
   assert.equal(defender.feedback.result, null);
-  assert.equal(observer.feedback.result, null);
-  assert.equal(observer.feedback.observer, true);
-  assert.equal(observer.publicRecord.defenderId, "player-2");
-  assert.equal(observer.view.publicActionLog.at(-1).result, null);
-  assert.equal(observer.view.publicActionLog.at(-1).defenderId, "player-2");
+  assert.equal(secondDefender.feedback.result, null);
+  assert.equal(secondDefender.feedback.observer, undefined);
+  assert.equal(secondDefender.publicRecord.defenderId, null);
+  assert.equal(secondDefender.view.publicActionLog.at(-1).result, null);
+  assert.equal(secondDefender.view.publicActionLog.at(-1).defenderId, null);
 });
 
 test("三人局赛后一名玩家离开时保留其余两名玩家并重置为等待房间", () => {

@@ -31,15 +31,15 @@ test("v0.7.2 对战页使用己方 + 独立敌方多地图工作区", () => {
   ]);
 });
 
-test("v0.7.2 三人回合明确显示 0/2、1/2、2/2 目标进度", () => {
+test("v1.2.6 三人回合明确显示一次行动同步两名目标", () => {
   includesAll(app, [
     "battle-turn-progress",
     "battle-target-progress",
-    "completedTargetPlayerIds",
     "remainingTargetPlayerIds",
     "requiredTargetPlayerIds",
-    "已完成",
-    "待操作",
+    "一次行动",
+    "同步 ×",
+    "同步生效",
   ]);
 });
 
@@ -56,12 +56,12 @@ test("v0.7.2 三张地图可以纯前端独立最小化且至少保留一张展�
   assert.equal(app.includes("map:collapse"), false);
 });
 
-test("v0.7.2 普通行动绑定被点击敌方地图，直升机仍保持多目标预览", () => {
+test("v1.2.6 三人任意行动绑定点击坐标并在两张敌方地图同步预览", () => {
   includesAll(app, [
     '"data-target-player-id": targetPlayerId',
     "handleEnemyCell(control.dataset.coordinate, control.dataset.targetPlayerId)",
-    "isGlobalHelicopterSelection",
-    "selectedForThisMap || globalHelicopter",
+    "isSimultaneousThreePlayerSelection",
+    "selectedForThisMap || simultaneousAction",
     "state.battle.targetPlayerId = targetPlayerId",
   ]);
 });

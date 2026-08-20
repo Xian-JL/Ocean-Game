@@ -22,10 +22,10 @@ const REQUIRED_PATHS = Object.freeze([
   "public/js/audio-system.js",
   "public/assets/icons/ocean-ui.svg",
   "public/assets/audio/music/README.txt",
-  "docs/release-manifest-Ocean-v1.2.4.md",
-  "docs/rule-v1.7.md",
-  "docs/page-flow-v1.9.md",
-  "docs/socket-protocol-v1.2.md",
+  "docs/release-manifest-Ocean-v1.2.6.md",
+  "docs/rule-v1.8.md",
+  "docs/page-flow-v2.0.md",
+  "docs/socket-protocol-v2.0.md",
   "server/app.js",
   "server/server.js",
   "server/game/map-rules.js",
@@ -34,7 +34,9 @@ const REQUIRED_PATHS = Object.freeze([
   "test/ui-v0.7.5.test.js",
   "test/ui-v0.7.6.test.js",
   "test/ocean-v1.1-bot.test.js",
-  "test/ocean-v1.2.4-consistency.test.js",
+  "test/ocean-v1.2.6-consistency.test.js",
+  "test/ocean-v1.2.6-three-player.test.js",
+  "test/ocean-v1.2.6-ui.test.js",
   "test/ocean-v1.2-dynamic-map.test.js",
   "test/ocean-v1.2.4-audio.test.js",
   "test/ui-readability.test.js",
@@ -94,7 +96,7 @@ async function main() {
       fail(`冻结文件已变化：${relativePath}`);
     }
   }
-  pass("rule、page-flow、开发大纲和环境说明保持冻结版本");
+  pass("历史冻结规则、页面流程、开发大纲和环境说明保持不变");
 
   try {
     await assertPortAvailable(3000);

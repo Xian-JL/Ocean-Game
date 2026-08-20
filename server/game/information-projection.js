@@ -49,9 +49,19 @@ function publicCellResults(cellResults) {
     }));
 }
 
+function outcomeForDefender(actionRecord, defenderId) {
+  return actionRecord.outcome.outcomesByDefender?.[defenderId] ??
+    actionRecord.outcome;
+}
+
+function isMultiDefenderRecord(actionRecord) {
+  return (actionRecord.defenderIds?.length ?? 0) > 1;
+}
+
 function createPublicActionRecord(actionRecord) {
   assertActionRecord(actionRecord);
   const definition = getActionDefinition(actionRecord.action.actionType);
+  const multiDefender = isMultiDefenderRecord(actionRecord);
   const record = {
     sequence: actionRecord.sequence,
     actorId: actionRecord.actorId,
@@ -88,17 +98,10 @@ function createPublicActionRecord(actionRecord) {
       };
 
     case ACTION_TYPES.HELICOPTER_STRAFE:
-      if (actionRecord.outcome.kind === "multi_defender_line") {
+      if (multiDefender) {
         return {
           ...record,
-          cellResultsByDefender: Object.fromEntries(
-            Object.entries(actionRecord.outcome.cellResultsByDefender).map(
-              ([playerId, cellResults]) => [
-                playerId,
-                publicCellResults(cellResults),
-              ],
-            ),
-          ),
+          result: null,
         };
       }
       return {
@@ -109,7 +112,7 @@ function createPublicActionRecord(actionRecord) {
     default:
       return {
         ...record,
-        result: actionRecord.outcome.actualResult,
+        result: multiDefender ? null : actionRecord.outcome.actualResult,
       };
   }
 }
@@ -176,6 +179,7 @@ function createActorFeedback(battleState, actionRecord) {
       : actorState.remainingUses[definition.type];
 
   const publicRecord = createPublicActionRecord(actionRecord);
+  const multiDefender = isMultiDefenderRecord(actionRecord);
   const privateResult = definition.type === ACTION_TYPES.DETECTION_BOMB
     ? (actionRecord.outcome.detected
       ? "underwater_signal_detected"
@@ -183,10 +187,46 @@ function createActorFeedback(battleState, actionRecord) {
     : definition.type === ACTION_TYPES.RADAR_SCAN
       ? (actionRecord.outcome.detected ? "layout_detected" : "no_layout_detected")
       : publicRecord.result;
+  const privateResultsByDefender = multiDefender &&
+    [ACTION_TYPES.DETECTION_BOMB, ACTION_TYPES.RADAR_SCAN].includes(definition.type)
+    ? Object.fromEntries(actionRecord.defenderIds.map((defenderId) => {
+        const detected = outcomeForDefender(actionRecord, defenderId).detected;
+        const result = definition.type === ACTION_TYPES.DETECTION_BOMB
+          ? (detected ? "underwater_signal_detected" : "no_underwater_signal")
+          : (detected ? "layout_detected" : "no_layout_detected");
+        return [defenderId, result];
+      }))
+    : null;
+  const resultsByDefender = multiDefender &&
+    ![
+      ACTION_TYPES.SUBMARINE_MISSILE,
+      ACTION_TYPES.NUCLEAR_BOMB,
+      ACTION_TYPES.SHOCK_BOMB,
+      ACTION_TYPES.DETECTION_BOMB,
+      ACTION_TYPES.RADAR_SCAN,
+      ACTION_TYPES.HELICOPTER_STRAFE,
+    ].includes(definition.type)
+    ? Object.fromEntries(actionRecord.defenderIds.map((defenderId) => [
+        defenderId,
+        outcomeForDefender(actionRecord, defenderId).actualResult,
+      ]))
+    : null;
+  const cellResultsByDefender = multiDefender &&
+    definition.type === ACTION_TYPES.HELICOPTER_STRAFE
+    ? Object.fromEntries(actionRecord.defenderIds.map((defenderId) => [
+        defenderId,
+        publicCellResults(
+          outcomeForDefender(actionRecord, defenderId).cellResults ?? [],
+        ),
+      ]))
+    : null;
 
   return {
     ...publicRecord,
-    result: privateResult,
+    result: multiDefender ? null : privateResult,
+    ...(privateResultsByDefender ? { privateResultsByDefender } : {}),
+    ...(resultsByDefender ? { resultsByDefender } : {}),
+    ...(cellResultsByDefender ? { cellResultsByDefender } : {}),
     actionId: actionRecord.action.actionId,
     sourceId: actionRecord.action.sourceId,
     remainingUses,
@@ -205,8 +245,26 @@ function createActorFeedback(battleState, actionRecord) {
 
 function createDefenderFeedback(actionRecord, defenderId) {
   assertActionRecord(actionRecord);
+  const definition = getActionDefinition(actionRecord.action.actionType);
+  const publicRecord = createPublicActionRecord(actionRecord);
+  const ownOutcome = outcomeForDefender(actionRecord, defenderId);
+  const hidesResult = [
+    ACTION_TYPES.SUBMARINE_MISSILE,
+    ACTION_TYPES.NUCLEAR_BOMB,
+    ACTION_TYPES.SHOCK_BOMB,
+    ACTION_TYPES.DETECTION_BOMB,
+    ACTION_TYPES.RADAR_SCAN,
+  ].includes(definition.type);
   return {
-    ...createPublicActionRecord(actionRecord),
+    ...publicRecord,
+    result: hidesResult
+      ? null
+      : definition.type === ACTION_TYPES.HELICOPTER_STRAFE
+        ? null
+        : ownOutcome.actualResult ?? publicRecord.result,
+    ...(definition.type === ACTION_TYPES.HELICOPTER_STRAFE
+      ? { cellResults: publicCellResults(ownOutcome.cellResults ?? []) }
+      : {}),
     ownDamage: [],
     receivedHits: createReceivedHitNotifications(actionRecord, defenderId),
     ownDecoyChanges: createOwnDecoyNotifications(
@@ -223,38 +281,45 @@ function createOwnPlayerSnapshot(battleState, playerId) {
   const intelligenceAreas = battleState.actionLog
     .filter((record) => record.actorId === playerId)
     .flatMap((record) => {
+      const defenderIds = record.defenderIds ??
+        [record.defenderId].filter(Boolean);
       if (record.action.actionType === ACTION_TYPES.SHOCK_BOMB) {
-        return [
-          {
+        return defenderIds.map((defenderId) => {
+          const outcome = outcomeForDefender(record, defenderId);
+          return {
             sequence: record.sequence,
-            defenderId: record.defenderId,
+            defenderId,
             kind: "shock",
-            center: record.outcome.center,
-            area: [...record.outcome.area],
-          },
-        ];
+            center: outcome.center,
+            area: [...outcome.area],
+          };
+        });
       }
       if (record.action.actionType === ACTION_TYPES.DETECTION_BOMB) {
-        return [
-          {
+        return defenderIds.map((defenderId) => {
+          const outcome = outcomeForDefender(record, defenderId);
+          return {
             sequence: record.sequence,
-            defenderId: record.defenderId,
+            defenderId,
             kind: "detection",
-            center: record.outcome.center,
-            area: [...record.outcome.area],
-            detected: record.outcome.detected,
-          },
-        ];
+            center: outcome.center,
+            area: [...outcome.area],
+            detected: outcome.detected,
+          };
+        });
       }
       if (record.action.actionType === ACTION_TYPES.RADAR_SCAN) {
-        return [{
-          sequence: record.sequence,
-          defenderId: record.defenderId,
-          kind: "radar",
-          center: record.outcome.anchor,
-          area: [...record.outcome.area],
-          detected: record.outcome.detected,
-        }];
+        return defenderIds.map((defenderId) => {
+          const outcome = outcomeForDefender(record, defenderId);
+          return {
+            sequence: record.sequence,
+            defenderId,
+            kind: "radar",
+            center: outcome.anchor,
+            area: [...outcome.area],
+            detected: outcome.detected,
+          };
+        });
       }
       return [];
     });
@@ -273,6 +338,7 @@ function createOwnPlayerSnapshot(battleState, playerId) {
     const destroyerTargetCells = [];
     for (const record of records) {
       const type = record.action.actionType;
+      const defenderOutcome = outcomeForDefender(record, opponentId);
       if ([ACTION_TYPES.SUBMARINE_MISSILE].includes(type)) {
         submarineMissileMarkers.push(record.action.target.coordinate);
       }
@@ -282,15 +348,15 @@ function createOwnPlayerSnapshot(battleState, playerId) {
       if ([ACTION_TYPES.DESTROYER_I_RAM, ACTION_TYPES.DESTROYER_II_RAM].includes(type)) {
         destroyerTargetCells.push(record.action.target.coordinate);
       }
-      if (type === ACTION_TYPES.HELICOPTER_STRAFE &&
-        record.outcome.kind === "multi_defender_line") {
-        for (const item of record.outcome.cellResultsByDefender?.[opponentId] ?? []) {
+      if (type === ACTION_TYPES.HELICOPTER_STRAFE) {
+        for (const item of defenderOutcome.cellResults ?? []) {
           if (["hit", "miss"].includes(item.result)) cellResults[item.coordinate] = item.result;
         }
       } else if (![ACTION_TYPES.SUBMARINE_MISSILE, ACTION_TYPES.NUCLEAR_BOMB,
         ACTION_TYPES.SHOCK_BOMB, ACTION_TYPES.DETECTION_BOMB,
         ACTION_TYPES.RADAR_SCAN].includes(type)) {
-        for (const item of record.outcome.cellResults ?? [record.outcome.cellResult].filter(Boolean)) {
+        for (const item of defenderOutcome.cellResults ??
+          [defenderOutcome.cellResult].filter(Boolean)) {
           if (["hit", "miss"].includes(item.result)) cellResults[item.coordinate] = item.result;
         }
       }
