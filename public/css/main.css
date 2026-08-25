@@ -7885,3 +7885,615 @@ body::before {
     min-height: 46px;
   }
 }
+
+/* -------------------------------------------------------------------------- */
+/* Ocean-v1.2.7 · phone-first UI adaptation                                   */
+/* Gameplay, desktop layout and map rules remain unchanged.                   */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  :root {
+    --mobile-header-height: 58px;
+  }
+
+  html {
+    scroll-padding-top: calc(var(--mobile-header-height) + env(safe-area-inset-top) + 10px);
+  }
+
+  body,
+  .site-shell {
+    min-height: 100dvh;
+  }
+
+  body {
+    padding-right: env(safe-area-inset-right);
+    padding-left: env(safe-area-inset-left);
+  }
+
+  .global-header {
+    min-height: calc(var(--mobile-header-height) + env(safe-area-inset-top));
+    gap: 6px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-right: max(8px, env(safe-area-inset-right));
+    padding-bottom: 8px;
+    padding-left: max(8px, env(safe-area-inset-left));
+  }
+
+  .brand {
+    min-width: 0;
+    gap: 8px;
+  }
+
+  .brand strong {
+    overflow: hidden;
+    max-width: 76px;
+    font-size: 0.8rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .global-header__tools {
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .global-header .connection-pill,
+  .global-header .header-audio,
+  .global-header .header-help {
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+  }
+
+  .app {
+    width: 100%;
+    padding: 12px 8px calc(92px + env(safe-area-inset-bottom));
+  }
+
+  .global-footer {
+    width: calc(100% - 16px);
+    padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
+  }
+
+  .entry-page--v07 {
+    gap: 14px;
+    padding-top: 2px;
+  }
+
+  .entry-hero--v07 {
+    min-height: auto;
+    padding: 14px 10px 8px;
+  }
+
+  .entry-hero--v07 h1 {
+    margin: 4px 0 0;
+    font-size: clamp(3rem, 18vw, 4.4rem);
+    line-height: 0.92;
+  }
+
+  .entry-hero__visual {
+    display: none;
+  }
+
+  .entry-hero__tagline {
+    margin-top: 9px;
+    font-size: 0.82rem;
+  }
+
+  .entry-hero__badge {
+    margin-bottom: 7px;
+  }
+
+  .entry-facts--v07 {
+    gap: 6px;
+    margin-top: 14px;
+  }
+
+  .entry-facts--v07 span {
+    min-height: 36px;
+    padding: 7px 9px;
+  }
+
+  .entry-form-card--v07,
+  .restore-card--v07,
+  .connection-help--compact,
+  .lobby-room-card,
+  .waiting-panel--v07 {
+    border-radius: 15px;
+  }
+
+  .entry-form-card--v07 {
+    padding: 16px 14px;
+  }
+
+  .entry-form-card__header--v07 {
+    margin-bottom: 18px;
+  }
+
+  .mode-switch,
+  .map-size-switch {
+    gap: 4px;
+  }
+
+  .mode-switch__option,
+  .map-size-switch__option {
+    min-width: 0;
+    min-height: 48px;
+    padding-inline: 5px;
+  }
+
+  .join-form--v07,
+  .create-room-panel {
+    gap: 12px;
+  }
+
+  .room-topbar {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .room-topbar h1 {
+    font-size: clamp(1.2rem, 6vw, 1.65rem);
+  }
+
+  .room-topbar__meta,
+  .room-code-card,
+  .timer-card {
+    width: 100%;
+  }
+
+  .seat-card {
+    min-height: 58px;
+    padding: 9px 10px;
+  }
+
+  .lobby-room-card,
+  .waiting-panel--v07 {
+    min-height: 0;
+    padding: 16px 14px;
+  }
+
+  .lobby-room-code {
+    font-size: clamp(2.3rem, 14vw, 3.6rem);
+  }
+
+  .deployment-page--v071 > .seat-list--compact {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deployment-progress-strip {
+    position: sticky;
+    z-index: 22;
+    top: calc(var(--mobile-header-height) + env(safe-area-inset-top) + 4px);
+    grid-template-columns: auto minmax(0, 1fr);
+    border-radius: 12px;
+    background: rgba(4, 20, 31, 0.96);
+    backdrop-filter: blur(14px);
+  }
+
+  .deployment-layout--v071 .deployment-panel,
+  .deployment-layout--v071 .deployment-map-card {
+    padding: 10px 8px;
+    border-radius: 13px;
+  }
+
+  .deployment-layout--v071 .deployment-map-card {
+    scroll-margin-top: calc(var(--mobile-header-height) + 72px);
+  }
+
+  .fleet-group__items {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deployment-page--v071 .fleet-item {
+    min-height: 52px;
+    padding: 7px;
+  }
+
+  .guide-actions--modern,
+  .deployment-utility-actions {
+    gap: 6px;
+  }
+
+  .deployment-toolbar--v071 {
+    bottom: max(6px, env(safe-area-inset-bottom));
+    margin: 10px 2px 0;
+    padding: 8px;
+    border-radius: 13px;
+  }
+
+  .deployment-toolbar__actions .button {
+    min-height: 48px;
+  }
+
+  .board-frame {
+    width: 100%;
+    max-width: 100%;
+    padding: 4px 3px 10px;
+    scroll-padding-inline: 18px;
+    overscroll-behavior-inline: contain;
+  }
+
+  .battle-map-card .board-frame,
+  .battle-maps--v072[data-map-count="2"] .battle-map-card--v072 .board-frame,
+  .deployment-map-card .board-frame,
+  .replay-map-panel .board-frame {
+    --cell-size: 42px;
+  }
+
+  .ocean-board,
+  .ocean-board[data-board-size="15"],
+  .battle-page[data-player-count="3"] .battle-map-card .ocean-board,
+  .battle-page[data-player-count="3"][data-map-size="15"] .battle-map-card .ocean-board {
+    grid-template-columns: 22px repeat(var(--board-size, 12), var(--cell-size));
+    grid-template-rows: 22px repeat(var(--board-size, 12), var(--cell-size));
+    gap: 2px;
+    margin-inline: 0;
+    zoom: 1;
+  }
+
+  .board-cell {
+    min-width: 42px;
+    min-height: 42px;
+  }
+
+  .board-axis {
+    font-size: 0.72rem;
+  }
+
+  .board-frame::after {
+    position: sticky;
+    left: 0;
+    width: min(100%, calc(100vw - 34px));
+    content: "左右滑动查看完整海域";
+  }
+
+  .rolling-page--v076 .room-topbar {
+    margin-bottom: 10px;
+  }
+
+  .rolling-stage--interactive,
+  .rolling-stage--interactive[data-player-count="3"] {
+    gap: 8px;
+    padding: 8px 0 12px;
+  }
+
+  .die-player--interactive {
+    min-height: 98px;
+    padding: 12px;
+  }
+
+  .roll-die-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+  }
+
+  .rolling-page--v076 .roll-history li {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .rolling-page--v076 .roll-history li em {
+    grid-column: 1 / -1;
+  }
+
+  .battle-header,
+  .battle-header--v072 {
+    position: relative;
+    z-index: 12;
+    top: auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 7px;
+    margin-bottom: 8px;
+    padding: 8px;
+    border-radius: 12px;
+  }
+
+  .battle-header--v072 .battle-header__turn {
+    min-width: 0;
+    padding: 0;
+  }
+
+  .battle-header--v072 .battle-header__timer {
+    min-width: 62px;
+  }
+
+  .battle-header--v072 .battle-turn-progress {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .resolution-strip--v074 {
+    gap: 9px;
+    margin-bottom: 8px;
+    padding: 9px;
+  }
+
+  .mobile-map-tabs,
+  .mobile-map-tabs--v072 {
+    position: sticky;
+    z-index: 45;
+    top: calc(var(--mobile-header-height) + env(safe-area-inset-top));
+    margin: 0 0 8px;
+    padding: 5px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  .mobile-map-tabs--v072 button {
+    min-height: 46px;
+    padding: 6px;
+  }
+
+  .battle-layout--v072,
+  .battle-layout--v076,
+  .battle-main-column {
+    gap: 9px;
+  }
+
+  .battle-map-card--v072 {
+    padding: 9px 6px 7px;
+    border-radius: 13px;
+  }
+
+  .map-card__heading--v072 {
+    gap: 5px;
+    margin-bottom: 7px;
+  }
+
+  .map-target-heading {
+    padding-inline: 3px;
+  }
+
+  .map-target-heading h2 {
+    font-size: 0.88rem;
+  }
+
+  .map-turn-state {
+    min-height: 28px;
+    padding-inline: 6px;
+  }
+
+  .marker-palette {
+    gap: 6px;
+    margin-inline: 0;
+    padding: 7px;
+  }
+
+  .marker-palette__tools {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 3px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .marker-tool {
+    flex: 0 0 78px;
+    min-height: 48px;
+    scroll-snap-align: start;
+    font-size: 0.58rem;
+  }
+
+  .marker-palette__heading small {
+    font-size: 0.6rem;
+    line-height: 1.45;
+  }
+
+  .action-rail,
+  .action-rail--v073 {
+    position: sticky;
+    z-index: 58;
+    top: auto;
+    bottom: max(6px, env(safe-area-inset-bottom));
+    border-radius: 14px;
+    box-shadow: 0 -12px 36px rgba(0, 0, 0, 0.46);
+  }
+
+  .action-rail__heading {
+    min-height: 52px;
+    padding: 11px 13px;
+    cursor: pointer;
+  }
+
+  .action-rail:not(.action-rail--open) .action-rail__content,
+  .action-rail--v073:not(.action-rail--open) .action-rail__content {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+
+  .action-rail--open .action-rail__content,
+  .action-rail--v073.action-rail--open .action-rail__content {
+    max-height: min(64dvh, 560px);
+    padding: 9px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .unit-action-card__actions .action-card--v073,
+  .action-card--v073 {
+    min-height: 52px;
+  }
+
+  .event-center--v074 {
+    border-radius: 13px;
+  }
+
+  .event-tabs {
+    gap: 5px;
+    padding-inline: 8px;
+  }
+
+  .event-tabs button {
+    min-height: 44px;
+    padding-inline: 4px;
+  }
+
+  .event-center__content {
+    padding: 0 8px 9px;
+  }
+
+  .battle-lower--controls-only {
+    margin-top: 9px;
+  }
+
+  .battle-lower--controls-only .battle-controls {
+    gap: 7px;
+    padding: 10px;
+  }
+
+  .battle-lower--controls-only .battle-controls .button {
+    min-height: 46px;
+  }
+
+  .toast-region {
+    top: calc(var(--mobile-header-height) + env(safe-area-inset-top) + 7px);
+    right: max(8px, env(safe-area-inset-right));
+    left: max(8px, env(safe-area-inset-left));
+    width: auto;
+    max-height: calc(100dvh - var(--mobile-header-height) - env(safe-area-inset-top) - 16px);
+    overflow-y: auto;
+  }
+
+  .toast {
+    grid-template-columns: 28px minmax(0, 1fr) 30px;
+    min-height: 52px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .toast__close {
+    width: 30px;
+    height: 30px;
+  }
+
+  dialog.modal {
+    inset: auto 0 0;
+    width: 100%;
+    max-width: none;
+    max-height: min(88dvh, 760px);
+    margin: 0;
+    padding: 18px 14px calc(18px + env(safe-area-inset-bottom));
+    overflow: auto;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 0;
+    border-radius: 20px 20px 0 0;
+    overscroll-behavior: contain;
+  }
+
+  .modal__actions {
+    position: sticky;
+    bottom: calc(-18px - env(safe-area-inset-bottom));
+    margin: 14px -14px calc(-18px - env(safe-area-inset-bottom));
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(4, 18, 28, 0.97);
+  }
+
+  .modal__actions .button {
+    min-height: 48px;
+    flex: 1;
+  }
+
+  .rules-dialog__content {
+    max-height: none;
+  }
+
+  .volume-control {
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+  }
+
+  .volume-control input[type="range"] {
+    min-height: 40px;
+  }
+
+  .final-salvo-stage--v075,
+  .result-hero--v075,
+  .result-player-panel,
+  .rematch-panel--v075,
+  .replay-map-panel,
+  .replay-record-panel {
+    border-radius: 14px;
+  }
+
+  .result-hero--v075 {
+    padding: 16px 12px;
+  }
+
+  .result-emblem--v075 {
+    width: 52px;
+    height: 52px;
+  }
+
+  .replay-tabs {
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .replay-tabs button {
+    flex: 0 0 auto;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 390px) {
+  .brand strong {
+    display: none;
+  }
+
+  .global-header .connection-pill,
+  .global-header .header-audio,
+  .global-header .header-help {
+    width: 42px;
+    min-width: 42px;
+  }
+
+  .deployment-page--v071 > .seat-list--compact,
+  .fleet-group__items {
+    grid-template-columns: 1fr;
+  }
+
+  .marker-tool {
+    flex-basis: 74px;
+  }
+
+  .battle-turn-progress {
+    grid-template-columns: 1fr;
+  }
+
+  .battle-turn-progress__summary {
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+@media (max-width: 700px) and (max-height: 520px) and (orientation: landscape) {
+  .global-header {
+    position: relative;
+  }
+
+  .mobile-map-tabs,
+  .mobile-map-tabs--v072,
+  .deployment-progress-strip {
+    top: 6px;
+  }
+
+  .action-rail--open .action-rail__content,
+  .action-rail--v073.action-rail--open .action-rail__content {
+    max-height: 58dvh;
+  }
+
+  dialog.modal {
+    max-height: 96dvh;
+  }
+}

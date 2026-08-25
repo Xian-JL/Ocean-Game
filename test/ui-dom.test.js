@@ -317,7 +317,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.2.6",
+    stage: "Ocean-v1.2.7",
     protocolVersion: "2.0",
   });
 
