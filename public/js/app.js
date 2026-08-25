@@ -136,6 +136,8 @@
     stateWaiters: [],
     renderedPage: null,
   };
+  let markerLongPress = null;
+  let suppressEnemyCellClickUntil = 0;
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -1845,6 +1847,30 @@
     return readMarkers(room.roomCode, room.own.playerId, targetPlayerId);
   }
 
+  function removePrivateMarker(control) {
+    const coordinate = control?.dataset.coordinate;
+    const targetPlayerId = control?.dataset.targetPlayerId;
+    if (
+      control?.dataset.cellState !== "private-marker" ||
+      !coordinate ||
+      !targetPlayerId ||
+      !markersForTarget(targetPlayerId).has(coordinate)
+    ) {
+      return false;
+    }
+    if (targetPlayerId !== state.battle.targetPlayerId) {
+      saveMarkers();
+      state.battle.targetPlayerId = targetPlayerId;
+      state.battle.mobileMap = targetPlayerId;
+      state.battle.markerContext = null;
+      prepareMarkerContext(state.room);
+    }
+    state.battle.markers.delete(coordinate);
+    saveMarkers();
+    render();
+    return true;
+  }
+
   function legalTargetCells(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
     if (!state.battle.selectedAction) {
       return new Set();
@@ -2523,7 +2549,7 @@
       <div class="marker-palette" data-active="${activeForMap}" aria-label="${escapeHtml(Model.nicknameFor(state.room, playerId))}海域自定义标记">
         <div class="marker-palette__heading">
           <strong>自定义标记</strong>
-          <small>选择类型后左键添加；右键已标记格删除</small>
+          <small>点击格子添加；电脑右键或手机长按删除</small>
         </div>
         <div class="marker-palette__tools" role="toolbar" aria-label="标记类型">
           ${MARKER_DEFINITIONS.map((marker) => {
@@ -4136,6 +4162,7 @@
       return;
     }
     if (action === "enemy-cell") {
+      if (Date.now() < suppressEnemyCellClickUntil) return;
       handleEnemyCell(control.dataset.coordinate, control.dataset.targetPlayerId);
       return;
     }
@@ -4247,25 +4274,70 @@
   document.addEventListener("contextmenu", (event) => {
     const control = event.target.closest?.('[data-action="enemy-cell"]');
     if (!control) return;
-    const coordinate = control.dataset.coordinate;
-    const targetPlayerId = control.dataset.targetPlayerId;
-    if (control.dataset.cellState !== "private-marker" ||
-      !coordinate || !targetPlayerId ||
-      !markersForTarget(targetPlayerId).has(coordinate)) {
+    if (Date.now() < suppressEnemyCellClickUntil) {
+      event.preventDefault();
       return;
     }
-    event.preventDefault();
-    if (targetPlayerId !== state.battle.targetPlayerId) {
-      saveMarkers();
-      state.battle.targetPlayerId = targetPlayerId;
-      state.battle.mobileMap = targetPlayerId;
-      state.battle.markerContext = null;
-      prepareMarkerContext(state.room);
+    if (removePrivateMarker(control)) {
+      const touchContextMenu = Boolean(markerLongPress) ||
+        Boolean(event.sourceCapabilities?.firesTouchEvents);
+      if (touchContextMenu) {
+        suppressEnemyCellClickUntil = Date.now() + 800;
+      }
+      if (markerLongPress) {
+        if (markerLongPress.timer) clearTimeout(markerLongPress.timer);
+        markerLongPress.timer = null;
+        markerLongPress.fired = true;
+      }
+      event.preventDefault();
     }
-    state.battle.markers.delete(coordinate);
-    saveMarkers();
-    render();
   });
+
+  document.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse") return;
+    const control = event.target.closest?.('[data-action="enemy-cell"][data-cell-state="private-marker"]');
+    if (!control) return;
+    if (markerLongPress?.timer) clearTimeout(markerLongPress.timer);
+    const press = {
+      control,
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      fired: false,
+      timer: null,
+    };
+    press.timer = window.setTimeout(() => {
+      press.timer = null;
+      if (markerLongPress !== press) return;
+      if (removePrivateMarker(control)) {
+        press.fired = true;
+        suppressEnemyCellClickUntil = Date.now() + 800;
+        navigator.vibrate?.(20);
+      }
+    }, 550);
+    markerLongPress = press;
+  });
+
+  document.addEventListener("pointermove", (event) => {
+    const press = markerLongPress;
+    if (!press || press.pointerId !== event.pointerId || press.fired) return;
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10) {
+      if (press.timer) clearTimeout(press.timer);
+      markerLongPress = null;
+    }
+  });
+
+  function finishMarkerLongPress(event) {
+    const press = markerLongPress;
+    if (!press || press.pointerId !== event.pointerId) return;
+    if (press.timer) clearTimeout(press.timer);
+    if (press.fired) event.preventDefault();
+    markerLongPress = null;
+  }
+
+  document.addEventListener("pointerup", finishMarkerLongPress);
+  document.addEventListener("pointercancel", finishMarkerLongPress);
+  document.addEventListener("lostpointercapture", finishMarkerLongPress);
 
   document.addEventListener("dragstart", (event) => {
     const cell = event.target.closest("[data-deployment-cell]");
