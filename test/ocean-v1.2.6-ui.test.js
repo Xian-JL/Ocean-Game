@@ -21,14 +21,14 @@ test("v1.2.6 每张敌方地图上方提供五类本机私人标记工具", () =
     assert.match(app, new RegExp(`marker-tool__swatch--\\$\\{marker\\.value\\}`));
   }
   assert.match(app, /function renderMarkerPalette\(playerId\)/);
-  assert.match(app, /选择类型后左键添加；右键已标记格删除/);
+  assert.match(app, /点击格子添加；电脑右键或手机长按删除/);
   assert.match(app, /data-action="select-marker-tool"/);
 });
 
 test("v1.2.6 左键按所选类型写入标记，右键只删除本机自定义标记", () => {
   assert.match(app, /state\.battle\.markers\.set\(coordinate, state\.battle\.selectedMarker\)/);
   assert.match(app, /document\.addEventListener\("contextmenu"/);
-  assert.match(app, /control\.dataset\.cellState !== "private-marker"/);
+  assert.match(app, /control\?\.dataset\.cellState !== "private-marker"/);
   assert.match(app, /markersForTarget\(targetPlayerId\)\.has\(coordinate\)/);
   assert.match(app, /state\.battle\.markers\.delete\(coordinate\)/);
   assert.match(app, /const marker = !resolved \? targetMarkers\.get\(coordinate\) : null/);

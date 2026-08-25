@@ -21,15 +21,15 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("Ocean-v1.2.6 前后端正式发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "1.2.6");
-  assert.equal(RELEASE_VERSION, "1.2.6");
-  assert.equal(RELEASE_STAGE, "Ocean-v1.2.6");
+test("Ocean-v1.2.7 前后端正式发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "1.2.7");
+  assert.equal(RELEASE_VERSION, "1.2.7");
+  assert.equal(RELEASE_STAGE, "Ocean-v1.2.7");
   assert.equal(RULE_VERSION, "1.8");
   assert.equal(SOCKET_PROTOCOL_VERSION, "2.0");
   assert.deepEqual(Data.RELEASE, {
-    version: "1.2.6",
-    stage: "Ocean-v1.2.6",
+    version: "1.2.7",
+    stage: "Ocean-v1.2.7",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.0",
   });
@@ -54,7 +54,7 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   }
 
   for (const current of [
-    "Ocean-v1.2.6",
+    "Ocean-v1.2.7",
     "10×10",
     "12×12",
     "15×15",
@@ -78,13 +78,13 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   );
 });
 
-test("当前规则与页面流程文档冻结三种地图和 v1.2.6 交互边界", () => {
+test("当前规则与页面流程文档冻结三种地图和 v1.2.7 交互边界", () => {
   const currentDocs = [
     read("README.md"),
     read("docs/rule-v1.8.md"),
     read("docs/page-flow-v2.0.md"),
     read("docs/socket-protocol-v2.0.md"),
-    read("docs/release-manifest-Ocean-v1.2.6.md"),
+    read("docs/release-manifest-Ocean-v1.2.7.md"),
   ].join("\n");
 
   for (const stale of ["postlaunch-v0.3", "协议 1.2"]) {
@@ -92,7 +92,7 @@ test("当前规则与页面流程文档冻结三种地图和 v1.2.6 交互边界
   }
 
   for (const current of [
-    "Ocean-v1.2.6",
+    "Ocean-v1.2.7",
     "rule-v1.8",
     "page-flow-v2.0",
     "10×10",
@@ -107,6 +107,7 @@ test("当前规则与页面流程文档冻结三种地图和 v1.2.6 交互边界
     "一次行动",
     "同时作用",
     "右键",
+    "手机长按",
     "0.765",
   ]) {
     assert.equal(currentDocs.includes(current), true, `当前文档缺少：${current}`);
