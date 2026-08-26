@@ -51,13 +51,21 @@ const {
   submitDeployment,
 } = require("./room");
 const { normalizeServerTime } = require("./timing");
+const {
+  BOT_DIFFICULTY_LABELS,
+  DEFAULT_BOT_DIFFICULTY,
+} = require("./bot-difficulty");
 
 const MAX_ID_ATTEMPTS = 100;
 const RECONNECT_TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,128}$/;
 const DEFAULT_MAX_ROOMS = 200;
 const DEFAULT_CLOSED_ROOM_RETENTION_MS = 10 * 60 * 1000;
 const DEFAULT_FINISHED_ROOM_RETENTION_MS = 2 * 60 * 60 * 1000;
-const BOT_NICKNAME = "OCEAN 战术机器人";
+const BOT_NICKNAME_BY_DIFFICULTY = Object.freeze({
+  beginner: "OCEAN 新手机器人",
+  standard: "OCEAN 战术机器人",
+  expert: "OCEAN 专家机器人",
+});
 
 function fail(code, message, details = {}) {
   throw new RuleValidationError(code, message, details);
@@ -126,7 +134,13 @@ class InMemoryRoomService {
     }
   }
 
-  createRoom({ nickname, maxPlayers = 2, roomMode = ROOM_MODES.PVP, mapSize = 12 }) {
+  createRoom({
+    nickname,
+    maxPlayers = 2,
+    roomMode = ROOM_MODES.PVP,
+    botDifficulty = DEFAULT_BOT_DIFFICULTY,
+    mapSize = 12,
+  }) {
     const nowMs = this.#readNow();
     if (this.rooms.size >= this.maxRooms) {
       fail(
@@ -143,13 +157,19 @@ class InMemoryRoomService {
       nickname,
       maxPlayers,
       roomMode,
+      botDifficulty,
       mapSize,
     });
     if (roomMode === ROOM_MODES.BOT_DUEL) {
       const botPlayerId = this.#createUniquePlayerId(room);
       room = joinRoomState(
         room,
-        { playerId: botPlayerId, nickname: BOT_NICKNAME, isBot: true },
+        {
+          playerId: botPlayerId,
+          nickname: BOT_NICKNAME_BY_DIFFICULTY[room.botDifficulty] ??
+            `OCEAN ${BOT_DIFFICULTY_LABELS[room.botDifficulty]}机器人`,
+          isBot: true,
+        },
         nowMs,
       );
       room = submitDeployment(

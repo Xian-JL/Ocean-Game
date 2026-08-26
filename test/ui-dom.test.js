@@ -34,7 +34,7 @@ class FakeSocket {
       if (eventName === "client:ping") {
         acknowledge(null, {
           ok: true,
-          protocolVersion: "2.0",
+          protocolVersion: "2.1",
         });
       } else {
         acknowledge(null, {
@@ -310,20 +310,53 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
 
   const socket = new FakeSocket();
   window.io = () => socket;
-  for (const script of ["game-data.js", "ui-model.js", "audio-system.js", "app.js"]) {
+  for (const script of ["game-data.js", "ui-model.js", "audio-system.js", "tutorial-system.js", "app.js"]) {
     window.eval(
       fs.readFileSync(path.join(PROJECT_ROOT, "public/js", script), "utf8"),
     );
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.2.7",
-    protocolVersion: "2.0",
+    stage: "Ocean-v1.3",
+    protocolVersion: "2.1",
   });
 
   assert.match(window.document.querySelector("#app").textContent, /创建房间/);
   assert.equal(window.document.querySelectorAll("#create-form").length, 1);
   assert.equal(window.document.querySelectorAll('[data-action="select-map-size"]').length, 3);
+  click(window, window.document.querySelector('[data-room-mode="bot_duel"]'));
+  assert.equal(
+    window.document.querySelectorAll('[data-action="select-bot-difficulty"]').length,
+    3,
+  );
+  click(window, window.document.querySelector('[data-bot-difficulty="expert"]'));
+  assert.equal(
+    window.document.querySelector('[data-bot-difficulty="expert"]').getAttribute("aria-checked"),
+    "true",
+  );
+  const emittedBeforeTutorial = socket.emitted.length;
+  click(window, window.document.querySelector('[data-action="start-tutorial"]'));
+  assert.ok(window.document.querySelector(".tutorial-page"));
+  assert.equal(window.document.querySelectorAll('[data-action="tutorial-cell"]').length, 144);
+  click(window, window.document.querySelector('[data-action="tutorial-cell"][data-coordinate="B2"]'));
+  assert.equal(window.document.querySelectorAll(".tutorial-board-cell--ship").length, 3);
+  click(window, window.document.querySelector('[data-action="tutorial-rotate"]'));
+  for (const coordinate of ["B2", "C2", "D2"]) {
+    assert.ok(window.document.querySelector(
+      `[data-action="tutorial-cell"][data-coordinate="${coordinate}"].tutorial-board-cell--ship`,
+    ));
+  }
+  assert.equal(socket.emitted.length, emittedBeforeTutorial, "教程不得发送任何 Socket 事件");
+  assert.deepEqual(
+    JSON.parse(window.localStorage.getItem("ocean.tutorial-progress.v1")).completedLessonIds,
+    ["deployment"],
+  );
+  click(window, window.document.querySelector('[data-action="exit-tutorial"]'));
+  assert.match(window.document.querySelector("#app").textContent, /创建房间/);
+  assert.equal(
+    window.document.querySelector('[data-bot-difficulty="expert"]').getAttribute("aria-checked"),
+    "true",
+  );
   click(window, window.document.querySelector('[data-map-size="15"]'));
   assert.equal(
     window.document.querySelector('[data-map-size="15"]').getAttribute("aria-checked"),

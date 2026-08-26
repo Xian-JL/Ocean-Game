@@ -1010,6 +1010,7 @@ function createRoomView(room, viewerId, nowMs = Date.now()) {
   return {
     roomCode: room.roomCode,
     roomMode: room.roomMode,
+    botDifficulty: room.botDifficulty,
     mapSize: room.mapSize,
     mapRules: clone(room.mapRules),
     maxPlayers: room.maxPlayers,

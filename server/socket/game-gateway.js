@@ -296,6 +296,7 @@ class SocketGameGateway {
             const botView = this.roomService.getPlayerView(roomCode, botSeat.playerId);
             const intent = createBotActionIntent(botView, {
               random: this.roomService.random,
+              difficulty: current.botDifficulty,
               actionId: `bot-${current.stateVersion}-${current.turnNumber}`,
             });
             const resolving = this.roomService.beginAction({
@@ -375,7 +376,10 @@ class SocketGameGateway {
                 current.stateVersion !== room.stateVersion
               ) return;
               const view = this.roomService.getPlayerView(roomCode, botSeat.playerId);
-              const decoyId = chooseBotFinalSalvo(view, this.roomService.random);
+              const decoyId = chooseBotFinalSalvo(view, {
+                random: this.roomService.random,
+                difficulty: current.botDifficulty,
+              });
               const views = this.roomService.submitFinalSalvo({
                 roomCode,
                 playerId: botSeat.playerId,
@@ -540,6 +544,7 @@ class SocketGameGateway {
       nickname: normalized.nickname,
       maxPlayers: normalized.maxPlayers ?? 2,
       roomMode: normalized.roomMode ?? ROOM_MODES.PVP,
+      botDifficulty: normalized.botDifficulty,
       mapSize: normalized.mapSize ?? 12,
     });
     await this.#bindSocket(

@@ -4,6 +4,10 @@ const { assertValidDeployment } = require("./deployment");
 const { RuleValidationError } = require("./errors");
 const { generateRandomDeployment } = require("./random-deployment");
 const {
+  DEFAULT_BOT_DIFFICULTY,
+  normalizeBotDifficulty,
+} = require("./bot-difficulty");
+const {
   DEFAULT_MAP_SIZE,
   assertMapRules,
   createMapRules,
@@ -124,6 +128,7 @@ function createRoomState({
   nickname,
   maxPlayers = 2,
   roomMode = ROOM_MODES.PVP,
+  botDifficulty = DEFAULT_BOT_DIFFICULTY,
   mapSize = DEFAULT_MAP_SIZE,
 }) {
   if (![2, 3].includes(maxPlayers)) {
@@ -138,6 +143,9 @@ function createRoomState({
   const ownerSeat = createSeat(playerId, nickname);
   const normalizedMapSize = normalizeMapSize(mapSize);
   const mapRules = createMapRules(normalizedMapSize);
+  const normalizedBotDifficulty = roomMode === ROOM_MODES.BOT_DUEL
+    ? normalizeBotDifficulty(botDifficulty)
+    : null;
   return {
     roomCode: normalizeRoomCode(roomCode),
     stateVersion: 1,
@@ -147,6 +155,7 @@ function createRoomState({
     pausedTimer: null,
     ownerPlayerId: ownerSeat.playerId,
     roomMode,
+    botDifficulty: normalizedBotDifficulty,
     mapSize: normalizedMapSize,
     mapRules,
     maxPlayers,
@@ -583,6 +592,16 @@ function assertRoomState(room) {
   }
   if (!Object.values(ROOM_MODES).includes(room.roomMode)) {
     fail("INVALID_ROOM_STATE", "房间模式无效。", { roomMode: room.roomMode });
+  }
+  if (
+    (room.roomMode === ROOM_MODES.BOT_DUEL &&
+      normalizeBotDifficulty(room.botDifficulty) !== room.botDifficulty) ||
+    (room.roomMode !== ROOM_MODES.BOT_DUEL && room.botDifficulty !== null)
+  ) {
+    fail("INVALID_ROOM_STATE", "人机难度与房间模式不一致。", {
+      roomMode: room.roomMode,
+      botDifficulty: room.botDifficulty,
+    });
   }
   if (normalizeMapSize(room.mapSize) !== room.mapSize) {
     fail("INVALID_ROOM_STATE", "房间地图大小无效。", { mapSize: room.mapSize });

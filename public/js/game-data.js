@@ -10,10 +10,10 @@
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
   const RELEASE = Object.freeze({
-    version: "1.2.7",
-    stage: "Ocean-v1.2.7",
+    version: "1.3.0",
+    stage: "Ocean-v1.3",
     ruleVersion: "1.8",
-    socketProtocolVersion: "2.0",
+    socketProtocolVersion: "2.1",
   });
   const SUPPORTED_MAP_SIZES = Object.freeze([10, 12, 15]);
   const ALL_ROW_LABELS = "ABCDEFGHIJKLMNO";

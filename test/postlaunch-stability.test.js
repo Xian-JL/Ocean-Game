@@ -60,7 +60,7 @@ test("公开状态接口只返回聚合运行信息，不包含私密对局标�
   const response = await fetch(`http://127.0.0.1:${address.port}/api/status`);
   assert.equal(response.status, 200);
   const status = await response.json();
-  assert.equal(status.stage, "Ocean-v1.2.7");
+  assert.equal(status.stage, "Ocean-v1.3");
   assert.equal(status.uptimeSeconds, 10);
   assert.equal(status.roomCount, 0);
   assert.equal(status.maxRooms, 200);

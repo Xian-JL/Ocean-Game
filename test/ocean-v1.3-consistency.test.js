@@ -21,17 +21,17 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("Ocean-v1.2.7 前后端正式发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "1.2.7");
-  assert.equal(RELEASE_VERSION, "1.2.7");
-  assert.equal(RELEASE_STAGE, "Ocean-v1.2.7");
+test("Ocean-v1.3 前后端正式发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "1.3.0");
+  assert.equal(RELEASE_VERSION, "1.3.0");
+  assert.equal(RELEASE_STAGE, "Ocean-v1.3");
   assert.equal(RULE_VERSION, "1.8");
-  assert.equal(SOCKET_PROTOCOL_VERSION, "2.0");
+  assert.equal(SOCKET_PROTOCOL_VERSION, "2.1");
   assert.deepEqual(Data.RELEASE, {
-    version: "1.2.7",
-    stage: "Ocean-v1.2.7",
+    version: "1.3.0",
+    stage: "Ocean-v1.3",
     ruleVersion: "1.8",
-    socketProtocolVersion: "2.0",
+    socketProtocolVersion: "2.1",
   });
 });
 
@@ -54,13 +54,18 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   }
 
   for (const current of [
-    "Ocean-v1.2.7",
+    "Ocean-v1.3",
     "10×10",
     "12×12",
     "15×15",
     'data-map-size="${mapSize}"',
     'data-max-players="3"',
     'data-room-mode="bot_duel"',
+    'data-action="start-tutorial"',
+    'data-action="select-bot-difficulty"',
+    "新手",
+    "标准",
+    "专家",
     "机器人准备中",
     "机器人思考中",
     "游戏说明",
@@ -78,13 +83,15 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   );
 });
 
-test("当前规则与页面流程文档冻结三种地图和 v1.2.7 交互边界", () => {
+test("当前规则与页面流程文档冻结三种地图及 v1.3 教程与人机边界", () => {
   const currentDocs = [
     read("README.md"),
     read("docs/rule-v1.8.md"),
-    read("docs/page-flow-v2.0.md"),
-    read("docs/socket-protocol-v2.0.md"),
-    read("docs/release-manifest-Ocean-v1.2.7.md"),
+    read("docs/page-flow-v2.1.md"),
+    read("docs/socket-protocol-v2.1.md"),
+    read("docs/tutorial-design-v1.3.md"),
+    read("docs/bot-design-v1.3.md"),
+    read("docs/release-manifest-Ocean-v1.3.md"),
   ].join("\n");
 
   for (const stale of ["postlaunch-v0.3", "协议 1.2"]) {
@@ -92,9 +99,9 @@ test("当前规则与页面流程文档冻结三种地图和 v1.2.7 交互边界
   }
 
   for (const current of [
-    "Ocean-v1.2.7",
+    "Ocean-v1.3",
     "rule-v1.8",
-    "page-flow-v2.0",
+    "page-flow-v2.1",
     "10×10",
     "12×12",
     "15×15",
@@ -109,6 +116,11 @@ test("当前规则与页面流程文档冻结三种地图和 v1.2.7 交互边界
     "右键",
     "手机长按",
     "0.765",
+    "五章",
+    "新手",
+    "标准",
+    "专家",
+    "安全玩家视图",
   ]) {
     assert.equal(currentDocs.includes(current), true, `当前文档缺少：${current}`);
   }

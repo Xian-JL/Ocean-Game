@@ -8,7 +8,7 @@
     />
     <meta
       name="description"
-      content="《海战 OCEAN》v1.2.7 手机端适配版，支持动态地图、双人、三人同步行动和 1v1 人机"
+      content="《海战 OCEAN》v1.3 教学与三档人机版，支持完整交互教程、新手、标准与专家机器人"
     />
     <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
@@ -17,6 +17,7 @@
     <script src="/js/game-data.js" defer></script>
     <script src="/js/ui-model.js" defer></script>
     <script src="/js/audio-system.js" defer></script>
+    <script src="/js/tutorial-system.js" defer></script>
     <script src="/js/app.js" defer></script>
   </head>
   <body>
@@ -68,9 +69,9 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.2.7</span>
+          <span id="footer-release">Ocean-v1.3</span>
           <span aria-hidden="true">·</span>
-          <span id="footer-protocol">Rule 1.8 · Socket 2.0</span>
+          <span id="footer-protocol">Rule 1.8 · Socket 2.1</span>
         </span>
       </footer>
     </div>
@@ -157,8 +158,9 @@
         <section class="rule-section">
           <h3>人机模式</h3>
           <p>
-            人机模式固定为 1v1。机器人自动部署、掷骰和行动，不参与三人局；其决策只读取公开战况、私人侦察结果和自身状态，不读取玩家隐藏部署。
+            人机模式固定为 1v1。新手机器人在合法行动中偏随机选择；标准机器人利用公开命中与己方侦察结果；专家机器人进一步分析情报热区、相邻命中延伸和有限资源。三档机器人都只读取普通玩家可见的安全视图，绝不读取玩家隐藏部署。
           </p>
+          <button class="button button--secondary" type="button" data-action="start-tutorial">进入完整交互教程</button>
         </section>
 
         <section class="rule-section">

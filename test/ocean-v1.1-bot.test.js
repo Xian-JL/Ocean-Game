@@ -6,6 +6,7 @@ const test = require("node:test");
 const { io: createSocketClient } = require("socket.io-client");
 const { createOceanServer } = require("../server/app");
 const { ACTION_TYPES } = require("../server/game/actions");
+const { BOT_DIFFICULTIES } = require("../server/game/bot-difficulty");
 const {
   buildKnowledge,
   chooseBotFinalSalvo,
@@ -215,6 +216,7 @@ test("浏览器可完成人机创建、部署、掷骰，并由机器人自动�
     nickname: "真人",
     maxPlayers: 2,
     roomMode: ROOM_MODES.BOT_DUEL,
+    botDifficulty: BOT_DIFFICULTIES.EXPERT,
   });
   assert.equal(created.ok, true, JSON.stringify(created));
   const deploying = await waitForState(
@@ -223,6 +225,11 @@ test("浏览器可完成人机创建、部署、掷骰，并由机器人自动�
     "人机房间没有进入部署阶段",
   );
   assert.equal(deploying.seats.filter((seat) => seat.isBot).length, 1);
+  assert.equal(deploying.botDifficulty, BOT_DIFFICULTIES.EXPERT);
+  assert.equal(
+    deploying.seats.find((seat) => seat.isBot).nickname,
+    "OCEAN 专家机器人",
+  );
 
   let response = await emitWithAck(socket, CLIENT_EVENTS.SUBMIT_DEPLOYMENT, {
     deployment: createValidDeployment(),
@@ -324,4 +331,5 @@ test("浏览器可完成人机创建、部署、掷骰，并由机器人自动�
     "机器人没有自动确认再来一局并重新部署",
   );
   assert.equal(rematch.own.deployment, null);
+  assert.equal(rematch.botDifficulty, BOT_DIFFICULTIES.EXPERT);
 });

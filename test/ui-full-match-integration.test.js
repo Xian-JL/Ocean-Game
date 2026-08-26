@@ -146,7 +146,7 @@ function createBrowser(baseUrl, clients, options = {}) {
     clients.push(activeClient);
     return activeClient;
   };
-  for (const script of ["game-data.js", "ui-model.js", "app.js"]) {
+  for (const script of ["game-data.js", "ui-model.js", "tutorial-system.js", "app.js"]) {
     window.eval(
       fs.readFileSync(path.join(PROJECT_ROOT, "public/js", script), "utf8"),
     );
@@ -297,11 +297,11 @@ async function createAndEnterBattle(baseUrl, clients, browsers, options = {}) {
   browsers.push(first, second);
   await Promise.all([
     waitFor(
-      () => first.window.document.querySelector("#create-form button:not(:disabled)"),
+      () => first.window.document.querySelector('#create-form button[type="submit"]:not(:disabled)'),
       "第一客户端未连接",
     ),
     waitFor(
-      () => second.window.document.querySelector("#create-form button:not(:disabled)"),
+      () => second.window.document.querySelector('#create-form button[type="submit"]:not(:disabled)'),
       "第二客户端未连接",
     ),
   ]);
