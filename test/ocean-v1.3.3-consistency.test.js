@@ -21,15 +21,15 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("Ocean-v1.3 前后端正式发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "1.3.0");
-  assert.equal(RELEASE_VERSION, "1.3.0");
-  assert.equal(RELEASE_STAGE, "Ocean-v1.3");
+test("Ocean-v1.3.3 前后端正式发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "1.3.3");
+  assert.equal(RELEASE_VERSION, "1.3.3");
+  assert.equal(RELEASE_STAGE, "Ocean-v1.3.3");
   assert.equal(RULE_VERSION, "1.8");
   assert.equal(SOCKET_PROTOCOL_VERSION, "2.1");
   assert.deepEqual(Data.RELEASE, {
-    version: "1.3.0",
-    stage: "Ocean-v1.3",
+    version: "1.3.3",
+    stage: "Ocean-v1.3.3",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.1",
   });
@@ -54,7 +54,7 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   }
 
   for (const current of [
-    "Ocean-v1.3",
+    "Ocean-v1.3.3",
     "10×10",
     "12×12",
     "15×15",
@@ -83,7 +83,7 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   );
 });
 
-test("当前规则与页面流程文档冻结三种地图及 v1.3 教程与人机边界", () => {
+test("当前文档冻结 v1.3 教程、人机边界与 v1.3.3 真实素材音效范围", () => {
   const currentDocs = [
     read("README.md"),
     read("docs/rule-v1.8.md"),
@@ -91,7 +91,9 @@ test("当前规则与页面流程文档冻结三种地图及 v1.3 教程与人�
     read("docs/socket-protocol-v2.1.md"),
     read("docs/tutorial-design-v1.3.md"),
     read("docs/bot-design-v1.3.md"),
-    read("docs/release-manifest-Ocean-v1.3.md"),
+    read("docs/audio-design-v1.3.3.md"),
+    read("docs/ui-theme-v1.0.md"),
+    read("docs/release-manifest-Ocean-v1.3.3.md"),
   ].join("\n");
 
   for (const stale of ["postlaunch-v0.3", "协议 1.2"]) {
@@ -99,7 +101,7 @@ test("当前规则与页面流程文档冻结三种地图及 v1.3 教程与人�
   }
 
   for (const current of [
-    "Ocean-v1.3",
+    "Ocean-v1.3.3",
     "rule-v1.8",
     "page-flow-v2.1",
     "10×10",
@@ -121,12 +123,17 @@ test("当前规则与页面流程文档冻结三种地图及 v1.3 教程与人�
     "标准",
     "专家",
     "安全玩家视图",
+    "差异化音效",
+    "不泄露",
+    "个性化",
+    "主题",
+    "强调色",
   ]) {
     assert.equal(currentDocs.includes(current), true, `当前文档缺少：${current}`);
   }
 });
 
-test("独立声音设置、CSP 兼容动态地图与分角色播报均打包在正式前端", () => {
+test("独立声音设置、个性化弹窗、CSP 兼容动态地图与分角色播报均打包在正式前端", () => {
   const html = read("public/index.html");
   const app = read("public/js/app.js");
   const audio = read("public/js/audio-system.js");
@@ -134,6 +141,7 @@ test("独立声音设置、CSP 兼容动态地图与分角色播报均打包在�
   const projection = read("server/game/information-projection.js");
 
   assert.match(html, /\/js\/audio-system\.js/);
+  assert.match(html, /\/js\/theme-bootstrap\.js/);
   assert.match(html, /id="effects-toggle"/);
   assert.match(html, /id="music-toggle"/);
   assert.match(html, /id="effects-volume"/);
@@ -141,6 +149,10 @@ test("独立声音设置、CSP 兼容动态地图与分角色播报均打包在�
   assert.match(html, /id="audio-dialog"/);
   assert.match(html, /data-action="open-audio-settings" data-audio-focus="effects"/);
   assert.match(html, /data-action="open-audio-settings" data-audio-focus="music"/);
+  assert.match(html, /id="personalize-dialog"/);
+  assert.match(html, /data-action="open-personalize"/);
+  assert.match(html, /data-action="select-theme"/);
+  assert.match(html, /data-action="select-accent"/);
   const rulesStart = html.indexOf('id="rules-dialog"');
   const rulesEnd = html.indexOf("</dialog>", rulesStart);
   assert.ok(rulesStart >= 0 && rulesEnd > rulesStart);

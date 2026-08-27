@@ -16,14 +16,22 @@ class FakeAudioContext {
     this.currentTime = 4;
     this.destination = {};
     this.state = "running";
+    this.sampleRate = 8_000;
     this.oscillators = [];
     this.gains = [];
+    this.sources = [];
+    this.filters = [];
   }
 
   createOscillator() {
     const oscillator = {
       type: null,
-      frequency: { setValueAtTime(value) { oscillator.frequencyValue = value; } },
+      frequency: {
+        setValueAtTime(value) { oscillator.frequencyValue = value; },
+        exponentialRampToValueAtTime(value, time) {
+          oscillator.frequencyRamp = { value, time };
+        },
+      },
       connect() {},
       start(value) { oscillator.startedAt = value; },
       stop(value) { oscillator.stoppedAt = value; },
@@ -43,6 +51,31 @@ class FakeAudioContext {
     };
     this.gains.push(gainNode);
     return gainNode;
+  }
+
+  createBuffer(_channels, length) {
+    const data = new Float32Array(length);
+    return { getChannelData() { return data; } };
+  }
+
+  createBufferSource() {
+    const source = {
+      connect() {},
+      start(value) { source.startedAt = value; },
+      stop(value) { source.stoppedAt = value; },
+    };
+    this.sources.push(source);
+    return source;
+  }
+
+  createBiquadFilter() {
+    const filter = {
+      type: null,
+      frequency: { setValueAtTime(value) { filter.frequencyValue = value; } },
+      connect() {},
+    };
+    this.filters.push(filter);
+    return filter;
   }
 
   resume() {
@@ -67,6 +100,7 @@ test("内置音效使用 Web Audio 合成完整反馈、可调音量且可独立
 
   const audio = dom.window.OceanAudio;
   assert.ok(audio);
+  assert.equal(audio.EFFECT_LIBRARY_VERSION, "3.0");
   audio.setEffectsEnabled(true);
   audio.playEffect("victory");
   assert.equal(contexts.length, 1);
@@ -85,9 +119,75 @@ test("内置音效使用 Web Audio 合成完整反馈、可调音量且可独立
   const hitPeaks = contexts[0].gains.slice(gainStart).map((gain) =>
     Math.max(...gain.ramps.map((entry) => entry.value)),
   );
-  assert.deepEqual(hitPeaks, [0.055 * 0.25, 0.06 * 0.25]);
+  assert.deepEqual(hitPeaks, [0.065 * 0.25, 0.065 * 0.25, 0.06 * 0.25]);
   assert.equal(audio.setEffectsVolume(-1), 0);
   assert.equal(audio.setEffectsVolume(8), 1);
+  dom.window.close();
+});
+
+test("v1.3.3 为十项战斗行动提供真实素材与合成回退", async () => {
+  const dom = new JSDOM("<!doctype html><body></body>", {
+    url: "http://127.0.0.1/",
+    runScripts: "outside-only",
+  });
+  const contexts = [];
+  dom.window.AudioContext = class extends FakeAudioContext {
+    constructor() {
+      super();
+      contexts.push(this);
+    }
+  };
+  dom.window.eval(AUDIO_SCRIPT);
+  const audio = dom.window.OceanAudio;
+  const actionEffects = [
+    "attack_destroyer_i",
+    "attack_destroyer_ii",
+    "attack_pirate",
+    "attack_motorboat",
+    "attack_missile",
+    "attack_nuclear",
+    "attack_shock",
+    "attack_detection",
+    "attack_helicopter",
+    "attack_radar",
+  ];
+  const interfaceEffects = [
+    "panel_open",
+    "panel_close",
+    "confirm",
+    "cancel",
+    "place",
+    "move",
+    "rotate",
+    "remove",
+    "undo",
+    "randomize",
+    "ready",
+    "dice_roll",
+    "marker_add",
+    "marker_remove",
+    "target_lock",
+    "tutorial_step",
+    "tutorial_complete",
+    "pause",
+    "reconnect",
+    "eliminated",
+    "final_salvo",
+  ];
+  const effects = [...actionEffects, ...interfaceEffects];
+  const BATCH_SIZE = 8;
+  for (let index = 0; index < effects.length; index += 1) {
+    const effect = effects[index];
+    assert.ok(audio.EFFECT_NAMES.includes(effect), `缺少音效：${effect}`);
+    const before = contexts[0]?.oscillators.length ?? 0;
+    audio.playEffect(effect);
+    const after = contexts[0].oscillators.length;
+    assert.ok(after > before, `${effect} 没有创建可听音调`);
+    if ((index + 1) % BATCH_SIZE === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 650));
+    }
+  }
+  assert.ok(contexts[0].sources.length >= 10, "爆炸、机械和部署音效应包含噪声层");
   dom.window.close();
 });
 

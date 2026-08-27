@@ -8,11 +8,12 @@
     />
     <meta
       name="description"
-      content="《海战 OCEAN》v1.3 教学与三档人机版，支持完整交互教程、新手、标准与专家机器人"
+      content="《海战 OCEAN》v1.3.3 真实海战素材音效版，支持完整教程、三档人机与多模式对战"
     />
     <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
     <link rel="stylesheet" href="/css/main.css" />
+    <script src="/js/theme-bootstrap.js"></script>
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="/js/game-data.js" defer></script>
     <script src="/js/ui-model.js" defer></script>
@@ -48,6 +49,7 @@
           </div>
           <button class="icon-button icon-button--small header-audio" id="effects-button" type="button" data-action="open-audio-settings" data-audio-focus="effects" aria-haspopup="dialog" aria-controls="audio-dialog" aria-label="打开音效设置" data-tooltip="音效设置">♪</button>
           <button class="icon-button icon-button--small header-audio" id="music-button" type="button" data-action="open-audio-settings" data-audio-focus="music" aria-haspopup="dialog" aria-controls="audio-dialog" aria-label="打开背景音乐设置" data-tooltip="音乐设置">♫</button>
+          <button class="icon-button icon-button--small header-personalize" id="personalize-button" type="button" data-action="open-personalize" aria-haspopup="dialog" aria-controls="personalize-dialog" aria-label="打开个性化设置" data-tooltip="个性化设置">✦</button>
           <button
             class="button button--quiet button--compact header-help"
             data-action="open-rules"
@@ -69,7 +71,7 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.3</span>
+          <span id="footer-release">Ocean-v1.3.3</span>
           <span aria-hidden="true">·</span>
           <span id="footer-protocol">Rule 1.8 · Socket 2.1</span>
         </span>
@@ -198,7 +200,7 @@
         <div>
           <p class="eyebrow">OCEAN AUDIO</p>
           <h2 id="audio-title">声音设置</h2>
-          <p>音效与背景音乐可以独立开关、独立调节。</p>
+          <p>不同操作具有独立的辨识音效；音效与背景音乐可以分别开关、分别调节。</p>
         </div>
         <button class="icon-button" type="button" data-action="close-audio-settings" aria-label="关闭声音设置">×</button>
       </div>
@@ -239,6 +241,74 @@
       </p>
       <div class="modal__actions">
         <button class="button button--primary" type="button" data-action="close-audio-settings">完成</button>
+      </div>
+    </dialog>
+
+    <dialog id="personalize-dialog" class="modal modal--personalize" aria-labelledby="personalize-title">
+      <div class="personalize-dialog__header">
+        <div>
+          <p class="eyebrow">OCEAN PERSONALIZE</p>
+          <h2 id="personalize-title">个性化设置</h2>
+          <p>选择界面主题与强调色；只保存在当前浏览器，不影响对局与服务器。</p>
+        </div>
+        <button class="icon-button" type="button" data-action="close-personalize" aria-label="关闭个性化设置">×</button>
+      </div>
+
+      <div class="personalize-grid" aria-label="个性化设置">
+        <section class="personalize-group">
+          <div class="personalize-group__heading">
+            <strong>界面主题</strong>
+            <small>主题仅改变本机外观</small>
+          </div>
+          <div class="theme-options" role="radiogroup" aria-label="界面主题">
+            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="ocean-dark" aria-checked="true">
+              <span class="theme-swatch theme-swatch--dark" aria-hidden="true"></span>
+              <span>深海暗夜</span>
+            </button>
+            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="ocean-light" aria-checked="false">
+              <span class="theme-swatch theme-swatch--light" aria-hidden="true"></span>
+              <span>极地寒光</span>
+            </button>
+            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="ocean-dusk" aria-checked="false">
+              <span class="theme-swatch theme-swatch--dusk" aria-hidden="true"></span>
+              <span>黄昏余晖</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="personalize-group">
+          <div class="personalize-group__heading">
+            <strong>强调色</strong>
+            <small>作用于边框、图标与激活状态</small>
+          </div>
+          <div class="accent-options" role="radiogroup" aria-label="强调色">
+            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="cyan" aria-checked="true">
+              <span class="accent-swatch accent-swatch--cyan" aria-hidden="true"></span>
+              <span>离子青</span>
+            </button>
+            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="gold" aria-checked="false">
+              <span class="accent-swatch accent-swatch--gold" aria-hidden="true"></span>
+              <span>荣耀金</span>
+            </button>
+            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="jade" aria-checked="false">
+              <span class="accent-swatch accent-swatch--jade" aria-hidden="true"></span>
+              <span>翡翠绿</span>
+            </button>
+            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="crimson" aria-checked="false">
+              <span class="accent-swatch accent-swatch--crimson" aria-hidden="true"></span>
+              <span>赤焰红</span>
+            </button>
+            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="violet" aria-checked="false">
+              <span class="accent-swatch accent-swatch--violet" aria-hidden="true"></span>
+              <span>极光紫</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <div class="modal__actions">
+        <button class="button button--secondary" type="button" data-action="reset-personalization">恢复默认</button>
+        <button class="button button--primary" type="button" data-action="close-personalize">完成</button>
       </div>
     </dialog>
 

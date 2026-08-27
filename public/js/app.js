@@ -20,6 +20,7 @@
   const confirmAccept = document.querySelector("#confirm-accept");
   const rulesDialog = document.querySelector("#rules-dialog");
   const audioDialog = document.querySelector("#audio-dialog");
+  const personalizeDialog = document.querySelector("#personalize-dialog");
   const reduceMotionToggle = document.querySelector("#reduce-motion-toggle");
   const effectsToggle = document.querySelector("#effects-toggle");
   const musicToggle = document.querySelector("#music-toggle");
@@ -35,6 +36,8 @@
   const NICKNAME_STORAGE_KEY = "ocean.nickname.v1";
   const MARKER_STORAGE_PREFIX = "ocean.private-markers.v2";
   const TUTORIAL_STORAGE_KEY = "ocean.tutorial-progress.v1";
+  const THEME_STORAGE_KEY = "ocean.theme.v1";
+  const ACCENT_STORAGE_KEY = "ocean.accent.v1";
   const MARKER_DEFINITIONS = Object.freeze([
     { value: "occupied", label: "确定有目标", shortLabel: "确定有" },
     { value: "surface_yes", label: "水面有目标", shortLabel: "水面有" },
@@ -45,6 +48,66 @@
   const MARKER_CYCLE = MARKER_DEFINITIONS.map((marker) => marker.value);
   const ROOM_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
   const REQUEST_TIMEOUT_MS = 8_000;
+  const ACTION_EFFECTS = Object.freeze({
+    destroyer_i_ram: "attack_destroyer_i",
+    destroyer_ii_ram: "attack_destroyer_ii",
+    pirate_attack: "attack_pirate",
+    motorboat_ram: "attack_motorboat",
+    submarine_missile: "attack_missile",
+    nuclear_bomb: "attack_nuclear",
+    shock_bomb: "attack_shock",
+    detection_bomb: "attack_detection",
+    helicopter_strafe: "attack_helicopter",
+    radar_scan: "attack_radar",
+  });
+  const CONTROL_EFFECTS = Object.freeze({
+    "start-tutorial": "panel_open",
+    "exit-tutorial": "panel_close",
+    "tutorial-start-beginner": "tutorial_complete",
+    "select-mode": "ui_select",
+    "select-bot-difficulty": "ui_select",
+    "select-map-size": "map_switch",
+    "open-audio-settings": "panel_open",
+    "close-audio-settings": "panel_close",
+    "open-rules": "panel_open",
+    "close-rules": "panel_close",
+    reload: "confirm",
+    "retry-connection": "reconnect",
+    "restore-session": "reconnect",
+    "dismiss-session": "cancel",
+    "copy-room": "copy",
+    "copy-invite": "copy",
+    "share-invite": "copy",
+    "toggle-deployment-map": "panel_close",
+    "select-placement": "ui_select",
+    "clear-deployment": "warning",
+    "ready-deployment": "panel_open",
+    "leave-room": "warning",
+    "switch-map": "map_switch",
+    "toggle-battle-map": "panel_close",
+    "select-battle-target": "ui_select",
+    "select-action": "ui_select",
+    "toggle-action-drawer": "panel_open",
+    "toggle-log": "panel_open",
+    "set-event-channel": "log_switch",
+    "set-helicopter-axis": "ui_select",
+    "select-marker-tool": "ui_select",
+    "toggle-marker-mode": "ui_select",
+    "cancel-action-selection": "cancel",
+    "reopen-action-confirm": "panel_open",
+    "select-intelligence": "private",
+    "clear-intelligence": "cancel",
+    surrender: "warning",
+    "surrender-and-leave": "warning",
+    "focus-replay": "panel_open",
+    "select-replay-player": "ui_select",
+    "return-home": "panel_close",
+    "open-personalize": "panel_open",
+    "close-personalize": "panel_close",
+    "select-theme": "ui_select",
+    "select-accent": "ui_select",
+    "reset-personalization": "cancel",
+  });
 
   if (!Data || !Model || !Tutorial || !app) {
     document.body.textContent = "正式页面资源加载失败，请刷新页面。";
@@ -133,6 +196,8 @@
     },
     replayPlayerId: null,
     reduceMotion: readBooleanPreference(MOTION_STORAGE_KEY),
+    theme: readStringPreference(THEME_STORAGE_KEY, "ocean-dark"),
+    accent: readStringPreference(ACCENT_STORAGE_KEY, "cyan"),
     audio: Sound?.preferences?.() ?? {
       effectsEnabled: false,
       effectsVolume: 1,
@@ -189,6 +254,23 @@
       localStorage.setItem(key, value ? "true" : "false");
     } catch (_error) {
       showToast("浏览器未允许保存动画偏好。", "warning");
+    }
+  }
+
+  function readStringPreference(key, fallback) {
+    try {
+      const value = localStorage.getItem(key);
+      return typeof value === "string" && value !== "" ? value : fallback;
+    } catch (_error) {
+      return fallback;
+    }
+  }
+
+  function writeStringPreference(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch (_error) {
+      showToast("浏览器未允许保存个性化设置。", "warning");
     }
   }
 
@@ -373,6 +455,68 @@
     writeBooleanPreference(MOTION_STORAGE_KEY, enabled);
   }
 
+  const THEME_OPTIONS = Object.freeze({
+    "ocean-dark": "深海暗夜",
+    "ocean-light": "极地寒光",
+    "ocean-dusk": "黄昏余晖",
+  });
+  const ACCENT_OPTIONS = Object.freeze({
+    cyan: ["#63ddf5", "#1ec6eb", "rgba(64, 204, 236, 0.12)", "99, 221, 245"],
+    gold: ["#f4c25a", "#d9a02e", "rgba(244, 194, 90, 0.14)", "244, 194, 90"],
+    jade: ["#59e0ac", "#2fbf85", "rgba(89, 224, 172, 0.14)", "89, 224, 172"],
+    crimson: ["#ff6b77", "#e23b4c", "rgba(255, 107, 119, 0.14)", "255, 107, 119"],
+    violet: ["#bc8cff", "#9660e8", "rgba(188, 140, 255, 0.14)", "188, 140, 255"],
+  });
+
+  function applyTheme(theme) {
+    if (!Object.hasOwn(THEME_OPTIONS, theme)) theme = "ocean-dark";
+    state.theme = theme;
+    document.documentElement.dataset.theme = theme;
+    writeStringPreference(THEME_STORAGE_KEY, theme);
+    syncPersonalizeControls();
+  }
+
+  function applyAccent(accent) {
+    if (!Object.hasOwn(ACCENT_OPTIONS, accent)) accent = "cyan";
+    state.accent = accent;
+    const parts = ACCENT_OPTIONS[accent];
+    const style = document.documentElement.style;
+    style.setProperty("--accent-primary", parts[0]);
+    style.setProperty("--accent-strong", parts[1]);
+    style.setProperty("--accent-soft", parts[2]);
+    style.setProperty("--accent-primary-rgb", parts[3]);
+    writeStringPreference(ACCENT_STORAGE_KEY, accent);
+    syncPersonalizeControls();
+  }
+
+  function syncPersonalizeControls() {
+    if (!personalizeDialog) return;
+    const themeControls = personalizeDialog.querySelectorAll(
+      '[data-action="select-theme"]',
+    );
+    for (const control of themeControls) {
+      const active = control.dataset.themeValue === state.theme;
+      control.classList.toggle("is-active", active);
+      control.setAttribute("aria-checked", String(active));
+    }
+    const accentControls = personalizeDialog.querySelectorAll(
+      '[data-action="select-accent"]',
+    );
+    for (const control of accentControls) {
+      const active = control.dataset.accentValue === state.accent;
+      control.classList.toggle("is-active", active);
+      control.setAttribute("aria-checked", String(active));
+    }
+  }
+
+  function openPersonalize() {
+    syncPersonalizeControls();
+    if (!personalizeDialog.open) personalizeDialog.showModal();
+    personalizeDialog
+      .querySelector('[data-action="select-theme"].is-active')
+      ?.focus();
+  }
+
   function syncAudioControls() {
     const effectsPercent = Math.round((state.audio.effectsVolume ?? 1) * 100);
     const musicPercent = Math.round((state.audio.musicVolume ?? 0.28) * 100);
@@ -455,7 +599,25 @@
     }[kind] ?? { icon: "action-radar", title: "提示" };
   }
 
-  function showToast(message, kind = "info", duration = 5_000) {
+  function controlEffectName(action, control) {
+    if (action === "toggle-deployment-map") {
+      return state.deployment.mapCollapsed ? "panel_open" : "panel_close";
+    }
+    if (action === "toggle-action-drawer") {
+      return state.battle.actionDrawerOpen ? "panel_close" : "panel_open";
+    }
+    if (action === "toggle-log") {
+      return state.battle.logOpen ? "panel_close" : "panel_open";
+    }
+    if (action === "toggle-battle-map") {
+      return state.battle.collapsedMaps[control.dataset.mapId]
+        ? "panel_open"
+        : "panel_close";
+    }
+    return CONTROL_EFFECTS[action] ?? null;
+  }
+
+  function showToast(message, kind = "info", duration = 5_000, effect = undefined) {
     if (!message) {
       return;
     }
@@ -483,15 +645,17 @@
     });
     toastRegion.append(toast);
     timer = window.setTimeout(dismiss, duration);
-    Sound?.playEffect?.({
-      success: "success",
-      warning: "warning",
-      error: "error",
-      hit: "hit",
-      miss: "miss",
-      unknown: "unknown",
-      private: "private",
-    }[kind] ?? "click");
+    if (effect !== false) {
+      Sound?.playEffect?.(effect ?? ({
+        success: "success",
+        warning: "warning",
+        error: "error",
+        hit: "hit",
+        miss: "miss",
+        unknown: "unknown",
+        private: "private",
+      }[kind] ?? "click"));
+    }
   }
 
   function humanizeSocketError(error) {
@@ -857,6 +1021,11 @@
       previous.connectionPhase !== "CONNECTED" &&
       nextRoom.connectionPhase === "CONNECTED"
     );
+    const enteredPause = Boolean(
+      previous?.roomCode === nextRoom.roomCode &&
+      previous?.connectionPhase === "CONNECTED" &&
+      nextRoom.connectionPhase !== "CONNECTED"
+    );
     const previousEliminated = new Set(previous?.battle?.match?.eliminatedPlayerIds ?? []);
     const newlyEliminated = (nextRoom.battle?.match?.eliminatedPlayerIds ?? []).filter((id) => !previousEliminated.has(id));
 
@@ -877,11 +1046,16 @@
             : "defeat",
       );
     }
+    if (enteredPause) {
+      Sound?.playEffect?.("pause");
+    }
     if (resumedFromPause) {
-      showToast("连接已恢复，对局继续。", "success", 3_500);
+      Sound?.playEffect?.("reconnect");
+      showToast("连接已恢复，对局继续。", "success", 3_500, false);
     }
     for (const playerId of newlyEliminated) {
-      showToast(`${Model.nicknameFor(nextRoom, playerId)} 已淘汰`, "warning", 4_500);
+      Sound?.playEffect?.("eliminated");
+      showToast(`${Model.nicknameFor(nextRoom, playerId)} 已淘汰`, "warning", 4_500, false);
     }
     const availableTargets = nextRoom.turn?.canAct && nextRoom.maxPlayers === 3
       ? (nextRoom.turn.remainingTargetPlayerIds ?? [])
@@ -2269,6 +2443,7 @@
     }
     state.battle.markers.delete(coordinate);
     saveMarkers();
+    Sound?.playEffect?.("marker_remove");
     render();
     return true;
   }
@@ -3516,6 +3691,7 @@
         }
         pushDeploymentHistory();
         setPlacement({ id: selectedId, type: definition.type, cells: moved });
+        Sound?.playEffect?.("move");
         render();
         return;
       }
@@ -3535,6 +3711,7 @@
           setPlacement({ id: selectedId, type: definition.type, cells: nextCells });
         }
         state.deployment.dirty = true;
+        Sound?.playEffect?.("remove");
         render();
         return;
       }
@@ -3555,6 +3732,7 @@
         type: definition.type,
         cells: [...cells, coordinate],
       });
+      Sound?.playEffect?.("place");
       render();
       return;
     }
@@ -3575,6 +3753,7 @@
     }
     pushDeploymentHistory();
     setPlacement({ id: selectedId, type: definition.type, cells: candidate });
+    Sound?.playEffect?.("place");
     render();
   }
 
@@ -3589,6 +3768,7 @@
           state.deployment.orientations[id] === "vertical"
             ? "horizontal"
             : "vertical";
+        Sound?.playEffect?.("rotate");
         render();
       } else {
         showToast("该对象无需预先旋转。", "info");
@@ -3638,6 +3818,7 @@
     }
     pushDeploymentHistory();
     setPlacement({ id, type: definition.type, cells: rotated });
+    Sound?.playEffect?.("rotate");
     render();
   }
 
@@ -3666,6 +3847,7 @@
     pushDeploymentHistory();
     setPlacement({ id, type: existing.type, cells: moved });
     state.deployment.selectedId = id;
+    Sound?.playEffect?.("move");
     render();
   }
 
@@ -3704,6 +3886,7 @@
     const cancelHandler = state.confirm?.onCancel;
     state.confirm = null;
     if (confirmDialog.open) confirmDialog.close();
+    Sound?.playEffect?.("cancel");
     cancelHandler?.();
   }
 
@@ -3796,6 +3979,7 @@
           target: clone(state.battle.target),
         },
       });
+      Sound?.playEffect?.(ACTION_EFFECTS[definition.type] ?? "confirm");
       await ensureStateVersion(response.stateVersion);
       clearBattleDraft();
       state.pendingRequest = null;
@@ -3817,6 +4001,7 @@
         expectedVersion: room.stateVersion,
         decoyId,
       });
+      Sound?.playEffect?.("final_salvo");
       await ensureStateVersion(response.stateVersion);
     } catch (error) {
       showToast(humanizeSocketError(error), "error");
@@ -3835,6 +4020,7 @@
       const response = await emitRequest("match:roll-die", {
         expectedVersion: room.stateVersion,
       });
+      Sound?.playEffect?.("dice_roll");
       await ensureStateVersion(response.stateVersion);
     } catch (error) {
       showToast(humanizeSocketError(error), "error");
@@ -3868,6 +4054,7 @@
       const ready = await emitRequest("deployment:ready", {
         expectedVersion: version,
       });
+      Sound?.playEffect?.("ready");
       await ensureStateVersion(ready.stateVersion);
       state.pendingRequest = null;
       render();
@@ -3951,6 +4138,7 @@
       }
       state.battle.markers.set(coordinate, state.battle.selectedMarker);
       saveMarkers();
+      Sound?.playEffect?.("marker_add");
       render();
       return;
     }
@@ -3986,6 +4174,7 @@
     }
     state.battle.target = target;
     state.battle.actionId = createActionId();
+    Sound?.playEffect?.("target_lock");
     render();
     openActionConfirmation();
   }
@@ -4019,6 +4208,7 @@
           : undefined,
         mapSize: state.entry.mapSize,
       });
+      Sound?.playEffect?.("room_create");
     } catch (error) {
       state.entry.error = humanizeSocketError(error);
     } finally {
@@ -4045,6 +4235,7 @@
     render();
     try {
       await emitRequest("room:join", { roomCode, nickname: nickname.value });
+      Sound?.playEffect?.("room_join");
     } catch (error) {
       state.entry.error = humanizeSocketError(error);
     } finally {
@@ -4060,11 +4251,14 @@
     render();
     try {
       const response = await emitRequest("room:resume", stored);
+      Sound?.playEffect?.("reconnect");
       showToast(
         response.disconnectResolved
           ? "座位已恢复，服务器已同步断线期间的最终处理结果。"
           : "座位与服务器确认状态已恢复。",
         "success",
+        5_000,
+        false,
       );
     } catch (error) {
       state.restoring = false;
@@ -4303,8 +4497,9 @@
     }
     const control = event.target.closest("[data-action]");
     if (!control || control.disabled) return;
-    Sound?.playEffect?.("click");
     const action = control.dataset.action;
+    const controlEffect = controlEffectName(action, control);
+    if (controlEffect) Sound?.playEffect?.(controlEffect);
 
     if (action === "start-tutorial") {
       startTutorial();
@@ -4320,16 +4515,30 @@
       return;
     }
     if (action.startsWith("tutorial-")) {
+      const previousTutorial = state.tutorial.session;
       const tutorialAction = {
         type: action,
         coordinate: control.dataset.coordinate,
         value: control.dataset.value,
         index: control.dataset.index,
       };
-      state.tutorial.session = Tutorial.reduce(
-        state.tutorial.session,
+      const nextTutorial = Tutorial.reduce(
+        previousTutorial,
         tutorialAction,
       );
+      state.tutorial.session = nextTutorial;
+      if (
+        nextTutorial.completedLessonIds.length >
+        previousTutorial.completedLessonIds.length
+      ) {
+        Sound?.playEffect?.("tutorial_complete");
+      } else if (nextTutorial.messageKind === "success") {
+        Sound?.playEffect?.("tutorial_step");
+      } else if (nextTutorial.messageKind === "warning") {
+        Sound?.playEffect?.("warning");
+      } else {
+        Sound?.playEffect?.("ui_select");
+      }
       saveTutorialProgress();
       render();
       return;
@@ -4376,6 +4585,28 @@
     }
     if (action === "close-rules") {
       rulesDialog.close();
+      return;
+    }
+    if (action === "open-personalize") {
+      openPersonalize();
+      return;
+    }
+    if (action === "close-personalize") {
+      personalizeDialog.close();
+      return;
+    }
+    if (action === "select-theme") {
+      applyTheme(control.dataset.themeValue);
+      return;
+    }
+    if (action === "select-accent") {
+      applyAccent(control.dataset.accentValue);
+      return;
+    }
+    if (action === "reset-personalization") {
+      applyTheme("ocean-dark");
+      applyAccent("cyan");
+      showToast("已恢复默认主题与强调色。", "success");
       return;
     }
     if (action === "reload") {
@@ -4449,6 +4680,7 @@
           (placement) => placement.id !== id,
         );
         state.deployment.dirty = true;
+        Sound?.playEffect?.("remove");
         render();
       }
       return;
@@ -4459,6 +4691,7 @@
         state.deployment.placements = previous;
         state.deployment.dirty =
           placementDigest(previous) !== state.deployment.serverDigest;
+        Sound?.playEffect?.("undo");
         render();
       }
       return;
@@ -4469,6 +4702,7 @@
         state.deployment.placements = Data.generateRandomDeployment();
         state.deployment.dirty = true;
         state.deployment.selectedId = "destroyer-i";
+        Sound?.playEffect?.("randomize");
         render();
       };
       if (state.deployment.placements.length > 0) {
@@ -4494,6 +4728,7 @@
           state.deployment.placements = [];
           state.deployment.dirty = true;
           state.deployment.selectedId = "destroyer-i";
+          Sound?.playEffect?.("remove");
           render();
         },
       });
@@ -4511,7 +4746,9 @@
     if (action === "cancel-ready") {
       void emitRequest("deployment:cancel-ready", {
         expectedVersion: state.room.stateVersion,
-      }).catch((error) => showToast(humanizeSocketError(error), "error"));
+      })
+        .then(() => Sound?.playEffect?.("cancel"))
+        .catch((error) => showToast(humanizeSocketError(error), "error"));
       return;
     }
     if (action === "leave-room") {
@@ -4693,13 +4930,17 @@
     if (action === "request-rematch") {
       void emitRequest("rematch:request", {
         expectedVersion: state.room.stateVersion,
-      }).catch((error) => showToast(humanizeSocketError(error), "error"));
+      })
+        .then(() => Sound?.playEffect?.("confirm"))
+        .catch((error) => showToast(humanizeSocketError(error), "error"));
       return;
     }
     if (action === "cancel-rematch") {
       void emitRequest("rematch:cancel", {
         expectedVersion: state.room.stateVersion,
-      }).catch((error) => showToast(humanizeSocketError(error), "error"));
+      })
+        .then(() => Sound?.playEffect?.("cancel"))
+        .catch((error) => showToast(humanizeSocketError(error), "error"));
       return;
     }
     if (action === "focus-replay") {
@@ -4862,12 +5103,16 @@
         state.battle.actionId = null;
         state.battle.helicopterAxis = null;
       }
+      Sound?.playEffect?.("ui_select");
       render();
     }
   });
 
   confirmCancel.addEventListener("click", cancelConfirm);
-  confirmAccept.addEventListener("click", () => void acceptConfirm());
+  confirmAccept.addEventListener("click", () => {
+    Sound?.playEffect?.("confirm");
+    void acceptConfirm();
+  });
   confirmDialog.addEventListener("cancel", (event) => {
     event.preventDefault();
     cancelConfirm();
@@ -4888,7 +5133,7 @@
     }
     const original = button.textContent;
     button.textContent = "已复制";
-    showToast(successMessage, "success");
+    showToast(successMessage, "success", 5_000, false);
     window.setTimeout(() => {
       if (button.isConnected) button.textContent = original;
     }, 1_500);
@@ -4930,6 +5175,8 @@
     ? "true"
     : "false";
   reduceMotionToggle.checked = state.reduceMotion;
+  applyTheme(state.theme);
+  applyAccent(state.accent);
   syncAudioControls();
   function resumeStoredMusicOnFirstGesture() {
     window.removeEventListener("pointerdown", resumeStoredMusicOnFirstGesture, true);
