@@ -3294,31 +3294,34 @@
       (decoy) => finalSalvoState?.availableDecoyIds?.includes(decoy.id),
     );
     const opponents = battleOpponentIds(battle);
+    void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
-        ${renderBattleHeader(room)}
-        ${finalSalvo ? renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) : ""}
-        ${renderLatestFeedback(room)}
-        ${renderBattleMapTabs(room)}
+        <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div></div>
+        <div class="carrier-bridge-interface">
+          ${renderBattleHeader(room)}
+          <div class="carrier-horizon-deck" aria-hidden="true"><span>CVN COMMAND BRIDGE</span><i></i><span>TACTICAL LINK ACTIVE</span></div>
+          <div class="carrier-tactical-console">
+            ${finalSalvo ? renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) : ""}
+            ${renderLatestFeedback(room)}
+            ${renderBattleMapTabs(room)}
 
-        <div class="battle-layout battle-layout--v072 battle-layout--v073 battle-layout--v076 ${finalSalvo ? "battle-layout--final" : ""}">
-          <div class="battle-main-column">
-            <div class="battle-maps battle-maps--v072 battle-maps--v073" data-map-count="${1 + opponents.length}">
-              ${renderOwnMapCard(room)}
-              ${opponents.map((playerId) => renderEnemyMapCard(room, playerId)).join("")}
+            <div class="battle-layout battle-layout--v072 battle-layout--v073 battle-layout--v076 ${finalSalvo ? "battle-layout--final" : ""}">
+              <div class="battle-main-column">
+                <div class="battle-maps battle-maps--v072 battle-maps--v073" data-map-count="${1 + opponents.length}">
+                  ${renderOwnMapCard(room)}
+                  ${opponents.map((playerId) => renderEnemyMapCard(room, playerId)).join("")}
+                </div>
+                ${renderPublicLog(room)}
+              </div>
+              ${finalSalvo ? "" : renderActionPanel(room)}
             </div>
-            ${renderPublicLog(room)}
-          </div>
-          ${finalSalvo ? "" : renderActionPanel(room)}
-        </div>
 
-        <div class="battle-lower battle-lower--controls-only">
-          <aside class="battle-controls">
-            <div><span class="status-kicker">对局控制</span><strong>${room.turn?.canAct ? "完成本回合行动" : "等待战场更新"}</strong></div>
-            <button class="button button--quiet" data-action="open-rules">游戏说明</button>
-            ${room.roomPhase === "PLAYING" ? '<button class="button button--danger-quiet" data-action="surrender">投降</button>' : ""}
-          </aside>
+            <div class="battle-lower battle-lower--controls-only">
+              <aside class="battle-controls"><div><span class="status-kicker">航母作战控制台</span><strong>${room.turn?.canAct ? "等待指挥官确认行动" : "战术链路监视中"}</strong></div><button class="button button--quiet" data-action="open-rules">游戏说明</button>${room.roomPhase === "PLAYING" ? '<button class="button button--danger-quiet" data-action="surrender">投降</button>' : ""}</aside>
+            </div>
+          </div>
         </div>
       </section>`;
   }

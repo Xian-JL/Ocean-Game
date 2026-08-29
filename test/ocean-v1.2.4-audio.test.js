@@ -100,7 +100,7 @@ test("内置音效使用 Web Audio 合成完整反馈、可调音量且可独立
 
   const audio = dom.window.OceanAudio;
   assert.ok(audio);
-  assert.equal(audio.EFFECT_LIBRARY_VERSION, "3.0");
+  assert.equal(audio.EFFECT_LIBRARY_VERSION, "3.1");
   audio.setEffectsEnabled(true);
   audio.playEffect("victory");
   assert.equal(contexts.length, 1);

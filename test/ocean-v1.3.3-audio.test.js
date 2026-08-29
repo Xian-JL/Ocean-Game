@@ -60,7 +60,7 @@ test("主要界面、部署、标记、教程与系统状态均接入语义音�
 });
 
 test("音效库接入本地真实素材且设置说明保持独立音量", () => {
-  assert.match(audio, /EFFECT_LIBRARY_VERSION = "3\.0"/);
+  assert.match(audio, /EFFECT_LIBRARY_VERSION = "3\.1"/);
   assert.match(audio, /createOscillator/);
   assert.match(audio, /createBufferSource/);
   assert.match(audio, /Math\.random\(\) \* 2 - 1/);

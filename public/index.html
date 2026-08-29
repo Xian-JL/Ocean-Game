@@ -8,16 +8,17 @@
     />
     <meta
       name="description"
-      content="《海战 OCEAN》v1.3.3 真实海战素材音效版，支持完整教程、三档人机与多模式对战"
+      content="《海战 OCEAN》v1.3.3.2 航母指挥舱界面与线上音效稳定版"
     />
     <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
-    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="preload" href="/assets/images/battle/carrier-bridge-ocean.webp?v=1.3.3.2" as="image" type="image/webp" />
+    <link rel="stylesheet" href="/css/main.css?v=1.3.3.2" />
     <script src="/js/theme-bootstrap.js"></script>
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="/js/game-data.js" defer></script>
     <script src="/js/ui-model.js" defer></script>
-    <script src="/js/audio-system.js" defer></script>
+    <script src="/js/audio-system.js?v=1.3.3.2" defer></script>
     <script src="/js/tutorial-system.js" defer></script>
     <script src="/js/app.js" defer></script>
   </head>
@@ -71,7 +72,7 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.3.3</span>
+          <span id="footer-release">Ocean-v1.3.3.2</span>
           <span aria-hidden="true">·</span>
           <span id="footer-protocol">Rule 1.8 · Socket 2.1</span>
         </span>

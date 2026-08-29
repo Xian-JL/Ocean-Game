@@ -1,0 +1,283 @@
+{
+  "version": "1.3.3.2",
+  "generatedAt": "release-build",
+  "assets": {
+    "01.ogg": {
+      "ogg": "runtime/01.ogg",
+      "mp3": "runtime/01.mp3"
+    },
+    "1.ogg": {
+      "ogg": "runtime/1.ogg",
+      "mp3": "runtime/1.mp3"
+    },
+    "beep-confirmation-ok.wav": {
+      "ogg": "runtime/beep-confirmation-ok.ogg",
+      "mp3": "runtime/beep-confirmation-ok.mp3"
+    },
+    "beep.wav": {
+      "ogg": "runtime/beep.ogg",
+      "mp3": "runtime/beep.mp3"
+    },
+    "boat-engine-on-water-sound-effect.wav": {
+      "ogg": "runtime/boat-engine-on-water-sound-effect.ogg",
+      "mp3": "runtime/boat-engine-on-water-sound-effect.mp3"
+    },
+    "c-ram-warning-sound-loops.mp3": {
+      "ogg": "runtime/c-ram-warning-sound-loops.ogg",
+      "mp3": "runtime/c-ram-warning-sound-loops.mp3"
+    },
+    "charged-laser.mp3": {
+      "ogg": "runtime/charged-laser.ogg",
+      "mp3": "runtime/charged-laser.mp3"
+    },
+    "dice-rolling-dungeon-and-dragons.wav": {
+      "ogg": "runtime/dice-rolling-dungeon-and-dragons.ogg",
+      "mp3": "runtime/dice-rolling-dungeon-and-dragons.mp3"
+    },
+    "electric-shock-3-hit.wav": {
+      "ogg": "runtime/electric-shock-3-hit.ogg",
+      "mp3": "runtime/electric-shock-3-hit.mp3"
+    },
+    "electrical-shock-zap.wav": {
+      "ogg": "runtime/electrical-shock-zap.ogg",
+      "mp3": "runtime/electrical-shock-zap.mp3"
+    },
+    "fanfare-3-rpg.wav": {
+      "ogg": "runtime/fanfare-3-rpg.ogg",
+      "mp3": "runtime/fanfare-3-rpg.mp3"
+    },
+    "fanfare-rpg.wav": {
+      "ogg": "runtime/fanfare-rpg.ogg",
+      "mp3": "runtime/fanfare-rpg.mp3"
+    },
+    "helicopter-rotor-loop.flac": {
+      "ogg": "runtime/helicopter-rotor-loop.ogg",
+      "mp3": "runtime/helicopter-rotor-loop.mp3"
+    },
+    "k-55-artillery.flac": {
+      "ogg": "runtime/k-55-artillery.ogg",
+      "mp3": "runtime/k-55-artillery.mp3"
+    },
+    "kenney_interface-sounds/back_002.ogg": {
+      "ogg": "runtime/kenney-back-002.ogg",
+      "mp3": "runtime/kenney-back-002.mp3"
+    },
+    "kenney_interface-sounds/back_003.ogg": {
+      "ogg": "runtime/kenney-back-003.ogg",
+      "mp3": "runtime/kenney-back-003.mp3"
+    },
+    "kenney_interface-sounds/close_002.ogg": {
+      "ogg": "runtime/kenney-close-002.ogg",
+      "mp3": "runtime/kenney-close-002.mp3"
+    },
+    "kenney_interface-sounds/confirmation_001.ogg": {
+      "ogg": "runtime/kenney-confirmation-001.ogg",
+      "mp3": "runtime/kenney-confirmation-001.mp3"
+    },
+    "kenney_interface-sounds/confirmation_002.ogg": {
+      "ogg": "runtime/kenney-confirmation-002.ogg",
+      "mp3": "runtime/kenney-confirmation-002.mp3"
+    },
+    "kenney_interface-sounds/confirmation_003.ogg": {
+      "ogg": "runtime/kenney-confirmation-003.ogg",
+      "mp3": "runtime/kenney-confirmation-003.mp3"
+    },
+    "kenney_interface-sounds/drop_001.ogg": {
+      "ogg": "runtime/kenney-drop-001.ogg",
+      "mp3": "runtime/kenney-drop-001.mp3"
+    },
+    "kenney_interface-sounds/drop_003.ogg": {
+      "ogg": "runtime/kenney-drop-003.ogg",
+      "mp3": "runtime/kenney-drop-003.mp3"
+    },
+    "kenney_interface-sounds/error_003.ogg": {
+      "ogg": "runtime/kenney-error-003.ogg",
+      "mp3": "runtime/kenney-error-003.mp3"
+    },
+    "kenney_interface-sounds/error_007.ogg": {
+      "ogg": "runtime/kenney-error-007.ogg",
+      "mp3": "runtime/kenney-error-007.mp3"
+    },
+    "kenney_interface-sounds/error_008.ogg": {
+      "ogg": "runtime/kenney-error-008.ogg",
+      "mp3": "runtime/kenney-error-008.mp3"
+    },
+    "kenney_interface-sounds/glass_003.ogg": {
+      "ogg": "runtime/kenney-glass-003.ogg",
+      "mp3": "runtime/kenney-glass-003.mp3"
+    },
+    "kenney_interface-sounds/glitch_002.ogg": {
+      "ogg": "runtime/kenney-glitch-002.ogg",
+      "mp3": "runtime/kenney-glitch-002.mp3"
+    },
+    "kenney_interface-sounds/maximize_004.ogg": {
+      "ogg": "runtime/kenney-maximize-004.ogg",
+      "mp3": "runtime/kenney-maximize-004.mp3"
+    },
+    "kenney_interface-sounds/minimize_004.ogg": {
+      "ogg": "runtime/kenney-minimize-004.ogg",
+      "mp3": "runtime/kenney-minimize-004.mp3"
+    },
+    "kenney_interface-sounds/minimize_006.ogg": {
+      "ogg": "runtime/kenney-minimize-006.ogg",
+      "mp3": "runtime/kenney-minimize-006.mp3"
+    },
+    "kenney_interface-sounds/open_002.ogg": {
+      "ogg": "runtime/kenney-open-002.ogg",
+      "mp3": "runtime/kenney-open-002.mp3"
+    },
+    "kenney_interface-sounds/open_003.ogg": {
+      "ogg": "runtime/kenney-open-003.ogg",
+      "mp3": "runtime/kenney-open-003.mp3"
+    },
+    "kenney_interface-sounds/question_002.ogg": {
+      "ogg": "runtime/kenney-question-002.ogg",
+      "mp3": "runtime/kenney-question-002.mp3"
+    },
+    "kenney_interface-sounds/scroll_002.ogg": {
+      "ogg": "runtime/kenney-scroll-002.ogg",
+      "mp3": "runtime/kenney-scroll-002.mp3"
+    },
+    "kenney_interface-sounds/scroll_004.ogg": {
+      "ogg": "runtime/kenney-scroll-004.ogg",
+      "mp3": "runtime/kenney-scroll-004.mp3"
+    },
+    "kenney_interface-sounds/select_003.ogg": {
+      "ogg": "runtime/kenney-select-003.ogg",
+      "mp3": "runtime/kenney-select-003.mp3"
+    },
+    "kenney_interface-sounds/switch_003.ogg": {
+      "ogg": "runtime/kenney-switch-003.ogg",
+      "mp3": "runtime/kenney-switch-003.mp3"
+    },
+    "kenney_interface-sounds/switch_006.ogg": {
+      "ogg": "runtime/kenney-switch-006.ogg",
+      "mp3": "runtime/kenney-switch-006.mp3"
+    },
+    "kenney_interface-sounds/tick_004.ogg": {
+      "ogg": "runtime/kenney-tick-004.ogg",
+      "mp3": "runtime/kenney-tick-004.mp3"
+    },
+    "metallic-clunk.wav": {
+      "ogg": "runtime/metallic-clunk.ogg",
+      "mp3": "runtime/metallic-clunk.mp3"
+    },
+    "missile-launcher-explosion-only.wav": {
+      "ogg": "runtime/missile-launcher-explosion-only.ogg",
+      "mp3": "runtime/missile-launcher-explosion-only.mp3"
+    },
+    "normal-click.wav": {
+      "ogg": "runtime/normal-click.ogg",
+      "mp3": "runtime/normal-click.mp3"
+    },
+    "pencil-scribble-on-paper.mp3": {
+      "ogg": "runtime/pencil-scribble-on-paper.ogg",
+      "mp3": "runtime/pencil-scribble-on-paper.mp3"
+    },
+    "pencil-writing-on-paper.mp3": {
+      "ogg": "runtime/pencil-writing-on-paper.ogg",
+      "mp3": "runtime/pencil-writing-on-paper.mp3"
+    },
+    "retro-pirate-cannon-shot.wav": {
+      "ogg": "runtime/retro-pirate-cannon-shot.ogg",
+      "mp3": "runtime/retro-pirate-cannon-shot.mp3"
+    },
+    "sonar-ping.wav": {
+      "ogg": "runtime/sonar-ping.ogg",
+      "mp3": "runtime/sonar-ping.mp3"
+    },
+    "sonar-sweep-beep.wav": {
+      "ogg": "runtime/sonar-sweep-beep.ogg",
+      "mp3": "runtime/sonar-sweep-beep.mp3"
+    },
+    "speedboat-loop.wav": {
+      "ogg": "runtime/speedboat-loop.ogg",
+      "mp3": "runtime/speedboat-loop.mp3"
+    },
+    "submarine-sonar.wav": {
+      "ogg": "runtime/submarine-sonar.ogg",
+      "mp3": "runtime/submarine-sonar.mp3"
+    },
+    "tic-toc-click.wav": {
+      "ogg": "runtime/tic-toc-click.ogg",
+      "mp3": "runtime/tic-toc-click.mp3"
+    },
+    "underwater-explosion.wav": {
+      "ogg": "runtime/underwater-explosion.ogg",
+      "mp3": "runtime/underwater-explosion.mp3"
+    },
+    "water-splash-1.flac": {
+      "ogg": "runtime/water-splash-1.ogg",
+      "mp3": "runtime/water-splash-1.mp3"
+    },
+    "water-splash-2.flac": {
+      "ogg": "runtime/water-splash-2.ogg",
+      "mp3": "runtime/water-splash-2.mp3"
+    }
+  },
+  "groups": {
+    "core": [
+      "normal-click.wav",
+      "tic-toc-click.wav",
+      "beep-confirmation-ok.wav",
+      "beep.wav",
+      "kenney_interface-sounds/open_002.ogg",
+      "kenney_interface-sounds/close_002.ogg",
+      "kenney_interface-sounds/switch_003.ogg"
+    ],
+    "battle": [
+      "01.ogg",
+      "1.ogg",
+      "boat-engine-on-water-sound-effect.wav",
+      "charged-laser.mp3",
+      "electric-shock-3-hit.wav",
+      "electrical-shock-zap.wav",
+      "helicopter-rotor-loop.flac",
+      "k-55-artillery.flac",
+      "kenney_interface-sounds/confirmation_001.ogg",
+      "kenney_interface-sounds/drop_001.ogg",
+      "missile-launcher-explosion-only.wav",
+      "retro-pirate-cannon-shot.wav",
+      "sonar-ping.wav",
+      "sonar-sweep-beep.wav",
+      "speedboat-loop.wav",
+      "submarine-sonar.wav",
+      "underwater-explosion.wav",
+      "water-splash-1.flac",
+      "water-splash-2.flac"
+    ],
+    "interface": [
+      "dice-rolling-dungeon-and-dragons.wav",
+      "fanfare-3-rpg.wav",
+      "fanfare-rpg.wav",
+      "kenney_interface-sounds/back_002.ogg",
+      "kenney_interface-sounds/back_003.ogg",
+      "kenney_interface-sounds/close_002.ogg",
+      "kenney_interface-sounds/confirmation_001.ogg",
+      "kenney_interface-sounds/confirmation_002.ogg",
+      "kenney_interface-sounds/confirmation_003.ogg",
+      "kenney_interface-sounds/drop_001.ogg",
+      "kenney_interface-sounds/drop_003.ogg",
+      "kenney_interface-sounds/error_003.ogg",
+      "kenney_interface-sounds/error_007.ogg",
+      "kenney_interface-sounds/error_008.ogg",
+      "kenney_interface-sounds/glass_003.ogg",
+      "kenney_interface-sounds/glitch_002.ogg",
+      "kenney_interface-sounds/maximize_004.ogg",
+      "kenney_interface-sounds/minimize_004.ogg",
+      "kenney_interface-sounds/minimize_006.ogg",
+      "kenney_interface-sounds/open_002.ogg",
+      "kenney_interface-sounds/open_003.ogg",
+      "kenney_interface-sounds/question_002.ogg",
+      "kenney_interface-sounds/scroll_002.ogg",
+      "kenney_interface-sounds/scroll_004.ogg",
+      "kenney_interface-sounds/select_003.ogg",
+      "kenney_interface-sounds/switch_003.ogg",
+      "kenney_interface-sounds/switch_006.ogg",
+      "kenney_interface-sounds/tick_004.ogg",
+      "metallic-clunk.wav",
+      "pencil-scribble-on-paper.mp3",
+      "pencil-writing-on-paper.mp3"
+    ]
+  }
+}

@@ -6,8 +6,9 @@
   const EFFECTS_VOLUME_KEY = "ocean.audio.effects-volume.v1";
   const MUSIC_VOLUME_KEY = "ocean.audio.music-volume.v1";
   const MUSIC_PATH = "/assets/audio/music/ocean-theme.mp3";
-  const EFFECT_LIBRARY_VERSION = "3.0";
-  const EFFECT_ROOT = "/assets/audio/effects/source";
+  const EFFECT_LIBRARY_VERSION = "3.1";
+  const EFFECT_ROOT = "/assets/audio/effects";
+  const EFFECT_MANIFEST_PATH = `${EFFECT_ROOT}/audio-manifest.json?v=1.3.3.2`;
   const MAX_CONCURRENT_EFFECTS = 12;
   let context = null;
   let masterChain = null;
@@ -19,6 +20,7 @@
   let music = null;
   const decodedSamples = new Map();
   const pendingSamples = new Map();
+  let manifestPromise = null;
 
   function tone(frequency, endFrequency, duration, wave, gain, delay = 0) {
     return Object.freeze({
@@ -295,8 +297,27 @@
     source.stop(start + note.duration + 0.025);
   }
 
-  function sampleUrl(file) {
-    return `${EFFECT_ROOT}/${file}`;
+  function versionedAssetUrl(relativePath) {
+    return `${EFFECT_ROOT}/${relativePath}?v=1.3.3.2`;
+  }
+
+  function loadManifest() {
+    if (manifestPromise) return manifestPromise;
+    if (typeof root.fetch !== "function") return Promise.resolve(null);
+    manifestPromise = root.fetch(EFFECT_MANIFEST_PATH, { cache: "no-store" })
+      .then((response) => {
+        if (!response.ok) throw new Error(`audio manifest ${response.status}`);
+        return response.json();
+      })
+      .then((manifest) => manifest?.version === "1.3.3.2" ? manifest : null)
+      .catch(() => null);
+    return manifestPromise;
+  }
+
+  async function decodeCandidate(audioContext, relativePath) {
+    const response = await root.fetch(versionedAssetUrl(relativePath), { cache: "force-cache" });
+    if (!response.ok) throw new Error(`audio ${response.status}`);
+    return audioContext.decodeAudioData(await response.arrayBuffer());
   }
 
   async function loadSample(file) {
@@ -306,14 +327,21 @@
     if (!audioContext || typeof root.fetch !== "function" || typeof audioContext.decodeAudioData !== "function") {
       return null;
     }
-    const pending = root.fetch(sampleUrl(file))
-      .then((response) => {
-        if (!response.ok) throw new Error(`audio ${response.status}`);
-        return response.arrayBuffer();
+    const pending = loadManifest()
+      .then(async (manifest) => {
+        const entry = manifest?.assets?.[file];
+        const candidates = entry ? [entry.ogg, entry.mp3] : [`source/${file}`];
+        for (const candidate of candidates) {
+          try {
+            return await decodeCandidate(audioContext, candidate);
+          } catch (_error) {
+            // OGG 不可用时尝试 MP3；全部失败后使用合成回退。
+          }
+        }
+        return null;
       })
-      .then((bytes) => audioContext.decodeAudioData(bytes))
       .then((buffer) => {
-        decodedSamples.set(file, buffer);
+        if (buffer) decodedSamples.set(file, buffer);
         pendingSamples.delete(file);
         return buffer;
       })
@@ -358,6 +386,12 @@
 
   function preloadEffects() {
     const files = [...new Set(Object.values(SAMPLE_EFFECTS).flat().map((layer) => layer.file))];
+    return Promise.all(files.map(loadSample));
+  }
+
+  async function preloadGroup(groupName) {
+    const manifest = await loadManifest();
+    const files = manifest?.groups?.[groupName] ?? [];
     return Promise.all(files.map(loadSample));
   }
 
@@ -460,10 +494,15 @@
     MUSIC_PATH,
     playEffect,
     preloadEffects,
+    preloadGroup,
     preferences,
     setEffectsEnabled,
     setEffectsVolume,
     setMusicEnabled,
     setMusicVolume,
   });
+
+  root.addEventListener?.("pointerdown", () => {
+    if (effectsEnabled) void preloadGroup("core");
+  }, { once: true, passive: true });
 })(typeof globalThis === "object" ? globalThis : window);

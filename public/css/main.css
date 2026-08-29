@@ -9526,3 +9526,44 @@ body::before {
     grid-template-columns: 1fr;
   }
 }
+
+/* Ocean-v1.3.3.2 · 航母指挥舱战斗框架 */
+.battle-page--carrier {
+  position: relative; isolation: isolate; width: min(1600px, calc(100% - 20px));
+  min-height: calc(100dvh - 20px); margin: 10px auto; padding: 12px; overflow: hidden;
+  border: 1px solid rgba(var(--accent-primary-rgb), .2); border-radius: 24px;
+  background: #02090f; box-shadow: 0 24px 80px rgba(0,0,0,.5);
+}
+.carrier-bridge-scene {
+  position: absolute; z-index: -2; inset: 0 0 auto; height: clamp(500px,58vw,760px); overflow: hidden;
+  background: #061722 url("/assets/images/battle/carrier-bridge-ocean.webp?v=1.3.3.2") center top/cover no-repeat;
+}
+.carrier-bridge-scene::after { content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(0,7,12,.48),transparent 23%,transparent 77%,rgba(0,7,12,.48)),linear-gradient(180deg,rgba(1,8,14,.08) 26%,rgba(2,10,16,.34) 57%,#02090f 96%); }
+.carrier-bridge-scene__glass { position:absolute; inset:8% 12% 29%; border:1px solid rgba(189,232,247,.12); background:linear-gradient(115deg,rgba(219,244,252,.08),transparent 34%,rgba(87,181,208,.05) 64%,transparent); pointer-events:none; }
+.carrier-bridge-scene__horizon { position:absolute; top:47%; left:18%; width:64%; border-top:1px solid rgba(var(--accent-primary-rgb),.22); box-shadow:0 0 16px rgba(var(--accent-primary-rgb),.16); pointer-events:none; }
+.carrier-bridge-scene__console { position:absolute; right:5%; bottom:-3%; left:5%; height:34%; border-top:1px solid rgba(var(--accent-primary-rgb),.23); background:linear-gradient(180deg,rgba(10,29,39,.25),rgba(2,9,14,.94)); clip-path:polygon(8% 0,92% 0,100% 45%,96% 100%,4% 100%,0 45%); pointer-events:none; }
+.carrier-bridge-interface { position:relative; z-index:1; }
+.battle-page--carrier .battle-header { border-color:rgba(var(--accent-primary-rgb),.28); background:rgba(2,13,21,.78); box-shadow:0 12px 32px rgba(0,0,0,.25); backdrop-filter:blur(14px) saturate(1.2); }
+.carrier-horizon-deck { display:flex; align-items:flex-end; gap:14px; height:clamp(150px,18vw,260px); padding:0 5% 28px; color:rgba(219,242,248,.72); font-family:var(--font-display); font-size:.66rem; letter-spacing:.18em; text-shadow:0 2px 8px rgba(0,0,0,.82); }
+.carrier-horizon-deck i { flex:1; margin-bottom:.38em; border-top:1px solid rgba(var(--accent-primary-rgb),.25); }
+.carrier-tactical-console { position:relative; padding:18px; border:1px solid rgba(var(--accent-primary-rgb),.27); background:radial-gradient(circle at 50% 0,rgba(var(--accent-primary-rgb),.08),transparent 42%),linear-gradient(180deg,rgba(4,17,26,.94),rgba(2,10,16,.985)); clip-path:polygon(18px 0,calc(100% - 18px) 0,100% 18px,100% calc(100% - 18px),calc(100% - 18px) 100%,18px 100%,0 calc(100% - 18px),0 18px); box-shadow:0 28px 70px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.035); }
+.battle-page--carrier .battle-map-card,.battle-page--carrier .action-rail,.battle-page--carrier .battle-controls { border-color:rgba(var(--accent-primary-rgb),.2); background:rgba(5,18,27,.91); box-shadow:inset 0 0 36px rgba(var(--accent-primary-rgb),.025),0 12px 28px rgba(0,0,0,.24); backdrop-filter:blur(8px); }
+.battle-page--carrier .battle-controls { margin-top:14px; }
+html[data-theme="light"] .battle-page--carrier .battle-header,html[data-theme="light"] .battle-page--carrier .battle-map-card,html[data-theme="light"] .battle-page--carrier .action-rail,html[data-theme="light"] .battle-page--carrier .battle-controls { background:rgba(224,237,243,.9); }
+html[data-theme="light"] .carrier-tactical-console { background:linear-gradient(180deg,rgba(208,226,235,.95),rgba(185,208,219,.985)); }
+html[data-theme="dusk"] .battle-page--carrier { background:#100a07; }
+html[data-theme="dusk"] .carrier-bridge-scene::after { background:linear-gradient(180deg,rgba(15,8,4,.05) 26%,rgba(18,10,5,.38) 57%,#100a07 96%); }
+@media (max-width:760px) {
+  .battle-page--carrier { width:100%; min-height:100dvh; margin:0; padding:6px; border:0; border-radius:0; }
+  .carrier-bridge-scene { height:350px; background-image:url("/assets/images/battle/carrier-bridge-ocean-mobile.webp?v=1.3.3.2"); }
+  .carrier-bridge-scene__glass { inset:8% 5% 35%; }
+  .carrier-horizon-deck { height:76px; padding:0 12px 12px; font-size:.52rem; }
+  .carrier-horizon-deck span:last-child { display:none; }
+  .carrier-tactical-console { padding:7px; border-radius:15px; clip-path:none; }
+}
+@media (prefers-contrast:more),(forced-colors:active) {
+  .carrier-bridge-scene { display:none; }
+  .battle-page--carrier,.carrier-tactical-console { background:Canvas; }
+  .carrier-horizon-deck { height:16px; padding:0; }
+  .carrier-tactical-console { border:2px solid CanvasText; clip-path:none; box-shadow:none; }
+}
