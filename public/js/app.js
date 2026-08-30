@@ -89,6 +89,7 @@
     "select-action": "ui_select",
     "toggle-action-drawer": "panel_open",
     "toggle-log": "panel_open",
+    "close-battle-drawers": "panel_close",
     "set-event-channel": "log_switch",
     "set-helicopter-axis": "ui_select",
     "select-marker-tool": "ui_select",
@@ -1772,14 +1773,15 @@
   }
 
   function renderGrid(label, cellRenderer, className = "") {
+    const tacticalSea = className.split(/\s+/).includes("board-frame--tactical-sea");
     const contents = [
       '<span class="board-corner" aria-hidden="true"></span>',
       ...Data.COLUMNS.map(
-        (column) => `<span class="board-axis board-axis--column">${column}</span>`,
+        (column) => `<span class="board-axis board-axis--column" data-axis-column="${column}">${column}</span>`,
       ),
     ];
     for (const row of Data.ROWS) {
-      contents.push(`<span class="board-axis board-axis--row">${row}</span>`);
+      contents.push(`<span class="board-axis board-axis--row" data-axis-row="${row}">${row}</span>`);
       for (const column of Data.COLUMNS) {
         const coordinate = `${row}${column}`;
         const cell = cellRenderer(coordinate) ?? {};
@@ -1796,14 +1798,15 @@
             ${cell.disabled ? "disabled" : ""}
             ${cell.draggable ? 'draggable="true"' : ""}
             ${attributes}
-          >${cell.content ?? ""}</button>`);
+          >${cell.content ?? ""}${tacticalSea ? `<span class="tactical-crosshair" aria-hidden="true"></span><span class="tactical-coordinate-badge" aria-hidden="true">${coordinate}</span>` : ""}</button>`);
       }
     }
     return `
-      <div class="board-frame ${className}">
+      <div class="board-frame ${className}"${tacticalSea ? ' data-tactical-hover="false"' : ""}>
         <div class="ocean-board" role="grid" aria-label="${escapeHtml(label)}" data-board-size="${Data.BOARD_SIZE}">
           ${contents.join("")}
         </div>
+        ${tacticalSea ? '<div class="tactical-map-readout" aria-hidden="true"><span>坐标锁定</span><strong data-tactical-coordinate>—</strong><small>隐形网格已启用</small></div>' : ""}
       </div>`;
   }
 
@@ -2372,7 +2375,9 @@
         disabled: true,
         attributes: { "data-coordinate": coordinate, "data-cell-state": cellState },
       };
-    }, options.replay ? "board-frame--replay" : "");
+    }, options.replay
+      ? "board-frame--replay board-frame--tactical-sea board-frame--own-sea"
+      : "board-frame--tactical-sea board-frame--own-sea");
   }
 
   function currentIntelligenceArea(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
@@ -2557,7 +2562,7 @@
           "aria-pressed": preview.has(coordinate) || hasMarker ? "true" : "false",
         },
       };
-    });
+    }, "board-frame--tactical-sea board-frame--enemy-sea");
   }
 
   function unitStateCode(unit, definition) {
@@ -3154,6 +3159,7 @@
     const canTarget = !room.turn?.canAct || isRemainingTurnTarget(room, playerId);
     const mobileActive = state.battle.mobileMap === playerId;
     const intel = currentIntelligenceArea(ownBattle, playerId);
+    const activeAction = Data.getActionDefinition(state.battle.selectedAction);
     return `
       <section
         class="battle-map-card battle-map-card--enemy battle-map-card--v072 battle-map-card--v073 ${selected ? "battle-map-card--targeted" : ""} ${collapsed ? "battle-map-card--collapsed" : ""} ${mobileActive ? "is-mobile-active" : ""}"
@@ -3184,6 +3190,7 @@
         ${collapsed
           ? `<button class="battle-map-collapsed-summary" type="button" data-action="toggle-battle-map" data-map-id="${escapeHtml(playerId)}"><span>${escapeHtml(nickname)} · 独立记录</span><strong>${status}</strong></button>`
           : `${renderMarkerPalette(playerId)}
+             <div class="tactical-sea-toolbar"><span><i aria-hidden="true"></i>海面战术投影</span><b>${state.battle.markerMode && selected ? "私人标记模式" : activeAction && (selected || isSimultaneousThreePlayerSelection(room)) ? escapeHtml(activeAction.name) : "悬停显示坐标"}</b></div>
              ${renderEnemyBoard(ownBattle, playerId)}
              ${renderRangeLegend(room, playerId)}
              <div class="map-caption map-caption--v072">
@@ -3205,7 +3212,7 @@
         </div>
         ${collapsed
           ? `<button class="battle-map-collapsed-summary" type="button" data-action="toggle-battle-map" data-map-id="own"><span>己方海域</span><strong>完整情报</strong></button>`
-          : `${renderOwnBattleBoard(room.battle.own)}<div class="map-caption map-caption--v072"><span>己方完整情报</span></div>`}
+          : `<div class="tactical-sea-toolbar"><span><i aria-hidden="true"></i>己方舰队投影</span><b>完整情报</b></div>${renderOwnBattleBoard(room.battle.own)}<div class="map-caption map-caption--v072"><span>己方完整情报</span></div>`}
       </section>`;
   }
 
@@ -3222,6 +3229,23 @@
             ${escapeHtml(tab.label)}${tab.id === "own" && state.battle.ownMapAlert ? '<i class="alert-dot" aria-label="有新的己方受击信息"></i>' : ""}
           </button>`).join("")}
       </div>`;
+  }
+
+  function renderBattleSideDock(room) {
+    const eventCount =
+      (room.battle?.publicActionLog?.length ?? 0) +
+      (room.battle?.own?.intelligenceAreas?.length ?? 0) +
+      (room.turnEvents?.length ?? 0) +
+      (room.systemEvents?.length ?? 0);
+    return `
+      <nav class="battle-side-dock" aria-label="战术侧边栏">
+        <button type="button" data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}" class="${state.battle.actionDrawerOpen ? "is-active" : ""}">
+          <span aria-hidden="true">${uiIcon("action-radar")}</span><strong>行动</strong><small>${room.turn?.canAct ? "可操作" : "待命"}</small>
+        </button>
+        <button type="button" data-action="toggle-log" aria-expanded="${state.battle.logOpen}" class="${state.battle.logOpen ? "is-active" : ""}">
+          <span aria-hidden="true">${uiIcon("status-private")}</span><strong>消息</strong><small>${eventCount}</small>
+        </button>
+      </nav>`;
   }
 
   function renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) {
@@ -3296,16 +3320,18 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div></div>
         <div class="carrier-bridge-interface">
           ${renderBattleHeader(room)}
-          <div class="carrier-horizon-deck" aria-hidden="true"><span>CVN COMMAND BRIDGE</span><i></i><span>TACTICAL LINK ACTIVE</span></div>
+          <div class="carrier-horizon-deck" aria-hidden="true"><span>CVN COMMAND BRIDGE</span><i></i><span>SEA TACTICAL DISPLAY · GRID ASSIST</span></div>
           <div class="carrier-tactical-console">
             ${finalSalvo ? renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) : ""}
             ${renderLatestFeedback(room)}
             ${renderBattleMapTabs(room)}
+            ${finalSalvo ? "" : renderBattleSideDock(room)}
+            ${state.battle.actionDrawerOpen || state.battle.logOpen ? '<button class="battle-drawer-scrim" type="button" data-action="close-battle-drawers" aria-label="关闭战术侧边栏"></button>' : ""}
 
             <div class="battle-layout battle-layout--v072 battle-layout--v073 battle-layout--v076 ${finalSalvo ? "battle-layout--final" : ""}">
               <div class="battle-main-column">
@@ -4106,7 +4132,8 @@
       return;
     }
     state.battle.selectedAction = actionType;
-    state.battle.actionDrawerOpen = true;
+    state.battle.actionDrawerOpen = definition.targetMode === "line";
+    state.battle.logOpen = false;
     state.battle.target = null;
     state.battle.actionId = null;
     state.battle.markerMode = false;
@@ -4784,6 +4811,8 @@
         state.battle.target = null;
         state.battle.actionId = null;
       }
+      state.battle.actionDrawerOpen = false;
+      state.battle.logOpen = false;
       render();
       return;
     }
@@ -4826,18 +4855,29 @@
       return;
     }
     if (action === "toggle-action-drawer") {
-      state.battle.actionDrawerOpen = !state.battle.actionDrawerOpen;
+      const opening = !state.battle.actionDrawerOpen;
+      state.battle.actionDrawerOpen = opening;
+      if (opening) state.battle.logOpen = false;
       render();
       return;
     }
     if (action === "toggle-log") {
-      state.battle.logOpen = !state.battle.logOpen;
+      const opening = !state.battle.logOpen;
+      state.battle.logOpen = opening;
+      if (opening) state.battle.actionDrawerOpen = false;
+      render();
+      return;
+    }
+    if (action === "close-battle-drawers") {
+      state.battle.actionDrawerOpen = false;
+      state.battle.logOpen = false;
       render();
       return;
     }
     if (action === "set-event-channel") {
       state.battle.eventChannel = control.dataset.channel ?? "combat";
       state.battle.logOpen = true;
+      state.battle.actionDrawerOpen = false;
       render();
       return;
     }
@@ -4845,6 +4885,7 @@
       state.battle.helicopterAxis = control.dataset.axis;
       state.battle.target = null;
       state.battle.actionId = null;
+      state.battle.actionDrawerOpen = false;
       render();
       return;
     }
@@ -5061,6 +5102,79 @@
     state.deployment.drag = null;
   });
 
+  let activeTacticalBoard = null;
+
+  function clearTacticalHover(board = activeTacticalBoard) {
+    if (!board) return;
+    board.dataset.tacticalHover = "false";
+    board.querySelectorAll(".board-cell--tactical-hover, .board-cell--tactical-near")
+      .forEach((cell) => cell.classList.remove(
+        "board-cell--tactical-hover",
+        "board-cell--tactical-near",
+      ));
+    board.querySelectorAll(".board-axis--active")
+      .forEach((axis) => axis.classList.remove("board-axis--active"));
+    const readout = board.querySelector("[data-tactical-coordinate]");
+    if (readout) readout.textContent = "—";
+    if (activeTacticalBoard === board) activeTacticalBoard = null;
+  }
+
+  function updateTacticalHover(cell) {
+    const board = cell?.closest?.(".board-frame--tactical-sea");
+    const coordinate = cell?.dataset?.coordinate;
+    const point = Data.parseCoordinate(coordinate);
+    if (!board || !point) return;
+    if (activeTacticalBoard && activeTacticalBoard !== board) {
+      clearTacticalHover(activeTacticalBoard);
+    }
+    activeTacticalBoard = board;
+    board.dataset.tacticalHover = "true";
+    board.querySelectorAll(".board-cell--tactical-hover, .board-cell--tactical-near")
+      .forEach((candidate) => candidate.classList.remove(
+        "board-cell--tactical-hover",
+        "board-cell--tactical-near",
+      ));
+    board.querySelectorAll(".board-cell[data-coordinate]").forEach((candidate) => {
+      const candidatePoint = Data.parseCoordinate(candidate.dataset.coordinate);
+      if (!candidatePoint) return;
+      if (
+        Math.abs(candidatePoint.row - point.row) <= 2 &&
+        Math.abs(candidatePoint.column - point.column) <= 2
+      ) {
+        candidate.classList.add("board-cell--tactical-near");
+      }
+    });
+    cell.classList.add("board-cell--tactical-hover");
+    board.querySelectorAll(".board-axis--active")
+      .forEach((axis) => axis.classList.remove("board-axis--active"));
+    board.querySelector(`[data-axis-row="${Data.ROWS[point.row]}"]`)
+      ?.classList.add("board-axis--active");
+    board.querySelector(`[data-axis-column="${point.column + 1}"]`)
+      ?.classList.add("board-axis--active");
+    const readout = board.querySelector("[data-tactical-coordinate]");
+    if (readout) readout.textContent = coordinate;
+  }
+
+  document.addEventListener("pointerover", (event) => {
+    const cell = event.target.closest?.(".board-frame--tactical-sea .board-cell[data-coordinate]");
+    if (cell) updateTacticalHover(cell);
+  });
+
+  document.addEventListener("pointerout", (event) => {
+    const board = event.target.closest?.(".board-frame--tactical-sea");
+    if (board && !board.contains(event.relatedTarget)) clearTacticalHover(board);
+  });
+
+  document.addEventListener("focusin", (event) => {
+    const cell = event.target.closest?.(".board-frame--tactical-sea .board-cell[data-coordinate]");
+    if (cell) updateTacticalHover(cell);
+  });
+
+  document.addEventListener("focusout", (event) => {
+    const board = event.target.closest?.(".board-frame--tactical-sea");
+    if (board && !board.contains(event.relatedTarget)) clearTacticalHover(board);
+  });
+
   document.addEventListener("pointerover", (event) => {
     const cell = event.target.closest('[data-action="deployment-cell"]');
     if (
@@ -5093,6 +5207,17 @@
   document.addEventListener("keydown", (event) => {
     const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(event.target.tagName);
     if (typing || confirmDialog.open || rulesDialog.open) return;
+    if (
+      event.key === "Escape" &&
+      state.room?.roomPhase === "PLAYING" &&
+      (state.battle.actionDrawerOpen || state.battle.logOpen)
+    ) {
+      event.preventDefault();
+      state.battle.actionDrawerOpen = false;
+      state.battle.logOpen = false;
+      render();
+      return;
+    }
     if (event.key.toLowerCase() === "r" && state.room?.roomPhase === "DEPLOYING") {
       event.preventDefault();
       rotateSelectedPlacement();
