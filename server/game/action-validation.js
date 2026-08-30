@@ -553,11 +553,25 @@ function hasAnyLegalActionForTarget(state, targetPlayerId, options = {}) {
   );
 }
 
-function hasAttackCapability(state) {
-  return listActionAvailability(state, { ignoreParalysis: true }).some(
-    (availability) =>
-      availability.category === ACTION_CATEGORIES.ATTACK &&
-      availability.available,
+function hasAttackCapability(state, options = {}) {
+  const targetPlayerIds = Array.isArray(options.targetPlayerIds)
+    ? options.targetPlayerIds.filter((playerId) => typeof playerId === "string")
+    : typeof options.targetPlayerId === "string"
+      ? [options.targetPlayerId]
+      : [];
+  const targetContexts = targetPlayerIds.length > 0
+    ? targetPlayerIds.map((targetPlayerId) => ({ targetPlayerId }))
+    : [{}];
+
+  return targetContexts.some((targetContext) =>
+    listActionAvailability(state, {
+      ignoreParalysis: true,
+      ...targetContext,
+    }).some(
+      (availability) =>
+        availability.category === ACTION_CATEGORIES.ATTACK &&
+        availability.available,
+    ),
   );
 }
 

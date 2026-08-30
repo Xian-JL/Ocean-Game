@@ -1,13 +1,13 @@
-# 海战 OCEAN · Ocean-v1.4
+# 海战 OCEAN · Ocean-v1.4.1
 
-`Ocean-v1.4` 在 v1.3.3.2 航母指挥舱框架上实施 D 方案：正式对战地图改为真实俯视海面，原 10×10、12×12、15×15 坐标按钮转为隐形吸附层；悬停或键盘聚焦时显示准线、坐标和局部网格。战斗规则、教程、人机难度、联机协议、私人标记、消息保密和服务器结算均不改变。
+`Ocean-v1.4.1` 修复驱逐舰仍存活、但合法射程格已全部攻击后无法进入终局鱼雷齐射的问题，并完整保留 v1.4 的真实俯视海面、隐形坐标和沉浸式战斗界面。
 
 ## 正式版本基线
 
 | 项目 | 当前值 |
 | --- | --- |
-| 产品名称 | Ocean-v1.4 |
-| npm version | 1.4.0 |
+| 产品名称 | Ocean-v1.4.1 |
+| npm version | 1.4.1 |
 | 战斗规则 | rule-v1.8 |
 | 页面流程 | page-flow-v2.1 |
 | Socket Protocol | 2.1 |
@@ -15,6 +15,14 @@
 | 地图 | 10×10 / 12×12 / 15×15，默认 12×12 |
 | 对局模式 | 1v1 联机 / 1v1 人机 / 3 人 FFA |
 | Node.js | >=24 |
+
+## v1.4.1 终局死锁修复
+
+- 终局攻击能力检查现在与正式回合合法目标检查使用同一目标玩家上下文。
+- 驱逐舰虽然仍存活，但其射程内所有坐标均已使用时，不再被误判为仍有攻击手段。
+- 当所有仍在局玩家都没有其他攻击手段时，服务器立即进入 `FINAL_SALVO`，不会让双方循环待命。
+- 同时覆盖仅一方由“驱逐舰射程耗尽”失去攻击能力，以及双方都由该原因失去攻击能力的情况。
+- 不修改驱逐舰范围、共享坐标、伤害、自损、弹药、鱼雷齐射或信息保密规则。
 
 ## v1.4 真实海面与隐形坐标
 
@@ -70,7 +78,7 @@
 ## 本机运行
 
 ```powershell
-Set-Location "E:\University\University_2.5\Ocean\Ocean-v1.4"
+Set-Location "E:\University\University_2.5\Ocean\Ocean-v1.4.1"
 npm ci
 npm start
 ```
@@ -105,6 +113,6 @@ public/assets/audio/music/ocean-theme.mp3
 - `docs/audio-design-v1.3.3.md`
 - `docs/ui-theme-v1.0.md`
 - `docs/ui-battle-tactical-sea-v1.4.md`
-- `docs/release-manifest-Ocean-v1.4.md`
+- `docs/release-manifest-Ocean-v1.4.1.md`
 
 历史规则、页面、协议和发布文档继续保留用于追溯，不代表当前线上版本。

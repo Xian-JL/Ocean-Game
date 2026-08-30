@@ -24,7 +24,7 @@ test("航母界面使用正确主题标识并清除无效简写选择器", () =>
   assert.equal(css.includes('data-theme="dusk"'), false);
   assert.match(css, /data-theme="ocean-light"/);
   assert.match(css, /data-theme="ocean-dusk"/);
-  assert.match(html, /main\.css\?v=1\.4-tactical-sea/);
+  assert.match(html, /main\.css\?v=1\.4\.1/);
 });
 
 test("主题背景修正继续保留高对比度降级", () => {

@@ -214,7 +214,9 @@ function bothPlayersLackAttackCapability(battleState) {
   return battleState.playerIds.every(
     (playerId) =>
       (battleState.match.eliminatedPlayerIds ?? []).includes(playerId) ||
-      !hasAttackCapability(getBattlePlayerState(battleState, playerId)),
+      !hasAttackCapability(getBattlePlayerState(battleState, playerId), {
+        targetPlayerIds: getOpponentPlayerIds(battleState, playerId),
+      }),
   );
 }
 

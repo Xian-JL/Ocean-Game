@@ -30,6 +30,7 @@ const {
 const {
   damageBattleUnit,
 } = require("../test-fixtures/battle");
+const { getDestroyerIRange } = require("../server/game/ranges");
 const {
   createValidDeployment,
 } = require("../test-fixtures/valid-deployment");
@@ -151,6 +152,37 @@ function preparePlayerTwoForAutomaticSkip(battle) {
   return replaceBattlePlayerState(next, "player-2", {
     ...playerState,
     pendingParalysisUnitIds: ["submarine", "nuclear"],
+  });
+}
+
+function prepareRangeExhaustedPlayer(
+  battle,
+  playerId,
+  targetPlayerId,
+  { keepLastSubmarineMissile = false } = {},
+) {
+  const sunkUnitIds = [
+    "destroyer-ii",
+    "pirate",
+    "motorboat",
+    "motorboat-2",
+    "nuclear",
+  ];
+  if (!keepLastSubmarineMissile) sunkUnitIds.push("submarine");
+  let next = sinkUnits(battle, playerId, sunkUnitIds);
+  next = setRemainingUses(next, playerId, {
+    submarine_missile: keepLastSubmarineMissile ? 1 : 0,
+    nuclear_bomb: 0,
+    helicopter_strafe: 0,
+  });
+  const playerState = getBattlePlayerState(next, playerId);
+  const destroyer = getBattleUnitById(playerState, "destroyer-i");
+  return replaceBattlePlayerState(next, playerId, {
+    ...playerState,
+    destroyerTargetCells: getDestroyerIRange(
+      destroyer.cells,
+      playerState.mapRules,
+    ).map((coordinate) => `${targetPlayerId}:${coordinate}`),
   });
 }
 
@@ -408,4 +440,32 @@ test("最后攻击手段耗尽后先进入 FINAL_SALVO，展示完成后才进�
     finalSalvo.battleState.actionLog.length,
   );
   assert.equal(finished.stateVersion, finalSalvo.stateVersion + 1);
+});
+
+test("最后一次攻击后仅剩射程耗尽的存活驱逐舰时立即进入 FINAL_SALVO", () => {
+  let room = createPlayingRoom("player-1");
+  let battle = prepareRangeExhaustedPlayer(
+    room.battleState,
+    "player-1",
+    "player-2",
+    { keepLastSubmarineMissile: true },
+  );
+  battle = prepareRangeExhaustedPlayer(
+    battle,
+    "player-2",
+    "player-1",
+  );
+  room = { ...room, battleState: battle };
+
+  room = completePlayerAction(beginPlayerAction(room, "player-1", {
+    actionId: "last-attack-before-range-exhaustion",
+    actionType: ACTION_TYPES.SUBMARINE_MISSILE,
+    sourceId: "submarine",
+    target: { kind: "cell", coordinate: "J1" },
+  }));
+
+  assert.equal(room.roomPhase, ROOM_PHASES.FINAL_SALVO);
+  assert.equal(room.turnPhase, null);
+  assert.equal(room.currentPlayerId, null);
+  assert.equal(room.battleState.match.finalSalvo.status, "selecting");
 });

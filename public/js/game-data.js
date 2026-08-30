@@ -10,8 +10,8 @@
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
   const RELEASE = Object.freeze({
-    version: "1.4.0",
-    stage: "Ocean-v1.4",
+    version: "1.4.1",
+    stage: "Ocean-v1.4.1",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.1",
   });

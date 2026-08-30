@@ -1,8 +1,8 @@
 {
   "name": "ocean-game",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "private": true,
-  "description": "《海战 OCEAN》Ocean-v1.4：真实海面隐形坐标战术界面版",
+  "description": "《海战 OCEAN》Ocean-v1.4.1：驱逐舰射程耗尽终局修正版",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

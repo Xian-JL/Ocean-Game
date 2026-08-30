@@ -28,7 +28,7 @@ const REQUIRED_PATHS = Object.freeze([
   "docs/audio-design-v1.3.3.md",
   "docs/ui-theme-v1.0.md",
   "docs/ui-battle-tactical-sea-v1.4.md",
-  "docs/release-manifest-Ocean-v1.4.md",
+  "docs/release-manifest-Ocean-v1.4.1.md",
   "docs/rule-v1.8.md",
   "docs/page-flow-v2.1.md",
   "docs/socket-protocol-v2.1.md",

@@ -21,6 +21,7 @@ const {
   createTestBattle,
   damageBattleUnit,
 } = require("../test-fixtures/battle");
+const { getDestroyerIRange } = require("../server/game/ranges");
 const {
   createValidDeployment,
 } = require("../test-fixtures/valid-deployment");
@@ -116,6 +117,30 @@ function exhaustBothPlayers(battle) {
   return next;
 }
 
+function exhaustPlayerExceptUsedDestroyerRange(battle, playerId, targetPlayerId) {
+  let next = sinkUnits(battle, playerId, [
+    "destroyer-ii",
+    "submarine",
+    "pirate",
+    "motorboat",
+    "motorboat-2",
+    "nuclear",
+  ]);
+  next = setRemainingUses(next, playerId, {
+    submarine_missile: 0,
+    nuclear_bomb: 0,
+    helicopter_strafe: 0,
+  });
+  const player = getBattlePlayerState(next, playerId);
+  const destroyer = getBattleUnitById(player, "destroyer-i");
+  const usedTargets = getDestroyerIRange(destroyer.cells, player.mapRules)
+    .map((coordinate) => `${targetPlayerId}:${coordinate}`);
+  return replaceBattlePlayerState(next, playerId, {
+    ...player,
+    destroyerTargetCells: usedTargets,
+  });
+}
+
 function destroyBattleDecoy(battle, playerId, decoyId) {
   const player = getBattlePlayerState(battle, playerId);
   const destroyed = destroyDecoy(player, decoyId, "test");
@@ -149,6 +174,41 @@ test("终局鱼雷齐射只允许在双方均无攻击手段时执行", () => {
 
   const exhausted = exhaustBothPlayers(createTestBattle());
   assert.equal(bothPlayersLackAttackCapability(exhausted), true);
+});
+
+test("存活驱逐舰射程已全部使用时等价于攻击手段耗尽", () => {
+  let oneExhaustedByRange = exhaustPlayerExceptUsedDestroyerRange(
+    createTestBattle(),
+    "player-1",
+    "player-2",
+  );
+  assert.equal(
+    getBattleUnitById(
+      getBattlePlayerState(oneExhaustedByRange, "player-1"),
+      "destroyer-i",
+    ).hp > 0,
+    true,
+  );
+  assert.equal(bothPlayersLackAttackCapability(oneExhaustedByRange), false);
+
+  oneExhaustedByRange = exhaustPlayerAttacks(
+    oneExhaustedByRange,
+    "player-2",
+  );
+  assert.equal(bothPlayersLackAttackCapability(oneExhaustedByRange), true);
+  assert.doesNotThrow(() => resolveFinalSalvo(oneExhaustedByRange));
+
+  let bothExhaustedByRange = exhaustPlayerExceptUsedDestroyerRange(
+    createTestBattle(),
+    "player-1",
+    "player-2",
+  );
+  bothExhaustedByRange = exhaustPlayerExceptUsedDestroyerRange(
+    bothExhaustedByRange,
+    "player-2",
+    "player-1",
+  );
+  assert.equal(bothPlayersLackAttackCapability(bothExhaustedByRange), true);
 });
 
 test("双方所有有效诱饵按同名坐标同时发射并在生命值相同时判平局", () => {
