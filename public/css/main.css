@@ -10064,6 +10064,295 @@ html[data-theme="ocean-dusk"] .board-frame--tactical-sea .board-corner {
   }
 }
 
+/* Ocean-v1.4.2 · complete theme compatibility and square tactical sea */
+html[data-theme="ocean-light"] {
+  --theme-control-bg: rgba(247, 252, 254, 0.96);
+  --theme-control-bg-soft: rgba(226, 240, 246, 0.92);
+  --theme-control-border: rgba(31, 91, 117, 0.22);
+  --theme-control-selected: rgba(174, 224, 239, 0.78);
+  --theme-control-text: #102f3d;
+  --theme-control-muted: #557482;
+  --theme-control-shadow: 0 16px 34px rgba(29, 72, 91, 0.11);
+}
+
+html[data-theme="ocean-dusk"] {
+  --theme-control-bg: rgba(54, 38, 27, 0.95);
+  --theme-control-bg-soft: rgba(71, 49, 31, 0.92);
+  --theme-control-border: rgba(247, 188, 112, 0.24);
+  --theme-control-selected: rgba(137, 78, 34, 0.76);
+  --theme-control-text: #fff4df;
+  --theme-control-muted: #d8b991;
+  --theme-control-shadow: 0 16px 34px rgba(20, 10, 5, 0.28);
+}
+
+html[data-theme="ocean-light"] :where(
+    .connection-pill,
+    .icon-button,
+    .header-room,
+    .header-help,
+    .entry-facts--v07 span,
+    .entry-form-card,
+    .restore-card,
+    .field input,
+    .field--modern input,
+    .mode-switch,
+    .map-size-switch,
+    .bot-difficulty-picker,
+    .bot-difficulty-switch,
+    .tutorial-cta,
+    .room-code-card,
+    .timer-card,
+    .seat-card,
+    .deployment-progress-strip,
+    .deployment-panel,
+    .deployment-map-card,
+    .deployment-toolbar--v071,
+    .fleet-item,
+    .selected-placement-card,
+    .validation-card,
+    .map-collapse-button,
+    .collapsed-map-summary,
+    .battle-header--v072,
+    .battle-turn-progress,
+    .battle-map-card--v073,
+    .resolution-strip--v074,
+    .battle-controls,
+    .mobile-map-tabs,
+    .battle-side-dock,
+    .action-rail--v073,
+    .event-center--v074,
+    .marker-palette,
+    .marker-tool,
+    .marker-toggle,
+    .map-turn-state,
+    .action-card,
+    .unit-action-card,
+    .event-tabs button,
+    .event-list
+  ),
+html[data-theme="ocean-dusk"] :where(
+    .connection-pill,
+    .icon-button,
+    .header-room,
+    .header-help,
+    .entry-facts--v07 span,
+    .entry-form-card,
+    .restore-card,
+    .field input,
+    .field--modern input,
+    .mode-switch,
+    .map-size-switch,
+    .bot-difficulty-picker,
+    .bot-difficulty-switch,
+    .tutorial-cta,
+    .room-code-card,
+    .timer-card,
+    .seat-card,
+    .deployment-progress-strip,
+    .deployment-panel,
+    .deployment-map-card,
+    .deployment-toolbar--v071,
+    .fleet-item,
+    .selected-placement-card,
+    .validation-card,
+    .map-collapse-button,
+    .collapsed-map-summary,
+    .battle-header--v072,
+    .battle-turn-progress,
+    .battle-map-card--v073,
+    .resolution-strip--v074,
+    .battle-controls,
+    .mobile-map-tabs,
+    .battle-side-dock,
+    .action-rail--v073,
+    .event-center--v074,
+    .marker-palette,
+    .marker-tool,
+    .marker-toggle,
+    .map-turn-state,
+    .action-card,
+    .unit-action-card,
+    .event-tabs button,
+    .event-list
+  ) {
+  color: var(--theme-control-text) !important;
+  border-color: var(--theme-control-border) !important;
+  background: var(--theme-control-bg) !important;
+  box-shadow: var(--theme-control-shadow);
+}
+
+html[data-theme="ocean-light"] :where(
+    .mode-switch__option,
+    .map-size-switch__option,
+    .bot-difficulty-switch__option,
+    .marker-palette button,
+    .marker-tool,
+    .event-tabs button,
+    .battle-side-dock button,
+    .mobile-map-tabs button,
+    .button--secondary,
+    .button--quiet,
+    .text-button
+  ),
+html[data-theme="ocean-dusk"] :where(
+    .mode-switch__option,
+    .map-size-switch__option,
+    .bot-difficulty-switch__option,
+    .marker-palette button,
+    .marker-tool,
+    .event-tabs button,
+    .battle-side-dock button,
+    .mobile-map-tabs button,
+    .button--secondary,
+    .button--quiet,
+    .text-button
+  ) {
+  color: var(--theme-control-muted) !important;
+  border-color: var(--theme-control-border) !important;
+  background: var(--theme-control-bg-soft) !important;
+}
+
+html[data-theme="ocean-light"] :where(
+    .mode-switch__option--selected,
+    .map-size-switch__option--selected,
+    .bot-difficulty-switch__option.is-active,
+    .marker-tool--selected,
+    .marker-palette button[aria-pressed="true"],
+    .event-tabs button[aria-selected="true"],
+    .mobile-map-tabs button[aria-selected="true"],
+    .fleet-item--selected
+  ),
+html[data-theme="ocean-dusk"] :where(
+    .mode-switch__option--selected,
+    .map-size-switch__option--selected,
+    .bot-difficulty-switch__option.is-active,
+    .marker-tool--selected,
+    .marker-palette button[aria-pressed="true"],
+    .event-tabs button[aria-selected="true"],
+    .mobile-map-tabs button[aria-selected="true"],
+    .fleet-item--selected
+  ) {
+  color: var(--theme-control-text) !important;
+  border-color: var(--accent-cyan) !important;
+  background: var(--theme-control-selected) !important;
+}
+
+html[data-theme="ocean-light"] :where(
+    .field > span,
+    .field--modern > span,
+    .fleet-group__heading,
+    .fleet-item__meta,
+    .bot-difficulty-picker__heading small,
+    .bot-difficulty-switch__option small,
+    .selected-placement-card p,
+    .validation-card p,
+    .map-card__heading p,
+    .marker-palette__heading span,
+    .action-card p,
+    .unit-action-card p,
+    .event-list__empty
+  ),
+html[data-theme="ocean-dusk"] :where(
+    .field > span,
+    .field--modern > span,
+    .fleet-group__heading,
+    .fleet-item__meta,
+    .bot-difficulty-picker__heading small,
+    .bot-difficulty-switch__option small,
+    .selected-placement-card p,
+    .validation-card p,
+    .map-card__heading p,
+    .marker-palette__heading span,
+    .action-card p,
+    .unit-action-card p,
+    .event-list__empty
+  ) {
+  color: var(--theme-control-muted) !important;
+}
+
+html[data-theme="ocean-light"] :where(.field input, .field--modern input)::placeholder,
+html[data-theme="ocean-dusk"] :where(.field input, .field--modern input)::placeholder {
+  color: var(--theme-control-muted);
+  opacity: 0.82;
+}
+
+html[data-theme="ocean-light"] .deployment-page--v071 .board-frame {
+  border-color: rgba(31, 91, 117, 0.26);
+  background: linear-gradient(145deg, #dbeaf0, #c8dce5);
+  box-shadow: inset 0 0 45px rgba(39, 105, 132, 0.1), var(--theme-control-shadow);
+}
+
+html[data-theme="ocean-light"] .deployment-page--v071 :where(.board-cell, .board-axis, .board-corner) {
+  color: #214b5d;
+  border-color: rgba(39, 100, 126, 0.26);
+  background: linear-gradient(145deg, rgba(247, 252, 254, 0.94), rgba(218, 235, 242, 0.94));
+}
+
+html[data-theme="ocean-light"] .deployment-page--v071 .board-cell:hover {
+  background: linear-gradient(145deg, rgba(194, 233, 243, 0.96), rgba(157, 214, 232, 0.96));
+}
+
+html[data-theme="ocean-light"] .deployment-page--v071 .board-cell--unit {
+  color: #f5fdff;
+  background: linear-gradient(145deg, rgba(48, 135, 158, 0.96), rgba(23, 86, 105, 0.97));
+}
+
+html[data-theme="ocean-light"] .deployment-page--v071 .board-cell--underwater {
+  color: #f5f8ff;
+  background: linear-gradient(145deg, rgba(73, 103, 167, 0.9), rgba(40, 65, 122, 0.95));
+}
+
+html[data-theme="ocean-light"] .deployment-page--v071 .board-cell--decoy {
+  color: #fff7e9;
+  background: linear-gradient(145deg, rgba(153, 105, 50, 0.9), rgba(99, 64, 31, 0.95));
+}
+
+html[data-theme="ocean-light"] .deployment-page--v071 .board-cell--radar {
+  color: #f1fff9;
+  background: linear-gradient(145deg, rgba(46, 135, 108, 0.9), rgba(27, 86, 72, 0.95));
+}
+
+html[data-theme="ocean-light"] .deployment-page--v071 .board-cell--own-hit {
+  color: #fff5f5;
+  background: linear-gradient(145deg, rgba(158, 72, 82, 0.94), rgba(91, 45, 53, 0.96));
+}
+
+html[data-theme="ocean-dusk"] .deployment-page--v071 .board-frame {
+  border-color: rgba(247, 188, 112, 0.3);
+  background: linear-gradient(145deg, #3b291d, #251b16);
+}
+
+html[data-theme="ocean-light"] :where(.marker-palette__heading strong, .fleet-item__name, .map-card__heading h2, .map-card__heading h3, .bot-difficulty-picker__heading > span, .bot-difficulty-switch__option strong),
+html[data-theme="ocean-dusk"] :where(.marker-palette__heading strong, .fleet-item__name, .map-card__heading h2, .map-card__heading h3, .bot-difficulty-picker__heading > span, .bot-difficulty-switch__option strong) {
+  color: var(--theme-control-text) !important;
+}
+
+@media (prefers-contrast: more), (forced-colors: active) {
+  html[data-theme="ocean-light"] :where(
+      .field input,
+      .mode-switch,
+      .map-size-switch,
+      .deployment-panel,
+      .deployment-map-card,
+      .marker-palette,
+      .resolution-strip--v074
+    ),
+  html[data-theme="ocean-dusk"] :where(
+      .field input,
+      .mode-switch,
+      .map-size-switch,
+      .deployment-panel,
+      .deployment-map-card,
+      .marker-palette,
+      .resolution-strip--v074
+    ) {
+    color: CanvasText !important;
+    border-color: CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none;
+  }
+}
+
 /* Ocean-v1.4 · 沉浸式单主战场与可展开战术侧栏 */
 .battle-page--immersive {
   width: min(1800px, calc(100% - 12px));
@@ -10522,5 +10811,112 @@ html[data-theme="ocean-dusk"] .battle-page--immersive .board-frame--tactical-sea
   .battle-drawer-scrim {
     background: transparent;
     backdrop-filter: none;
+  }
+}
+
+/* Ocean-v1.4.2 · final immersive-layout overrides (keep after v1.4 rules) */
+html[data-theme="ocean-light"] :where(
+    .mode-switch__option.is-active,
+    .map-size-switch__option.is-active,
+    .mobile-map-tabs button.is-active,
+    .battle-side-dock button.is-active,
+    .event-tabs button.is-active
+  ),
+html[data-theme="ocean-dusk"] :where(
+    .mode-switch__option.is-active,
+    .map-size-switch__option.is-active,
+    .mobile-map-tabs button.is-active,
+    .battle-side-dock button.is-active,
+    .event-tabs button.is-active
+  ) {
+  color: var(--theme-control-text) !important;
+  border-color: var(--accent-cyan) !important;
+  background: var(--theme-control-selected) !important;
+}
+
+html[data-theme="ocean-light"] .battle-page--immersive :where(
+    .battle-map-card--v073,
+    .mobile-map-tabs,
+    .battle-side-dock,
+    .action-rail--v073,
+    .event-center--v074,
+    .battle-controls,
+    .marker-palette,
+    .resolution-strip--v074
+  ),
+html[data-theme="ocean-dusk"] .battle-page--immersive :where(
+    .battle-map-card--v073,
+    .mobile-map-tabs,
+    .battle-side-dock,
+    .action-rail--v073,
+    .event-center--v074,
+    .battle-controls,
+    .marker-palette,
+    .resolution-strip--v074
+  ) {
+  color: var(--theme-control-text) !important;
+  border-color: var(--theme-control-border) !important;
+  background: var(--theme-control-bg) !important;
+  box-shadow: var(--theme-control-shadow);
+}
+
+@media (min-width: 901px) {
+  .battle-page--immersive .board-frame--tactical-sea {
+    display: block;
+    width: min(100%, clamp(440px, calc(100dvh - 250px), 980px));
+    min-height: 0;
+    margin: 0 auto;
+    padding: 12px 12px 34px;
+    overflow: hidden;
+    background: var(--surface-deep);
+  }
+
+  html[data-theme="ocean-light"] .battle-page--immersive .board-frame--tactical-sea,
+  html[data-theme="ocean-dusk"] .battle-page--immersive .board-frame--tactical-sea {
+    background: var(--theme-control-bg-soft);
+  }
+
+  .battle-page--immersive .board-frame--tactical-sea .ocean-board {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    grid-template-columns: 26px repeat(var(--board-size), minmax(0, 1fr));
+    grid-template-rows: 26px repeat(var(--board-size), minmax(0, 1fr));
+    overflow: hidden;
+    background:
+      linear-gradient(rgba(1, 20, 31, 0.06), rgba(1, 20, 31, 0.12)),
+      url("/assets/images/battle/tactical-ocean-v1.4.webp?v=1.4") center / cover no-repeat;
+    box-shadow:
+      0 0 0 1px rgba(216, 244, 250, 0.09),
+      0 18px 60px rgba(0, 0, 0, 0.22);
+  }
+
+  .battle-page--immersive .board-frame--tactical-sea :where(.board-cell, .board-axis, .board-corner) {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+  }
+}
+
+@media (prefers-contrast: more), (forced-colors: active) {
+  html[data-theme="ocean-light"] .battle-page--immersive :where(
+      .battle-map-card--v073,
+      .board-frame--tactical-sea,
+      .mobile-map-tabs,
+      .marker-palette,
+      .resolution-strip--v074
+    ),
+  html[data-theme="ocean-dusk"] .battle-page--immersive :where(
+      .battle-map-card--v073,
+      .board-frame--tactical-sea,
+      .mobile-map-tabs,
+      .marker-palette,
+      .resolution-strip--v074
+    ) {
+    color: CanvasText !important;
+    border-color: CanvasText !important;
+    background: Canvas !important;
+    box-shadow: none;
   }
 }
