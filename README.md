@@ -1,13 +1,13 @@
-# 海战 OCEAN · Ocean-v1.4.2.1
+# 海战 OCEAN · Ocean-v1.4.2.2
 
-`Ocean-v1.4.2.1` 是 v1.4.2 的定点修正版：修正动态地图下诱饵鱼雷总数、统一雷达起始格文案，并约束桌面对战首屏与行动侧栏高度。极地寒光配色经人工复核后保持不变。
+`Ocean-v1.4.2.2` 修复桌面对战页面滚动后，己方与敌方地图切换条被回合状态栏遮挡的问题。v1.4.2.1 的三项定点修复全部保留。
 
 ## 正式版本基线
 
 | 项目 | 当前值 |
 | --- | --- |
-| 产品名称 | Ocean-v1.4.2.1 |
-| npm version | 1.4.2-1 |
+| 产品名称 | Ocean-v1.4.2.2 |
+| npm version | 1.4.2-2 |
 | 战斗规则 | rule-v1.8 |
 | 页面流程 | page-flow-v2.1 |
 | Socket Protocol | 2.1 |
@@ -15,6 +15,12 @@
 | 地图 | 10×10 / 12×12 / 15×15，默认 12×12 |
 | 对局模式 | 1v1 联机 / 1v1 人机 / 3 人 FFA |
 | Node.js | >=24 |
+
+## v1.4.2.2 地图切换条修复
+
+- 桌面端回合状态栏与地图切换条使用互不重叠的粘性位置，页面滚动后仍可完整看到“己方 / 敌方”按钮。
+- 战斗外框改用 `overflow: clip` 保留圆角裁切，同时避免 `overflow: hidden` 破坏粘性定位参照。
+- 手机端原有顶部地图标签规则不变；地图尺寸、行动侧栏、三套主题和游戏规则均未修改。
 
 ## v1.4.2.1 定点修复
 
@@ -95,7 +101,7 @@
 ## 本机运行
 
 ```powershell
-Set-Location "E:\University\University_2.5\Ocean\Ocean-v1.4.2.1"
+Set-Location "E:\University\University_2.5\Ocean\Ocean-v1.4.2.2"
 npm ci
 npm start
 ```
@@ -133,5 +139,6 @@ public/assets/audio/music/ocean-theme.mp3
 - `docs/release-manifest-Ocean-v1.4.1.md`
 - `docs/release-manifest-Ocean-v1.4.2.md`
 - `docs/release-manifest-Ocean-v1.4.2.1.md`
+- `docs/release-manifest-Ocean-v1.4.2.2.md`
 
 历史规则、页面、协议和发布文档继续保留用于追溯，不代表当前线上版本。

@@ -10978,3 +10978,17 @@ html[data-theme="ocean-dusk"] .battle-page--immersive :where(
     overscroll-behavior: contain;
   }
 }
+
+/* Ocean-v1.4.2.2 · keep desktop map tabs below the sticky turn header */
+@media (min-width: 901px) {
+  .battle-page--immersive {
+    overflow: clip;
+  }
+
+  .battle-page--immersive .mobile-map-tabs,
+  .battle-page--immersive .mobile-map-tabs--v072 {
+    position: sticky;
+    z-index: 39;
+    top: 168px;
+  }
+}

@@ -46,5 +46,5 @@ test("桌面行动和消息侧栏使用独立视口上限与内部滚动区", ()
   const fixes = css.slice(css.lastIndexOf("Ocean-v1.4.2.1 · viewport-bounded battle workspace"));
   assert.match(fixes, /action-rail--v073,[\s\S]*event-center--v074[\s\S]*max-height: min\(720px, calc\(100dvh - 280px\)\)/);
   assert.match(fixes, /action-rail__content[\s\S]*max-height: calc\(100dvh - 356px\)[\s\S]*overscroll-behavior: contain/);
-  assert.match(html, /\/css\/main\.css\?v=1\.4\.2\.1/);
+  assert.match(html, /\/css\/main\.css\?v=1\.4\.2\.2/);
 });
