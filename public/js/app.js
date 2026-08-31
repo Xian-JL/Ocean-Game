@@ -2625,7 +2625,7 @@
         <article class="decoy-status decoy-status--v073">
           <span class="unit-status__icon unit-status__icon--decoy" aria-hidden="true">${uiIcon("ship-decoy")}</span>
           <div><strong>诱饵鱼雷</strong><small>仍有效</small></div>
-          <b>${ownBattle.decoys.filter((decoy) => !decoy.destroyed).length} / 3</b>
+          <b>${ownBattle.decoys.filter((decoy) => !decoy.destroyed).length} / ${ownBattle.decoys.length}</b>
         </article>
       </div>`;
   }
@@ -2772,7 +2772,7 @@
           <header class="unit-action-card__header">
             <span class="unit-status__icon unit-status__icon--decoy" aria-hidden="true">${uiIcon("ship-decoy")}</span>
             <div class="unit-action-card__identity"><div><strong>诱饵鱼雷</strong><small>战术装置</small></div></div>
-            <span class="hp-meter hp-meter--compact"><b>${ownBattle.decoys.filter((decoy) => !decoy.destroyed).length}</b><i>/ 3</i></span>
+            <span class="hp-meter hp-meter--compact"><b>${ownBattle.decoys.filter((decoy) => !decoy.destroyed).length}</b><i>/ ${ownBattle.decoys.length}</i></span>
           </header>
         </section>
       </div>`;
@@ -2817,7 +2817,7 @@
         ${radarRequired ? `
           <section class="opening-radar-task" aria-label="首次雷达任务">
             <span class="opening-radar-task__icon" aria-hidden="true">${uiIcon("action-radar")}</span>
-            <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `选择任一敌方地图坐标，同时扫描 ${escapeHtml(remainingNames.join(" / "))}` : `选择敌方 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 海域`}</small></div>
+            <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `选择扫描区域的左上起始格，同时扫描 ${escapeHtml(remainingNames.join(" / "))}` : `选择敌方 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 扫描区域的左上起始格`}</small></div>
             <button class="button button--primary button--compact" data-action="select-action" data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}">${state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN ? "已选择" : "开始扫描"}</button>
           </section>` : ""}
 
@@ -2827,7 +2827,9 @@
           <div class="target-instruction target-instruction--v073" data-target-mode="${selectedDefinition.targetMode}">
             <div class="target-instruction__heading"><span class="action-card__icon action-card__icon--${actionVisualMeta(selectedDefinition).group}" aria-hidden="true">${uiIcon(actionVisualMeta(selectedDefinition).icon)}</span><div><small>当前行动</small><strong>${escapeHtml(selectedDefinition.name)}</strong></div></div>
             ${simultaneousAction ? `<div class="multi-target-action multi-target-action--v073"><span>同时作用</span>${(room.turn?.remainingTargetPlayerIds ?? []).map((playerId) => `<b>${escapeHtml(Model.nicknameFor(room, playerId))}</b>`).join("")}<small>资源与自损只结算 1 次</small></div>` : ""}
-            <p>${selectedDefinition.targetMode === "line"
+            <p>${selectedDefinition.type === Data.ACTION_TYPES.RADAR_SCAN
+              ? `选择 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 扫描区域的左上起始格。`
+              : selectedDefinition.targetMode === "line"
               ? "选择行或列，再点地图。"
               : selectedDefinition.targetMode === "area"
                 ? "选择高亮中心格。"
@@ -3373,7 +3375,7 @@
         }).join("")}
         <article>
           <span>雷</span><div><strong>诱饵鱼雷</strong><small>最终有效数量</small></div>
-          <b>${snapshot?.decoys?.filter((decoy) => !decoy.destroyed).length ?? 0} / 3</b>
+          <b>${snapshot?.decoys?.filter((decoy) => !decoy.destroyed).length ?? 0} / ${snapshot?.decoys?.length ?? 0}</b>
         </article>
       </div>
       <div class="replay-resources" aria-label="最终剩余弹药与使用次数">

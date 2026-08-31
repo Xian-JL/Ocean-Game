@@ -10,8 +10,8 @@
   }
 })(typeof globalThis === "object" ? globalThis : this, function createGameData() {
   const RELEASE = Object.freeze({
-    version: "1.4.2",
-    stage: "Ocean-v1.4.2",
+    version: "1.4.2-1",
+    stage: "Ocean-v1.4.2.1",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.1",
   });
@@ -314,7 +314,7 @@
         warning = `以中心格形成完整 ${mapRules.detectionSize}×${mapRules.detectionSize} 区域。潜水艇或核潜艇的未受击存活单位格，以及未被摧毁的诱饵鱼雷，都会产生水下信号；只返回是否探测到信号。`;
       }
       if (definition.type === ACTION_TYPES.RADAR_SCAN) {
-        warning = `每名玩家的首个行动回合必须使用航空母舰自带雷达，选择完整 ${mapRules.radarSize}×${mapRules.radarSize} 区域；只返回是否存在敌方布局。`;
+        warning = `每名玩家的首个行动回合必须使用航空母舰自带雷达，选择 ${mapRules.radarSize}×${mapRules.radarSize} 扫描区域的左上起始格；只返回是否存在敌方布局。`;
       }
       return Object.freeze({ ...definition, warning });
     });

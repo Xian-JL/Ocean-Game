@@ -1,13 +1,13 @@
-# 海战 OCEAN · Ocean-v1.4.2
+# 海战 OCEAN · Ocean-v1.4.2.1
 
-`Ocean-v1.4.2` 完整修复三套主题在首页、部署与对战组件中的适配问题，并将桌面对战海面重构为与坐标盘严格贴合、随视口放大的方形战区。v1.4.1 的终局死锁修复完整保留。
+`Ocean-v1.4.2.1` 是 v1.4.2 的定点修正版：修正动态地图下诱饵鱼雷总数、统一雷达起始格文案，并约束桌面对战首屏与行动侧栏高度。极地寒光配色经人工复核后保持不变。
 
 ## 正式版本基线
 
 | 项目 | 当前值 |
 | --- | --- |
-| 产品名称 | Ocean-v1.4.2 |
-| npm version | 1.4.2 |
+| 产品名称 | Ocean-v1.4.2.1 |
+| npm version | 1.4.2-1 |
 | 战斗规则 | rule-v1.8 |
 | 页面流程 | page-flow-v2.1 |
 | Socket Protocol | 2.1 |
@@ -15,6 +15,14 @@
 | 地图 | 10×10 / 12×12 / 15×15，默认 12×12 |
 | 对局模式 | 1v1 联机 / 1v1 人机 / 3 人 FFA |
 | Node.js | >=24 |
+
+## v1.4.2.1 定点修复
+
+- 诱饵鱼雷状态与赛后复盘的分母改为读取当前对局实际鱼雷总数，10×10、12×12、15×15 分别正确显示 2、3、5。
+- 雷达选择坐标统一说明为扫描区域的“左上起始格”，不再与震爆弹、探测弹所使用的“中心格”混淆。
+- 桌面对战入口移除多余顶距、压缩航母地平线与地图标签间距，并根据视口高度限制方形战区大小，使主要内容能在首屏完整呈现。
+- 行动和消息侧栏按当前视口高度限制外框与内部滚动区，避免底部越界；手机端底部抽屉规则保持不变。
+- 极地寒光配色未修改；规则、数值、Socket 协议、AI、教程与音效均保持 v1.4.2 基线。
 
 ## v1.4.2 主题与战术海面修复
 
@@ -87,7 +95,7 @@
 ## 本机运行
 
 ```powershell
-Set-Location "E:\University\University_2.5\Ocean\Ocean-v1.4.2"
+Set-Location "E:\University\University_2.5\Ocean\Ocean-v1.4.2.1"
 npm ci
 npm start
 ```
@@ -124,5 +132,6 @@ public/assets/audio/music/ocean-theme.mp3
 - `docs/ui-battle-tactical-sea-v1.4.md`
 - `docs/release-manifest-Ocean-v1.4.1.md`
 - `docs/release-manifest-Ocean-v1.4.2.md`
+- `docs/release-manifest-Ocean-v1.4.2.1.md`
 
 历史规则、页面、协议和发布文档继续保留用于追溯，不代表当前线上版本。

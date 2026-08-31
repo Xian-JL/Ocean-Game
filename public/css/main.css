@@ -10920,3 +10920,61 @@ html[data-theme="ocean-dusk"] .battle-page--immersive :where(
     box-shadow: none;
   }
 }
+
+/* Ocean-v1.4.2.1 · viewport-bounded battle workspace (theme colors unchanged) */
+@media (min-width: 901px) {
+  .app:has(> .battle-page--immersive) {
+    width: 100%;
+    padding: 0 0 16px;
+  }
+
+  .battle-page--immersive {
+    min-height: calc(100dvh - 76px);
+  }
+
+  .battle-page--immersive .carrier-horizon-deck {
+    height: 28px;
+    padding: 0 4% 4px;
+  }
+
+  .battle-page--immersive .carrier-tactical-console {
+    min-height: calc(100dvh - 114px);
+    padding: 7px 8px 8px;
+  }
+
+  .battle-page--immersive .mobile-map-tabs,
+  .battle-page--immersive .mobile-map-tabs--v072 {
+    margin-block: 4px 5px;
+    padding: 4px;
+  }
+
+  .battle-page--immersive .mobile-map-tabs button {
+    min-height: 34px;
+  }
+
+  .battle-page--immersive .battle-map-card--v073 {
+    min-height: 0;
+    padding: 6px;
+  }
+
+  .battle-page--immersive .board-frame--tactical-sea {
+    width: min(100%, clamp(380px, calc(100dvh - 392px), 900px));
+    padding: 8px 8px 30px;
+  }
+
+  .battle-page--immersive .action-rail--v073,
+  .battle-page--immersive .event-center--v074 {
+    max-height: min(720px, calc(100dvh - 280px));
+  }
+
+  .battle-page--immersive .action-rail--v073 .action-rail__content {
+    max-height: calc(100dvh - 356px);
+    overscroll-behavior: contain;
+  }
+
+  .battle-page--immersive .event-center--v074 .event-center__content,
+  .battle-page--immersive .event-center--v074 .event-list {
+    max-height: calc(100dvh - 410px);
+    overscroll-behavior: contain;
+  }
+}
