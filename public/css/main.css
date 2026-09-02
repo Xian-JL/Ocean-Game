@@ -11875,3 +11875,226 @@ html[data-theme="ocean-dusk"] .battle-page--immersive :where(
     transform: none;
   }
 }
+
+/* Ocean-v1.5.1 · viewport-fit map and classic battle controls */
+@media (min-width: 901px) {
+  .battle-page--v151 .carrier-bridge-scene {
+    background:
+      linear-gradient(180deg, rgba(1, 8, 14, .08) 0 42%, rgba(1, 7, 12, .56) 72%, rgba(0, 4, 8, .9) 100%),
+      url("/assets/images/battle/carrier-bridge-ocean.webp?v=1.5.1") center / cover no-repeat;
+  }
+
+  .battle-page--v151 .carrier-tactical-console {
+    display: grid;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 42px 14px 120px;
+    overflow: hidden;
+  }
+
+  .battle-page--v151 .carrier-tactical-console:has(.resolution-strip--v074) {
+    padding-top: 94px;
+  }
+
+  .battle-page--v151 .resolution-strip--v074 {
+    position: relative;
+    z-index: 32;
+    grid-row: 1;
+    max-height: min(104px, 18dvh);
+    margin: 0 0 0 96px;
+    overflow: auto;
+  }
+
+  .battle-page--v151 .battle-layout--v072,
+  .battle-page--v151 .battle-layout--v076 {
+    grid-row: 2;
+    height: auto;
+    min-height: 0;
+    align-self: stretch;
+  }
+
+  .battle-page--v151 .battle-main-column,
+  .battle-page--v151 .battle-maps,
+  .battle-page--v151 .battle-map-card--v073 {
+    min-height: 0;
+  }
+
+  .battle-page--v151 .battle-map-card--v073 {
+    container-type: size;
+    overflow: hidden;
+  }
+
+  .battle-page--v151 .board-frame--tactical-sea {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    aspect-ratio: 1;
+    margin: 0 auto;
+    overflow: hidden;
+    transform: perspective(1200px) rotateX(2.5deg) scale(.965);
+    transform-origin: center center;
+  }
+
+  @supports (width: 1cqh) {
+    .battle-page--v151 .board-frame--tactical-sea {
+      width: min(100%, 100cqh);
+      height: auto;
+    }
+  }
+
+  .battle-page--v151 .board-frame--tactical-sea .ocean-board {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    grid-template-columns: 26px repeat(var(--board-size), minmax(0, 1fr));
+    grid-template-rows: 26px repeat(var(--board-size), minmax(0, 1fr));
+    background:
+      linear-gradient(rgba(2, 18, 30, .22), rgba(2, 18, 30, .36)),
+      url("/assets/images/battle/tactical-ocean-v1.4.webp?v=1.5.1") center / cover no-repeat;
+  }
+
+  /* v1.4.2.2 的圆角、字体和细边框语言；右侧行动面板保持 v1.5。 */
+  .battle-page--v151 .mobile-map-tabs,
+  .battle-page--v151 .mobile-map-tabs--v072 {
+    gap: 5px;
+    padding: 5px;
+    border: 1px solid rgba(var(--accent-primary-rgb), .2);
+    border-radius: 13px;
+    background: rgba(2, 14, 23, .82);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .22);
+    backdrop-filter: blur(14px);
+  }
+
+  .battle-page--v151 .mobile-map-tabs button {
+    min-height: 38px;
+    padding: 7px 12px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-muted);
+    clip-path: none;
+    font-family: inherit;
+    font-size: .78rem;
+    font-weight: 680;
+    transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+  }
+
+  .battle-page--v151 .mobile-map-tabs button:hover,
+  .battle-page--v151 .mobile-map-tabs button:focus-visible,
+  .battle-page--v151 .mobile-map-tabs button.is-active {
+    border-color: rgba(var(--accent-primary-rgb), .42);
+    background: rgba(var(--accent-primary-rgb), .11);
+    color: var(--text-primary);
+    box-shadow: none;
+  }
+
+  .battle-page--v151 .battle-side-dock {
+    width: 70px;
+    gap: 7px;
+    padding: 6px;
+    overflow: visible;
+    border: 1px solid rgba(var(--accent-primary-rgb), .24);
+    border-radius: 15px;
+    background: rgba(2, 14, 23, .88);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, .34);
+  }
+
+  .battle-page--v151 .battle-side-dock button {
+    min-height: 70px;
+    padding: 7px 4px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+  }
+
+  .battle-page--v151 .battle-side-dock button:hover,
+  .battle-page--v151 .battle-side-dock button:focus-visible,
+  .battle-page--v151 .battle-side-dock button.is-active {
+    border-color: rgba(var(--accent-primary-rgb), .42);
+    background: rgba(var(--accent-primary-rgb), .11);
+    color: var(--text-primary);
+    box-shadow: none;
+  }
+
+  .battle-page--v151 .battle-side-dock small {
+    padding: 0;
+    border-radius: 0;
+    color: var(--text-muted);
+    background: transparent;
+    font-family: inherit;
+  }
+
+  .battle-page--v151 .bridge-menu-button {
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: rgba(12, 37, 52, .7);
+  }
+
+  .battle-page--v151 .bridge-confirm-control {
+    background: transparent;
+    clip-path: none;
+  }
+
+  .battle-page--v151 .bridge-console-group button {
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(9, 31, 46, .62);
+    color: var(--text-soft);
+    font-family: inherit;
+    font-size: .78rem;
+    font-weight: 680;
+    line-height: 1.2;
+    box-shadow: none;
+    transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
+  }
+
+  .battle-page--v151 .bridge-console-group button:hover:not(:disabled),
+  .battle-page--v151 .bridge-console-group button:focus-visible,
+  .battle-page--v151 .bridge-console-group button.is-active {
+    border-color: rgba(var(--accent-primary-rgb), .55);
+    background: rgba(52, 163, 190, .18);
+    color: var(--text-primary);
+    box-shadow: none;
+  }
+
+  .battle-page--v151 .bridge-console-group button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  .battle-page--v151 .bridge-confirm-button {
+    min-height: 58px !important;
+    border-color: rgba(var(--accent-primary-rgb), .55) !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, #2ed2ef, #149aba) !important;
+    color: #00121a !important;
+    box-shadow: 0 12px 28px rgba(17, 172, 206, .19) !important;
+  }
+
+  .battle-page--v151 .bridge-help-control button[data-action="surrender"] {
+    border-color: rgba(var(--danger-rgb), .44);
+    background: rgba(167, 52, 65, .13);
+    color: var(--status-danger-soft);
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .battle-page--v151 .battle-side-dock {
+    width: 64px;
+  }
+
+  .battle-page--v151 .battle-side-dock button {
+    min-height: 70px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-page--v151 .board-frame--tactical-sea {
+    transform: scale(.965);
+  }
+}

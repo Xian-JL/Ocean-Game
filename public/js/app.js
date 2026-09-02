@@ -3389,7 +3389,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">

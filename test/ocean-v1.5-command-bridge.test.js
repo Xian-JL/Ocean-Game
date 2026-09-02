@@ -24,7 +24,7 @@ test("桌面沙盘使用舰桥场景、透视海图与常驻右侧行动台", ()
   const v15 = css.slice(css.lastIndexOf("Ocean-v1.5 · carrier command bridge"));
   assert.match(v15, /carrier-bridge-ocean\.webp\?v=1\.5/);
   assert.match(v15, /tactical-ocean-v1\.4\.webp\?v=1\.5/);
-  assert.match(v15, /rotateX\(5\.5deg\)/);
+  assert.match(v15, /rotateX\((?:5\.5|2\.5)deg\)/);
   assert.match(v15, /grid-template-columns:\s*minmax\(0, 1fr\) clamp\(250px, 19vw, 320px\)/);
   assert.match(v15, /\.action-rail--v073[\s\S]*opacity:\s*1/);
 });
@@ -36,5 +36,5 @@ test("水面与潜层只写入本地界面状态且手机端关闭透视控制�
   assert.match(css, /data-tactical-layer="surface"/);
   assert.match(css, /data-tactical-layer="underwater"/);
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.battle-page--v15 \.bridge-command-deck/);
-  assert.match(html, /\/css\/main\.css\?v=1\.5/);
+  assert.match(html, /\/css\/main\.css\?v=1\.5(?:\.1)?/);
 });

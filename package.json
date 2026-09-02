@@ -1,8 +1,8 @@
 {
   "name": "ocean-game",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "private": true,
-  "description": "《海战 OCEAN》Ocean-v1.5：舰桥立体战术沙盘版",
+  "description": "《海战 OCEAN》Ocean-v1.5.1：完整海图与经典按键风格修正版",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
