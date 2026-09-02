@@ -257,7 +257,9 @@ function assertBoardCoordinateAlignment(board, size = 12) {
     Array.from({ length: size }, (_value, index) => String(index + 1)));
   assert.deepEqual(rowAxes.map((axis) => axis.textContent),
     "ABCDEFGHIJKLMNO".slice(0, size).split(""));
-  const children = [...board.children];
+  const children = [...board.children].filter(
+    (child) => !child.classList.contains("tactical-unit-art-layer"),
+  );
   assert.ok(children[0].classList.contains("board-corner"));
   columnAxes.forEach((axis, index) => {
     assert.equal(children[index + 1], axis);
@@ -317,7 +319,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.5.1",
+    stage: "Ocean-v1.5.2",
     protocolVersion: "2.1",
   });
 

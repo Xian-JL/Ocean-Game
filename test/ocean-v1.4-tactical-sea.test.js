@@ -22,7 +22,7 @@ test("v1.4 战斗地图使用真实海面并保留原坐标按钮", () => {
 
   assert.equal(fs.existsSync(oceanAsset), true);
   assert.ok(fs.statSync(oceanAsset).size > 50_000);
-  assert.match(html, /tactical-ocean-v1\.4\.webp/);
+  assert.match(html, /ocean_deep_active\.webp/);
   assert.match(css, /tactical-ocean-v1\.4\.webp/);
   assert.match(app, /data-action="enemy-cell"/);
   assert.match(app, /data-coordinate/);

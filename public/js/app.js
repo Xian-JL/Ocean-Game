@@ -241,6 +241,179 @@
     }[unitType] ?? "ship-destroyer-i";
   }
 
+  const UNIT_ART_FOLDERS = Object.freeze({
+    [Data.UNIT_TYPES.DESTROYER_I]: "destroyer-1",
+    [Data.UNIT_TYPES.DESTROYER_II]: "destroyer-2",
+    [Data.UNIT_TYPES.PIRATE_SHIP]: "pirate",
+    [Data.UNIT_TYPES.MOTORBOAT]: "motorboat",
+    [Data.UNIT_TYPES.SUBMARINE]: "submarine",
+    [Data.UNIT_TYPES.NUCLEAR_SUBMARINE]: "nuclear-submarine",
+    [Data.UNIT_TYPES.DECOY_TORPEDO]: "decoy",
+  });
+
+  const ACTION_ART_FILES = Object.freeze({
+    [Data.ACTION_TYPES.DESTROYER_I_RAM]: "action_destroyer_1_ram.webp",
+    [Data.ACTION_TYPES.DESTROYER_II_RAM]: "action_destroyer_2_ram.webp",
+    [Data.ACTION_TYPES.PIRATE_ATTACK]: "action_pirate_raid.webp",
+    [Data.ACTION_TYPES.MOTORBOAT_RAM]: "action_motorboat_ram.webp",
+    [Data.ACTION_TYPES.SUBMARINE_MISSILE]: "action_submarine_missile.webp",
+    [Data.ACTION_TYPES.NUCLEAR_BOMB]: "action_nuclear_bomb.webp",
+    [Data.ACTION_TYPES.SHOCK_BOMB]: "action_shock_bomb.webp",
+    [Data.ACTION_TYPES.DETECTION_BOMB]: "action_detection_bomb.webp",
+    [Data.ACTION_TYPES.HELICOPTER_STRAFE]: "action_helicopter_strafe.webp",
+    [Data.ACTION_TYPES.RADAR_SCAN]: "action_radar_scan.webp",
+  });
+
+  const ART_DIRECTIONS = Object.freeze(["north", "east", "south", "west"]);
+
+  function artCoordinate(coordinate) {
+    const parsed = Data.parseCoordinate(coordinate);
+    return parsed ? { row: parsed.row + 1, column: parsed.column + 1 } : null;
+  }
+
+  function stableArtDirection(seed) {
+    const hash = [...String(seed ?? "")].reduce(
+      (value, character) => ((value * 31) + character.charCodeAt(0)) >>> 0,
+      0,
+    );
+    return ART_DIRECTIONS[hash % ART_DIRECTIONS.length];
+  }
+
+  function artBounds(cells) {
+    const parsed = cells.map(artCoordinate).filter(Boolean);
+    if (parsed.length === 0) return null;
+    const rows = parsed.map((cell) => cell.row);
+    const columns = parsed.map((cell) => cell.column);
+    const row = Math.min(...rows);
+    const column = Math.min(...columns);
+    return {
+      row,
+      column,
+      rowSpan: Math.max(...rows) - row + 1,
+      columnSpan: Math.max(...columns) - column + 1,
+    };
+  }
+
+  function unitArtDirection(unit) {
+    const first = artCoordinate(unit.cells?.[0]);
+    const last = artCoordinate(unit.cells?.at(-1));
+    const bounds = artBounds(unit.cells ?? []);
+    if (!first || !last || !bounds) return stableArtDirection(unit.id);
+    if (bounds.columnSpan > bounds.rowSpan) {
+      return last.column < first.column ? "west" : "east";
+    }
+    if (bounds.rowSpan > bounds.columnSpan) {
+      return last.row < first.row ? "north" : "south";
+    }
+    return stableArtDirection(unit.id ?? unit.cells?.[0]);
+  }
+
+  function carrierModuleName(coordinate, carrierCells) {
+    const current = artCoordinate(coordinate);
+    if (!current) return "carrier_n0e0s0w0.webp";
+    const occupied = new Set(carrierCells);
+    const north = Data.formatCoordinate(current.row - 2, current.column - 1);
+    const east = Data.formatCoordinate(current.row - 1, current.column);
+    const south = Data.formatCoordinate(current.row, current.column - 1);
+    const west = Data.formatCoordinate(current.row - 1, current.column - 2);
+    return `carrier_n${Number(occupied.has(north))}e${Number(occupied.has(east))}s${Number(occupied.has(south))}w${Number(occupied.has(west))}.webp`;
+  }
+
+  function unitArtState(unit, definition, coordinate = null) {
+    if (unit.destroyed || unit.hp <= 0) return "sunk";
+    if (unit.paralyzed) return "paralyzed";
+    if (coordinate && unit.hitCells?.includes(coordinate)) return "hit";
+    if ((unit.hitCells?.length ?? 0) > 0 || (definition.initialHp && unit.hp < definition.initialHp)) {
+      return "damaged";
+    }
+    return "ready";
+  }
+
+  function artSpriteMarkup({
+    asset,
+    bounds,
+    layer,
+    stateCode = "ready",
+    kind = "unit",
+    selected = false,
+    label = "",
+  }) {
+    if (!asset || !bounds) return "";
+    return `<span
+      class="tactical-unit-art tactical-unit-art--${kind} tactical-unit-art--${stateCode}${selected ? " tactical-unit-art--selected" : ""}"
+      data-grid-row="${bounds.row}"
+      data-grid-column="${bounds.column}"
+      data-grid-row-span="${bounds.rowSpan}"
+      data-grid-column-span="${bounds.columnSpan}"
+      data-art-layer="${layer}"
+      data-art-state="${stateCode}"
+      role="img"
+      aria-label="${escapeHtml(label)}"
+    ><img src="${asset}" alt="" decoding="async" draggable="false" /></span>`;
+  }
+
+  function renderTacticalUnitArt(snapshot, options = {}) {
+    const sprites = [];
+    for (const unit of snapshot?.units ?? []) {
+      const definition = Data.getUnitDefinitionByType(unit.type);
+      if (!definition || !Array.isArray(unit.cells) || unit.cells.length === 0) continue;
+      const layer = definition.category === "underwater" ? "underwater" : "surface";
+      const selected = options.selectedId === unit.id;
+      if (unit.type === Data.UNIT_TYPES.AIRCRAFT_CARRIER) {
+        for (const coordinate of unit.cells) {
+          const position = artCoordinate(coordinate);
+          if (!position) continue;
+          const stateCode = unitArtState(unit, definition, coordinate);
+          sprites.push(artSpriteMarkup({
+            asset: `/assets/images/ocean-2.5d/units/carrier/${carrierModuleName(coordinate, unit.cells)}`,
+            bounds: { row: position.row, column: position.column, rowSpan: 1, columnSpan: 1 },
+            layer,
+            stateCode,
+            kind: "carrier-module",
+            selected,
+            label: `${definition.name} ${coordinate}${stateCode === "hit" ? "，该格已受击" : ""}`,
+          }));
+        }
+        continue;
+      }
+      const folder = UNIT_ART_FOLDERS[unit.type];
+      const stateCode = unitArtState(unit, definition);
+      sprites.push(artSpriteMarkup({
+        asset: folder ? `/assets/images/ocean-2.5d/units/${folder}/${unitArtDirection(unit)}.webp` : null,
+        bounds: artBounds(unit.cells),
+        layer,
+        stateCode,
+        kind: definition.shape === "square" ? "square-unit" : "whole-unit",
+        selected,
+        label: `${definition.name}${stateCode === "sunk" ? "，已沉没" : stateCode === "paralyzed" ? "，已瘫痪" : ""}`,
+      }));
+    }
+    for (const decoy of snapshot?.decoys ?? []) {
+      const position = artCoordinate(decoy.cell);
+      if (!position) continue;
+      const stateCode = decoy.destroyed ? "sunk" : "ready";
+      sprites.push(artSpriteMarkup({
+        asset: `/assets/images/ocean-2.5d/units/decoy/${stableArtDirection(decoy.id ?? decoy.cell)}.webp`,
+        bounds: { row: position.row, column: position.column, rowSpan: 1, columnSpan: 1 },
+        layer: "underwater",
+        stateCode,
+        kind: "decoy",
+        selected: options.selectedId === decoy.id,
+        label: `诱饵鱼雷 ${decoy.cell}${decoy.destroyed ? "，已摧毁" : ""}`,
+      }));
+    }
+    return sprites.length > 0
+      ? `<div class="tactical-unit-art-layer" aria-label="2.5D 作战单位投影">${sprites.join("")}</div>`
+      : "";
+  }
+
+  function actionArtIcon(definition) {
+    const file = ACTION_ART_FILES[definition?.type];
+    return file
+      ? `<img class="action-art-icon" src="/assets/images/ocean-2.5d/actions/${file}" alt="" decoding="async" draggable="false" />`
+      : uiIcon("action-radar");
+  }
+
   function clone(value) {
     return structuredClone(value);
   }
@@ -1775,7 +1948,7 @@
     ) ?? null;
   }
 
-  function renderGrid(label, cellRenderer, className = "") {
+  function renderGrid(label, cellRenderer, className = "", artLayer = "") {
     const tacticalSea = className.split(/\s+/).includes("board-frame--tactical-sea");
     const contents = [
       '<span class="board-corner" aria-hidden="true"></span>',
@@ -1808,6 +1981,7 @@
       <div class="board-frame ${className}"${tacticalSea ? ' data-tactical-hover="false"' : ""}>
         <div class="ocean-board" role="grid" aria-label="${escapeHtml(label)}" data-board-size="${Data.BOARD_SIZE}">
           ${contents.join("")}
+          ${artLayer}
         </div>
         ${tacticalSea ? '<div class="tactical-map-readout" aria-hidden="true"><span>坐标锁定</span><strong data-tactical-coordinate>—</strong><small>隐形网格已启用</small></div>' : ""}
       </div>`;
@@ -1843,6 +2017,20 @@
     }
     const hoverPreview = getDeploymentHoverPreview(locked);
     const hoverCells = new Set(hoverPreview.cells);
+
+    const artSnapshot = {
+      units: state.deployment.placements
+        .filter((placement) => Data.getUnitDefinitionById(placement.id)?.type !== Data.UNIT_TYPES.DECOY_TORPEDO)
+        .map((placement) => ({
+          id: placement.id,
+          type: Data.getUnitDefinitionById(placement.id)?.type,
+          cells: placement.cells,
+          hitCells: [],
+        })),
+      decoys: state.deployment.placements
+        .filter((placement) => Data.getUnitDefinitionById(placement.id)?.type === Data.UNIT_TYPES.DECOY_TORPEDO)
+        .map((placement) => ({ id: placement.id, cell: placement.cells[0], destroyed: false })),
+    };
 
     return renderGrid("己方舰队部署地图", (coordinate) => {
       const entry = occupied.get(coordinate);
@@ -1887,7 +2075,8 @@
             : {}),
         },
       };
-    }, locked ? "board-frame--locked" : "");
+    }, locked ? "board-frame--locked board-frame--2d-art" : "board-frame--2d-art",
+    renderTacticalUnitArt(artSnapshot, { selectedId: selected }));
   }
 
   function getDeploymentHoverPreview(locked) {
@@ -2380,13 +2569,14 @@
           "data-coordinate": coordinate,
           "data-cell-state": cellState,
           "data-tactical-layer": entry?.kind === "unit"
-            ? entry.definition.category === "underwater_unit" ? "underwater" : "surface"
+            ? entry.definition.category === "underwater" ? "underwater" : "surface"
             : entry?.kind === "decoy" ? "underwater" : "empty",
         },
       };
     }, options.replay
       ? "board-frame--replay board-frame--tactical-sea board-frame--own-sea"
-      : "board-frame--tactical-sea board-frame--own-sea");
+      : "board-frame--tactical-sea board-frame--own-sea",
+    renderTacticalUnitArt(snapshot, { replay: options.replay }));
   }
 
   function currentIntelligenceArea(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
@@ -2698,7 +2888,7 @@
         title="${escapeHtml(definition.warning)}"
         ${status.enabled ? "" : "disabled"}
       >
-        <span class="action-card__icon action-card__icon--${meta.group}" aria-hidden="true">${uiIcon(meta.icon)}</span>
+        <span class="action-card__icon action-card__icon--${meta.group}" aria-hidden="true">${actionArtIcon(definition)}</span>
         <span class="action-card__body">
           <strong>${escapeHtml(definition.name)}</strong>
           <small>${escapeHtml(sourceDefinition?.name ?? "作战单位")}${global ? " · 同步两方" : ""}</small>
@@ -2829,7 +3019,7 @@
 
         ${radarRequired ? `
           <section class="opening-radar-task" aria-label="首次雷达任务">
-            <span class="opening-radar-task__icon" aria-hidden="true">${uiIcon("action-radar")}</span>
+            <span class="opening-radar-task__icon opening-radar-task__icon--art" aria-hidden="true">${actionArtIcon(Data.getActionDefinition(Data.ACTION_TYPES.RADAR_SCAN))}</span>
             <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `选择扫描区域的左上起始格，同时扫描 ${escapeHtml(remainingNames.join(" / "))}` : `选择敌方 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 扫描区域的左上起始格`}</small></div>
             <button class="button button--primary button--compact" data-action="select-action" data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}">${state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN ? "已选择" : "开始扫描"}</button>
           </section>` : ""}
@@ -2838,7 +3028,7 @@
 
         ${selectedDefinition ? `
           <div class="target-instruction target-instruction--v073" data-target-mode="${selectedDefinition.targetMode}">
-            <div class="target-instruction__heading"><span class="action-card__icon action-card__icon--${actionVisualMeta(selectedDefinition).group}" aria-hidden="true">${uiIcon(actionVisualMeta(selectedDefinition).icon)}</span><div><small>当前行动</small><strong>${escapeHtml(selectedDefinition.name)}</strong></div></div>
+            <div class="target-instruction__heading"><span class="action-card__icon action-card__icon--${actionVisualMeta(selectedDefinition).group}" aria-hidden="true">${actionArtIcon(selectedDefinition)}</span><div><small>当前行动</small><strong>${escapeHtml(selectedDefinition.name)}</strong></div></div>
             ${simultaneousAction ? `<div class="multi-target-action multi-target-action--v073"><span>同时作用</span>${(room.turn?.remainingTargetPlayerIds ?? []).map((playerId) => `<b>${escapeHtml(Model.nicknameFor(room, playerId))}</b>`).join("")}<small>资源与自损只结算 1 次</small></div>` : ""}
             <p>${selectedDefinition.type === Data.ACTION_TYPES.RADAR_SCAN
               ? `选择 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 扫描区域的左上起始格。`
@@ -3389,7 +3579,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">

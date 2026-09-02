@@ -11881,7 +11881,7 @@ html[data-theme="ocean-dusk"] .battle-page--immersive :where(
   .battle-page--v151 .carrier-bridge-scene {
     background:
       linear-gradient(180deg, rgba(1, 8, 14, .08) 0 42%, rgba(1, 7, 12, .56) 72%, rgba(0, 4, 8, .9) 100%),
-      url("/assets/images/battle/carrier-bridge-ocean.webp?v=1.5.1") center / cover no-repeat;
+      url("/assets/images/battle/carrier-bridge-ocean.webp?v=1.5.2") center / cover no-repeat;
   }
 
   .battle-page--v151 .carrier-tactical-console {
@@ -11952,7 +11952,7 @@ html[data-theme="ocean-dusk"] .battle-page--immersive :where(
     grid-template-rows: 26px repeat(var(--board-size), minmax(0, 1fr));
     background:
       linear-gradient(rgba(2, 18, 30, .22), rgba(2, 18, 30, .36)),
-      url("/assets/images/battle/tactical-ocean-v1.4.webp?v=1.5.1") center / cover no-repeat;
+      url("/assets/images/battle/tactical-ocean-v1.4.webp?v=1.5.2") center / cover no-repeat;
   }
 
   /* v1.4.2.2 的圆角、字体和细边框语言；右侧行动面板保持 v1.5。 */
@@ -12097,4 +12097,249 @@ html[data-theme="ocean-dusk"] .battle-page--immersive :where(
   .battle-page--v151 .board-frame--tactical-sea {
     transform: scale(.965);
   }
+}
+
+/* Ocean-v1.5.2 · first production 2.5D asset integration */
+.ocean-board {
+  position: relative;
+}
+
+.board-frame--2d-art .ocean-board,
+.board-frame--tactical-sea .ocean-board {
+  background:
+    linear-gradient(rgba(2, 18, 30, .26), rgba(2, 18, 30, .4)),
+    url("/assets/images/ocean-2.5d/ocean/ocean_deep_active.webp?v=1.5.2") center / cover no-repeat;
+}
+
+html[data-theme="ocean-light"] .board-frame--2d-art .ocean-board,
+html[data-theme="ocean-light"] .board-frame--tactical-sea .ocean-board {
+  background:
+    linear-gradient(rgba(215, 237, 244, .08), rgba(35, 91, 110, .14)),
+    url("/assets/images/ocean-2.5d/ocean/ocean_deep_calm.webp?v=1.5.2") center / cover no-repeat;
+}
+
+html[data-theme="ocean-dusk"] .board-frame--2d-art .ocean-board,
+html[data-theme="ocean-dusk"] .board-frame--tactical-sea .ocean-board {
+  background:
+    linear-gradient(rgba(52, 21, 8, .2), rgba(4, 12, 19, .38)),
+    url("/assets/images/ocean-2.5d/ocean/ocean_deep_subtle.webp?v=1.5.2") center / cover no-repeat;
+}
+
+.tactical-unit-art-layer {
+  position: absolute;
+  z-index: 6;
+  top: 25px;
+  right: 0;
+  bottom: 0;
+  left: 25px;
+  display: grid;
+  grid-template-columns: repeat(var(--board-size, 12), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--board-size, 12), minmax(0, 1fr));
+  gap: 2px;
+  pointer-events: none;
+}
+
+.board-frame--tactical-sea .tactical-unit-art-layer {
+  top: 23px;
+  left: 23px;
+  gap: 0;
+}
+
+.tactical-unit-art {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  overflow: visible;
+  pointer-events: none;
+  transition: opacity 160ms ease, filter 160ms ease, transform 160ms ease;
+}
+
+.tactical-unit-art[data-art-layer="underwater"] {
+  z-index: 1;
+  opacity: .84;
+}
+
+.tactical-unit-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  filter:
+    drop-shadow(0 7px 5px rgba(0, 0, 0, .52))
+    drop-shadow(0 0 5px rgba(102, 211, 236, .2));
+  transform: scale(1.16);
+  transform-origin: center;
+}
+
+.tactical-unit-art--carrier-module img {
+  transform: scale(1.23);
+}
+
+.tactical-unit-art--square-unit img {
+  transform: scale(1.12);
+}
+
+.tactical-unit-art--decoy img {
+  transform: scale(1.28);
+}
+
+.tactical-unit-art--selected {
+  z-index: 7;
+  filter: drop-shadow(0 0 7px rgba(181, 247, 255, .92));
+}
+
+.tactical-unit-art--damaged img,
+.tactical-unit-art--hit img {
+  filter:
+    sepia(.22) saturate(1.25)
+    drop-shadow(0 5px 4px rgba(0, 0, 0, .56))
+    drop-shadow(0 0 6px rgba(255, 133, 78, .42));
+}
+
+.tactical-unit-art--hit::after {
+  position: absolute;
+  z-index: 8;
+  width: 42%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 8%, #ffc16e 9% 20%, rgba(255, 77, 48, .8) 21% 40%, transparent 72%);
+  content: "";
+  filter: drop-shadow(0 0 5px rgba(255, 88, 55, .8));
+}
+
+.tactical-unit-art--paralyzed img {
+  filter:
+    hue-rotate(34deg) saturate(1.7)
+    drop-shadow(0 0 7px rgba(191, 103, 255, .72));
+}
+
+.tactical-unit-art--sunk {
+  opacity: .48;
+}
+
+.tactical-unit-art--sunk img {
+  filter: grayscale(.85) brightness(.5) contrast(1.18) drop-shadow(0 5px 5px rgba(0, 0, 0, .65));
+}
+
+.ocean-board:has(.tactical-unit-art-layer) .board-cell--unit {
+  background: rgba(9, 49, 66, .18);
+  box-shadow: inset 0 0 8px rgba(88, 198, 226, .06);
+}
+
+.ocean-board:has(.tactical-unit-art-layer) .board-cell--underwater {
+  background: rgba(24, 50, 96, .14);
+}
+
+.ocean-board:has(.tactical-unit-art-layer) .board-cell--decoy {
+  background: rgba(106, 67, 26, .14);
+}
+
+.ocean-board:has(.tactical-unit-art-layer) .board-cell--unit .unit-glyph {
+  opacity: 0;
+}
+
+.battle-page--v152[data-tactical-layer="surface"] .battle-map-card--own .tactical-unit-art[data-art-layer="underwater"],
+.battle-page--v152[data-tactical-layer="underwater"] .battle-map-card--own .tactical-unit-art[data-art-layer="surface"] {
+  opacity: .08;
+  filter: grayscale(1);
+}
+
+.battle-page--v152[data-tactical-layer="surface"] .battle-map-card--own .tactical-unit-art[data-art-layer="surface"],
+.battle-page--v152[data-tactical-layer="underwater"] .battle-map-card--own .tactical-unit-art[data-art-layer="underwater"] {
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(83, 218, 250, .34));
+}
+
+.action-art-icon {
+  display: block;
+  width: 112%;
+  height: 112%;
+  max-width: none;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .42));
+  transform: scale(1.08);
+}
+
+.action-card:disabled .action-art-icon {
+  filter: grayscale(.82) brightness(.6);
+}
+
+.action-card--selected .action-art-icon {
+  filter: drop-shadow(0 0 7px rgba(var(--accent-primary-rgb), .72));
+}
+
+.opening-radar-task__icon--art {
+  overflow: hidden;
+}
+
+.opening-radar-task__icon--art .action-art-icon {
+  width: 100%;
+  height: 100%;
+}
+
+@media (min-width: 901px) {
+  .battle-page--v152 .board-frame--tactical-sea .tactical-unit-art-layer {
+    top: 26px;
+    left: 26px;
+  }
+}
+
+@media (max-width: 900px) {
+  .tactical-unit-art img {
+    transform: scale(1.1);
+  }
+
+  .tactical-unit-art--carrier-module img,
+  .tactical-unit-art--decoy img {
+    transform: scale(1.16);
+  }
+}
+
+.tactical-unit-art[data-grid-row="1"] { --art-row: 1; }
+.tactical-unit-art[data-grid-row="2"] { --art-row: 2; }
+.tactical-unit-art[data-grid-row="3"] { --art-row: 3; }
+.tactical-unit-art[data-grid-row="4"] { --art-row: 4; }
+.tactical-unit-art[data-grid-row="5"] { --art-row: 5; }
+.tactical-unit-art[data-grid-row="6"] { --art-row: 6; }
+.tactical-unit-art[data-grid-row="7"] { --art-row: 7; }
+.tactical-unit-art[data-grid-row="8"] { --art-row: 8; }
+.tactical-unit-art[data-grid-row="9"] { --art-row: 9; }
+.tactical-unit-art[data-grid-row="10"] { --art-row: 10; }
+.tactical-unit-art[data-grid-row="11"] { --art-row: 11; }
+.tactical-unit-art[data-grid-row="12"] { --art-row: 12; }
+.tactical-unit-art[data-grid-row="13"] { --art-row: 13; }
+.tactical-unit-art[data-grid-row="14"] { --art-row: 14; }
+.tactical-unit-art[data-grid-row="15"] { --art-row: 15; }
+
+.tactical-unit-art[data-grid-column="1"] { --art-column: 1; }
+.tactical-unit-art[data-grid-column="2"] { --art-column: 2; }
+.tactical-unit-art[data-grid-column="3"] { --art-column: 3; }
+.tactical-unit-art[data-grid-column="4"] { --art-column: 4; }
+.tactical-unit-art[data-grid-column="5"] { --art-column: 5; }
+.tactical-unit-art[data-grid-column="6"] { --art-column: 6; }
+.tactical-unit-art[data-grid-column="7"] { --art-column: 7; }
+.tactical-unit-art[data-grid-column="8"] { --art-column: 8; }
+.tactical-unit-art[data-grid-column="9"] { --art-column: 9; }
+.tactical-unit-art[data-grid-column="10"] { --art-column: 10; }
+.tactical-unit-art[data-grid-column="11"] { --art-column: 11; }
+.tactical-unit-art[data-grid-column="12"] { --art-column: 12; }
+.tactical-unit-art[data-grid-column="13"] { --art-column: 13; }
+.tactical-unit-art[data-grid-column="14"] { --art-column: 14; }
+.tactical-unit-art[data-grid-column="15"] { --art-column: 15; }
+
+.tactical-unit-art[data-grid-row-span="1"] { --art-row-span: 1; }
+.tactical-unit-art[data-grid-row-span="2"] { --art-row-span: 2; }
+.tactical-unit-art[data-grid-row-span="3"] { --art-row-span: 3; }
+.tactical-unit-art[data-grid-row-span="4"] { --art-row-span: 4; }
+.tactical-unit-art[data-grid-column-span="1"] { --art-column-span: 1; }
+.tactical-unit-art[data-grid-column-span="2"] { --art-column-span: 2; }
+.tactical-unit-art[data-grid-column-span="3"] { --art-column-span: 3; }
+.tactical-unit-art[data-grid-column-span="4"] { --art-column-span: 4; }
+
+.tactical-unit-art {
+  grid-row: var(--art-row) / span var(--art-row-span);
+  grid-column: var(--art-column) / span var(--art-column-span);
 }

@@ -1,0 +1,692 @@
+{
+  "project": "Ocean",
+  "asset_batch": "2.5D-first-required-assets",
+  "core_asset_count": 57,
+  "generated_package_date": "2026-09-02",
+  "assets": [
+    {
+      "relative_path": "01_ocean/ocean_deep_calm.webp",
+      "pixel_dimensions": {
+        "width": 4096,
+        "height": 4096
+      },
+      "format": "WebP",
+      "direction": null,
+      "asset_type": "ocean_texture",
+      "transparent_background": false,
+      "sha256": "f9a96f6689ba66c6f802bc1c810ff8ea14b941d6dc90ee9a113e95f9de71191d"
+    },
+    {
+      "relative_path": "01_ocean/ocean_deep_active.webp",
+      "pixel_dimensions": {
+        "width": 4096,
+        "height": 4096
+      },
+      "format": "WebP",
+      "direction": null,
+      "asset_type": "ocean_texture",
+      "transparent_background": false,
+      "sha256": "280dcd7ede5123f349bf79c687738ccdeb722ef7bfd2855cd6fd11832d699d2a"
+    },
+    {
+      "relative_path": "01_ocean/ocean_deep_subtle.webp",
+      "pixel_dimensions": {
+        "width": 4096,
+        "height": 4096
+      },
+      "format": "WebP",
+      "direction": null,
+      "asset_type": "ocean_texture",
+      "transparent_background": false,
+      "sha256": "3eaf7ad5189a4a1f1855745ab9694742dfb83ba182b5a9e7e2edcc9e4602547b"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N0E0S0W0.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "79c75096bc31dba6ceb69c07d777777e8f9d398b5d929532a17833ecc2e0dc20"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N1E0S0W0.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "21cfc50ceb32f9d311a23b5c505aa5ad318aa56b6812039a4638c9961d326e3a"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N0E1S0W0.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "ac5af2eaf96e9b75c84be085a7df94f210e86cade8b028dad5f9ec2f92bea89a"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N0E0S1W0.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "f2044b1ca1dd85686e17cb3ba3b58b97a2b95776d5ece760d5667f0d6a3c654f"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N0E0S0W1.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "5cae5997527b1bd7fe57bd884fa4b22f495265385a1dcb2bb0b1fcffc4677a36"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N1E0S1W0.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "885cb660eb38ed7bfbcffe1ee8f90e62b522a6cb2cda1b0ce8a7e919ddf09353"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N0E1S0W1.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "7198f99a2be925519f89c5a8a53ee5c5b4fdd6d8d427a493a2a2ac3c7c16bbf2"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N1E1S0W0.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "f6a2672ddb540fc4cc1e34c4c9d333fb486e231dbac2b9474f0019cd3734eb81"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N0E1S1W0.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "98435da25d49bafbe71af2c6dbb526f4495aa8e58efbefb3f612ee92c542bd58"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N0E0S1W1.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "28fed1d1afb7bba2846f7f35030681a8cbcee360fcc8731788b44c31c7e6e93f"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N1E0S0W1.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "a8bcfdc2a853315770f3e52173f1d2e91eaf14c2b1c16970795dcb35cca6bad2"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N1E1S1W0.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "f74d1c728f813b4f9d4cb1318a7d61c3942110f12762221b06454f19c035ef19"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N0E1S1W1.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "af123de33d246d5a9d9be7e5f8c9a885d29a6cc504d598a359b1a1cd0787a084"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N1E0S1W1.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "1e8b03ec3ae1eefe28a20df33f010ab51a970ce158f6bb304cf8d3e7f49897ed"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N1E1S0W1.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "447afff356f5304e71e6c192251c5002e25f8a38a8048ebf1acd25e1377e3f17"
+    },
+    {
+      "relative_path": "02_units/carrier_modules/carrier_N1E1S1W1.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "carrier_module",
+      "transparent_background": true,
+      "sha256": "418c3e1ca100e1b9223796ae82b36cdcaede9013491df75d18e760ca827e9a62"
+    },
+    {
+      "relative_path": "02_units/destroyer_1/destroyer_1_north.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "north",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "ea69a01814309bd29b22faa8e6c338211d0b15e85d6003bead115b5792b81769"
+    },
+    {
+      "relative_path": "02_units/destroyer_1/destroyer_1_east.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "east",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "3e6e36cf9ede0fbe0094565e1e91d34177af15c3c13452f1b2369c3d9feb9be1"
+    },
+    {
+      "relative_path": "02_units/destroyer_1/destroyer_1_south.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "south",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "ba8e10defb68476245ef2006c6adca4905195d7143c23f71e77adbed6e047141"
+    },
+    {
+      "relative_path": "02_units/destroyer_1/destroyer_1_west.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "west",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "5cb665324ebd530b1f1e8ae004f0b0d666b7e3cd79883a5b3a6616b40d17d55d"
+    },
+    {
+      "relative_path": "02_units/destroyer_2/destroyer_2_north.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "north",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "0e39af9a079e18a935636600b954f9835f54e76c1e7eb09bbceafc8f9a192ae3"
+    },
+    {
+      "relative_path": "02_units/destroyer_2/destroyer_2_east.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "east",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "6348e26df4ee56828213f710b7ca8a1f93f597c9b310bc87601277dfcd3d98f6"
+    },
+    {
+      "relative_path": "02_units/destroyer_2/destroyer_2_south.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "south",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "af37d526019f3a497ab01a5e4c70918270dee8c3f4a6eba9e893b9cd61e1e7fa"
+    },
+    {
+      "relative_path": "02_units/destroyer_2/destroyer_2_west.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "west",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "2d414ec5e57553d8ff675d415e28a63c52b7927e452147397ca0c0ad632649d3"
+    },
+    {
+      "relative_path": "02_units/pirate/pirate_north.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "north",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "39893325e3a6cbfd53c3424e5d308fe4a76a6356d6ce69a9feb36dd903eaf25b"
+    },
+    {
+      "relative_path": "02_units/pirate/pirate_east.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "east",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "54f714ecdcd4d35349135bb830890c1d04e103bff2fc438872b8ceb4c8140396"
+    },
+    {
+      "relative_path": "02_units/pirate/pirate_south.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "south",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "0a777f816c7a8173421e50c691d1711b7cb2286879a4842ec4d43443eee1d3d7"
+    },
+    {
+      "relative_path": "02_units/pirate/pirate_west.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "west",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "9d6c79c9faa69b59b3e997c84fd72ceda15acbdbcce5c46fedf2847664b03d41"
+    },
+    {
+      "relative_path": "02_units/motorboat/motorboat_north.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "north",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "1c84843dc7b74c62cf4de90b711050d9170d7e256ca99a28f7722ef5135d0cf3"
+    },
+    {
+      "relative_path": "02_units/motorboat/motorboat_east.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "east",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "52ae04a58d8d66c2eaeddca7f149c0ec96e004c2e7849508c176092c4b652c35"
+    },
+    {
+      "relative_path": "02_units/motorboat/motorboat_south.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "south",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "91ba6c3e64a6a7e6759da1616d5af193c88ddcc9fcc9014c6ff66156a7516c36"
+    },
+    {
+      "relative_path": "02_units/motorboat/motorboat_west.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "west",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "d8470292b19b9f14919c04010102b160b849f69276e7018ad77e7221876e9cd2"
+    },
+    {
+      "relative_path": "02_units/submarine/submarine_north.png",
+      "pixel_dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "format": "PNG",
+      "direction": "north",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "7a7743861f16e18076b0389d3e78f95e981d4e8038d9beffadcb9ebdc0f90326"
+    },
+    {
+      "relative_path": "02_units/submarine/submarine_east.png",
+      "pixel_dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "format": "PNG",
+      "direction": "east",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "f2b05405b2cffd9380892aa6100ec362cbd78b92a2e92a4f7a9e3cd60dbcc867"
+    },
+    {
+      "relative_path": "02_units/submarine/submarine_south.png",
+      "pixel_dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "format": "PNG",
+      "direction": "south",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "c9dd80e988018998568d632f316f25026131a55ae5a16405878771d677cfbc37"
+    },
+    {
+      "relative_path": "02_units/submarine/submarine_west.png",
+      "pixel_dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "format": "PNG",
+      "direction": "west",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "abc91bc66a350638aa4746a01b1c754f135df121a6e5d148172a2cc0f4d1e024"
+    },
+    {
+      "relative_path": "02_units/nuclear_submarine/nuclear_submarine_north.png",
+      "pixel_dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "format": "PNG",
+      "direction": "north",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "b23c307f2034e94dd72932be2fa7e0a5f5df557539fb9ddf10c5ceb282520bc3"
+    },
+    {
+      "relative_path": "02_units/nuclear_submarine/nuclear_submarine_east.png",
+      "pixel_dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "format": "PNG",
+      "direction": "east",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "c9c44c0b357af0daa0e3f0977bec5a1ff967459fad11f508393d7d993081c5dd"
+    },
+    {
+      "relative_path": "02_units/nuclear_submarine/nuclear_submarine_south.png",
+      "pixel_dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "format": "PNG",
+      "direction": "south",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "61d9318d4e3f8dc3a77c83ad270ce74689349dc9ed2b1dccbe43fad19a889b81"
+    },
+    {
+      "relative_path": "02_units/nuclear_submarine/nuclear_submarine_west.png",
+      "pixel_dimensions": {
+        "width": 2048,
+        "height": 2048
+      },
+      "format": "PNG",
+      "direction": "west",
+      "asset_type": "unit_sprite",
+      "transparent_background": true,
+      "sha256": "95ff658301f54e8234238b8c1eb4b8df6c19c1c3885ec19fb7eb58cc7c7ac8b1"
+    },
+    {
+      "relative_path": "02_units/decoy/decoy_north.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "north",
+      "asset_type": "decoy_device",
+      "transparent_background": true,
+      "sha256": "bbd33ccb059b4d8f3e6a79deb5c2f2023202edace63b9aa6cf7a8fbc81b5541f"
+    },
+    {
+      "relative_path": "02_units/decoy/decoy_east.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "east",
+      "asset_type": "decoy_device",
+      "transparent_background": true,
+      "sha256": "af3c0e801ab848301a03839885abc8033f783aded59ac57533362520b3baa471"
+    },
+    {
+      "relative_path": "02_units/decoy/decoy_south.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "south",
+      "asset_type": "decoy_device",
+      "transparent_background": true,
+      "sha256": "bbe6da1d7af3a86fb9460441b1d8b0d0b25ed7b54651867117d049f430f79cca"
+    },
+    {
+      "relative_path": "02_units/decoy/decoy_west.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": "west",
+      "asset_type": "decoy_device",
+      "transparent_background": true,
+      "sha256": "3c4b096db36c87434a6ec6468c2a6bb5acd5760b11b27033e2c83ad7b014956c"
+    },
+    {
+      "relative_path": "03_actions/action_destroyer_1_ram.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "2dcaec1c67eb28fbcd40461385677cf64f6232b8376970f951d34c74a98d4cf2"
+    },
+    {
+      "relative_path": "03_actions/action_destroyer_2_ram.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "14489e41747c2744d7182a6385112558c31cc12355bf0e0d30f9c80be793a994"
+    },
+    {
+      "relative_path": "03_actions/action_pirate_raid.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "a3cbef3e8abb34d809854aaf2830f348f6117411f2d35c62a7563c966a8a5c31"
+    },
+    {
+      "relative_path": "03_actions/action_motorboat_ram.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "7e6f32d8c63e4ab31c44caa0b91669e795e7579f2052a44d2c2838667f3ca570"
+    },
+    {
+      "relative_path": "03_actions/action_submarine_missile.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "986cff51daa0e7a0c8f001e7d138f050796ee9fc7dec02ee43b10c7160aace20"
+    },
+    {
+      "relative_path": "03_actions/action_nuclear_bomb.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "16c46ca5a6d229db453a4ed7d5239792011d284b92c2c62b131ae1990a3b0f53"
+    },
+    {
+      "relative_path": "03_actions/action_shock_bomb.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "e21ae87980aaa14206630ea5d1c160c2cbeedb265fd8fdf9aef0994826b0b1a3"
+    },
+    {
+      "relative_path": "03_actions/action_detection_bomb.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "7b04d6900d432847ca3ea1454a600b78fc5e0d53c28e61296b54404f5e5efb76"
+    },
+    {
+      "relative_path": "03_actions/action_radar_scan.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "cc12e18605d524d1b2542f7a428b45074fddb48ba5cca544d47a4a5a3e2a32af"
+    },
+    {
+      "relative_path": "03_actions/action_helicopter_strafe.png",
+      "pixel_dimensions": {
+        "width": 1024,
+        "height": 1024
+      },
+      "format": "PNG",
+      "direction": null,
+      "asset_type": "action_icon",
+      "transparent_background": true,
+      "sha256": "a8eff1fa0e11995f5c5c2ea6b26279af83ad5485b4cea1865f2e83fce22d8f58"
+    }
+  ]
+}
