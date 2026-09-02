@@ -63,7 +63,7 @@ test("就绪与指标接口提供请求编号、资源用量和聚合计数", as
   assert.equal(metricsResponse.status, 200);
   assert.equal(metricsResponse.headers.get("cache-control"), "no-store");
   const metrics = await metricsResponse.json();
-  assert.equal(metrics.stage, "Ocean-v1.4.2.2");
+  assert.equal(metrics.stage, "Ocean-v1.5");
   assert.ok(Number.isInteger(metrics.memoryMb.rss));
   assert.ok(Number.isInteger(metrics.memoryMb.heapUsed));
   assert.ok(metrics.counters.httpRequests >= 2);

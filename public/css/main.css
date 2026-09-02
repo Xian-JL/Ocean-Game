@@ -10992,3 +10992,886 @@ html[data-theme="ocean-dusk"] .battle-page--immersive :where(
     top: 168px;
   }
 }
+
+/* Ocean-v1.5 · carrier command bridge and perspective tactical table */
+@media (min-width: 901px) {
+  .site-shell:has(.battle-page--v15) {
+    min-height: 100dvh;
+    overflow: clip;
+  }
+
+  .site-shell:has(.battle-page--v15) > .global-header,
+  .site-shell:has(.battle-page--v15) > .global-footer {
+    display: none;
+  }
+
+  .app:has(> .battle-page--v15) {
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    padding: 0;
+  }
+
+  .battle-page--v15.battle-page--immersive {
+    width: 100%;
+    min-height: 100dvh;
+    height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow: clip;
+    border: 0;
+    border-radius: 0;
+    background: #020a11;
+  }
+
+  .battle-page--v15 .carrier-bridge-scene {
+    position: fixed;
+    z-index: 0;
+    inset: 0;
+    height: 100dvh;
+    opacity: 1;
+    background:
+      linear-gradient(180deg, rgba(1, 8, 14, .08) 0 42%, rgba(1, 7, 12, .56) 72%, rgba(0, 4, 8, .9) 100%),
+      url("/assets/images/battle/carrier-bridge-ocean.webp?v=1.5") center / cover no-repeat;
+  }
+
+  .battle-page--v15 .carrier-bridge-scene__glass {
+    position: absolute;
+    inset: 64px 7% 24% 7%;
+    border: 1px solid rgba(165, 229, 245, .08);
+    background: linear-gradient(180deg, rgba(93, 187, 219, .05), transparent 40%);
+    box-shadow: inset 0 0 80px rgba(0, 9, 16, .35);
+  }
+
+  .battle-page--v15 .carrier-bridge-scene__horizon,
+  .battle-page--v15 .carrier-bridge-scene__console {
+    display: none;
+  }
+
+  .battle-page--v15 .bridge-frame {
+    position: absolute;
+    z-index: 1;
+    top: 58px;
+    bottom: 106px;
+    width: 7.5%;
+    border-color: rgba(98, 152, 173, .24);
+    background: linear-gradient(90deg, rgba(0, 5, 9, .95), rgba(7, 19, 27, .82));
+    box-shadow: 0 0 24px rgba(0, 0, 0, .8);
+  }
+
+  .battle-page--v15 .bridge-frame--left {
+    left: 0;
+    border-right: 2px solid rgba(118, 190, 213, .16);
+    clip-path: polygon(0 0, 86% 0, 100% 12%, 92% 88%, 100% 100%, 0 100%);
+  }
+
+  .battle-page--v15 .bridge-frame--right {
+    right: 0;
+    border-left: 2px solid rgba(118, 190, 213, .16);
+    clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%, 8% 88%, 0 12%);
+  }
+
+  .battle-page--v15 .carrier-bridge-interface {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    min-height: 100dvh;
+    grid-template-rows: 64px minmax(0, 1fr);
+  }
+
+  .battle-page--v15 .battle-header--v072 {
+    position: relative;
+    z-index: 80;
+    top: 0;
+    display: grid;
+    min-height: 64px;
+    grid-template-columns: 52px minmax(180px, 1.15fr) minmax(130px, .72fr) minmax(132px, .72fr) minmax(330px, 2.25fr) auto;
+    grid-template-areas: "menu room turn timer players timeout";
+    gap: 0;
+    align-items: stretch;
+    padding: 0 16px;
+    border: 0;
+    border-bottom: 1px solid rgba(118, 194, 218, .26);
+    border-radius: 0;
+    background: linear-gradient(180deg, rgba(2, 13, 21, .98), rgba(2, 12, 20, .92));
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35), inset 0 -1px rgba(106, 198, 226, .08);
+    backdrop-filter: blur(18px);
+  }
+
+  .battle-page--v15 .bridge-menu-button {
+    grid-area: menu;
+    align-self: center;
+    width: 40px;
+    height: 40px;
+    padding: 10px;
+    border: 0;
+    border-right: 1px solid rgba(118, 194, 218, .16);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .battle-page--v15 .bridge-menu-button span {
+    display: block;
+    width: 19px;
+    height: 2px;
+    margin: 4px auto;
+    background: #8ba4af;
+    box-shadow: 0 0 8px rgba(85, 216, 239, .2);
+  }
+
+  .battle-page--v15 .battle-header__room,
+  .battle-page--v15 .battle-header__turn,
+  .battle-page--v15 .battle-header__timer,
+  .battle-page--v15 .battle-header__players,
+  .battle-page--v15 .battle-header__timeouts {
+    min-width: 0;
+    border-left: 1px solid rgba(118, 194, 218, .13);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .battle-page--v15 .battle-header__room {
+    grid-area: room;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 18px;
+  }
+
+  .battle-page--v15 .battle-header__room small,
+  .battle-page--v15 .battle-header__timer span {
+    color: #a6b5bd;
+    font-size: .68rem;
+    letter-spacing: .05em;
+  }
+
+  .battle-page--v15 .battle-header__room span {
+    overflow: hidden;
+    color: #eaf7fa;
+    font: 700 .83rem/1.2 Consolas, monospace;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .battle-page--v15 .battle-header__room .text-button {
+    display: none;
+  }
+
+  .battle-page--v15 .battle-header__turn {
+    grid-area: turn;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    padding: 0 12px;
+  }
+
+  .battle-page--v15 .battle-header__turn small {
+    color: #93a7b0;
+    font: 650 .76rem/1.1 Consolas, monospace;
+  }
+
+  .battle-page--v15 .battle-header__turn strong {
+    margin-top: 3px;
+    color: #edfaff;
+    font-size: .76rem;
+  }
+
+  .battle-page--v15 .battle-header__timer {
+    grid-area: timer;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 12px;
+  }
+
+  .battle-page--v15 .battle-header__timer strong {
+    color: #dda1ff;
+    font: 800 clamp(1.2rem, 2vw, 1.85rem)/1 Consolas, monospace;
+    text-shadow: 0 0 16px rgba(191, 98, 255, .38);
+  }
+
+  .battle-page--v15 .battle-header__players {
+    position: relative;
+    grid-area: players;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    gap: 34px;
+    padding: 4px 26px;
+  }
+
+  .battle-page--v15[data-player-count="3"] .battle-header__players {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .battle-page--v15 .battle-header__players > span {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: 8px minmax(0, 1fr);
+    gap: 1px 7px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .battle-page--v15 .battle-header__players > span i {
+    grid-row: 1 / 3;
+    align-self: center;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #55dfa9;
+    box-shadow: 0 0 10px #55dfa9;
+  }
+
+  .battle-page--v15 .battle-header__players b,
+  .battle-page--v15 .battle-header__players small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .battle-page--v15 .battle-header__players b {
+    color: #e7f4f7;
+    font-size: .76rem;
+  }
+
+  .battle-page--v15 .battle-header__players small {
+    color: #91a7b1;
+    font-size: .58rem;
+  }
+
+  .battle-page--v15 .bridge-versus {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    right: calc(13% + 118px);
+    color: #d69bff;
+    font: italic 800 1.15rem/1 Georgia, serif;
+    text-shadow: 0 0 14px rgba(195, 90, 255, .5);
+    transform: translate(50%, -50%);
+  }
+
+  .battle-page--v15[data-player-count="3"] .bridge-versus {
+    display: none;
+  }
+
+  .battle-page--v15 .battle-header__timeouts {
+    grid-area: timeout;
+    display: grid;
+    align-content: center;
+    min-width: 78px;
+    padding: 0 10px;
+    text-align: center;
+  }
+
+  .battle-page--v15 .battle-header__timeouts span {
+    color: #78909a;
+    font-size: .5rem;
+  }
+
+  .battle-page--v15 .battle-header__timeouts strong {
+    color: #d3e5ea;
+    font: 700 .72rem/1.3 Consolas, monospace;
+  }
+
+  .battle-page--v15 .battle-turn-progress {
+    position: absolute;
+    z-index: 3;
+    right: 12%;
+    bottom: -28px;
+    min-width: 250px;
+    border-color: rgba(var(--accent-primary-rgb), .2);
+    background: rgba(2, 13, 21, .92);
+  }
+
+  .battle-page--v15 .carrier-horizon-deck {
+    position: absolute;
+    z-index: 4;
+    top: 64px;
+    right: 8%;
+    left: 8%;
+    display: flex;
+    height: 34px;
+    padding: 8px 18px 0;
+    color: rgba(189, 218, 228, .58);
+    font-size: .54rem;
+    letter-spacing: .18em;
+    pointer-events: none;
+  }
+
+  .battle-page--v15 .carrier-horizon-deck i {
+    flex: 1;
+    border-top: 1px solid rgba(145, 215, 235, .12);
+  }
+
+  .battle-page--v15 .carrier-tactical-console {
+    position: relative;
+    min-height: 0;
+    height: calc(100dvh - 64px);
+    padding: 42px 14px 116px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    clip-path: none;
+  }
+
+  .battle-page--v15 .mobile-map-tabs,
+  .battle-page--v15 .mobile-map-tabs--v072 {
+    position: absolute;
+    z-index: 35;
+    top: 35px;
+    right: 28%;
+    left: 28%;
+    width: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .battle-page--v15 .mobile-map-tabs button {
+    min-height: 46px;
+    border: 1px solid rgba(112, 171, 194, .28);
+    border-radius: 2px;
+    background: linear-gradient(180deg, rgba(12, 35, 49, .94), rgba(4, 19, 29, .94));
+    color: #b8cbd2;
+    font-size: .86rem;
+    clip-path: polygon(7px 0, calc(100% - 7px) 0, 100% 100%, 0 100%);
+  }
+
+  .battle-page--v15 .mobile-map-tabs button.is-active {
+    border-color: rgba(84, 206, 255, .78);
+    background: linear-gradient(180deg, rgba(26, 91, 137, .95), rgba(10, 45, 73, .96));
+    color: #dff8ff;
+    box-shadow: inset 0 0 18px rgba(50, 188, 255, .2), 0 0 18px rgba(30, 162, 230, .22);
+  }
+
+  .battle-page--v15 .battle-layout--v072,
+  .battle-page--v15 .battle-layout--v076 {
+    position: relative;
+    display: grid;
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr) clamp(250px, 19vw, 320px);
+    gap: 12px;
+    padding: 44px 0 0 96px;
+  }
+
+  .battle-page--v15 .battle-main-column,
+  .battle-page--v15 .battle-maps,
+  .battle-page--v15 .battle-map-card--v073 {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+  }
+
+  .battle-page--v15 .battle-map-card--v073 {
+    position: relative;
+    width: 100%;
+    padding: 0 8px;
+    overflow: visible;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .battle-page--v15 .map-card__heading--v072,
+  .battle-page--v15 .tactical-sea-toolbar,
+  .battle-page--v15 .battle-map-card > .marker-palette,
+  .battle-page--v15 .map-caption--v072 {
+    position: absolute;
+    z-index: 8;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .battle-page--v15 .range-legend--v073 {
+    position: absolute;
+    z-index: 12;
+    right: 18px;
+    bottom: 18px;
+    width: auto;
+    margin: 0;
+    padding: 6px 9px;
+    border: 1px solid rgba(115, 183, 207, .25);
+    border-radius: 6px;
+    background: rgba(1, 11, 18, .86);
+  }
+
+  .battle-page--v15 .board-frame--tactical-sea {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 8px 8px 28px;
+    place-items: center;
+    overflow: visible;
+    border: 1px solid rgba(95, 179, 211, .26);
+    border-radius: 5px;
+    background:
+      linear-gradient(rgba(2, 18, 30, .22), rgba(2, 18, 30, .36)),
+      url("/assets/images/battle/tactical-ocean-v1.4.webp?v=1.5") center / cover no-repeat;
+    box-shadow:
+      inset 0 0 100px rgba(0, 5, 11, .72),
+      inset 0 0 0 7px rgba(3, 24, 36, .24),
+      0 28px 54px rgba(0, 0, 0, .48),
+      0 0 30px rgba(23, 139, 185, .12);
+    perspective: 1200px;
+    transform: perspective(1200px) rotateX(5.5deg) scale(.985);
+    transform-origin: center 10%;
+  }
+
+  .battle-page--v15 .board-frame--tactical-sea::before {
+    position: absolute;
+    z-index: 5;
+    inset: 8px;
+    border: 1px solid rgba(118, 205, 232, .15);
+    content: "";
+    pointer-events: none;
+    box-shadow: inset 0 0 34px rgba(49, 179, 222, .09);
+  }
+
+  .battle-page--v15 .board-frame--tactical-sea .ocean-board {
+    background: rgba(3, 25, 40, .16);
+    box-shadow: 0 0 0 1px rgba(172, 225, 239, .08), 0 25px 50px rgba(0, 0, 0, .35);
+  }
+
+  .battle-page--v15[data-map-size="10"] .battle-map-card .board-frame {
+    --cell-size: clamp(38px, min(calc((100vw - 540px) / 11), calc((100dvh - 260px) / 11)), 66px);
+  }
+
+  .battle-page--v15[data-map-size="12"] .battle-map-card .board-frame {
+    --cell-size: clamp(34px, min(calc((100vw - 540px) / 13), calc((100dvh - 260px) / 13)), 58px);
+  }
+
+  .battle-page--v15[data-map-size="15"] .battle-map-card .board-frame {
+    --cell-size: clamp(27px, min(calc((100vw - 540px) / 16), calc((100dvh - 260px) / 16)), 47px);
+  }
+
+  .battle-page--v15 .board-frame--tactical-sea :where(.board-cell, .board-axis, .board-corner) {
+    border-color: rgba(135, 207, 228, .16);
+  }
+
+  .battle-page--v15 .board-frame--tactical-sea .board-axis {
+    color: rgba(221, 241, 247, .78);
+    text-shadow: 0 1px 4px #001018;
+  }
+
+  .battle-page--v15 .unit-glyph--v15 {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    color: #8fe9ff;
+    filter: drop-shadow(0 0 5px rgba(45, 201, 239, .5));
+  }
+
+  .battle-page--v15 .unit-glyph--v15 .ui-svg-icon {
+    width: 86%;
+    height: 86%;
+  }
+
+  .battle-page--v15 .unit-glyph--v15 i {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+  }
+
+  .battle-page--v15[data-tactical-layer="surface"] .battle-map-card--own .board-cell[data-tactical-layer="underwater"],
+  .battle-page--v15[data-tactical-layer="underwater"] .battle-map-card--own .board-cell[data-tactical-layer="surface"] {
+    opacity: .14;
+    filter: grayscale(1);
+  }
+
+  .battle-page--v15[data-tactical-layer="surface"] .battle-map-card--own .board-cell[data-tactical-layer="surface"],
+  .battle-page--v15[data-tactical-layer="underwater"] .battle-map-card--own .board-cell[data-tactical-layer="underwater"] {
+    z-index: 3;
+    box-shadow: inset 0 0 14px rgba(82, 217, 250, .22), 0 0 10px rgba(45, 194, 235, .16);
+  }
+
+  .battle-page--v15 .battle-side-dock {
+    position: absolute;
+    z-index: 46;
+    top: 22%;
+    right: auto;
+    left: 12px;
+    display: grid;
+    width: 82px;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid rgba(101, 173, 199, .32);
+    border-radius: 5px;
+    background: linear-gradient(90deg, rgba(2, 12, 19, .97), rgba(8, 26, 38, .94));
+    box-shadow: 10px 14px 28px rgba(0, 0, 0, .36), inset 0 0 22px rgba(26, 116, 151, .08);
+    backdrop-filter: blur(14px);
+  }
+
+  .battle-page--v15 .battle-side-dock__action {
+    display: none;
+  }
+
+  .battle-page--v15 .battle-side-dock button {
+    min-height: 92px;
+    gap: 5px;
+    padding: 10px 5px;
+    border: 0;
+    border-bottom: 1px solid rgba(116, 179, 202, .18);
+    border-radius: 0;
+  }
+
+  .battle-page--v15 .battle-side-dock button:last-child {
+    border-bottom: 0;
+  }
+
+  .battle-page--v15 .battle-side-dock button.is-active {
+    background: linear-gradient(90deg, rgba(27, 91, 120, .46), rgba(13, 47, 67, .28));
+    box-shadow: inset 3px 0 #5fdcff;
+  }
+
+  .battle-page--v15 .battle-side-dock .ui-svg-icon {
+    width: 25px;
+    height: 25px;
+  }
+
+  .battle-page--v15 .battle-side-dock strong {
+    font-size: .63rem;
+    letter-spacing: .04em;
+  }
+
+  .battle-page--v15 .battle-side-dock small {
+    min-width: 19px;
+    padding: 2px 5px;
+    border-radius: 8px;
+    color: #d8f5ff;
+    background: rgba(32, 112, 177, .65);
+    font: 700 .54rem/1 Consolas, monospace;
+  }
+
+  .battle-page--v15 .action-rail--v073 {
+    position: relative;
+    z-index: 38;
+    top: auto;
+    right: auto;
+    display: grid;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    grid-template-rows: auto minmax(0, 1fr);
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid rgba(92, 162, 188, .32);
+    border-radius: 5px;
+    background: linear-gradient(180deg, rgba(2, 14, 23, .97), rgba(4, 20, 30, .95));
+    box-shadow: -14px 18px 38px rgba(0, 0, 0, .38), inset 0 0 28px rgba(27, 116, 150, .07);
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+    backdrop-filter: blur(18px);
+  }
+
+  .battle-page--v15 .action-rail__heading {
+    min-height: 48px;
+    padding: 8px 10px;
+    cursor: default;
+  }
+
+  .battle-page--v15 .action-rail__heading h2 {
+    font-size: .84rem;
+  }
+
+  .battle-page--v15 .action-rail__heading .drawer-chevron {
+    display: none;
+  }
+
+  .battle-page--v15 .action-rail--v073 .action-rail__content {
+    max-height: none;
+    padding: 8px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  .battle-page--v15 .bridge-target-readout {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 10px;
+    margin-bottom: 8px;
+    padding: 9px 10px;
+    border: 1px solid rgba(103, 164, 188, .22);
+    border-radius: 4px;
+    background: rgba(1, 10, 17, .66);
+  }
+
+  .battle-page--v15 .bridge-target-readout div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .battle-page--v15 .bridge-target-readout span,
+  .battle-page--v15 .bridge-target-readout small {
+    color: #91a9b2;
+    font-size: .58rem;
+  }
+
+  .battle-page--v15 .bridge-target-readout strong {
+    color: #dc98ff;
+    font: 800 1.28rem/1 Consolas, monospace;
+    text-shadow: 0 0 12px rgba(189, 74, 255, .4);
+  }
+
+  .battle-page--v15 .bridge-target-readout small {
+    grid-column: 1 / -1;
+  }
+
+  .battle-page--v15 .unit-action-card {
+    padding: 7px;
+  }
+
+  .battle-page--v15 .unit-action-card__header {
+    gap: 6px;
+  }
+
+  .battle-page--v15 .unit-action-card__actions .action-card {
+    min-height: 42px;
+  }
+
+  .battle-page--v15 .event-center--v074 {
+    position: absolute;
+    z-index: 58;
+    top: 94px;
+    right: auto;
+    left: 102px;
+    width: min(380px, calc(100% - 450px));
+    max-height: calc(100dvh - 230px);
+    border-color: rgba(91, 165, 193, .38);
+    border-radius: 5px;
+    background: rgba(2, 15, 24, .97);
+    box-shadow: 16px 20px 46px rgba(0, 0, 0, .48);
+    transform: translateX(-18px);
+  }
+
+  .battle-page--v15 .event-center--v074.log-panel--open {
+    transform: none;
+  }
+
+  .battle-page--v15 .event-center--v074 .event-center__content,
+  .battle-page--v15 .event-center--v074 .event-list {
+    max-height: calc(100dvh - 350px);
+  }
+
+  .battle-page--v15 .battle-drawer-scrim {
+    display: none;
+  }
+
+  .battle-page--v15 .bridge-command-deck {
+    position: absolute;
+    z-index: 72;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    height: 112px;
+    grid-template-columns: 1.05fr 1.55fr 1.15fr .85fr 1fr;
+    border-top: 2px solid rgba(113, 176, 198, .28);
+    background: linear-gradient(180deg, rgba(12, 28, 38, .98), rgba(3, 12, 19, .99));
+    box-shadow: 0 -18px 40px rgba(0, 0, 0, .48), inset 0 1px rgba(194, 229, 239, .06);
+  }
+
+  .battle-page--v15 .bridge-console-group {
+    display: grid;
+    min-width: 0;
+    align-content: center;
+    gap: 8px;
+    padding: 10px clamp(10px, 1.3vw, 20px);
+    border-right: 1px solid rgba(117, 174, 194, .18);
+  }
+
+  .battle-page--v15 .bridge-console-group > span {
+    color: #91a4ac;
+    font-size: .62rem;
+    letter-spacing: .08em;
+    text-align: center;
+  }
+
+  .battle-page--v15 .bridge-console-group button {
+    min-height: 40px;
+    border: 1px solid rgba(101, 163, 187, .28);
+    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(16, 38, 51, .94), rgba(5, 19, 28, .98));
+    color: #c2d1d7;
+    cursor: pointer;
+    font: 650 .7rem/1.2 inherit;
+    box-shadow: inset 0 0 12px rgba(57, 160, 196, .05), 0 4px 10px rgba(0, 0, 0, .25);
+  }
+
+  .battle-page--v15 .bridge-console-group button:hover:not(:disabled),
+  .battle-page--v15 .bridge-console-group button:focus-visible,
+  .battle-page--v15 .bridge-console-group button.is-active {
+    border-color: rgba(68, 204, 247, .7);
+    color: #e5faff;
+    background: linear-gradient(180deg, rgba(22, 95, 137, .94), rgba(7, 44, 71, .98));
+    box-shadow: inset 0 0 18px rgba(57, 201, 250, .15), 0 0 14px rgba(38, 171, 224, .16);
+  }
+
+  .battle-page--v15 .bridge-console-group button:disabled {
+    cursor: not-allowed;
+    opacity: .42;
+  }
+
+  .battle-page--v15 .bridge-layer-control > div,
+  .battle-page--v15 .bridge-help-control > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .battle-page--v15 .bridge-help-control > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .battle-page--v15 .bridge-marker-control > div {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .battle-page--v15 .bridge-marker-control button {
+    display: grid;
+    min-width: 0;
+    place-items: center;
+    padding: 5px 2px;
+  }
+
+  .battle-page--v15 .bridge-marker-control button b {
+    overflow: hidden;
+    width: 100%;
+    font-size: .48rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .battle-page--v15 .bridge-marker-control .marker-tool__swatch {
+    width: 17px;
+    height: 17px;
+  }
+
+  .battle-page--v15 .bridge-confirm-control {
+    position: relative;
+    background: linear-gradient(180deg, rgba(16, 35, 47, .98), rgba(5, 15, 23, .99));
+    clip-path: polygon(8% 0, 92% 0, 100% 22%, 94% 100%, 6% 100%, 0 22%);
+  }
+
+  .battle-page--v15 .bridge-confirm-button {
+    display: grid;
+    min-height: 58px !important;
+    place-items: center;
+    border-color: rgba(54, 180, 244, .72) !important;
+    color: #dff7ff !important;
+    background: linear-gradient(180deg, rgba(21, 104, 163, .98), rgba(4, 48, 82, .99)) !important;
+    box-shadow: inset 0 0 20px rgba(55, 192, 255, .2), 0 0 16px rgba(31, 144, 212, .24) !important;
+  }
+
+  .battle-page--v15 .bridge-confirm-button small {
+    color: #9fc9db;
+    font-size: .52rem;
+  }
+
+  .battle-page--v15 .bridge-confirm-button strong {
+    font-size: .84rem;
+  }
+
+  .battle-page--v15 .battle-lower--controls-only {
+    display: none;
+  }
+
+  html[data-theme="ocean-light"] .battle-page--v15 .action-rail--v073,
+  html[data-theme="ocean-light"] .battle-page--v15 .event-center--v074,
+  html[data-theme="ocean-light"] .battle-page--v15 .battle-side-dock {
+    color: #e7f4f7;
+    background: rgba(4, 20, 30, .96);
+  }
+
+  html[data-theme="ocean-dusk"] .battle-page--v15 .mobile-map-tabs button.is-active,
+  html[data-theme="ocean-dusk"] .battle-page--v15 .bridge-console-group button.is-active {
+    border-color: rgba(248, 173, 90, .72);
+    background: linear-gradient(180deg, rgba(125, 68, 25, .96), rgba(58, 31, 18, .98));
+  }
+}
+
+@media (min-width: 901px) and (max-width: 1180px) {
+  .battle-page--v15 .battle-header--v072 {
+    grid-template-columns: 46px minmax(145px, 1fr) 112px 118px minmax(270px, 1.5fr) 70px;
+    padding-inline: 8px;
+  }
+
+  .battle-page--v15 .battle-header__room {
+    padding-inline: 10px;
+  }
+
+  .battle-page--v15 .battle-header__room small,
+  .battle-page--v15 .battle-header__timeouts span {
+    display: none;
+  }
+
+  .battle-page--v15 .battle-layout--v072,
+  .battle-page--v15 .battle-layout--v076 {
+    grid-template-columns: minmax(0, 1fr) 258px;
+    padding-left: 78px;
+  }
+
+  .battle-page--v15 .battle-side-dock {
+    left: 7px;
+    width: 64px;
+  }
+
+  .battle-page--v15 .battle-side-dock button {
+    min-height: 80px;
+  }
+
+  .battle-page--v15 .battle-side-dock strong {
+    font-size: .55rem;
+  }
+
+  .battle-page--v15 .bridge-command-deck {
+    grid-template-columns: .9fr 1.35fr 1fr .72fr .84fr;
+  }
+
+  .battle-page--v15 .bridge-console-group {
+    padding-inline: 7px;
+  }
+
+  .battle-page--v15 .bridge-marker-control button b {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .battle-page--v15 .bridge-command-deck,
+  .battle-page--v15 .bridge-frame,
+  .battle-page--v15 .bridge-menu-button,
+  .battle-page--v15 .bridge-versus,
+  .battle-page--v15 .bridge-target-readout {
+    display: none;
+  }
+
+  .battle-page--v15 .battle-side-dock__action {
+    display: grid;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-page--v15 .board-frame--tactical-sea {
+    transform: none;
+  }
+}

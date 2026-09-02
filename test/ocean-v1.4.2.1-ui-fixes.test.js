@@ -35,7 +35,8 @@ test("雷达明确选择扫描区域左上起始格，其他区域武器继续�
 });
 
 test("桌面战斗首屏按视口收束，方形地图不再强制撑出首屏", () => {
-  const fixes = css.slice(css.lastIndexOf("Ocean-v1.4.2.1 · viewport-bounded battle workspace"));
+  const start = css.lastIndexOf("Ocean-v1.4.2.1 · viewport-bounded battle workspace");
+  const fixes = css.slice(start, css.indexOf("Ocean-v1.4.2.2 · keep desktop map tabs", start));
   assert.match(fixes, /@media \(min-width: 901px\)/);
   assert.match(fixes, /\.app:has\(> \.battle-page--immersive\)[\s\S]*padding: 0 0 16px/);
   assert.match(fixes, /width: min\(100%, clamp\(380px, calc\(100dvh - 392px\), 900px\)\)/);
@@ -43,8 +44,9 @@ test("桌面战斗首屏按视口收束，方形地图不再强制撑出首屏",
 });
 
 test("桌面行动和消息侧栏使用独立视口上限与内部滚动区", () => {
-  const fixes = css.slice(css.lastIndexOf("Ocean-v1.4.2.1 · viewport-bounded battle workspace"));
+  const start = css.lastIndexOf("Ocean-v1.4.2.1 · viewport-bounded battle workspace");
+  const fixes = css.slice(start, css.indexOf("Ocean-v1.4.2.2 · keep desktop map tabs", start));
   assert.match(fixes, /action-rail--v073,[\s\S]*event-center--v074[\s\S]*max-height: min\(720px, calc\(100dvh - 280px\)\)/);
   assert.match(fixes, /action-rail__content[\s\S]*max-height: calc\(100dvh - 356px\)[\s\S]*overscroll-behavior: contain/);
-  assert.match(html, /\/css\/main\.css\?v=1\.4\.2\.2/);
+  assert.match(html, /\/css\/main\.css\?v=1\.5/);
 });

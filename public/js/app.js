@@ -91,8 +91,10 @@
     "toggle-log": "panel_open",
     "close-battle-drawers": "panel_close",
     "set-event-channel": "log_switch",
+    "set-tactical-layer": "map_switch",
     "set-helicopter-axis": "ui_select",
     "select-marker-tool": "ui_select",
+    "select-bridge-marker-tool": "ui_select",
     "toggle-marker-mode": "ui_select",
     "cancel-action-selection": "cancel",
     "reopen-action-confirm": "panel_open",
@@ -190,6 +192,7 @@
       actionDrawerOpen: false,
       logOpen: false,
       eventChannel: "combat",
+      tacticalLayer: "all",
       ownMapAlert: false,
       collapsedMaps: {},
       selectedIntelligenceSequence: null,
@@ -2358,7 +2361,7 @@
         if (centerCells.has(coordinate)) {
           classes.push("board-cell--range-center");
         }
-        content = `<span class="unit-glyph">${escapeHtml(definition.shortName)}</span>${hit ? '<span class="cell-state-glyph">✦</span>' : ""}`;
+        content = `<span class="unit-glyph unit-glyph--v15">${uiIcon(unitIconName(unit.type))}<i>${escapeHtml(definition.shortName)}</i></span>${hit ? '<span class="cell-state-glyph">✦</span>' : ""}`;
         label = `${coordinate}，${definition.name}，生命值 ${Model.formatHp(unit.hp)}${hit ? "，该格已受击" : ""}${sunk ? "，已沉没" : ""}${unit.paralyzed ? "，本回合瘫痪" : ""}`;
       } else if (entry?.kind === "decoy") {
         classes.push("board-cell--unit", "board-cell--decoy");
@@ -2373,7 +2376,13 @@
         content,
         label,
         disabled: true,
-        attributes: { "data-coordinate": coordinate, "data-cell-state": cellState },
+        attributes: {
+          "data-coordinate": coordinate,
+          "data-cell-state": cellState,
+          "data-tactical-layer": entry?.kind === "unit"
+            ? entry.definition.category === "underwater_unit" ? "underwater" : "surface"
+            : entry?.kind === "decoy" ? "underwater" : "empty",
+        },
       };
     }, options.replay
       ? "board-frame--replay board-frame--tactical-sea board-frame--own-sea"
@@ -2798,6 +2807,10 @@
           <span class="drawer-chevron" aria-hidden="true">⌃</span>
         </button>
         <div class="action-rail__content">
+        <div class="bridge-target-readout" data-has-target="${Boolean(state.battle.target)}">
+          <div><span>选择坐标</span><strong>${state.battle.target ? escapeHtml(Model.formatTarget(state.battle.target)) : "—"}</strong></div>
+          <small>${selectedDefinition ? escapeHtml(selectedDefinition.name) : room.turn?.canAct ? "等待选择武器" : "战术链路已锁定"}</small>
+        </div>
         ${room.turn?.canAct && battleOpponentIds(room.battle).length > 1 ? `
           <div class="battle-target-progress" aria-label="三人回合目标">
             <div class="battle-target-progress__heading"><span>同步目标</span><strong>一次行动</strong></div>
@@ -2877,17 +2890,18 @@
     const botThinking = !canAct && currentSeat?.isBot && room.turnPhase === "ACTIVE";
     return `
       <header class="battle-header battle-header--v072">
+        <button class="bridge-menu-button" type="button" data-action="open-rules" aria-label="打开舰桥菜单"><span></span><span></span><span></span></button>
         <div class="battle-header__room">
-          <span>房间 ${escapeHtml(room.roomCode)}</span>
+          <small>房间号</small><span>OCEAN-${escapeHtml(room.roomCode)}</span>
           <button class="text-button" data-action="copy-room">复制</button>
         </div>
         <div class="battle-header__turn" data-own-turn="${canAct}">
-          <small>第 ${room.turn?.turnNumber ?? room.matchSummary.turnCount} 回合</small>
+          <small>回合 ${String(room.turn?.turnNumber ?? room.matchSummary.turnCount).padStart(2, "0")}</small>
           <strong>${canAct ? "你的回合" : botThinking ? "机器人思考中" : `等待 ${escapeHtml(currentName)}`}</strong>
         </div>
         ${renderTurnProgress(room)}
         <div class="battle-header__timer">
-          <span>行动剩余</span>
+          <span>倒计时</span>
           ${room.deadlines.actionDeadlineAt
             ? `<strong data-deadline="${room.deadlines.actionDeadlineAt}">—</strong>`
             : `<strong>${room.turnPhase === "RESOLVING" ? "结算中" : room.turnPhase === "AUTO_SKIPPING" ? "自动跳过" : "暂停"}</strong>`}
@@ -2900,6 +2914,7 @@
             return `<span data-online="${seat.online}" data-player-state="${playerState}"><i></i><b>${escapeHtml(seat.nickname)}${seat.playerId === room.own.playerId ? "（你）" : ""}</b><small>${stateText}</small></span>`;
           }).join("")}
         </div>
+        <div class="bridge-versus" aria-hidden="true">VS</div>
         <div class="battle-header__timeouts">
           <span>连续超时</span><strong>${room.own.consecutiveActionTimeouts} / 3</strong>
         </div>
@@ -3234,20 +3249,72 @@
   }
 
   function renderBattleSideDock(room) {
-    const eventCount =
-      (room.battle?.publicActionLog?.length ?? 0) +
-      (room.battle?.own?.intelligenceAreas?.length ?? 0) +
-      (room.turnEvents?.length ?? 0) +
-      (room.systemEvents?.length ?? 0);
+    const combatCount = room.battle?.publicActionLog?.length ?? 0;
+    const privateCount = room.battle?.own?.intelligenceAreas?.length ?? 0;
+    const systemCount = (room.turnEvents?.length ?? 0) + (room.systemEvents?.length ?? 0);
     return `
       <nav class="battle-side-dock" aria-label="战术侧边栏">
-        <button type="button" data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}" class="${state.battle.actionDrawerOpen ? "is-active" : ""}">
+        <button class="battle-side-dock__action" type="button" data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}">
           <span aria-hidden="true">${uiIcon("action-radar")}</span><strong>行动</strong><small>${room.turn?.canAct ? "可操作" : "待命"}</small>
         </button>
-        <button type="button" data-action="toggle-log" aria-expanded="${state.battle.logOpen}" class="${state.battle.logOpen ? "is-active" : ""}">
-          <span aria-hidden="true">${uiIcon("status-private")}</span><strong>消息</strong><small>${eventCount}</small>
+        <button type="button" data-action="set-event-channel" data-channel="combat" aria-expanded="${state.battle.logOpen && state.battle.eventChannel === "combat"}" class="${state.battle.logOpen && state.battle.eventChannel === "combat" ? "is-active" : ""}">
+          <span aria-hidden="true">${uiIcon("status-hit")}</span><strong>战斗日志</strong><small>${combatCount}</small>
+        </button>
+        <button type="button" data-action="set-event-channel" data-channel="private" aria-expanded="${state.battle.logOpen && state.battle.eventChannel === "private"}" class="${state.battle.logOpen && state.battle.eventChannel === "private" ? "is-active" : ""}">
+          <span aria-hidden="true">${uiIcon("status-private")}</span><strong>情报信息</strong><small>${privateCount}</small>
+        </button>
+        <button type="button" data-action="set-event-channel" data-channel="system" aria-expanded="${state.battle.logOpen && state.battle.eventChannel === "system"}" class="${state.battle.logOpen && state.battle.eventChannel === "system" ? "is-active" : ""}">
+          <span aria-hidden="true">${uiIcon("status-online")}</span><strong>系统消息</strong><small>${systemCount}</small>
         </button>
       </nav>`;
+  }
+
+  function renderBridgeCommandDeck(room) {
+    const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
+    const targetPlayerId = state.battle.targetPlayerId ?? battleOpponentIds(room.battle)[0];
+    const hasDraft = Boolean(selectedDefinition || state.battle.target || state.battle.markerMode);
+    const targetText = state.battle.target ? Model.formatTarget(state.battle.target) : "选择目标";
+    return `
+      <div class="bridge-command-deck" aria-label="舰桥底部控制台">
+        <section class="bridge-console-group bridge-layer-control">
+          <span>战术视层</span>
+          <div role="group" aria-label="己方沙盘显示层">
+            ${[
+              ["all", "综合"],
+              ["surface", "水面"],
+              ["underwater", "潜层"],
+            ].map(([value, label]) => `<button type="button" data-action="set-tactical-layer" data-layer="${value}" aria-pressed="${state.battle.tacticalLayer === value}" class="${state.battle.tacticalLayer === value ? "is-active" : ""}">${label}</button>`).join("")}
+          </div>
+        </section>
+        <section class="bridge-console-group bridge-marker-control">
+          <span>私人标记</span>
+          <div role="toolbar" aria-label="快速私人标记">
+            ${MARKER_DEFINITIONS.map((marker) => `<button
+              type="button"
+              data-action="select-bridge-marker-tool"
+              data-marker="${marker.value}"
+              data-target-player-id="${escapeHtml(targetPlayerId)}"
+              aria-pressed="${state.battle.markerMode && state.battle.selectedMarker === marker.value}"
+              title="${escapeHtml(marker.label)}"
+            ><i class="marker-tool__swatch marker-tool__swatch--${marker.value}" aria-hidden="true"></i><b>${escapeHtml(marker.shortLabel)}</b></button>`).join("")}
+          </div>
+        </section>
+        <section class="bridge-console-group bridge-confirm-control">
+          <span>行动确认</span>
+          <button class="bridge-confirm-button" type="button" data-action="reopen-action-confirm" ${state.battle.target ? "" : "disabled"}>
+            <small>${selectedDefinition ? escapeHtml(selectedDefinition.name) : "等待指令"}</small>
+            <strong>${escapeHtml(targetText)}</strong>
+          </button>
+        </section>
+        <section class="bridge-console-group bridge-cancel-control">
+          <span>取消操作</span>
+          <button type="button" data-action="cancel-action-selection" ${hasDraft ? "" : "disabled"}>取消选择</button>
+        </section>
+        <section class="bridge-console-group bridge-help-control">
+          <span>舰桥菜单</span>
+          <div><button type="button" data-action="open-rules">游戏说明</button>${room.roomPhase === "PLAYING" ? '<button type="button" data-action="surrender">投降</button>' : ""}</div>
+        </section>
+      </div>`;
   }
 
   function renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) {
@@ -3322,9 +3389,9 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
-        <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div></div>
+        <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
           ${renderBattleHeader(room)}
           <div class="carrier-horizon-deck" aria-hidden="true"><span>CVN COMMAND BRIDGE</span><i></i><span>SEA TACTICAL DISPLAY · GRID ASSIST</span></div>
@@ -3346,6 +3413,7 @@
               ${finalSalvo ? "" : renderActionPanel(room)}
             </div>
 
+            ${finalSalvo ? "" : renderBridgeCommandDeck(room)}
             <div class="battle-lower battle-lower--controls-only">
               <aside class="battle-controls"><div><span class="status-kicker">航母作战控制台</span><strong>${room.turn?.canAct ? "等待指挥官确认行动" : "战术链路监视中"}</strong></div><button class="button button--quiet" data-action="open-rules">游戏说明</button>${room.roomPhase === "PLAYING" ? '<button class="button button--danger-quiet" data-action="surrender">投降</button>' : ""}</aside>
             </div>
@@ -4883,6 +4951,13 @@
       render();
       return;
     }
+    if (action === "set-tactical-layer") {
+      const layer = control.dataset.layer;
+      if (!["all", "surface", "underwater"].includes(layer)) return;
+      state.battle.tacticalLayer = layer;
+      render();
+      return;
+    }
     if (action === "set-helicopter-axis") {
       state.battle.helicopterAxis = control.dataset.axis;
       state.battle.target = null;
@@ -4896,7 +4971,7 @@
       handleEnemyCell(control.dataset.coordinate, control.dataset.targetPlayerId);
       return;
     }
-    if (action === "select-marker-tool") {
+    if (action === "select-marker-tool" || action === "select-bridge-marker-tool") {
       const markerTarget = control.dataset.targetPlayerId;
       const marker = control.dataset.marker;
       if (!MARKER_CYCLE.includes(marker) || !markerTarget) return;
