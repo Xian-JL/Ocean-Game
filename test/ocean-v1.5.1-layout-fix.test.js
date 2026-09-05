@@ -10,7 +10,7 @@ const app = fs.readFileSync(path.join(ROOT, "public/js/app.js"), "utf8");
 const css = fs.readFileSync(path.join(ROOT, "public/css/main.css"), "utf8");
 const html = fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8");
 const packageJson = require(path.join(ROOT, "package.json"));
-const v151 = css.slice(css.lastIndexOf("Ocean-v1.5.1 · viewport-fit map"));
+const v151 = css.slice(css.lastIndexOf("Ocean-v1.5.1 · viewport-fit map"), css.indexOf("/* Ocean-v1.5.2 ·"));
 
 test("v1.5.1 使用剩余高度约束整张战术海图", () => {
   assert.match(app, /battle-page--v151/);
@@ -31,9 +31,9 @@ test("地图标签、侧栏与底部控制恢复经典按键语言，行动面�
   assert.doesNotMatch(v151, /\.action-rail--v073\s*\{/);
 });
 
-test("v1.5.1 布局修复在 v1.5.2 中继续保留", () => {
-  assert.equal(packageJson.version, "1.5.2");
-  assert.match(html, /Ocean-v1\.5\.2/);
-  assert.match(html, /\/css\/main\.css\?v=1\.5\.2/);
-  assert.match(html, /carrier-bridge-ocean\.webp\?v=1\.5\.2/);
+test("v1.5.1 布局修复在 v1.5.3 中继续保留", () => {
+  assert.equal(packageJson.version, "1.5.3");
+  assert.match(html, /Ocean-v1\.5\.3/);
+  assert.match(html, /\/css\/main\.css\?v=1\.5\.3/);
+  assert.match(html, /carrier-bridge-ocean\.webp\?v=1\.5\.3/);
 });

@@ -319,7 +319,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.5.2",
+    stage: "Ocean-v1.5.3",
     protocolVersion: "2.1",
   });
 
@@ -503,6 +503,9 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   assert.match(window.document.querySelector("#app").textContent, /甲 获得第一回合/);
 
   socket.serverEmit("room:state", playingRoom());
+  assert.ok(window.document.querySelector(".battle-page--v153"));
+  assert.ok(window.document.querySelector(".battle-map-card--own .tactical-hull-viewport image"));
+  assert.equal(window.document.querySelector(".battle-map-card--enemy .tactical-hull-viewport"), null);
   assert.equal(window.document.querySelectorAll(".action-card").length, 10);
   assert.equal(window.document.querySelectorAll('.battle-map-card [data-action="enemy-cell"]').length, 144);
   const battleMainColumn = window.document.querySelector(".battle-main-column");

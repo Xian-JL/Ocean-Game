@@ -12343,3 +12343,152 @@ html[data-theme="ocean-dusk"] .board-frame--tactical-sea .ocean-board {
   grid-row: var(--art-row) / span var(--art-row-span);
   grid-column: var(--art-column) / span var(--art-column-span);
 }
+
+/* Ocean-v1.5.3 · full central console and visible hull fitting */
+.tactical-hull-viewport {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: scale(.96);
+  filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .52)) drop-shadow(0 0 3px rgba(102, 211, 236, .2));
+}
+
+.tactical-unit-art--damaged .tactical-hull-viewport,
+.tactical-unit-art--hit .tactical-hull-viewport {
+  filter: sepia(.22) saturate(1.25) drop-shadow(0 0 5px rgba(255, 133, 78, .42));
+}
+
+.tactical-unit-art--paralyzed .tactical-hull-viewport {
+  filter: hue-rotate(34deg) saturate(1.7) drop-shadow(0 0 7px rgba(191, 103, 255, .72));
+}
+
+.tactical-unit-art--sunk .tactical-hull-viewport {
+  filter: grayscale(.85) brightness(.5) contrast(1.18);
+}
+
+@media (min-width: 901px) {
+  .battle-page--v153 .carrier-horizon-deck {
+    display: none;
+  }
+
+  .battle-page--v153 .carrier-tactical-console,
+  .battle-page--v153 .carrier-tactical-console:has(.resolution-strip--v074) {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px 12px 120px;
+    min-height: 0;
+  }
+
+  /* Three-player progress has its own reserved strip below the header. */
+  .battle-page--v153:has(.battle-turn-progress) .carrier-tactical-console {
+    margin-top: 28px;
+    height: calc(100dvh - 92px);
+  }
+
+  .battle-page--v153 .mobile-map-tabs,
+  .battle-page--v153 .mobile-map-tabs--v072 {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    width: auto;
+    margin: 0;
+  }
+
+  .battle-page--v153 .resolution-strip--v074 {
+    position: relative;
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+    max-height: min(80px, 14dvh);
+    overflow: auto;
+  }
+
+  .battle-page--v153 .battle-side-dock {
+    position: static;
+    grid-column: 1;
+    grid-row: 1 / 4;
+    align-self: stretch;
+    align-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .battle-page--v153 .battle-layout--v072,
+  .battle-page--v153 .battle-layout--v076 {
+    grid-column: 2;
+    grid-row: 3;
+    grid-template-columns: minmax(0, 1fr) clamp(250px, 19vw, 320px);
+    gap: 8px;
+    padding: 0;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .battle-page--v153 .battle-main-column,
+  .battle-page--v153 .battle-maps,
+  .battle-page--v153 .battle-map-card--v073 {
+    height: 100%;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  .battle-page--v153 .battle-map-card--v073 {
+    container-type: normal;
+    padding: 0;
+  }
+
+  .battle-page--v153 .board-frame--tactical-sea {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: auto;
+    margin: 0;
+    padding: 6px 6px 24px;
+    transform: none;
+  }
+
+  .battle-page--v153 .board-frame--tactical-sea .ocean-board {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    grid-template-columns: 26px repeat(var(--board-size), minmax(0, 1fr));
+    grid-template-rows: 26px repeat(var(--board-size), minmax(0, 1fr));
+    background:
+      linear-gradient(rgba(2, 18, 30, .26), rgba(2, 18, 30, .4)),
+      url("/assets/images/ocean-2.5d/ocean/ocean_deep_active.webp?v=1.5.2") center / cover no-repeat;
+  }
+
+  html[data-theme="ocean-light"] .battle-page--v153 .board-frame--tactical-sea .ocean-board {
+    background:
+      linear-gradient(rgba(215, 237, 244, .08), rgba(35, 91, 110, .14)),
+      url("/assets/images/ocean-2.5d/ocean/ocean_deep_calm.webp?v=1.5.2") center / cover no-repeat;
+  }
+
+  html[data-theme="ocean-dusk"] .battle-page--v153 .board-frame--tactical-sea .ocean-board {
+    background:
+      linear-gradient(rgba(52, 21, 8, .2), rgba(4, 12, 19, .38)),
+      url("/assets/images/ocean-2.5d/ocean/ocean_deep_subtle.webp?v=1.5.2") center / cover no-repeat;
+  }
+
+  .battle-page--v153 .board-frame--tactical-sea :where(.board-cell, .board-axis, .board-corner) {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .battle-page--v153 .board-frame--tactical-sea .tactical-unit-art-layer {
+    top: 26px;
+    left: 26px;
+    gap: 0;
+  }
+}

@@ -1,0 +1,50 @@
+# Ocean-v1.5.3 · PowerShell 发布命令（手动执行，不自动部署）
+# 先把 Ocean-v1.5.3.zip 解压到下面的源目录；路径不同请先修改。
+# 将替换 release 仓库工作区、创建提交和标签，并推送 origin/main。
+# 替换前把旧工作区移到独立备份目录；保留 .git，不删除旧文件。
+
+$ErrorActionPreference = "Stop"
+$ver = "1.5.3"
+$src = "E:\University\University_2.5\Ocean\Ocean-v$ver"
+$repo = "E:\University\University_2.5\Ocean\Ocean-Game-release"
+
+function Invoke-OceanGit {
+    param([string[]]$GitArgs)
+    & git @GitArgs
+    if ($LASTEXITCODE -ne 0) { throw "Git 失败：$($GitArgs -join ' ')。已停止，请检查输出。" }
+}
+
+if (-not (Test-Path -LiteralPath "$src\package.json" -PathType Leaf)) { throw "源目录不完整：$src" }
+if (-not (Test-Path -LiteralPath "$src\docs\release-manifest-Ocean-v$ver.md" -PathType Leaf)) { throw "缺少版本发布清单。" }
+if ((Get-Content -LiteralPath "$src\package.json" -Raw | ConvertFrom-Json).version -ne $ver) { throw "源目录版本不匹配。" }
+if (-not (Test-Path -LiteralPath "$repo\.git")) { throw "目标不是预期 Git 仓库：$repo" }
+$src = (Resolve-Path -LiteralPath $src).Path
+$repo = (Resolve-Path -LiteralPath $repo).Path
+if ($src -eq $repo -or $src.StartsWith($repo + '\', [StringComparison]::OrdinalIgnoreCase) -or $repo.StartsWith($src + '\', [StringComparison]::OrdinalIgnoreCase)) { throw "源目录与发布仓库必须相互独立。" }
+
+Set-Location -LiteralPath $repo
+$branch = Invoke-OceanGit -GitArgs @("branch", "--show-current")
+if ($branch -ne "main") { throw "当前分支不是 main；请先自行确认并切换。" }
+$dirty = Invoke-OceanGit -GitArgs @("status", "--porcelain")
+if ($dirty) { throw "发布仓库有未提交改动，请先保存。" }
+$tag = Invoke-OceanGit -GitArgs @("tag", "--list", "v$ver")
+if ($tag) { throw "本地 v$ver 标签已存在；请先确认是否已经发布，勿重复执行。" }
+$remoteTag = Invoke-OceanGit -GitArgs @("ls-remote", "--tags", "origin", "refs/tags/v$ver")
+if ($remoteTag) { throw "远程 v$ver 标签已存在；勿重复发布。" }
+Invoke-OceanGit -GitArgs @("pull", "--ff-only", "origin", "main")
+
+$backup = Join-Path (Split-Path $repo -Parent) ("Ocean-release-backup-v$ver-" + [Guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory -Path $backup | Out-Null
+Get-ChildItem -LiteralPath $repo -Force | Where-Object { $_.Name -ne ".git" } | ForEach-Object {
+    Move-Item -LiteralPath $_.FullName -Destination $backup
+}
+Write-Host "旧工作区可从此目录恢复：$backup"
+Get-ChildItem -LiteralPath $src -Force | Where-Object { $_.Name -notin @(".git", "node_modules") } | ForEach-Object {
+    Copy-Item -LiteralPath $_.FullName -Destination $repo -Recurse -Force
+}
+
+Invoke-OceanGit -GitArgs @("add", "-A")
+Invoke-OceanGit -GitArgs @("commit", "-m", "release: Ocean Game v$ver")
+Invoke-OceanGit -GitArgs @("tag", "-a", "v$ver", "-m", "Ocean Game v$ver")
+Invoke-OceanGit -GitArgs @("push", "--atomic", "origin", "main", "v$ver")
+Write-Host "v$ver 已推送；如配置了 Render 自动部署，请检查部署结果。"

@@ -266,6 +266,39 @@
 
   const ART_DIRECTIONS = Object.freeze(["north", "east", "south", "west"]);
 
+  // Alpha bounds of the unchanged 512px assets, with a 3px safety margin.
+  // A cropped SVG viewport fits the hull, not the transparent square canvas.
+  const UNIT_ART_VIEWBOXES = Object.freeze({
+    "decoy/east.webp": "3 190 502 129",
+    "decoy/north.webp": "194 22 124 468",
+    "decoy/south.webp": "193 16 126 472",
+    "decoy/west.webp": "7 184 501 139",
+    "destroyer-1/east.webp": "6 199 498 107",
+    "destroyer-1/north.webp": "203 4 106 503",
+    "destroyer-1/south.webp": "198 5 116 501",
+    "destroyer-1/west.webp": "3 194 506 112",
+    "destroyer-2/east.webp": "8 176 497 137",
+    "destroyer-2/north.webp": "210 17 92 471",
+    "destroyer-2/south.webp": "208 13 97 482",
+    "destroyer-2/west.webp": "2 198 504 114",
+    "motorboat/east.webp": "44 189 425 136",
+    "motorboat/north.webp": "191 57 130 381",
+    "motorboat/south.webp": "188 54 132 395",
+    "motorboat/west.webp": "36 183 443 138",
+    "nuclear-submarine/east.webp": "1 186 507 124",
+    "nuclear-submarine/north.webp": "199 6 114 500",
+    "nuclear-submarine/south.webp": "201 4 111 504",
+    "nuclear-submarine/west.webp": "1 183 509 121",
+    "pirate/east.webp": "4 154 502 203",
+    "pirate/north.webp": "160 1 207 501",
+    "pirate/south.webp": "151 3 199 503",
+    "pirate/west.webp": "6 152 501 199",
+    "submarine/east.webp": "12 206 488 98",
+    "submarine/north.webp": "209 32 93 448",
+    "submarine/south.webp": "208 11 96 479",
+    "submarine/west.webp": "11 188 490 119",
+  });
+
   function artCoordinate(coordinate) {
     const parsed = Data.parseCoordinate(coordinate);
     return parsed ? { row: parsed.row + 1, column: parsed.column + 1 } : null;
@@ -339,6 +372,10 @@
     label = "",
   }) {
     if (!asset || !bounds) return "";
+    const viewBox = UNIT_ART_VIEWBOXES[asset.replace("/assets/images/ocean-2.5d/units/", "")];
+    const artwork = viewBox
+      ? `<svg class="tactical-hull-viewport" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><image href="${asset}" x="0" y="0" width="512" height="512" /></svg>`
+      : `<img src="${asset}" alt="" decoding="async" draggable="false" />`;
     return `<span
       class="tactical-unit-art tactical-unit-art--${kind} tactical-unit-art--${stateCode}${selected ? " tactical-unit-art--selected" : ""}"
       data-grid-row="${bounds.row}"
@@ -349,7 +386,7 @@
       data-art-state="${stateCode}"
       role="img"
       aria-label="${escapeHtml(label)}"
-    ><img src="${asset}" alt="" decoding="async" draggable="false" /></span>`;
+    >${artwork}</span>`;
   }
 
   function renderTacticalUnitArt(snapshot, options = {}) {
@@ -3579,7 +3616,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
