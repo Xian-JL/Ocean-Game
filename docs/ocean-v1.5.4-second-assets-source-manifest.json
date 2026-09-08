@@ -1,0 +1,391 @@
+{
+  "project": "Ocean",
+  "asset_batch": "2.5D-second-feedback-assets",
+  "core_asset_count": 48,
+  "assets": [
+    {
+      "path": "04_tile_feedback/tile_selected_blue.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_move_valid.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_move_hover.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_attack_range_red.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_attack_target_red.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_scan_range_cyan.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_radar_range_green.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_shock_range_purple.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_forbidden_dark.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_hit_confirm_orange.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_miss_confirm_white.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_warning_yellow.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_enemy_mark_red.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "04_tile_feedback/tile_self_mark_blue.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tile_feedback",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_damaged_light.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_damaged_heavy.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_emp_disabled.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_revealed_sonar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_revealed_radar.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_target_locked.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_burning.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_flooding.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_sinking.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_decoy_active.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_low_hp_warning.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "05_status_overlays/status_destroyed_marker.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "status_overlay",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_missile_launch.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_torpedo_trail.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_small_explosion.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_large_explosion.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_small_water_splash.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_large_water_splash.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_emp_pulse.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_emp_impact.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_sonar_ping.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_radar_sweep.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_helicopter_trace.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_nuclear_flash_core.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_nuclear_shock_ring.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "06_vfx/vfx_debris_sparks.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "vfx",
+      "transparent_background": true
+    },
+    {
+      "path": "07_tactical_props/prop_shadow_small.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tactical_prop",
+      "transparent_background": true
+    },
+    {
+      "path": "07_tactical_props/prop_shadow_medium.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tactical_prop",
+      "transparent_background": true
+    },
+    {
+      "path": "07_tactical_props/prop_shadow_large.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tactical_prop",
+      "transparent_background": true
+    },
+    {
+      "path": "07_tactical_props/prop_wake_small.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tactical_prop",
+      "transparent_background": true
+    },
+    {
+      "path": "07_tactical_props/prop_wake_medium.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tactical_prop",
+      "transparent_background": true
+    },
+    {
+      "path": "07_tactical_props/prop_wake_large.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tactical_prop",
+      "transparent_background": true
+    },
+    {
+      "path": "07_tactical_props/prop_ping_beacon.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tactical_prop",
+      "transparent_background": true
+    },
+    {
+      "path": "07_tactical_props/prop_target_arrow.png",
+      "width": 1254,
+      "height": 1254,
+      "format": "PNG",
+      "asset_type": "tactical_prop",
+      "transparent_background": true
+    }
+  ]
+}

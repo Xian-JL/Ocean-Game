@@ -10,12 +10,12 @@ const Data = require("../public/js/game-data");
 const ROOT = path.resolve(__dirname, "..");
 const app = fs.readFileSync(path.join(ROOT, "public/js/app.js"), "utf8");
 const css = fs.readFileSync(path.join(ROOT, "public/css/main.css"), "utf8");
-const patch = css.slice(css.indexOf("/* Ocean-v1.5.3 ·"));
+const patch = css.slice(css.indexOf("/* Ocean-v1.5.3 ·"), css.indexOf("/* Ocean-v1.5.4 ·"));
 const context = vm.createContext({ Data, escapeHtml: (value) => String(value).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;") });
 vm.runInContext(app.slice(app.indexOf("  const UNIT_ART_FOLDERS"), app.indexOf("  function actionArtIcon")) + "\nthis.art = { UNIT_ART_VIEWBOXES, artSpriteMarkup, renderTacticalUnitArt, artBounds, carrierModuleName };", context);
 const { art } = context;
 
-test("v1.5.3 全部28张方向素材使用有效边界及等比SVG视口", () => {
+test("v1.5.4 全部28张方向素材使用有效边界及等比SVG视口", () => {
   assert.equal(Object.keys(art.UNIT_ART_VIEWBOXES).length, 28);
   for (const [file, viewBox] of Object.entries(art.UNIT_ART_VIEWBOXES)) {
     assert.ok(fs.existsSync(path.join(ROOT, "public/assets/images/ocean-2.5d/units", file)), file);
@@ -55,7 +55,7 @@ test("三种地图边缘舰艇定位与航母六格连接不受放大影响", ()
   }
   const cells = ["A1", "A2", "B1", "B2", "B3", "C2"];
   const dom = new JSDOM(art.renderTacticalUnitArt({ units: [{ id: "carrier", type: Data.UNIT_TYPES.AIRCRAFT_CARRIER, cells, hp: 6 }] }));
-  assert.equal(dom.window.document.querySelectorAll(".tactical-unit-art--carrier-module img").length, 6);
+  assert.equal(dom.window.document.querySelectorAll(".tactical-unit-art--carrier-module > img:not(.tactical-prop):not(.tactical-status-art)").length, 6);
   assert.equal(dom.window.document.querySelectorAll("svg").length, 0);
   assert.equal(art.carrierModuleName("B2", cells), "carrier_n1e1s1w1.webp");
   dom.window.close();
@@ -93,7 +93,7 @@ test("敌方未知海图不渲染舰体，版本和缓存标识一致", () => {
   const enemyEnd = app.indexOf("\n  function ", enemyStart + 3);
   assert.ok(enemyStart > 0 && enemyEnd > enemyStart);
   assert.doesNotMatch(app.slice(enemyStart, enemyEnd), /renderTacticalUnitArt/);
-  assert.equal(require("../package.json").version, "1.5.3");
-  assert.equal(Data.RELEASE.stage, "Ocean-v1.5.3");
-  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=1\.5\.3/);
+  assert.equal(require("../package.json").version, "1.5.4");
+  assert.equal(Data.RELEASE.stage, "Ocean-v1.5.4");
+  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=1\.5\.4/);
 });

@@ -265,6 +265,52 @@
   });
 
   const ART_DIRECTIONS = Object.freeze(["north", "east", "south", "west"]);
+  const FEEDBACK_ART_ROOT = "/assets/images/ocean-2.5d/feedback";
+  const SECOND_BATCH_ASSET_FILES = Object.freeze({
+    tiles: Object.freeze([
+      "tile_selected_blue", "tile_move_valid", "tile_move_hover", "tile_attack_range_red", "tile_attack_target_red", "tile_scan_range_cyan", "tile_radar_range_green", "tile_shock_range_purple", "tile_forbidden_dark", "tile_hit_confirm_orange", "tile_miss_confirm_white", "tile_warning_yellow", "tile_enemy_mark_red", "tile_self_mark_blue",
+    ]),
+    status: Object.freeze([
+      "status_damaged_light", "status_damaged_heavy", "status_emp_disabled", "status_revealed_sonar", "status_revealed_radar", "status_target_locked", "status_burning", "status_flooding", "status_sinking", "status_decoy_active", "status_low_hp_warning", "status_destroyed_marker",
+    ]),
+    vfx: Object.freeze([
+      "vfx_missile_launch", "vfx_torpedo_trail", "vfx_small_explosion", "vfx_large_explosion", "vfx_small_water_splash", "vfx_large_water_splash", "vfx_emp_pulse", "vfx_emp_impact", "vfx_sonar_ping", "vfx_radar_sweep", "vfx_helicopter_trace", "vfx_nuclear_flash_core", "vfx_nuclear_shock_ring", "vfx_debris_sparks",
+    ]),
+    props: Object.freeze([
+      "prop_shadow_small", "prop_shadow_medium", "prop_shadow_large", "prop_wake_small", "prop_wake_medium", "prop_wake_large", "prop_ping_beacon", "prop_target_arrow",
+    ]),
+  });
+
+  function feedbackArtPath(group, name) {
+    return SECOND_BATCH_ASSET_FILES[group]?.includes(name)
+      ? `${FEEDBACK_ART_ROOT}/${group}/${name}.webp`
+      : "";
+  }
+
+  function tacticalPropSize(bounds) {
+    const occupied = (bounds?.rowSpan ?? 1) * (bounds?.columnSpan ?? 1);
+    return occupied >= 6 ? "large" : occupied >= 3 ? "medium" : "small";
+  }
+
+  function statusArtName(unit, definition, stateCode, selected) {
+    if (unit?.destroyed || unit?.hp <= 0) return "status_sinking";
+    if (unit?.paralyzed) return "status_emp_disabled";
+    if (definition?.initialHp && unit?.hp <= definition.initialHp / 2) return "status_low_hp_warning";
+    if ((unit?.hitCells?.length ?? 0) >= 2) return "status_damaged_heavy";
+    if ((unit?.hitCells?.length ?? 0) > 0 || stateCode === "damaged" || stateCode === "hit") return "status_damaged_light";
+    if (selected) return "status_target_locked";
+    return null;
+  }
+
+  function tacticalArtEffects({ unit, definition, bounds, stateCode, selected, kind }) {
+    const size = tacticalPropSize(bounds);
+    const status = kind === "decoy"
+      ? (stateCode === "sunk" ? "status_destroyed_marker" : "status_decoy_active")
+      : statusArtName(unit, definition, stateCode, selected);
+    return `${stateCode === "sunk" ? "" : `<img class="tactical-prop tactical-prop--shadow" src="${feedbackArtPath("props", `prop_shadow_${size}`)}" alt="" decoding="async" draggable="false" />`}
+      ${stateCode === "sunk" ? "" : `<img class="tactical-prop tactical-prop--wake" src="${feedbackArtPath("props", `prop_wake_${size}`)}" alt="" decoding="async" draggable="false" />`}
+      ${status ? `<img class="tactical-status-art" src="${feedbackArtPath("status", status)}" alt="" decoding="async" draggable="false" />` : ""}`;
+  }
 
   // Alpha bounds of the unchanged 512px assets, with a 3px safety margin.
   // A cropped SVG viewport fits the hull, not the transparent square canvas.
@@ -370,6 +416,7 @@
     kind = "unit",
     selected = false,
     label = "",
+    effects = "",
   }) {
     if (!asset || !bounds) return "";
     const viewBox = UNIT_ART_VIEWBOXES[asset.replace("/assets/images/ocean-2.5d/units/", "")];
@@ -386,7 +433,7 @@
       data-art-state="${stateCode}"
       role="img"
       aria-label="${escapeHtml(label)}"
-    >${artwork}</span>`;
+    >${effects}${artwork}</span>`;
   }
 
   function renderTacticalUnitArt(snapshot, options = {}) {
@@ -409,6 +456,7 @@
             kind: "carrier-module",
             selected,
             label: `${definition.name} ${coordinate}${stateCode === "hit" ? "，该格已受击" : ""}`,
+            effects: tacticalArtEffects({ unit, definition, bounds: { rowSpan: 1, columnSpan: 1 }, stateCode, selected, kind: "carrier-module" }),
           }));
         }
         continue;
@@ -423,6 +471,7 @@
         kind: definition.shape === "square" ? "square-unit" : "whole-unit",
         selected,
         label: `${definition.name}${stateCode === "sunk" ? "，已沉没" : stateCode === "paralyzed" ? "，已瘫痪" : ""}`,
+        effects: tacticalArtEffects({ unit, definition, bounds: artBounds(unit.cells), stateCode, selected, kind: "unit" }),
       }));
     }
     for (const decoy of snapshot?.decoys ?? []) {
@@ -437,6 +486,7 @@
         kind: "decoy",
         selected: options.selectedId === decoy.id,
         label: `诱饵鱼雷 ${decoy.cell}${decoy.destroyed ? "，已摧毁" : ""}`,
+        effects: tacticalArtEffects({ unit: decoy, definition: Data.getUnitDefinitionByType(Data.UNIT_TYPES.DECOY_TORPEDO), bounds: { rowSpan: 1, columnSpan: 1 }, stateCode, selected: options.selectedId === decoy.id, kind: "decoy" }),
       }));
     }
     return sprites.length > 0
@@ -2579,6 +2629,7 @@
         if (hit) classes.push("board-cell--own-hit");
         if (sunk) classes.push("board-cell--wreck");
         if (unit.paralyzed) classes.push("board-cell--paralyzed");
+        if (!sunk && definition.initialHp && unit.hp <= definition.initialHp / 2) classes.push("board-cell--own-low-hp");
         cellState = sunk ? "sunk-unit" : unit.paralyzed ? "paralyzed-unit" : hit ? "damaged-unit" : "own-unit";
         classes.push(`cell-state--${cellState}`);
         if (selectedDefinition?.sourceType === unit.type) {
@@ -2770,6 +2821,15 @@
             ? "board-cell--intel-shock"
             : "board-cell--intel-detection",
         );
+      }
+      if (state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN && preview.has(coordinate)) {
+        classes.push("board-cell--radar-preview");
+      }
+      if (state.battle.selectedAction === Data.ACTION_TYPES.DETECTION_BOMB && preview.has(coordinate)) {
+        classes.push("board-cell--scan-preview");
+      }
+      if (state.battle.selectedAction === Data.ACTION_TYPES.SHOCK_BOMB && preview.has(coordinate)) {
+        classes.push("board-cell--shock-preview");
       }
       classes.push(`cell-state--${cellState}`);
       const rangeState = preview.has(coordinate) ? "selected" : legal.has(coordinate) ? "valid" : "none";
@@ -3186,6 +3246,44 @@
     }[stateCode];
   }
 
+  function feedbackArtMarkup(room) {
+    const feedback = room.latestResolution?.feedback;
+    if (!feedback) return "";
+    const action = feedback.actionType;
+    const stateCode = resolutionVisualState(room);
+    const assets = [];
+    const add = (group, name) => assets.push(`<img src="${feedbackArtPath(group, name)}" alt="" decoding="async" draggable="false" />`);
+    if (action === Data.ACTION_TYPES.SUBMARINE_MISSILE) {
+      add("vfx", "vfx_missile_launch");
+      add("vfx", "vfx_torpedo_trail");
+    } else if (action === Data.ACTION_TYPES.NUCLEAR_BOMB) {
+      add("vfx", "vfx_nuclear_flash_core");
+      add("vfx", "vfx_nuclear_shock_ring");
+    } else if (action === Data.ACTION_TYPES.SHOCK_BOMB) {
+      add("vfx", "vfx_emp_pulse");
+      add("vfx", "vfx_emp_impact");
+    } else if (action === Data.ACTION_TYPES.DETECTION_BOMB) {
+      add("vfx", "vfx_sonar_ping");
+      add("status", "status_revealed_sonar");
+    } else if (action === Data.ACTION_TYPES.RADAR_SCAN) {
+      add("vfx", "vfx_radar_sweep");
+      add("status", "status_revealed_radar");
+      add("props", "prop_ping_beacon");
+    } else if (action === Data.ACTION_TYPES.HELICOPTER_STRAFE) {
+      add("vfx", "vfx_helicopter_trace");
+    }
+    if (stateCode === "hit") {
+      add("vfx", action === Data.ACTION_TYPES.NUCLEAR_BOMB ? "vfx_large_explosion" : "vfx_small_explosion");
+      add("vfx", "vfx_debris_sparks");
+      add("status", "status_burning");
+    } else if (stateCode === "miss") {
+      add("vfx", action === Data.ACTION_TYPES.NUCLEAR_BOMB ? "vfx_large_water_splash" : "vfx_small_water_splash");
+    } else if (stateCode === "private") {
+      add("status", "status_flooding");
+    }
+    return assets.length ? `<span class="resolution-artwork" aria-hidden="true">${assets.join("")}</span>` : "";
+  }
+
   function renderLatestFeedback(room) {
     const feedback = room.latestResolution?.feedback;
     if (!feedback) {
@@ -3198,6 +3296,7 @@
     return `
       <section class="resolution-strip resolution-strip--v074 resolution-strip--${visualState}" data-feedback-state="${visualState}" aria-label="最近一次行动反馈">
         <span class="resolution-strip__icon" aria-hidden="true">${escapeHtml(meta.icon)}</span>
+        ${feedbackArtMarkup(room)}
         <div class="resolution-strip__content">
           <div class="resolution-strip__meta"><span>${escapeHtml(meta.label)}</span><small>行动 ${feedback.sequence ?? "—"}</small></div>
           <strong>${escapeHtml(describeLatestResolution(room))}</strong>
@@ -3616,7 +3715,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
