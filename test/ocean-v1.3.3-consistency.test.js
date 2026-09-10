@@ -21,15 +21,15 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("Ocean-v1.5.4 前后端正式发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "1.5.4");
-  assert.equal(RELEASE_VERSION, "1.5.4");
-  assert.equal(RELEASE_STAGE, "Ocean-v1.5.4");
+test("Ocean-v1.5.5 前后端正式发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "1.5.5");
+  assert.equal(RELEASE_VERSION, "1.5.5");
+  assert.equal(RELEASE_STAGE, "Ocean-v1.5.5");
   assert.equal(RULE_VERSION, "1.8");
   assert.equal(SOCKET_PROTOCOL_VERSION, "2.1");
   assert.deepEqual(Data.RELEASE, {
-    version: "1.5.4",
-    stage: "Ocean-v1.5.4",
+    version: "1.5.5",
+    stage: "Ocean-v1.5.5",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.1",
   });
@@ -54,7 +54,7 @@ test("正式前端不再包含会误导当前规则的历史关键文案", () =>
   }
 
   for (const current of [
-    "Ocean-v1.5.4",
+    "Ocean-v1.5.5",
     "10×10",
     "12×12",
     "15×15",
@@ -98,6 +98,7 @@ test("当前文档冻结 v1.4 战术海面、v1.3 教程、人机边界与真实
     read("docs/release-manifest-Ocean-v1.5.md"),
     read("docs/release-manifest-Ocean-v1.5.1.md"),
     read("docs/release-manifest-Ocean-v1.5.4.md"),
+    read("docs/release-manifest-Ocean-v1.5.5.md"),
   ].join("\n");
 
   for (const stale of ["postlaunch-v0.3", "协议 1.2"]) {
@@ -105,7 +106,7 @@ test("当前文档冻结 v1.4 战术海面、v1.3 教程、人机边界与真实
   }
 
   for (const current of [
-    "Ocean-v1.5.4",
+    "Ocean-v1.5.5",
     "rule-v1.8",
     "page-flow-v2.1",
     "10×10",

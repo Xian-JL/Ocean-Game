@@ -12599,3 +12599,178 @@ html[data-theme="ocean-dusk"] .board-frame--tactical-sea .ocean-board {
   .tactical-unit-art--sunk .tactical-status-art,
   .resolution-artwork img { animation: none; }
 }
+
+/* Ocean-v1.5.5 · faster targeting, compact feedback and collapsible action deck */
+.battle-page--v155 .unit-action-deck--v076 {
+  gap: 6px;
+}
+
+.battle-page--v155 .unit-action-card {
+  gap: 6px;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.battle-page--v155 .unit-action-card--collapsed {
+  padding-block: 6px;
+}
+
+.battle-page--v155 .unit-action-card__toggle {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: 34px minmax(0, 1fr) auto auto 16px;
+  gap: 7px;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.battle-page--v155 .unit-action-card__toggle:hover .unit-action-card__identity strong,
+.battle-page--v155 .unit-action-card__toggle:focus-visible .unit-action-card__identity strong {
+  color: var(--cyan);
+}
+
+.battle-page--v155 .unit-action-card__toggle:focus-visible {
+  border-radius: 7px;
+  outline: 2px solid rgba(var(--accent-primary-rgb), .58);
+  outline-offset: 3px;
+}
+
+.battle-page--v155 .unit-action-card__availability {
+  min-width: 34px;
+  padding: 3px 5px;
+  border: 1px solid rgba(var(--accent-primary-rgb), .2);
+  border-radius: 999px;
+  color: var(--text-soft);
+  background: rgba(var(--accent-primary-rgb), .08);
+  font-size: .57rem;
+  font-weight: 760;
+  text-align: center;
+}
+
+.battle-page--v155 .unit-action-card__chevron {
+  color: var(--text-muted);
+  font-size: .72rem;
+  text-align: center;
+  transition: transform 150ms ease;
+}
+
+.battle-page--v155 .unit-action-card--expanded .unit-action-card__chevron {
+  transform: rotate(180deg);
+}
+
+.battle-page--v155 .unit-action-card__details {
+  display: grid;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.battle-page--v155 .unit-action-card__details[hidden] {
+  display: none;
+}
+
+.battle-page--v155 :is(.unit-action-card__identity small, .unit-instance-row span, .unit-resource-badge, .action-card__state, .action-card__resource) {
+  color: var(--text-soft);
+}
+
+.battle-page--v155 .resolution-strip--v074 {
+  grid-template-columns: 32px auto minmax(0, 1fr) auto;
+  transition: max-height 180ms ease, padding 180ms ease;
+}
+
+.battle-page--v155 .resolution-strip__toggle {
+  align-self: center;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid rgba(var(--accent-primary-rgb), .24);
+  border-radius: 8px;
+  color: var(--text-soft);
+  background: rgba(4, 19, 29, .7);
+  font: 680 .58rem/1 inherit;
+  cursor: pointer;
+}
+
+.battle-page--v155 .resolution-strip__toggle:hover,
+.battle-page--v155 .resolution-strip__toggle:focus-visible {
+  border-color: rgba(var(--accent-primary-rgb), .52);
+  color: var(--text-primary);
+}
+
+.battle-page--v155 .resolution-strip--collapsed {
+  max-height: 42px;
+  align-items: center;
+  padding-block: 5px;
+  overflow: hidden;
+}
+
+.battle-page--v155 .resolution-strip--collapsed .resolution-artwork,
+.battle-page--v155 .resolution-strip--collapsed .resolution-strip__content ul,
+.battle-page--v155 .resolution-strip--collapsed .resolution-strip__meta small {
+  display: none;
+}
+
+.battle-page--v155 .resolution-strip--collapsed .resolution-strip__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
+.battle-page--v155 .resolution-strip--collapsed .resolution-strip__content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.battle-page--v155 .resolution-strip--collapsed .resolution-strip__content > strong {
+  overflow: hidden;
+  font-size: .7rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.confirm-turn-countdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 11px;
+  border: 1px solid rgba(var(--warn-rgb), .22);
+  border-radius: 9px;
+  color: var(--text-soft);
+  background: rgba(var(--warn-rgb), .07);
+}
+
+.confirm-turn-countdown strong {
+  color: var(--orange);
+  font: 800 .92rem/1 Consolas, monospace;
+}
+
+@media (min-width: 901px) {
+  .battle-page--v155 .carrier-tactical-console:has(.resolution-strip--collapsed) {
+    grid-template-rows: auto 42px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .battle-page--v155 .resolution-strip--v074 {
+    grid-template-columns: 32px 42px minmax(0, 1fr) auto;
+  }
+
+  .battle-page--v155 .resolution-strip--collapsed {
+    grid-template-columns: 28px minmax(0, 1fr) auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-page--v155 .unit-action-card,
+  .battle-page--v155 .unit-action-card__chevron,
+  .battle-page--v155 .resolution-strip--v074 {
+    transition: none;
+  }
+}

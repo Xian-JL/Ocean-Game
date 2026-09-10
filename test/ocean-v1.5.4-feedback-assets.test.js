@@ -73,9 +73,9 @@ test("反馈特效继续遵守命中保密与可访问性边界", () => {
   assert.doesNotMatch(app.slice(enemyStart, enemyEnd), /renderTacticalUnitArt/);
 });
 
-test("版本与满幅沙盘回归保持在 v1.5.4", () => {
-  assert.equal(require("../package.json").version, "1.5.4");
+test("v1.5.4素材与满幅沙盘在 v1.5.5 中继续保留", () => {
+  assert.equal(require("../package.json").version, "1.5.5");
   assert.match(app, /battle-page--v154/);
   assert.match(css, /Ocean-v1\.5\.4 · second production feedback/);
-  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=1\.5\.4/);
+  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=1\.5\.5/);
 });

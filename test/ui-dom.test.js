@@ -319,7 +319,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.5.4",
+    stage: "Ocean-v1.5.5",
     protocolVersion: "2.1",
   });
 
@@ -504,9 +504,18 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
 
   socket.serverEmit("room:state", playingRoom());
   assert.ok(window.document.querySelector(".battle-page--v153"));
+  assert.ok(window.document.querySelector(".battle-page--v155"));
   assert.ok(window.document.querySelector(".battle-map-card--own .tactical-hull-viewport image"));
   assert.equal(window.document.querySelector(".battle-map-card--enemy .tactical-hull-viewport"), null);
   assert.equal(window.document.querySelectorAll(".action-card").length, 10);
+  assert.equal(window.document.querySelectorAll('[data-action="toggle-unit-card"]').length, 7);
+  const firstUnitToggle = window.document.querySelector('[data-action="toggle-unit-card"]');
+  assert.equal(firstUnitToggle.getAttribute("aria-expanded"), "false");
+  click(window, firstUnitToggle);
+  assert.equal(window.document.querySelector('[data-action="toggle-unit-card"]').getAttribute("aria-expanded"), "true");
+  assert.equal(window.document.querySelector(".unit-action-card__details").hidden, false);
+  click(window, window.document.querySelector('[data-action="toggle-unit-card"]'));
+  assert.equal(window.document.querySelector('[data-action="toggle-unit-card"]').getAttribute("aria-expanded"), "false");
   assert.equal(window.document.querySelectorAll('.battle-map-card [data-action="enemy-cell"]').length, 144);
   const battleMainColumn = window.document.querySelector(".battle-main-column");
   assert.ok(battleMainColumn);
@@ -516,16 +525,27 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
     assertBoardCoordinateAlignment(board);
   }
+  click(window, window.document.querySelector('[data-action="switch-map"][data-map="own"]'));
+  assert.ok(window.document.querySelector(".battle-map-card--own.is-mobile-active"));
+  click(window, window.document.querySelector('[data-action="toggle-log"]'));
+  assert.ok(window.document.querySelector(".log-panel--open"));
   const pirate = window.document.querySelector(
     `[data-action="select-action"][data-action-type="${Data.ACTION_TYPES.PIRATE_ATTACK}"]`,
   );
   click(window, pirate);
+  assert.ok(window.document.querySelector(".battle-map-card--enemy.is-mobile-active"));
+  assert.equal(window.document.querySelector(".log-panel--open"), null);
+  assert.equal(
+    window.document.querySelector(`[data-source-type="${Data.UNIT_TYPES.PIRATE_SHIP}"] [data-action="toggle-unit-card"]`).getAttribute("aria-expanded"),
+    "true",
+  );
   const enemyA1 = window.document.querySelector(
     '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A1"]',
   );
   click(window, enemyA1);
   assert.equal(window.document.querySelector("#confirm-dialog").open, true);
   assert.match(window.document.querySelector("#confirm-body").textContent, /目标：A1/);
+  assert.ok(window.document.querySelector("#confirm-body [data-deadline]"));
   assert.equal(window.document.querySelector("#confirm-body").textContent.includes("未命中无伤害"), false);
   click(window, window.document.querySelector("#confirm-cancel"));
 

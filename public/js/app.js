@@ -197,6 +197,9 @@
       collapsedMaps: {},
       selectedIntelligenceSequence: null,
       lastResolutionKey: null,
+      feedbackCollapsed: false,
+      feedbackCollapseTimer: null,
+      expandedUnitCards: new Set(),
     },
     replayPlayerId: null,
     reduceMotion: readBooleanPreference(MOTION_STORAGE_KEY),
@@ -1070,6 +1073,21 @@
     state.battle.markerMode = false;
   }
 
+  function scheduleFeedbackCollapse(resolutionStateKey) {
+    window.clearTimeout(state.battle.feedbackCollapseTimer);
+    state.battle.feedbackCollapsed = false;
+    state.battle.feedbackCollapseTimer = window.setTimeout(() => {
+      if (state.battle.lastResolutionKey !== resolutionStateKey) return;
+      state.battle.feedbackCollapsed = true;
+      render();
+    }, 4_500);
+  }
+
+  function closeConfirmSilently() {
+    state.confirm = null;
+    if (confirmDialog.open) confirmDialog.close();
+  }
+
   function prepareMarkerContext(room) {
     if (!room?.battle || !room?.own?.playerId) {
       return;
@@ -1253,7 +1271,11 @@
     if (enteredDeployment) {
       resetDeployment(nextRoom);
       clearBattleDraft();
+      state.battle.expandedUnitCards.clear();
       state.battle.lastResolutionKey = null;
+      state.battle.feedbackCollapsed = false;
+      window.clearTimeout(state.battle.feedbackCollapseTimer);
+      state.battle.feedbackCollapseTimer = null;
       state.replayPlayerId = null;
       if (nextRoom.own?.playerId) {
         clearMarkersFor(nextRoom.roomCode, nextRoom.own.playerId);
@@ -1271,6 +1293,15 @@
     const pendingActionResolved =
       state.battle.actionId &&
       nextRoom.latestResolution?.feedback?.actionId === state.battle.actionId;
+    const actionConfirmInvalidated =
+      state.confirm?.kind === "battle-action" &&
+      (nextRoom.roomPhase !== "PLAYING" ||
+        !nextRoom.turn?.canAct ||
+        (previousTurn !== undefined && previousTurn !== nextRoom.turn?.turnNumber) ||
+        pendingActionResolved);
+    if (actionConfirmInvalidated) {
+      closeConfirmSilently();
+    }
     if (
       nextRoom.roomPhase !== "PLAYING" ||
       (previousTurn !== undefined && previousTurn !== nextRoom.turn?.turnNumber) ||
@@ -1353,6 +1384,7 @@
         showToast(description, resolutionVisualState(nextRoom), 7_000);
       }
       state.battle.lastResolutionKey = nextResolutionKey;
+      scheduleFeedbackCollapse(nextResolutionKey);
     }
 
     if (nextRoom.roomPhase === "CLOSED") {
@@ -1426,6 +1458,13 @@
         app.querySelector(".page-enter")?.classList.remove("page-enter");
       }
       state.renderedPage = page;
+      if (!samePage) {
+        const scrollingElement = document.scrollingElement ?? document.documentElement;
+        scrollingElement.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        app.scrollTop = 0;
+      }
     } catch (error) {
       console.error("[Ocean] 页面渲染失败", error);
       app.innerHTML = `
@@ -3047,20 +3086,26 @@
           const maxHp = units.length * definition.initialHp;
           const hpPercent = Math.max(0, Math.min(100, (hp / maxHp) * 100));
           const availableCount = actions.filter((action) => Model.deriveActionStatus(room, action).enabled).length;
+          const selectedSource = Data.getActionDefinition(state.battle.selectedAction)?.sourceType === sourceType;
+          const expanded = selectedSource || state.battle.expandedUnitCards.has(sourceType);
           return `
-            <section class="unit-action-card unit-action-card--${sourceState.code}" data-source-type="${sourceType}" data-unit-state="${sourceState.code}">
-              <header class="unit-action-card__header">
+            <section class="unit-action-card unit-action-card--${sourceState.code} ${expanded ? "unit-action-card--expanded" : "unit-action-card--collapsed"}" data-source-type="${sourceType}" data-unit-state="${sourceState.code}">
+              <button class="unit-action-card__toggle" type="button" data-action="toggle-unit-card" data-source-type="${sourceType}" aria-expanded="${expanded}">
                 <span class="unit-status__icon unit-status__icon--${definition.category}" aria-hidden="true">${uiIcon(unitIconName(sourceType))}</span>
                 <div class="unit-action-card__identity">
                   <div><strong>${escapeHtml(definition.name)}${units.length > 1 ? ` ×${units.length}` : ""}</strong><small>${escapeHtml(sourceState.label)}</small></div>
                   <div class="hp-track hp-track--compact" aria-label="生命值 ${Model.formatHp(hp)} / ${maxHp}"><i style="--hp-percent:${hpPercent}%"></i></div>
                 </div>
                 <span class="hp-meter hp-meter--compact"><b>${Model.formatHp(hp)}</b><i>/ ${maxHp}</i></span>
-              </header>
-              ${units.length > 1 ? `<div class="unit-instance-row">${units.map((unit, index) => `<span data-unit-state="${unitStateCode(unit, definition)}">艇 ${index + 1} · ${Model.formatHp(unit.hp)}/${definition.initialHp}</span>`).join("")}</div>` : ""}
-              <div class="unit-action-card__resources">${unitResourceBadges(ownBattle, units[0]) || `<span class="unit-resource-badge">可用行动 <b>${availableCount}/${actions.length}</b></span>`}</div>
-              <div class="unit-action-card__actions">
-                ${actions.map((action) => renderActionCard(room, action)).join("")}
+                <span class="unit-action-card__availability">${availableCount}/${actions.length}</span>
+                <span class="unit-action-card__chevron" aria-hidden="true">⌄</span>
+              </button>
+              <div class="unit-action-card__details" ${expanded ? "" : "hidden"}>
+                ${units.length > 1 ? `<div class="unit-instance-row">${units.map((unit, index) => `<span data-unit-state="${unitStateCode(unit, definition)}">艇 ${index + 1} · ${Model.formatHp(unit.hp)}/${definition.initialHp}</span>`).join("")}</div>` : ""}
+                <div class="unit-action-card__resources">${unitResourceBadges(ownBattle, units[0]) || `<span class="unit-resource-badge">可用行动 <b>${availableCount}/${actions.length}</b></span>`}</div>
+                <div class="unit-action-card__actions">
+                  ${actions.map((action) => renderActionCard(room, action)).join("")}
+                </div>
               </div>
             </section>`;
         }).join("")}
@@ -3118,7 +3163,7 @@
           <section class="opening-radar-task" aria-label="首次雷达任务">
             <span class="opening-radar-task__icon opening-radar-task__icon--art" aria-hidden="true">${actionArtIcon(Data.getActionDefinition(Data.ACTION_TYPES.RADAR_SCAN))}</span>
             <div><span class="status-kicker">首次行动</span><strong>雷达扫描</strong><small>${remainingNames.length > 1 ? `选择扫描区域的左上起始格，同时扫描 ${escapeHtml(remainingNames.join(" / "))}` : `选择敌方 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 扫描区域的左上起始格`}</small></div>
-            <button class="button button--primary button--compact" data-action="select-action" data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}">${state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN ? "已选择" : "开始扫描"}</button>
+            <button class="button button--primary button--compact" data-action="select-action" data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}">${state.battle.selectedAction === Data.ACTION_TYPES.RADAR_SCAN ? "选择左上格" : "开始扫描"}</button>
           </section>` : ""}
 
         ${renderUnitActionDeck(room, ownBattle)}
@@ -3293,8 +3338,9 @@
     const decoys = feedback.ownDecoyChanges ?? [];
     const visualState = resolutionVisualState(room);
     const meta = resolutionVisualMeta(room);
+    const collapsed = state.battle.feedbackCollapsed;
     return `
-      <section class="resolution-strip resolution-strip--v074 resolution-strip--${visualState}" data-feedback-state="${visualState}" aria-label="最近一次行动反馈">
+      <section class="resolution-strip resolution-strip--v074 resolution-strip--${visualState} ${collapsed ? "resolution-strip--collapsed" : ""}" data-feedback-state="${visualState}" aria-label="最近一次行动反馈">
         <span class="resolution-strip__icon" aria-hidden="true">${escapeHtml(meta.icon)}</span>
         ${feedbackArtMarkup(room)}
         <div class="resolution-strip__content">
@@ -3309,6 +3355,7 @@
               ${decoys.map((event) => `<li>诱饵鱼雷 ${escapeHtml(event.decoyId)} · ${escapeHtml(event.cell)} 已摧毁</li>`).join("")}
             </ul>` : ""}
         </div>
+        <button class="resolution-strip__toggle" type="button" data-action="toggle-feedback" aria-expanded="${!collapsed}" aria-label="${collapsed ? "展开最近一次行动反馈" : "收起最近一次行动反馈"}">${collapsed ? "展开" : "收起"}</button>
       </section>`;
   }
 
@@ -3715,7 +3762,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
@@ -4280,6 +4327,10 @@
     state.confirm = {
       onConfirm: options.onConfirm,
       onCancel: options.onCancel ?? null,
+      kind: options.kind ?? "generic",
+      roomCode: state.room?.roomCode ?? null,
+      stateVersion: state.room?.stateVersion ?? null,
+      turnNumber: state.room?.turn?.turnNumber ?? null,
     };
     confirmTitle.textContent = options.title;
     confirmBody.replaceChildren();
@@ -4296,6 +4347,16 @@
         list.append(element);
       }
       confirmBody.append(list);
+    }
+    if (options.deadline) {
+      const countdown = document.createElement("p");
+      countdown.className = "confirm-turn-countdown";
+      countdown.append("本回合剩余：");
+      const value = document.createElement("strong");
+      value.dataset.deadline = String(options.deadline);
+      value.textContent = formatCountdown(Model.remainingSeconds(options.deadline, getServerNow()));
+      countdown.append(value);
+      confirmBody.append(countdown);
     }
     confirmAccept.textContent = options.confirmLabel ?? "确认";
     confirmAccept.className = `button ${options.danger ? "button--danger" : "button--primary"}`;
@@ -4366,6 +4427,8 @@
     openConfirm({
       title: `确认${definition.name}`,
       paragraphs,
+      kind: "battle-action",
+      deadline: state.room.deadlines?.actionDeadlineAt,
       confirmLabel: "确认行动",
       onCancel: () => {
         state.battle.target = null;
@@ -4528,6 +4591,7 @@
       return;
     }
     state.battle.selectedAction = actionType;
+    state.battle.expandedUnitCards.add(definition.sourceType);
     state.battle.actionDrawerOpen = definition.targetMode === "line";
     state.battle.logOpen = false;
     state.battle.target = null;
@@ -4535,6 +4599,11 @@
     state.battle.markerMode = false;
     state.battle.helicopterAxis =
       definition.targetMode === "line" ? state.battle.helicopterAxis : null;
+    const targetPlayerId = state.battle.targetPlayerId ?? battleOpponentIds(state.room?.battle)[0];
+    if (targetPlayerId) {
+      state.battle.targetPlayerId = targetPlayerId;
+      state.battle.mobileMap = targetPlayerId;
+    }
     render();
   }
 
@@ -4574,6 +4643,7 @@
       showToast("请先在行动面板选择一项可用行动。", "info");
       return;
     }
+    state.battle.logOpen = false;
     let target;
     if (definition.targetMode === "line") {
       if (!state.battle.helicopterAxis) {
@@ -5244,6 +5314,24 @@
     }
     if (action === "select-action") {
       selectAction(control.dataset.actionType);
+      return;
+    }
+    if (action === "toggle-unit-card") {
+      const sourceType = control.dataset.sourceType;
+      if (!sourceType) return;
+      if (state.battle.expandedUnitCards.has(sourceType)) {
+        state.battle.expandedUnitCards.delete(sourceType);
+      } else {
+        state.battle.expandedUnitCards.add(sourceType);
+      }
+      render();
+      return;
+    }
+    if (action === "toggle-feedback") {
+      state.battle.feedbackCollapsed = !state.battle.feedbackCollapsed;
+      window.clearTimeout(state.battle.feedbackCollapseTimer);
+      state.battle.feedbackCollapseTimer = null;
+      render();
       return;
     }
     if (action === "submit-final-salvo") {

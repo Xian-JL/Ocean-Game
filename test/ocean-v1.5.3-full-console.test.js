@@ -93,7 +93,7 @@ test("敌方未知海图不渲染舰体，版本和缓存标识一致", () => {
   const enemyEnd = app.indexOf("\n  function ", enemyStart + 3);
   assert.ok(enemyStart > 0 && enemyEnd > enemyStart);
   assert.doesNotMatch(app.slice(enemyStart, enemyEnd), /renderTacticalUnitArt/);
-  assert.equal(require("../package.json").version, "1.5.4");
-  assert.equal(Data.RELEASE.stage, "Ocean-v1.5.4");
-  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=1\.5\.4/);
+  assert.equal(require("../package.json").version, "1.5.5");
+  assert.equal(Data.RELEASE.stage, "Ocean-v1.5.5");
+  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=1\.5\.5/);
 });
