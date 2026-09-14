@@ -49,7 +49,7 @@ test("桌面对战海面严格收束为随视口放大的方形坐标盘", () =>
 test("手机地图尺寸、强制高对比和当前缓存版本继续有效", () => {
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*--cell-size: 42px/);
   assert.match(css, /forced-colors: active[\s\S]*board-frame--tactical-sea/);
-  assert.match(html, /\/css\/main\.css\?v=1\.5/);
+  assert.match(html, /\/css\/main\.css\?v=1\.6\.0/);
   for (const size of [10, 12, 15]) {
     assert.match(css, new RegExp(`data-map-size="${size}"`));
   }

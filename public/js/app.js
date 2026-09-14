@@ -38,6 +38,7 @@
   const TUTORIAL_STORAGE_KEY = "ocean.tutorial-progress.v1";
   const THEME_STORAGE_KEY = "ocean.theme.v1";
   const ACCENT_STORAGE_KEY = "ocean.accent.v1";
+  const QUALITY_STORAGE_KEY = "ocean.quality.v1";
   const MARKER_DEFINITIONS = Object.freeze([
     { value: "occupied", label: "确定有目标", shortLabel: "确定有" },
     { value: "surface_yes", label: "水面有目标", shortLabel: "水面有" },
@@ -98,6 +99,8 @@
     "toggle-marker-mode": "ui_select",
     "cancel-action-selection": "cancel",
     "reopen-action-confirm": "panel_open",
+    "center-battle-map": "map_switch",
+    "focus-selected-target": "map_switch",
     "select-intelligence": "private",
     "clear-intelligence": "cancel",
     surrender: "warning",
@@ -109,6 +112,7 @@
     "close-personalize": "panel_close",
     "select-theme": "ui_select",
     "select-accent": "ui_select",
+    "select-quality-mode": "ui_select",
     "reset-personalization": "cancel",
   });
 
@@ -206,6 +210,7 @@
       resolutionEffectMapId: null,
       unreadResultPlayerIds: new Set(),
       viewedResolutionByPlayer: new Map(),
+      mapViewPositions: new Map(),
       ownEffectCells: {
         hit: new Set(),
         sunk: new Set(),
@@ -217,6 +222,8 @@
     reduceMotion: readBooleanPreference(MOTION_STORAGE_KEY),
     theme: readStringPreference(THEME_STORAGE_KEY, "ocean-dark"),
     accent: readStringPreference(ACCENT_STORAGE_KEY, "cyan"),
+    qualityMode: readStringPreference(QUALITY_STORAGE_KEY, "auto"),
+    effectiveQuality: "high",
     audio: Sound?.preferences?.() ?? {
       effectsEnabled: false,
       effectsVolume: 1,
@@ -228,7 +235,10 @@
     renderedPage: null,
   };
   let markerLongPress = null;
+  let mapPanGesture = null;
   let suppressEnemyCellClickUntil = 0;
+  let viewportRestoreTimer = null;
+  const preloadedArtAssets = new Set();
 
   function escapeHtml(value) {
     return String(value ?? "")
@@ -302,6 +312,44 @@
       : "";
   }
 
+  function preloadArtAssets(urls) {
+    if (typeof Image !== "function") return;
+    const load = () => {
+      for (const url of urls.filter(Boolean)) {
+        if (preloadedArtAssets.has(url)) continue;
+        preloadedArtAssets.add(url);
+        const image = new Image();
+        image.decoding = "async";
+        image.fetchPriority = "low";
+        image.src = url;
+      }
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(load, { timeout: 1_200 });
+    } else {
+      window.setTimeout(load, 0);
+    }
+  }
+
+  function warmBattleArt(room) {
+    if (!room?.battle) return;
+    const urls = [
+      "/assets/images/ocean-2.5d/ocean/ocean_deep_active.webp",
+      "/assets/images/ocean-2.5d/actions/action_radar_scan.webp",
+    ];
+    const selectedFile = ACTION_ART_FILES[state.battle.selectedAction];
+    if (selectedFile) urls.push(`/assets/images/ocean-2.5d/actions/${selectedFile}`);
+    if (state.effectiveQuality === "high") {
+      urls.push(...Object.values(ACTION_ART_FILES).map((file) => `/assets/images/ocean-2.5d/actions/${file}`));
+      urls.push(
+        feedbackArtPath("vfx", "vfx_small_explosion"),
+        feedbackArtPath("vfx", "vfx_small_water_splash"),
+        feedbackArtPath("status", "status_target_locked"),
+      );
+    }
+    preloadArtAssets(urls);
+  }
+
   function tacticalPropSize(bounds) {
     const occupied = (bounds?.rowSpan ?? 1) * (bounds?.columnSpan ?? 1);
     return occupied >= 6 ? "large" : occupied >= 3 ? "medium" : "small";
@@ -317,14 +365,17 @@
     return null;
   }
 
-  function tacticalArtEffects({ unit, definition, bounds, stateCode, selected, kind }) {
+  function tacticalArtEffects({ unit, definition, bounds, stateCode, selected, kind, quality = "high" }) {
     const size = tacticalPropSize(bounds);
     const status = kind === "decoy"
       ? (stateCode === "sunk" ? "status_destroyed_marker" : "status_decoy_active")
       : statusArtName(unit, definition, stateCode, selected);
-    return `${stateCode === "sunk" ? "" : `<img class="tactical-prop tactical-prop--shadow" src="${feedbackArtPath("props", `prop_shadow_${size}`)}" alt="" decoding="async" draggable="false" />`}
-      ${stateCode === "sunk" ? "" : `<img class="tactical-prop tactical-prop--wake" src="${feedbackArtPath("props", `prop_wake_${size}`)}" alt="" decoding="async" draggable="false" />`}
-      ${status ? `<img class="tactical-status-art" src="${feedbackArtPath("status", status)}" alt="" decoding="async" draggable="false" />` : ""}`;
+    if (quality === "smooth") {
+      return status ? `<img class="tactical-status-art" src="${feedbackArtPath("status", status)}" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />` : "";
+    }
+    return `${stateCode === "sunk" ? "" : `<img class="tactical-prop tactical-prop--shadow" src="${feedbackArtPath("props", `prop_shadow_${size}`)}" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />`}
+      ${stateCode === "sunk" ? "" : `<img class="tactical-prop tactical-prop--wake" src="${feedbackArtPath("props", `prop_wake_${size}`)}" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />`}
+      ${status ? `<img class="tactical-status-art" src="${feedbackArtPath("status", status)}" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />` : ""}`;
   }
 
   // Alpha bounds of the unchanged 512px assets, with a 3px safety margin.
@@ -437,7 +488,7 @@
     const viewBox = UNIT_ART_VIEWBOXES[asset.replace("/assets/images/ocean-2.5d/units/", "")];
     const artwork = viewBox
       ? `<svg class="tactical-hull-viewport" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><image href="${asset}" x="0" y="0" width="512" height="512" /></svg>`
-      : `<img src="${asset}" alt="" decoding="async" draggable="false" />`;
+      : `<img src="${asset}" alt="" loading="eager" decoding="async" fetchpriority="auto" draggable="false" />`;
     return `<span
       class="tactical-unit-art tactical-unit-art--${kind} tactical-unit-art--${stateCode}${selected ? " tactical-unit-art--selected" : ""}"
       data-grid-row="${bounds.row}"
@@ -471,7 +522,7 @@
             kind: "carrier-module",
             selected,
             label: `${definition.name} ${coordinate}${stateCode === "hit" ? "，该格已受击" : ""}`,
-            effects: tacticalArtEffects({ unit, definition, bounds: { rowSpan: 1, columnSpan: 1 }, stateCode, selected, kind: "carrier-module" }),
+            effects: tacticalArtEffects({ unit, definition, bounds: { rowSpan: 1, columnSpan: 1 }, stateCode, selected, kind: "carrier-module", quality: options.quality }),
           }));
         }
         continue;
@@ -486,7 +537,7 @@
         kind: definition.shape === "square" ? "square-unit" : "whole-unit",
         selected,
         label: `${definition.name}${stateCode === "sunk" ? "，已沉没" : stateCode === "paralyzed" ? "，已瘫痪" : ""}`,
-        effects: tacticalArtEffects({ unit, definition, bounds: artBounds(unit.cells), stateCode, selected, kind: "unit" }),
+        effects: tacticalArtEffects({ unit, definition, bounds: artBounds(unit.cells), stateCode, selected, kind: "unit", quality: options.quality }),
       }));
     }
     for (const decoy of snapshot?.decoys ?? []) {
@@ -501,7 +552,7 @@
         kind: "decoy",
         selected: options.selectedId === decoy.id,
         label: `诱饵鱼雷 ${decoy.cell}${decoy.destroyed ? "，已摧毁" : ""}`,
-        effects: tacticalArtEffects({ unit: decoy, definition: Data.getUnitDefinitionByType(Data.UNIT_TYPES.DECOY_TORPEDO), bounds: { rowSpan: 1, columnSpan: 1 }, stateCode, selected: options.selectedId === decoy.id, kind: "decoy" }),
+        effects: tacticalArtEffects({ unit: decoy, definition: Data.getUnitDefinitionByType(Data.UNIT_TYPES.DECOY_TORPEDO), bounds: { rowSpan: 1, columnSpan: 1 }, stateCode, selected: options.selectedId === decoy.id, kind: "decoy", quality: options.quality }),
       }));
     }
     return sprites.length > 0
@@ -512,7 +563,7 @@
   function actionArtIcon(definition) {
     const file = ACTION_ART_FILES[definition?.type];
     return file
-      ? `<img class="action-art-icon" src="/assets/images/ocean-2.5d/actions/${file}" alt="" decoding="async" draggable="false" />`
+      ? `<img class="action-art-icon" src="/assets/images/ocean-2.5d/actions/${file}" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />`
       : uiIcon("action-radar");
   }
 
@@ -732,6 +783,26 @@
     document.documentElement.dataset.reduceMotion = enabled ? "true" : "false";
     reduceMotionToggle.checked = enabled;
     writeBooleanPreference(MOTION_STORAGE_KEY, enabled);
+    if (state.qualityMode === "auto") applyQualityMode("auto");
+  }
+
+  function resolveAutomaticQuality() {
+    const reduced = state.reduceMotion || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const memory = Number(navigator.deviceMemory ?? 8);
+    const cores = Number(navigator.hardwareConcurrency ?? 8);
+    const compactViewport = Math.min(window.innerWidth || 1280, window.innerHeight || 720) < 700;
+    return reduced || memory <= 4 || cores <= 4 || compactViewport ? "smooth" : "high";
+  }
+
+  function applyQualityMode(mode) {
+    if (!["auto", "high", "smooth"].includes(mode)) mode = "auto";
+    state.qualityMode = mode;
+    state.effectiveQuality = mode === "auto" ? resolveAutomaticQuality() : mode;
+    document.documentElement.dataset.qualityMode = mode;
+    document.documentElement.dataset.quality = state.effectiveQuality;
+    writeStringPreference(QUALITY_STORAGE_KEY, mode);
+    syncPersonalizeControls();
+    warmBattleArt(state.room);
   }
 
   const THEME_OPTIONS = Object.freeze({
@@ -785,6 +856,18 @@
       const active = control.dataset.accentValue === state.accent;
       control.classList.toggle("is-active", active);
       control.setAttribute("aria-checked", String(active));
+    }
+    const qualityControls = personalizeDialog.querySelectorAll(
+      '[data-action="select-quality-mode"]',
+    );
+    for (const control of qualityControls) {
+      const active = control.dataset.qualityMode === state.qualityMode;
+      control.classList.toggle("is-active", active);
+      control.setAttribute("aria-checked", String(active));
+      const detail = control.querySelector("small");
+      if (detail && control.dataset.qualityMode === "auto") {
+        detail.textContent = `当前：${state.effectiveQuality === "smooth" ? "流畅" : "高画质"}`;
+      }
     }
   }
 
@@ -1352,6 +1435,7 @@
       state.battle.resolutionEffectMapId = null;
       state.battle.unreadResultPlayerIds.clear();
       state.battle.viewedResolutionByPlayer.clear();
+      state.battle.mapViewPositions.clear();
       state.battle.ownEffectCells = emptyOwnEffectCells();
       window.clearTimeout(state.battle.resolutionEffectTimer);
       state.battle.resolutionEffectTimer = null;
@@ -1425,7 +1509,16 @@
     }
     if (resumedFromPause) {
       Sound?.playEffect?.("reconnect");
-      showToast("连接已恢复，对局继续。", "success", 3_500, false);
+      const remaining = nextRoom.deadlines?.actionDeadlineAt
+        ? Model.remainingSeconds(nextRoom.deadlines.actionDeadlineAt, nextRoom.serverNow)
+        : null;
+      const turnText = nextRoom.turn?.canAct
+        ? "仍是你的回合"
+        : `当前由 ${Model.nicknameFor(nextRoom, nextRoom.turn?.currentPlayerId)} 行动`;
+      const targetText = state.battle.target
+        ? `，已保留目标 ${Model.formatTarget(state.battle.target)}`
+        : "";
+      showToast(`连接已恢复，对局继续。${turnText}${remaining === null ? "" : `，剩余 ${formatCountdown(remaining)}`}${targetText}。`, "success", 5_000, false);
     }
     for (const playerId of newlyEliminated) {
       Sound?.playEffect?.("eliminated");
@@ -1447,6 +1540,7 @@
       : "海战 OCEAN";
     state.clockOffsetMs = Date.now() - nextRoom.serverNow;
     prepareMarkerContext(nextRoom);
+    warmBattleArt(nextRoom);
 
     if (
       nextResolutionKey &&
@@ -1495,6 +1589,9 @@
     }
 
     settleStateWaiters();
+    if (state.connected) {
+      setConnectionPhase("online", "服务器状态已校准。", "online", "服务器在线");
+    }
     render();
   }
 
@@ -1536,6 +1633,7 @@
       : "";
     const page = state.tutorial.active ? "T01" : Model.pageForState(state.room);
     const samePage = state.renderedPage === page;
+    if (page === "P05" && samePage) rememberBattleMapView();
     try {
       if (page === "T01") {
         app.innerHTML = renderTutorialPage();
@@ -1558,6 +1656,7 @@
         app.querySelector(".page-enter")?.classList.remove("page-enter");
       }
       state.renderedPage = page;
+      if (page === "P05") restoreBattleMapView();
       if (!samePage) {
         const scrollingElement = document.scrollingElement ?? document.documentElement;
         scrollingElement.scrollTop = 0;
@@ -2302,7 +2401,7 @@
         },
       };
     }, locked ? "board-frame--locked board-frame--2d-art" : "board-frame--2d-art",
-    renderTacticalUnitArt(artSnapshot, { selectedId: selected }));
+    renderTacticalUnitArt(artSnapshot, { selectedId: selected, quality: state.effectiveQuality }));
   }
 
   function getDeploymentHoverPreview(locked) {
@@ -2901,7 +3000,9 @@
     if (model.hasParalyzed) add("status", "status_emp_disabled", "status");
     if (model.hasDecoy) add("status", "status_destroyed_marker", "status");
     if (model.hasSunk) add("status", "status_sinking", "status");
-    return assets;
+    return state.effectiveQuality === "smooth"
+      ? assets.filter((asset) => ["primary", "impact", "status"].includes(asset.role)).slice(0, 1)
+      : assets;
   }
 
   function renderBattleEffectLayer(model) {
@@ -2920,7 +3021,7 @@
         data-grid-column="${bounds.column}"
         data-grid-row-span="${bounds.rowSpan}"
         data-grid-column-span="${bounds.columnSpan}"
-      >${assets.map((asset) => `<img class="battle-effect-art__${asset.role}" data-effect-asset="${asset.name}" src="${asset.path}" alt="" decoding="async" draggable="false" />`).join("")}</span>
+      >${assets.map((asset) => `<img class="battle-effect-art__${asset.role}" data-effect-asset="${asset.name}" src="${asset.path}" alt="" loading="eager" decoding="async" fetchpriority="high" draggable="false" />`).join("")}</span>
     </div>`;
   }
 
@@ -2987,7 +3088,7 @@
     }, options.replay
       ? "board-frame--replay board-frame--tactical-sea board-frame--own-sea"
       : "board-frame--tactical-sea board-frame--own-sea",
-    `${renderTacticalUnitArt(snapshot, { replay: options.replay })}${renderBattleEffectLayer(effectModel)}`);
+    `${renderTacticalUnitArt(snapshot, { replay: options.replay, quality: state.effectiveQuality })}${renderBattleEffectLayer(effectModel)}`);
   }
 
   function currentIntelligenceArea(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
@@ -4088,6 +4189,70 @@
       </nav>`;
   }
 
+  function battleMapPanel(mapId = state.battle.mobileMap) {
+    return [...document.querySelectorAll("[data-map-panel]")]
+      .find((panel) => panel.dataset.mapPanel === mapId) ?? null;
+  }
+
+  function rememberBattleMapView(mapId = state.battle.mobileMap) {
+    const frame = battleMapPanel(mapId)?.querySelector(".board-frame--tactical-sea");
+    if (!frame) return;
+    state.battle.mapViewPositions.set(mapId, {
+      left: frame.scrollLeft,
+      top: frame.scrollTop,
+    });
+  }
+
+  function restoreBattleMapView(mapId = state.battle.mobileMap) {
+    const position = state.battle.mapViewPositions.get(mapId);
+    if (!position) return;
+    window.requestAnimationFrame(() => {
+      const frame = battleMapPanel(mapId)?.querySelector(".board-frame--tactical-sea");
+      if (!frame) return;
+      frame.scrollLeft = Math.min(position.left, Math.max(0, frame.scrollWidth - frame.clientWidth));
+      frame.scrollTop = Math.min(position.top, Math.max(0, frame.scrollHeight - frame.clientHeight));
+    });
+  }
+
+  function targetFocusCoordinate(target = state.battle.target) {
+    if (target?.coordinate) return target.coordinate;
+    const size = state.room?.mapSize ?? 12;
+    const midpoint = Math.max(0, Math.floor((size - 1) / 2));
+    if (target?.kind === "row") {
+      const row = Data.ROWS.indexOf(target.row);
+      return row >= 0 ? Data.formatCoordinate(row, midpoint) : null;
+    }
+    if (target?.kind === "column") {
+      return Data.formatCoordinate(midpoint, Number(target.column) - 1);
+    }
+    return null;
+  }
+
+  function centerBattleMap(coordinate = null) {
+    const mapId = state.battle.mobileMap;
+    window.requestAnimationFrame(() => {
+      const panel = battleMapPanel(mapId);
+      const frame = panel?.querySelector(".board-frame--tactical-sea");
+      const cell = coordinate
+        ? [...(panel?.querySelectorAll("[data-coordinate]") ?? [])].find((item) => item.dataset.coordinate === coordinate)
+        : null;
+      if (!frame) return;
+      const left = cell
+        ? cell.offsetLeft + cell.offsetWidth / 2 - frame.clientWidth / 2
+        : (frame.scrollWidth - frame.clientWidth) / 2;
+      const top = cell
+        ? cell.offsetTop + cell.offsetHeight / 2 - frame.clientHeight / 2
+        : (frame.scrollHeight - frame.clientHeight) / 2;
+      if (typeof frame.scrollTo === "function") {
+        frame.scrollTo({ left, top, behavior: state.reduceMotion ? "auto" : "smooth" });
+      } else {
+        frame.scrollLeft = left;
+        frame.scrollTop = top;
+      }
+      state.battle.mapViewPositions.set(mapId, { left: Math.max(0, left), top: Math.max(0, top) });
+    });
+  }
+
   function renderMobileCommandPeek(room) {
     const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
     const targetText = state.battle.target ? Model.formatTarget(state.battle.target) : "尚未选择目标";
@@ -4103,6 +4268,7 @@
           <strong>${escapeHtml(targetText)}</strong>
           <small>${state.battle.target ? "点击展开或确认" : "点击打开行动面板"}</small>
         </button>
+        <button class="mobile-command-peek__center" type="button" data-action="center-battle-map">地图居中</button>
         ${state.battle.target ? `<button class="mobile-command-peek__focus" type="button" data-action="focus-selected-target">回到目标</button><button class="mobile-command-peek__confirm" type="button" data-action="reopen-action-confirm">确认</button>` : ""}
       </section>`;
   }
@@ -4230,7 +4396,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 battle-page--v158 battle-page--v159 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 battle-page--v158 battle-page--v159 battle-page--v160 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
@@ -5077,6 +5243,7 @@
       state.battle.targetPlayerId = targetPlayerId;
       state.battle.mobileMap = targetPlayerId;
     }
+    warmBattleArt(state.room);
     render();
   }
 
@@ -5341,7 +5508,13 @@
     socket.on("connect", () => {
       state.connected = true;
       state.connection.failures = 0;
-      setConnectionPhase("online", "服务器连接正常。", "online", "服务器在线");
+      const reconnectingWithRoom = Boolean(state.room || readStoredSession());
+      setConnectionPhase(
+        reconnectingWithRoom ? "syncing" : "online",
+        reconnectingWithRoom ? "连接已建立，正在恢复并校准对局状态。" : "服务器连接正常。",
+        reconnectingWithRoom ? "warning" : "online",
+        reconnectingWithRoom ? "正在同步" : "服务器在线",
+      );
       render();
       socket.timeout(3_000).emit("client:ping", {}, (error, response) => {
         if (error || !response?.ok) {
@@ -5578,10 +5751,16 @@
       applyAccent(control.dataset.accentValue);
       return;
     }
+    if (action === "select-quality-mode") {
+      applyQualityMode(control.dataset.qualityMode);
+      render();
+      return;
+    }
     if (action === "reset-personalization") {
       applyTheme("ocean-dark");
       applyAccent("cyan");
-      showToast("已恢复默认主题与强调色。", "success");
+      applyQualityMode("auto");
+      showToast("已恢复默认主题、强调色与自动画质。", "success");
       return;
     }
     if (action === "reload") {
@@ -5746,6 +5925,7 @@
     }
     if (action === "switch-map") {
       const mapId = control.dataset.map;
+      rememberBattleMapView();
       state.battle.mobileMap = mapId;
       if (mapId === "own") {
         state.battle.ownMapAlert = false;
@@ -5871,20 +6051,11 @@
       return;
     }
     if (action === "focus-selected-target") {
-      const coordinate = state.battle.target?.coordinate;
-      if (!coordinate) return;
-      const activePanel = document.querySelector('.battle-map-card.is-mobile-active');
-      const cell = activePanel?.querySelector(`[data-coordinate="${coordinate}"]`);
-      const frame = cell?.closest(".board-frame");
-      if (!cell || !frame) return;
-      const left = cell.offsetLeft + cell.offsetWidth / 2 - frame.clientWidth / 2;
-      const top = cell.offsetTop + cell.offsetHeight / 2 - frame.clientHeight / 2;
-      if (typeof frame.scrollTo === "function") {
-        frame.scrollTo({ left, top, behavior: state.reduceMotion ? "auto" : "smooth" });
-      } else {
-        frame.scrollLeft = left;
-        frame.scrollTop = top;
-      }
+      centerBattleMap(targetFocusCoordinate());
+      return;
+    }
+    if (action === "center-battle-map") {
+      centerBattleMap();
       return;
     }
     if (action === "set-helicopter-axis") {
@@ -6041,6 +6212,15 @@
 
   document.addEventListener("pointerdown", (event) => {
     if (event.pointerType === "mouse") return;
+    const mapFrame = event.target.closest?.(".board-frame--tactical-sea");
+    if (mapFrame) {
+      mapPanGesture = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        moved: false,
+      };
+    }
     const control = event.target.closest?.('[data-action="enemy-cell"][data-cell-state="private-marker"]');
     if (!control) return;
     if (markerLongPress?.timer) clearTimeout(markerLongPress.timer);
@@ -6065,6 +6245,15 @@
   });
 
   document.addEventListener("pointermove", (event) => {
+    const gesture = mapPanGesture;
+    if (gesture && gesture.pointerId === event.pointerId && !gesture.moved) {
+      if (Math.hypot(event.clientX - gesture.x, event.clientY - gesture.y) > 12) {
+        gesture.moved = true;
+        suppressEnemyCellClickUntil = Date.now() + 650;
+        if (markerLongPress?.timer) clearTimeout(markerLongPress.timer);
+        markerLongPress = null;
+      }
+    }
     const press = markerLongPress;
     if (!press || press.pointerId !== event.pointerId || press.fired) return;
     if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > 10) {
@@ -6074,6 +6263,7 @@
   });
 
   function finishMarkerLongPress(event) {
+    if (mapPanGesture?.pointerId === event.pointerId) mapPanGesture = null;
     const press = markerLongPress;
     if (!press || press.pointerId !== event.pointerId) return;
     if (press.timer) clearTimeout(press.timer);
@@ -6319,6 +6509,7 @@
   reduceMotionToggle.checked = state.reduceMotion;
   applyTheme(state.theme);
   applyAccent(state.accent);
+  applyQualityMode(state.qualityMode);
   syncAudioControls();
   function resumeStoredMusicOnFirstGesture() {
     window.removeEventListener("pointerdown", resumeStoredMusicOnFirstGesture, true);
@@ -6355,15 +6546,39 @@
       event.returnValue = "";
     }
   });
+  window.addEventListener("resize", () => {
+    if (state.renderedPage !== "P05") return;
+    rememberBattleMapView();
+    window.clearTimeout(viewportRestoreTimer);
+    viewportRestoreTimer = window.setTimeout(() => {
+      if (state.qualityMode === "auto") applyQualityMode("auto");
+      restoreBattleMapView();
+    }, 120);
+  });
+  window.addEventListener("orientationchange", () => {
+    rememberBattleMapView();
+    window.clearTimeout(viewportRestoreTimer);
+    viewportRestoreTimer = window.setTimeout(() => restoreBattleMapView(), 220);
+  });
   document.addEventListener("visibilitychange", () => {
     if (
       document.visibilityState === "visible" &&
       state.socket?.connected &&
       state.room
     ) {
+      setConnectionPhase(
+        "syncing",
+        "页面已回到前台，正在校准服务器回合与剩余时间。",
+        "warning",
+        "正在同步",
+      );
+      render();
       void emitRequest("room:sync", {}).then((response) => {
         if (response.view) acceptRoomState(response.view);
-      }).catch(() => {});
+      }).catch(() => {
+        setConnectionPhase("reconnecting", "同步暂未完成，客户端会继续重试。", "warning", "同步延迟");
+        render();
+      });
     }
   });
   window.setInterval(updateCountdowns, 250);

@@ -48,5 +48,5 @@ test("桌面行动和消息侧栏使用独立视口上限与内部滚动区", ()
   const fixes = css.slice(start, css.indexOf("Ocean-v1.4.2.2 · keep desktop map tabs", start));
   assert.match(fixes, /action-rail--v073,[\s\S]*event-center--v074[\s\S]*max-height: min\(720px, calc\(100dvh - 280px\)\)/);
   assert.match(fixes, /action-rail__content[\s\S]*max-height: calc\(100dvh - 356px\)[\s\S]*overscroll-behavior: contain/);
-  assert.match(html, /\/css\/main\.css\?v=1\.5/);
+  assert.match(html, /\/css\/main\.css\?v=1\.6\.0/);
 });

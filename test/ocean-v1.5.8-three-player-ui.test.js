@@ -22,10 +22,10 @@ function functionBody(name, nextName) {
 }
 
 test("v1.5.8 发布元数据、缓存标识与页面类一致", () => {
-  assert.equal(require("../package.json").version, "1.5.9");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.5.9");
-  assert.match(html, /main\.css\?v=1\.5\.9/);
-  assert.match(html, /app\.js\?v=1\.5\.9/);
+  assert.equal(require("../package.json").version, "1.6.0");
+  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.0");
+  assert.match(html, /main\.css\?v=1\.6\.0/);
+  assert.match(html, /app\.js\?v=1\.6\.0/);
   assert.match(app, /battle-page--v158/);
 });
 

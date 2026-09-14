@@ -26,7 +26,7 @@ test("战斗外框使用 clip 裁切，不再建立会破坏 sticky 的滚动容
 });
 
 test("v1.5 缓存版本生效且手机底部抽屉规则保持原样", () => {
-  assert.match(html, /\/css\/main\.css\?v=1\.5/);
+  assert.match(html, /\/css\/main\.css\?v=1\.6\.0/);
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*max-height: min\(78dvh, 720px\)/);
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*position: fixed/);
 });

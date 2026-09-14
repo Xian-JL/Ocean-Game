@@ -22,11 +22,11 @@ function functionBody(name, nextName) {
   return app.slice(start, end);
 }
 
-test("v1.5.5 交互优化在 v1.5.9 发布元数据中继续保留", () => {
-  assert.equal(require("../package.json").version, "1.5.9");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.5.9");
-  assert.match(html, /Ocean-v1\.5\.9/);
-  assert.match(html, /main\.css\?v=1\.5\.9/);
+test("v1.5.5 交互优化在 v1.6.0 发布元数据中继续保留", () => {
+  assert.equal(require("../package.json").version, "1.6.0");
+  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.0");
+  assert.match(html, /Ocean-v1\.6\.0/);
+  assert.match(html, /main\.css\?v=1\.6\.0/);
   assert.match(app, /battle-page--v155/);
 });
 

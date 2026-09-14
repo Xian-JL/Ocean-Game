@@ -31,9 +31,9 @@ test("地图标签、侧栏与底部控制恢复经典按键语言，行动面�
   assert.doesNotMatch(v151, /\.action-rail--v073\s*\{/);
 });
 
-test("v1.5.1 布局修复在 v1.5.9 中继续保留", () => {
-  assert.equal(packageJson.version, "1.5.9");
-  assert.match(html, /Ocean-v1\.5\.9/);
-  assert.match(html, /\/css\/main\.css\?v=1\.5\.9/);
-  assert.match(html, /carrier-bridge-ocean\.webp\?v=1\.5\.9/);
+test("v1.5.1 布局修复在 v1.6.0 中继续保留", () => {
+  assert.equal(packageJson.version, "1.6.0");
+  assert.match(html, /Ocean-v1\.6\.0/);
+  assert.match(html, /\/css\/main\.css\?v=1\.6\.0/);
+  assert.match(html, /carrier-bridge-ocean\.webp\?v=1\.6\.0/);
 });

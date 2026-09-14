@@ -36,5 +36,5 @@ test("水面与潜层只写入本地界面状态且手机端关闭透视控制�
   assert.match(css, /data-tactical-layer="surface"/);
   assert.match(css, /data-tactical-layer="underwater"/);
   assert.match(css, /@media \(max-width: 900px\)[\s\S]*\.battle-page--v15 \.bridge-command-deck/);
-  assert.match(html, /\/css\/main\.css\?v=1\.5(?:\.1)?/);
+  assert.match(html, /\/css\/main\.css\?v=1\.6\.0/);
 });
