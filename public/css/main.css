@@ -12774,3 +12774,213 @@ html[data-theme="ocean-dusk"] .board-frame--tactical-sea .ocean-board {
     transition: none;
   }
 }
+
+/* Ocean-v1.5.7 · privacy-safe battlefield feedback effects */
+.battle-page--v157 .battle-effect-layer {
+  position: absolute;
+  z-index: 15;
+  top: 23px;
+  right: 0;
+  bottom: 0;
+  left: 23px;
+  display: grid;
+  grid-template-columns: repeat(var(--board-size, 12), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--board-size, 12), minmax(0, 1fr));
+  pointer-events: none;
+}
+
+.battle-page--v157 .battle-effect-art {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  overflow: visible;
+  pointer-events: none;
+  isolation: isolate;
+  grid-row: var(--effect-row) / span var(--effect-row-span);
+  grid-column: var(--effect-column) / span var(--effect-column-span);
+}
+
+.battle-page--v157 .battle-effect-art img {
+  position: absolute;
+  width: 116%;
+  height: 116%;
+  max-width: none;
+  object-fit: contain;
+  opacity: 0;
+  filter: drop-shadow(0 0 7px rgba(93, 222, 255, .54));
+  animation: battle-effect-arrival 3.6s ease-out both;
+  pointer-events: none;
+}
+
+.battle-page--v157 .battle-effect-art__ring { z-index: 1; animation-name: battle-effect-ring !important; }
+.battle-page--v157 .battle-effect-art__scan { z-index: 2; animation-name: battle-effect-scan !important; }
+.battle-page--v157 .battle-effect-art__trail { z-index: 3; animation-name: battle-effect-trail !important; }
+.battle-page--v157 .battle-effect-art__primary,
+.battle-page--v157 .battle-effect-art__impact { z-index: 4; }
+.battle-page--v157 .battle-effect-art__debris,
+.battle-page--v157 .battle-effect-art__status,
+.battle-page--v157 .battle-effect-art__beacon {
+  z-index: 5;
+  width: 82%;
+  height: 82%;
+  animation-delay: 120ms;
+}
+
+.battle-page--v157 .battle-effect-art[data-effect-action="helicopter_strafe"] img {
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.battle-page--v157 .battle-effect-art[data-effect-result="hit"] {
+  filter: drop-shadow(0 0 9px rgba(255, 107, 62, .58));
+}
+
+.battle-page--v157 .battle-effect-art[data-effect-result="private-positive"] {
+  filter: drop-shadow(0 0 9px rgba(94, 255, 205, .62));
+}
+
+.battle-page--v157 .board-cell--effect-hit::after,
+.battle-page--v157 .board-cell--effect-decoy::after,
+.battle-page--v157 .board-cell--effect-sunk::after,
+.battle-page--v157 .board-cell--effect-miss::after,
+.battle-page--v157 .board-cell--effect-paralyzed::after {
+  z-index: 13;
+  opacity: 1;
+  animation: battle-effect-cell 3.6s ease-out both;
+}
+
+.battle-page--v157 .board-cell--effect-hit::after {
+  background-image: url("/assets/images/ocean-2.5d/feedback/tiles/tile_hit_confirm_orange.webp");
+}
+
+.battle-page--v157 .board-cell--effect-miss::after {
+  background-image: url("/assets/images/ocean-2.5d/feedback/tiles/tile_miss_confirm_white.webp");
+}
+
+.battle-page--v157 .board-cell--effect-paralyzed::after {
+  background-image: url("/assets/images/ocean-2.5d/feedback/tiles/tile_shock_range_purple.webp");
+}
+
+.battle-page--v157 .board-cell--effect-decoy::after,
+.battle-page--v157 .board-cell--effect-sunk::after {
+  background-image: url("/assets/images/ocean-2.5d/feedback/tiles/tile_warning_yellow.webp");
+}
+
+@keyframes battle-effect-arrival {
+  0% { opacity: 0; transform: scale(.45) rotate(-7deg); }
+  12% { opacity: 1; transform: scale(1.08) rotate(0); }
+  65% { opacity: .94; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.04); }
+}
+
+@keyframes battle-effect-ring {
+  0% { opacity: 0; transform: scale(.24); }
+  16% { opacity: .96; }
+  72% { opacity: .76; }
+  100% { opacity: 0; transform: scale(1.42); }
+}
+
+@keyframes battle-effect-scan {
+  0% { opacity: 0; transform: rotate(-42deg) scale(.72); }
+  15% { opacity: .94; }
+  74% { opacity: .86; }
+  100% { opacity: 0; transform: rotate(318deg) scale(1.02); }
+}
+
+@keyframes battle-effect-trail {
+  0% { opacity: 0; transform: translate(-12%, 10%) scale(.82); }
+  18% { opacity: 1; }
+  72% { opacity: .9; }
+  100% { opacity: 0; transform: translate(10%, -8%) scale(1.05); }
+}
+
+@keyframes battle-effect-cell {
+  0% { opacity: 0; transform: scale(.68); }
+  14% { opacity: 1; transform: scale(1.14); }
+  70% { opacity: .9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.08); }
+}
+
+.battle-effect-art[data-grid-row="1"] { --effect-row: 1; }
+.battle-effect-art[data-grid-row="2"] { --effect-row: 2; }
+.battle-effect-art[data-grid-row="3"] { --effect-row: 3; }
+.battle-effect-art[data-grid-row="4"] { --effect-row: 4; }
+.battle-effect-art[data-grid-row="5"] { --effect-row: 5; }
+.battle-effect-art[data-grid-row="6"] { --effect-row: 6; }
+.battle-effect-art[data-grid-row="7"] { --effect-row: 7; }
+.battle-effect-art[data-grid-row="8"] { --effect-row: 8; }
+.battle-effect-art[data-grid-row="9"] { --effect-row: 9; }
+.battle-effect-art[data-grid-row="10"] { --effect-row: 10; }
+.battle-effect-art[data-grid-row="11"] { --effect-row: 11; }
+.battle-effect-art[data-grid-row="12"] { --effect-row: 12; }
+.battle-effect-art[data-grid-row="13"] { --effect-row: 13; }
+.battle-effect-art[data-grid-row="14"] { --effect-row: 14; }
+.battle-effect-art[data-grid-row="15"] { --effect-row: 15; }
+.battle-effect-art[data-grid-column="1"] { --effect-column: 1; }
+.battle-effect-art[data-grid-column="2"] { --effect-column: 2; }
+.battle-effect-art[data-grid-column="3"] { --effect-column: 3; }
+.battle-effect-art[data-grid-column="4"] { --effect-column: 4; }
+.battle-effect-art[data-grid-column="5"] { --effect-column: 5; }
+.battle-effect-art[data-grid-column="6"] { --effect-column: 6; }
+.battle-effect-art[data-grid-column="7"] { --effect-column: 7; }
+.battle-effect-art[data-grid-column="8"] { --effect-column: 8; }
+.battle-effect-art[data-grid-column="9"] { --effect-column: 9; }
+.battle-effect-art[data-grid-column="10"] { --effect-column: 10; }
+.battle-effect-art[data-grid-column="11"] { --effect-column: 11; }
+.battle-effect-art[data-grid-column="12"] { --effect-column: 12; }
+.battle-effect-art[data-grid-column="13"] { --effect-column: 13; }
+.battle-effect-art[data-grid-column="14"] { --effect-column: 14; }
+.battle-effect-art[data-grid-column="15"] { --effect-column: 15; }
+.battle-effect-art[data-grid-row-span="1"] { --effect-row-span: 1; }
+.battle-effect-art[data-grid-row-span="2"] { --effect-row-span: 2; }
+.battle-effect-art[data-grid-row-span="3"] { --effect-row-span: 3; }
+.battle-effect-art[data-grid-row-span="4"] { --effect-row-span: 4; }
+.battle-effect-art[data-grid-row-span="5"] { --effect-row-span: 5; }
+.battle-effect-art[data-grid-row-span="6"] { --effect-row-span: 6; }
+.battle-effect-art[data-grid-row-span="7"] { --effect-row-span: 7; }
+.battle-effect-art[data-grid-row-span="8"] { --effect-row-span: 8; }
+.battle-effect-art[data-grid-row-span="9"] { --effect-row-span: 9; }
+.battle-effect-art[data-grid-row-span="10"] { --effect-row-span: 10; }
+.battle-effect-art[data-grid-row-span="11"] { --effect-row-span: 11; }
+.battle-effect-art[data-grid-row-span="12"] { --effect-row-span: 12; }
+.battle-effect-art[data-grid-row-span="13"] { --effect-row-span: 13; }
+.battle-effect-art[data-grid-row-span="14"] { --effect-row-span: 14; }
+.battle-effect-art[data-grid-row-span="15"] { --effect-row-span: 15; }
+.battle-effect-art[data-grid-column-span="1"] { --effect-column-span: 1; }
+.battle-effect-art[data-grid-column-span="2"] { --effect-column-span: 2; }
+.battle-effect-art[data-grid-column-span="3"] { --effect-column-span: 3; }
+.battle-effect-art[data-grid-column-span="4"] { --effect-column-span: 4; }
+.battle-effect-art[data-grid-column-span="5"] { --effect-column-span: 5; }
+.battle-effect-art[data-grid-column-span="6"] { --effect-column-span: 6; }
+.battle-effect-art[data-grid-column-span="7"] { --effect-column-span: 7; }
+.battle-effect-art[data-grid-column-span="8"] { --effect-column-span: 8; }
+.battle-effect-art[data-grid-column-span="9"] { --effect-column-span: 9; }
+.battle-effect-art[data-grid-column-span="10"] { --effect-column-span: 10; }
+.battle-effect-art[data-grid-column-span="11"] { --effect-column-span: 11; }
+.battle-effect-art[data-grid-column-span="12"] { --effect-column-span: 12; }
+.battle-effect-art[data-grid-column-span="13"] { --effect-column-span: 13; }
+.battle-effect-art[data-grid-column-span="14"] { --effect-column-span: 14; }
+.battle-effect-art[data-grid-column-span="15"] { --effect-column-span: 15; }
+
+@media (min-width: 901px) {
+  .battle-page--v157 .board-frame--tactical-sea .battle-effect-layer {
+    top: 26px;
+    left: 26px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-page--v157 .battle-effect-art img,
+  .battle-page--v157 .board-cell--effect-hit::after,
+  .battle-page--v157 .board-cell--effect-decoy::after,
+  .battle-page--v157 .board-cell--effect-sunk::after,
+  .battle-page--v157 .board-cell--effect-miss::after,
+  .battle-page--v157 .board-cell--effect-paralyzed::after {
+    opacity: .9;
+    animation: none !important;
+  }
+}

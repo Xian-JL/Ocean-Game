@@ -258,7 +258,8 @@ function assertBoardCoordinateAlignment(board, size = 12) {
   assert.deepEqual(rowAxes.map((axis) => axis.textContent),
     "ABCDEFGHIJKLMNO".slice(0, size).split(""));
   const children = [...board.children].filter(
-    (child) => !child.classList.contains("tactical-unit-art-layer"),
+    (child) => !child.classList.contains("tactical-unit-art-layer") &&
+      !child.classList.contains("battle-effect-layer"),
   );
   assert.ok(children[0].classList.contains("board-corner"));
   columnAxes.forEach((axis, index) => {
@@ -319,7 +320,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.5.5",
+    stage: "Ocean-v1.5.7",
     protocolVersion: "2.1",
   });
 
@@ -608,9 +609,21 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   assert.equal(attackerToast.textContent.includes("航空母舰"), false);
   assert.equal(attackerToast.textContent.includes("生命值"), false);
   assert.equal(window.document.querySelector(".resolution-strip").textContent.includes("航空母舰"), false);
+  const attackerEffect = window.document.querySelector(
+    '.battle-map-card--enemy .battle-effect-art[data-effect-action="destroyer_i_ram"]',
+  );
+  assert.ok(attackerEffect);
+  assert.equal(attackerEffect.dataset.effectResult, "hit");
+  assert.ok(attackerEffect.querySelector('[data-effect-asset="vfx_small_explosion"]'));
+  assert.ok(window.document.querySelector(
+    '.battle-map-card--enemy [data-coordinate="A1"].board-cell--effect-hit',
+  ));
 
   const defenderFeedbackRoom = playingRoom();
   defenderFeedbackRoom.stateVersion = 6;
+  const damagedCarrier = defenderFeedbackRoom.battle.own.units.find((unit) => unit.id === "carrier");
+  damagedCarrier.hp = 5;
+  damagedCarrier.hitCells = ["G5"];
   defenderFeedbackRoom.latestResolution = {
     feedback: {
       sequence: 2,
@@ -635,6 +648,13 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   socket.serverEmit("room:state", defenderFeedbackRoom);
   const defenderToast = window.document.querySelector("#toast-region").lastElementChild;
   assert.match(defenderToast.textContent, /航空母舰被命中，生命值 6 → 5/);
+  assert.ok(window.document.querySelector(
+    '.battle-map-card--own [data-coordinate="G5"].board-cell--effect-hit',
+  ));
+  assert.equal(
+    window.document.querySelector('.battle-map-card--own .battle-effect-art')?.dataset.effectResult,
+    "hit",
+  );
 
   const nuclearFeedbackRoom = playingRoom();
   nuclearFeedbackRoom.stateVersion = 7;
@@ -662,6 +682,15 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   const nuclearToast = window.document.querySelector("#toast-region").lastElementChild;
   assert.match(nuclearToast.textContent, /命中结果不会向你显示/);
   assert.equal(nuclearToast.textContent.includes("生命值"), false);
+  const nuclearEffect = window.document.querySelector(
+    '.battle-map-card--enemy .battle-effect-art[data-effect-action="nuclear_bomb"]',
+  );
+  assert.ok(nuclearEffect);
+  assert.equal(nuclearEffect.dataset.effectResult, "unknown");
+  assert.ok(nuclearEffect.querySelector('[data-effect-asset="vfx_nuclear_flash_core"]'));
+  assert.ok(nuclearEffect.querySelector('[data-effect-asset="vfx_nuclear_shock_ring"]'));
+  assert.equal(Boolean(nuclearEffect.querySelector('[data-effect-asset="vfx_large_explosion"]')), false);
+  assert.equal(Boolean(nuclearEffect.querySelector('[data-effect-asset="vfx_large_water_splash"]')), false);
 
   socket.serverEmit("room:state", threePlayerPlayingRoom());
   assert.equal(window.document.querySelectorAll(".battle-map-card .ocean-board").length, 3);

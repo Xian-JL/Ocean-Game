@@ -200,6 +200,15 @@
       feedbackCollapsed: false,
       feedbackCollapseTimer: null,
       expandedUnitCards: new Set(),
+      resolutionEffectKey: null,
+      resolutionEffectVisible: false,
+      resolutionEffectTimer: null,
+      ownEffectCells: {
+        hit: new Set(),
+        sunk: new Set(),
+        paralyzed: new Set(),
+        decoy: new Set(),
+      },
     },
     replayPlayerId: null,
     reduceMotion: readBooleanPreference(MOTION_STORAGE_KEY),
@@ -1083,6 +1092,65 @@
     }, 4_500);
   }
 
+  function emptyOwnEffectCells() {
+    return {
+      hit: new Set(),
+      sunk: new Set(),
+      paralyzed: new Set(),
+      decoy: new Set(),
+    };
+  }
+
+  function computeOwnEffectCells(previousRoom, nextRoom) {
+    const changes = emptyOwnEffectCells();
+    if (
+      !previousRoom?.battle?.own ||
+      !nextRoom?.battle?.own ||
+      previousRoom.roomCode !== nextRoom.roomCode ||
+      previousRoom.matchSummary?.startedAt !== nextRoom.matchSummary?.startedAt
+    ) {
+      return changes;
+    }
+    const previousUnits = new Map(
+      (previousRoom.battle.own.units ?? []).map((unit) => [unit.id, unit]),
+    );
+    for (const unit of nextRoom.battle.own.units ?? []) {
+      const previousUnit = previousUnits.get(unit.id);
+      if (!previousUnit) continue;
+      const previousHits = new Set(previousUnit.hitCells ?? []);
+      const newHits = (unit.hitCells ?? []).filter((cell) => !previousHits.has(cell));
+      newHits.forEach((cell) => changes.hit.add(cell));
+      if (unit.hp <= 0 && previousUnit.hp > 0) {
+        (unit.cells ?? []).forEach((cell) => changes.sunk.add(cell));
+      } else if (unit.paralyzed && !previousUnit.paralyzed) {
+        (unit.cells ?? []).forEach((cell) => changes.paralyzed.add(cell));
+      } else if (unit.hp < previousUnit.hp && newHits.length === 0 && unit.cells?.[0]) {
+        changes.hit.add(unit.cells[0]);
+      }
+    }
+    const previousDecoys = new Map(
+      (previousRoom.battle.own.decoys ?? []).map((decoy) => [decoy.id, decoy]),
+    );
+    for (const decoy of nextRoom.battle.own.decoys ?? []) {
+      const previousDecoy = previousDecoys.get(decoy.id);
+      if (decoy.destroyed && previousDecoy && !previousDecoy.destroyed && decoy.cell) {
+        changes.decoy.add(decoy.cell);
+      }
+    }
+    return changes;
+  }
+
+  function scheduleResolutionEffectHide(resolutionStateKey) {
+    window.clearTimeout(state.battle.resolutionEffectTimer);
+    state.battle.resolutionEffectKey = resolutionStateKey;
+    state.battle.resolutionEffectVisible = true;
+    state.battle.resolutionEffectTimer = window.setTimeout(() => {
+      if (state.battle.resolutionEffectKey !== resolutionStateKey) return;
+      state.battle.resolutionEffectVisible = false;
+      render();
+    }, 3_600);
+  }
+
   function closeConfirmSilently() {
     state.confirm = null;
     if (confirmDialog.open) confirmDialog.close();
@@ -1276,6 +1344,11 @@
       state.battle.feedbackCollapsed = false;
       window.clearTimeout(state.battle.feedbackCollapseTimer);
       state.battle.feedbackCollapseTimer = null;
+      state.battle.resolutionEffectKey = null;
+      state.battle.resolutionEffectVisible = false;
+      state.battle.ownEffectCells = emptyOwnEffectCells();
+      window.clearTimeout(state.battle.resolutionEffectTimer);
+      state.battle.resolutionEffectTimer = null;
       state.replayPlayerId = null;
       if (nextRoom.own?.playerId) {
         clearMarkersFor(nextRoom.roomCode, nextRoom.own.playerId);
@@ -1372,6 +1445,8 @@
       nextResolutionKey &&
       nextResolutionKey !== state.battle.lastResolutionKey
     ) {
+      state.battle.ownEffectCells = computeOwnEffectCells(previous, nextRoom);
+      scheduleResolutionEffectHide(nextResolutionKey);
       const feedback = nextRoom.latestResolution?.feedback;
       if (
         feedback?.actorId !== nextRoom.own.playerId &&
@@ -2648,8 +2723,187 @@
     return map;
   }
 
+  const HIDDEN_RESULT_ACTIONS = Object.freeze([
+    Data.ACTION_TYPES.SUBMARINE_MISSILE,
+    Data.ACTION_TYPES.NUCLEAR_BOMB,
+    Data.ACTION_TYPES.SHOCK_BOMB,
+  ]);
+
+  function activeBattleEffectFeedback(room) {
+    const key = resolutionKey(room);
+    if (
+      !state.battle.resolutionEffectVisible ||
+      !key ||
+      key !== state.battle.resolutionEffectKey
+    ) {
+      return null;
+    }
+    return room?.latestResolution?.feedback ?? null;
+  }
+
+  function safeEffectTargetCells(feedback) {
+    if (!feedback?.actionType || !feedback?.target) return [];
+    return Data.previewCells(feedback.actionType, feedback.target)
+      .filter((coordinate) => Boolean(Data.parseCoordinate(coordinate)));
+  }
+
+  function setEffectCell(cellStates, coordinate, value) {
+    if (!Data.parseCoordinate(coordinate)) return;
+    const priority = { miss: 1, paralyzed: 2, hit: 3, decoy: 4, sunk: 5 };
+    const current = cellStates.get(coordinate);
+    if (!current || priority[value] > priority[current]) {
+      cellStates.set(coordinate, value);
+    }
+  }
+
+  function battleEffectModel(room, mapId) {
+    const feedback = activeBattleEffectFeedback(room);
+    if (!feedback) return null;
+    const ownId = room.own.playerId;
+    const isOwnMap = mapId === "own";
+    const isActor = feedback.actorId === ownId;
+    const defenderIds = feedback.defenderIds ?? [feedback.defenderId].filter(Boolean);
+    const isOwnDefender = defenderIds.includes(ownId);
+    const cellStates = new Map();
+    let targetCells = [];
+    let visualState = "unknown";
+
+    if (isOwnMap) {
+      const changes = state.battle.ownEffectCells ?? emptyOwnEffectCells();
+      for (const coordinate of changes.hit) setEffectCell(cellStates, coordinate, "hit");
+      for (const coordinate of changes.paralyzed) setEffectCell(cellStates, coordinate, "paralyzed");
+      for (const coordinate of changes.decoy) setEffectCell(cellStates, coordinate, "decoy");
+      for (const coordinate of changes.sunk) setEffectCell(cellStates, coordinate, "sunk");
+
+      if (isOwnDefender) {
+        targetCells = safeEffectTargetCells(feedback);
+        if (feedback.actionType === Data.ACTION_TYPES.HELICOPTER_STRAFE) {
+          for (const result of feedback.cellResults ?? []) {
+            setEffectCell(cellStates, result.coordinate, result.result);
+          }
+        }
+      } else if (cellStates.size > 0) {
+        targetCells = [...cellStates.keys()];
+      } else {
+        return null;
+      }
+
+      if ([...cellStates.values()].some((value) => ["hit", "decoy", "sunk"].includes(value))) {
+        visualState = "hit";
+      } else if ([...cellStates.values()].includes("miss")) {
+        visualState = "miss";
+      } else if (
+        isOwnDefender &&
+        !HIDDEN_RESULT_ACTIONS.includes(feedback.actionType) &&
+        ![Data.ACTION_TYPES.DETECTION_BOMB, Data.ACTION_TYPES.RADAR_SCAN].includes(feedback.actionType) &&
+        ["hit", "miss"].includes(feedback.result)
+      ) {
+        visualState = feedback.result;
+      }
+    } else {
+      if (!isActor || !defenderIds.includes(mapId)) return null;
+      targetCells = safeEffectTargetCells(feedback);
+      if (feedback.actionType === Data.ACTION_TYPES.HELICOPTER_STRAFE) {
+        const results = feedback.cellResultsByDefender?.[mapId] ?? feedback.cellResults ?? [];
+        for (const result of results) setEffectCell(cellStates, result.coordinate, result.result);
+        visualState = results.some((result) => result.result === "hit") ? "hit" : "miss";
+      } else if (feedback.actionType === Data.ACTION_TYPES.DETECTION_BOMB) {
+        const result = feedback.privateResultsByDefender?.[mapId] ?? feedback.result;
+        visualState = result === "underwater_signal_detected" ? "private-positive" : "private-negative";
+      } else if (feedback.actionType === Data.ACTION_TYPES.RADAR_SCAN) {
+        const result = feedback.privateResultsByDefender?.[mapId] ?? feedback.result;
+        visualState = result === "layout_detected" ? "private-positive" : "private-negative";
+      } else if (HIDDEN_RESULT_ACTIONS.includes(feedback.actionType)) {
+        visualState = "unknown";
+      } else {
+        visualState = feedback.resultsByDefender?.[mapId] ?? feedback.result ?? "unknown";
+        if (["hit", "miss"].includes(visualState) && targetCells.length === 1) {
+          setEffectCell(cellStates, targetCells[0], visualState);
+        }
+      }
+    }
+
+    return {
+      key: state.battle.resolutionEffectKey,
+      actionType: feedback.actionType,
+      cellStates,
+      targetCells,
+      visualState,
+      hasSunk: [...cellStates.values()].includes("sunk"),
+      hasParalyzed: [...cellStates.values()].includes("paralyzed"),
+      hasDecoy: [...cellStates.values()].includes("decoy"),
+    };
+  }
+
+  function battleEffectAssets(model) {
+    if (!model) return [];
+    const assets = [];
+    const add = (group, name, role = "secondary") => {
+      const path = feedbackArtPath(group, name);
+      if (path) assets.push({ path, name, role });
+    };
+    const action = model.actionType;
+    if (action === Data.ACTION_TYPES.SUBMARINE_MISSILE) {
+      add("vfx", "vfx_missile_launch", "primary");
+      add("vfx", "vfx_torpedo_trail", "trail");
+    } else if (action === Data.ACTION_TYPES.NUCLEAR_BOMB) {
+      add("vfx", "vfx_nuclear_flash_core", "primary");
+      add("vfx", "vfx_nuclear_shock_ring", "ring");
+    } else if (action === Data.ACTION_TYPES.SHOCK_BOMB) {
+      add("vfx", "vfx_emp_pulse", "ring");
+      add("vfx", "vfx_emp_impact", "primary");
+    } else if (action === Data.ACTION_TYPES.DETECTION_BOMB) {
+      add("vfx", "vfx_sonar_ping", "ring");
+      add("status", "status_revealed_sonar", "status");
+    } else if (action === Data.ACTION_TYPES.RADAR_SCAN) {
+      add("vfx", "vfx_radar_sweep", "scan");
+      add("status", "status_revealed_radar", "status");
+      add("props", "prop_ping_beacon", "beacon");
+    } else if (action === Data.ACTION_TYPES.HELICOPTER_STRAFE) {
+      add("vfx", "vfx_helicopter_trace", "trail");
+    }
+
+    if (model.visualState === "hit") {
+      add("vfx", action === Data.ACTION_TYPES.NUCLEAR_BOMB ? "vfx_large_explosion" : "vfx_small_explosion", "impact");
+      add("vfx", "vfx_debris_sparks", "debris");
+      add("status", "status_burning", "status");
+    } else if (model.visualState === "miss") {
+      add("vfx", action === Data.ACTION_TYPES.NUCLEAR_BOMB ? "vfx_large_water_splash" : "vfx_small_water_splash", "impact");
+    }
+    if (model.hasParalyzed) add("status", "status_emp_disabled", "status");
+    if (model.hasDecoy) add("status", "status_destroyed_marker", "status");
+    if (model.hasSunk) add("status", "status_sinking", "status");
+    return assets;
+  }
+
+  function renderBattleEffectLayer(model) {
+    const cells = model?.targetCells?.length > 0
+      ? model.targetCells
+      : [...(model?.cellStates?.keys?.() ?? [])];
+    const bounds = artBounds(cells);
+    const assets = battleEffectAssets(model);
+    if (!model || !bounds || assets.length === 0) return "";
+    return `<div class="battle-effect-layer" data-effect-key="${escapeHtml(model.key)}" aria-hidden="true">
+      <span
+        class="battle-effect-art battle-effect-art--${escapeHtml(model.visualState)}"
+        data-effect-action="${escapeHtml(model.actionType)}"
+        data-effect-result="${escapeHtml(model.visualState)}"
+        data-grid-row="${bounds.row}"
+        data-grid-column="${bounds.column}"
+        data-grid-row-span="${bounds.rowSpan}"
+        data-grid-column-span="${bounds.columnSpan}"
+      >${assets.map((asset) => `<img class="battle-effect-art__${asset.role}" data-effect-asset="${asset.name}" src="${asset.path}" alt="" decoding="async" draggable="false" />`).join("")}</span>
+    </div>`;
+  }
+
+  function battleEffectCellClass(model, coordinate) {
+    const value = model?.cellStates?.get(coordinate);
+    return value ? `board-cell--effect-${value}` : "";
+  }
+
   function renderOwnBattleBoard(snapshot, options = {}) {
     const map = ownBattleCellMap(snapshot);
+    const effectModel = options.replay ? null : battleEffectModel(state.room, "own");
     const centerCells = new Set(
       Data.destroyerCenterCells(state.battle.selectedAction, snapshot),
     );
@@ -2657,6 +2911,8 @@
     return renderGrid(options.label ?? "己方地图", (coordinate) => {
       const entry = map.get(coordinate);
       const classes = [];
+      const effectClass = battleEffectCellClass(effectModel, coordinate);
+      if (effectClass) classes.push(effectClass);
       let content = "";
       let label = `${coordinate}，空海域`;
       let cellState = "empty";
@@ -2703,7 +2959,7 @@
     }, options.replay
       ? "board-frame--replay board-frame--tactical-sea board-frame--own-sea"
       : "board-frame--tactical-sea board-frame--own-sea",
-    renderTacticalUnitArt(snapshot, { replay: options.replay }));
+    `${renderTacticalUnitArt(snapshot, { replay: options.replay })}${renderBattleEffectLayer(effectModel)}`);
   }
 
   function currentIntelligenceArea(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
@@ -2816,6 +3072,7 @@
     const intelligence = currentIntelligenceArea(ownBattle, targetPlayerId);
     const intelligenceCells = new Set(intelligence?.area ?? []);
     const targetMarkers = markersForTarget(targetPlayerId);
+    const effectModel = battleEffectModel(state.room, targetPlayerId);
     return renderGrid("敌方地图", (coordinate) => {
       const result = results[coordinate];
       const resolved = result === "hit" || result === "miss";
@@ -2824,6 +3081,8 @@
       const marker = !resolved ? targetMarkers.get(coordinate) : null;
       const hasMarker = Boolean(marker);
       const classes = [];
+      const effectClass = battleEffectCellClass(effectModel, coordinate);
+      if (effectClass) classes.push(effectClass);
       let content = "";
       let stateText = "未知";
       let cellState = "unknown";
@@ -2897,7 +3156,7 @@
           "aria-pressed": preview.has(coordinate) || hasMarker ? "true" : "false",
         },
       };
-    }, "board-frame--tactical-sea board-frame--enemy-sea");
+    }, "board-frame--tactical-sea board-frame--enemy-sea", renderBattleEffectLayer(effectModel));
   }
 
   function unitStateCode(unit, definition) {
@@ -3762,7 +4021,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
