@@ -22,11 +22,11 @@ function functionBody(name, nextName) {
   return app.slice(start, end);
 }
 
-test("v1.5.5 交互优化在 v1.5.7 发布元数据中继续保留", () => {
-  assert.equal(require("../package.json").version, "1.5.7");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.5.7");
-  assert.match(html, /Ocean-v1\.5\.7/);
-  assert.match(html, /main\.css\?v=1\.5\.7/);
+test("v1.5.5 交互优化在 v1.5.8 发布元数据中继续保留", () => {
+  assert.equal(require("../package.json").version, "1.5.8");
+  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.5.8");
+  assert.match(html, /Ocean-v1\.5\.8/);
+  assert.match(html, /main\.css\?v=1\.5\.8/);
   assert.match(app, /battle-page--v155/);
 });
 
@@ -35,7 +35,7 @@ test("选择行动自动切换敌方地图、展开来源单位并收起日志",
   assert.match(selectAction, /expandedUnitCards\.add\(definition\.sourceType\)/);
   assert.match(selectAction, /state\.battle\.logOpen = false/);
   assert.match(selectAction, /state\.battle\.mobileMap = targetPlayerId/);
-  assert.match(selectAction, /battleOpponentIds\(state\.room\?\.battle\)\[0\]/);
+  assert.match(selectAction, /activeBattleOpponentIds\(state\.room\)/);
 });
 
 test("行动确认显示倒计时并在回合状态失效时自动关闭", () => {

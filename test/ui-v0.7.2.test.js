@@ -36,7 +36,7 @@ test("v1.2.6 三人回合明确显示一次行动同步两名目标", () => {
     "battle-turn-progress",
     "battle-target-progress",
     "remainingTargetPlayerIds",
-    "requiredTargetPlayerIds",
+    "activeBattleOpponentIds",
     "一次行动",
     "同步 ×",
     "同步生效",
@@ -69,7 +69,7 @@ test("v1.2.6 三人任意行动绑定点击坐标并在两张敌方地图同步�
 test("v0.7.2 平板和手机使用己方及每名敌方的独立地图 Tab", () => {
   includesAll(app, [
     "renderBattleMapTabs(room)",
-    '{ id: "own", label: "己方" }',
+    '{ id: "own", label: "己方", own: true }',
     "...opponents.map((playerId)",
     'data-tab-count="${tabs.length}"',
   ]);

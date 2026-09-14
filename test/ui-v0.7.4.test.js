@@ -72,7 +72,7 @@ test("v0.7.4 断线重连与 Toast 使用现代非阻断状态反馈", () => {
     "pause-card--connection",
     "connection-status-chip",
     "正在重新连接",
-    "对局已暂停",
+    "行动计时已冻结",
     "连接已恢复，对局继续。",
     "toastPresentation(kind)",
     "toast__icon",

@@ -912,6 +912,264 @@
   }
 }
 
+/* Ocean-v1.5.8 · three-player synchronized command clarity */
+.battle-page--v158 .battle-turn-progress__summary small {
+  overflow: hidden;
+  max-width: 190px;
+  color: rgba(212, 239, 246, .66);
+  font-size: .58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.battle-page--v158 .battle-map-tabs--v158 button {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 9px;
+  align-items: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+.battle-map-tab__identity {
+  display: grid;
+  grid-template-columns: 7px minmax(0, 1fr);
+  gap: 0 7px;
+  min-width: 0;
+}
+
+.battle-map-tab__identity > i {
+  grid-row: 1 / 3;
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5de0ad;
+  box-shadow: 0 0 8px rgba(93, 224, 173, .72);
+}
+
+[data-player-state="offline"] .battle-map-tab__identity > i {
+  background: #ffb35c;
+  box-shadow: 0 0 8px rgba(255, 179, 92, .58);
+}
+
+[data-player-state="eliminated"] .battle-map-tab__identity > i {
+  background: #7f94a0;
+  box-shadow: none;
+}
+
+.battle-map-tab__identity strong,
+.battle-map-tab__identity small,
+.battle-map-tab__result {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.battle-map-tab__identity strong {
+  color: var(--text-strong);
+  font-size: .76rem;
+}
+
+.battle-map-tab__identity small {
+  color: var(--text-muted);
+  font-size: .58rem;
+}
+
+.battle-map-tab__result {
+  display: grid;
+  justify-items: end;
+  color: rgba(190, 221, 230, .68);
+  font-size: .58rem;
+  font-style: normal;
+}
+
+.battle-map-tab__result em {
+  color: #d9f8fd;
+  font: 700 .62rem/1.1 Consolas, monospace;
+  font-style: normal;
+}
+
+.battle-map-tab__result[data-result-state="hit"] { color: #ffb47a; }
+.battle-map-tab__result[data-result-state="miss"] { color: #d9edf2; }
+.battle-map-tab__result[data-result-state="unknown"] { color: #d8a3ef; }
+.battle-map-tab__result[data-result-state^="private"] { color: #62dff1; }
+
+.battle-map-tab__unread {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffbf58;
+  box-shadow: 0 0 0 3px rgba(255, 191, 88, .12), 0 0 9px rgba(255, 191, 88, .85);
+}
+
+.battle-page--v158 .battle-map-tabs--v158 button.is-eliminated,
+.battle-page--v158 .battle-map-card--eliminated {
+  opacity: .58;
+  filter: saturate(.55);
+}
+
+.battle-page--v158 .battle-map-card--eliminated .ocean-board {
+  cursor: default;
+}
+
+.battle-page--v158 .map-latest-result {
+  margin-left: auto;
+  padding: 3px 7px;
+  border: 1px solid rgba(113, 218, 237, .18);
+  border-radius: 7px;
+  background: rgba(2, 18, 28, .58);
+  color: #caeef5;
+  font-size: .62rem;
+}
+
+.battle-page--v158 .map-latest-result[data-result-state="hit"] { color: #ffba82; }
+.battle-page--v158 .map-latest-result[data-result-state="unknown"] { color: #dda7f5; }
+.battle-page--v158 .map-latest-result[data-result-state^="private"] { color: #66e0f1; }
+
+.battle-page--v158 .board-cell--latest-result:not(.board-cell--effect-hit):not(.board-cell--effect-miss)::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  z-index: 4;
+  border: 1px solid rgba(203, 234, 241, .44);
+  background: rgba(214, 239, 244, .06);
+  pointer-events: none;
+}
+
+.battle-page--v158 .board-cell--latest-hit::before {
+  border-color: rgba(255, 151, 83, .78);
+  background: rgba(255, 111, 53, .13);
+}
+
+.battle-page--v158 .board-cell--latest-unknown::before {
+  border-color: rgba(205, 126, 238, .68);
+  background: rgba(176, 83, 220, .11);
+}
+
+.battle-page--v158 [class*="board-cell--latest-private"]::before {
+  border-color: rgba(85, 218, 239, .72);
+  background: rgba(55, 188, 214, .1);
+}
+
+.resolution-player-results {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.resolution-player-results > span,
+.event-defender-details > div > span {
+  display: flex;
+  min-width: 0;
+  gap: 7px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 7px;
+  border: 1px solid rgba(114, 205, 222, .14);
+  border-radius: 7px;
+  background: rgba(1, 15, 24, .46);
+}
+
+.resolution-player-results b,
+.event-defender-details b {
+  overflow: hidden;
+  color: #d9f5fa;
+  font-size: .65rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resolution-player-results em,
+.event-defender-details em {
+  color: var(--text-muted);
+  font-size: .62rem;
+  font-style: normal;
+  text-align: right;
+}
+
+.resolution-player-results [data-result-state="hit"] em,
+.event-defender-details [data-result-state="hit"] em { color: #ffb17a; }
+.resolution-player-results [data-result-state^="private"] em,
+.event-defender-details [data-result-state^="private"] em { color: #68dfef; }
+.resolution-player-results [data-result-state="unknown"] em,
+.event-defender-details [data-result-state="unknown"] em { color: #daa4ef; }
+
+.resolution-player-results > small {
+  grid-column: 1 / -1;
+  color: rgba(190, 218, 225, .62);
+  font-size: .58rem;
+}
+
+.event-defender-details {
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(117, 207, 224, .1);
+}
+
+.event-defender-details summary {
+  width: max-content;
+  color: #6fdae9;
+  cursor: pointer;
+  font-size: .62rem;
+}
+
+.event-defender-details > div {
+  display: grid;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.event-defender-details > small {
+  display: block;
+  margin-top: 5px;
+  color: rgba(183, 211, 219, .55);
+  font-size: .56rem;
+}
+
+.multi-target-action--single {
+  border-color: rgba(255, 189, 92, .24);
+  background: rgba(74, 47, 11, .16);
+}
+
+@media (min-width: 901px) {
+  .battle-page--v158 .carrier-tactical-console:has(.resolution-player-results) .resolution-strip--v074 {
+    max-height: min(122px, 19dvh);
+  }
+}
+
+@media (max-width: 900px) {
+  .battle-page--v158 .battle-map-tabs--v158 button {
+    display: flex;
+    min-height: 42px;
+    padding: 6px 7px;
+  }
+
+  .battle-page--v158 .battle-map-tab__result {
+    display: none;
+  }
+
+  .battle-page--v158 .battle-map-tab__identity {
+    width: 100%;
+  }
+
+  .resolution-player-results {
+    grid-template-columns: 1fr;
+  }
+
+  .battle-page--v158 .battle-turn-progress__summary small {
+    display: none;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -12982,5 +13240,30 @@ html[data-theme="ocean-dusk"] .board-frame--tactical-sea .ocean-board {
   .battle-page--v157 .board-cell--effect-paralyzed::after {
     opacity: .9;
     animation: none !important;
+  }
+}
+
+/* v1.5.8 final cascade guard: keep rich tabs compact after historical overrides. */
+.battle-page--v158 .battle-map-tabs--v158 button {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 9px;
+  align-items: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 6px 10px;
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .battle-page--v158 .battle-map-tabs--v158 button {
+    display: flex;
+    min-height: 42px;
+    padding: 6px 7px;
+  }
+
+  .battle-page--v158 .battle-map-tab__result {
+    display: none;
   }
 }

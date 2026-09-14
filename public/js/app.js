@@ -203,6 +203,9 @@
       resolutionEffectKey: null,
       resolutionEffectVisible: false,
       resolutionEffectTimer: null,
+      resolutionEffectMapId: null,
+      unreadResultPlayerIds: new Set(),
+      viewedResolutionByPlayer: new Map(),
       ownEffectCells: {
         hit: new Set(),
         sunk: new Set(),
@@ -1346,6 +1349,9 @@
       state.battle.feedbackCollapseTimer = null;
       state.battle.resolutionEffectKey = null;
       state.battle.resolutionEffectVisible = false;
+      state.battle.resolutionEffectMapId = null;
+      state.battle.unreadResultPlayerIds.clear();
+      state.battle.viewedResolutionByPlayer.clear();
       state.battle.ownEffectCells = emptyOwnEffectCells();
       window.clearTimeout(state.battle.resolutionEffectTimer);
       state.battle.resolutionEffectTimer = null;
@@ -1425,13 +1431,14 @@
       Sound?.playEffect?.("eliminated");
       showToast(`${Model.nicknameFor(nextRoom, playerId)} 已淘汰`, "warning", 4_500, false);
     }
-    const availableTargets = nextRoom.turn?.canAct && nextRoom.maxPlayers === 3
-      ? (nextRoom.turn.remainingTargetPlayerIds ?? [])
-      : battleOpponentIds(nextRoom.battle);
-    if (!availableTargets.includes(state.battle.targetPlayerId)) {
-      state.battle.targetPlayerId = availableTargets[0] ?? null;
+    const opponentIds = battleOpponentIds(nextRoom.battle);
+    const activeTargets = activeBattleOpponentIds(nextRoom);
+    if (!opponentIds.includes(state.battle.targetPlayerId)) {
+      state.battle.targetPlayerId = activeTargets[0] ?? opponentIds[0] ?? null;
+    } else if (state.battle.selectedAction && !activeTargets.includes(state.battle.targetPlayerId)) {
+      state.battle.targetPlayerId = activeTargets[0] ?? null;
     }
-    const visibleBattleMaps = ["own", ...battleOpponentIds(nextRoom.battle)];
+    const visibleBattleMaps = ["own", ...opponentIds];
     if (!visibleBattleMaps.includes(state.battle.mobileMap)) {
       state.battle.mobileMap = state.battle.targetPlayerId ?? "own";
     }
@@ -1446,8 +1453,26 @@
       nextResolutionKey !== state.battle.lastResolutionKey
     ) {
       state.battle.ownEffectCells = computeOwnEffectCells(previous, nextRoom);
-      scheduleResolutionEffectHide(nextResolutionKey);
       const feedback = nextRoom.latestResolution?.feedback;
+      const defenderIds = feedback?.defenderIds ?? [feedback?.defenderId].filter(Boolean);
+      if (feedback?.actorId === nextRoom.own.playerId) {
+        const viewedEnemyId = defenderIds.includes(state.battle.mobileMap)
+          ? state.battle.mobileMap
+          : null;
+        state.battle.resolutionEffectMapId = viewedEnemyId;
+        state.battle.unreadResultPlayerIds = new Set(
+          defenderIds.filter((playerId) => playerId !== viewedEnemyId),
+        );
+        if (viewedEnemyId) {
+          state.battle.viewedResolutionByPlayer.set(viewedEnemyId, nextResolutionKey);
+        }
+      } else {
+        state.battle.resolutionEffectMapId = defenderIds.includes(nextRoom.own.playerId)
+          ? "own"
+          : null;
+        state.battle.unreadResultPlayerIds.clear();
+      }
+      scheduleResolutionEffectHide(nextResolutionKey);
       if (
         feedback?.actorId !== nextRoom.own.playerId &&
         state.battle.mobileMap !== "own"
@@ -2759,6 +2784,9 @@
   function battleEffectModel(room, mapId) {
     const feedback = activeBattleEffectFeedback(room);
     if (!feedback) return null;
+    if (room.maxPlayers === 3 && state.battle.resolutionEffectMapId !== mapId) {
+      return null;
+    }
     const ownId = room.own.playerId;
     const isOwnMap = mapId === "own";
     const isActor = feedback.actorId === ownId;
@@ -2988,7 +3016,7 @@
     return Boolean(
       isSimultaneousThreePlayerSelection(room) &&
       state.battle.selectedAction === Data.ACTION_TYPES.HELICOPTER_STRAFE &&
-      (room.turn?.remainingTargetPlayerIds?.length ?? 0) > 1,
+      activeBattleOpponentIds(room).length > 1,
     );
   }
 
@@ -2997,7 +3025,7 @@
       room?.maxPlayers === 3 &&
       room?.turn?.canAct &&
       state.battle.selectedAction &&
-      (room.turn?.remainingTargetPlayerIds?.length ?? 0) > 1,
+      activeBattleOpponentIds(room).length > 1,
     );
   }
 
@@ -3017,6 +3045,7 @@
       control?.dataset.cellState !== "private-marker" ||
       !coordinate ||
       !targetPlayerId ||
+      !activeBattleOpponentIds(state.room).includes(targetPlayerId) ||
       !markersForTarget(targetPlayerId).has(coordinate)
     ) {
       return false;
@@ -3062,7 +3091,8 @@
     const effectiveOwnBattle = { ...ownBattle, enemyMap };
     const selectedForThisMap = targetPlayerId === state.battle.targetPlayerId;
     const simultaneousAction = isSimultaneousThreePlayerSelection();
-    const interactiveForThisMap = selectedForThisMap || simultaneousAction;
+    const eliminated = (state.room?.battle?.match?.eliminatedPlayerIds ?? []).includes(targetPlayerId);
+    const interactiveForThisMap = !eliminated && (selectedForThisMap || simultaneousAction);
     const legal = interactiveForThisMap
       ? legalTargetCells(ownBattle, targetPlayerId)
       : new Set();
@@ -3073,6 +3103,13 @@
     const intelligenceCells = new Set(intelligence?.area ?? []);
     const targetMarkers = markersForTarget(targetPlayerId);
     const effectModel = battleEffectModel(state.room, targetPlayerId);
+    const latestFeedback = state.room?.latestResolution?.feedback;
+    const latestResult = mapLatestResultMeta(state.room, targetPlayerId);
+    const latestResultCells = new Set(
+      latestResult && feedbackTargets(latestFeedback).includes(targetPlayerId)
+        ? safeEffectTargetCells(latestFeedback)
+        : [],
+    );
     return renderGrid("敌方地图", (coordinate) => {
       const result = results[coordinate];
       const resolved = result === "hit" || result === "miss";
@@ -3083,6 +3120,9 @@
       const classes = [];
       const effectClass = battleEffectCellClass(effectModel, coordinate);
       if (effectClass) classes.push(effectClass);
+      if (latestResultCells.has(coordinate)) {
+        classes.push("board-cell--latest-result", `board-cell--latest-${latestResult.code}`);
+      }
       let content = "";
       let stateText = "未知";
       let cellState = "unknown";
@@ -3385,7 +3425,8 @@
     const simultaneousAction = Boolean(
       selectedDefinition && isSimultaneousThreePlayerSelection(room),
     );
-    const remainingNames = (room.turn?.remainingTargetPlayerIds ?? [])
+    const activeOpponents = activeBattleOpponentIds(room);
+    const remainingNames = activeOpponents
       .map((playerId) => Model.nicknameFor(room, playerId));
     return `
       <aside class="action-rail action-rail--v073 ${state.battle.actionDrawerOpen ? "action-rail--open" : ""}" aria-label="行动与单位状态">
@@ -3404,12 +3445,14 @@
         </div>
         ${room.turn?.canAct && battleOpponentIds(room.battle).length > 1 ? `
           <div class="battle-target-progress" aria-label="三人回合目标">
-            <div class="battle-target-progress__heading"><span>同步目标</span><strong>一次行动</strong></div>
+            <div class="battle-target-progress__heading"><span>${activeOpponents.length > 1 ? "同步目标" : "当前有效目标"}</span><strong>${activeOpponents.length > 1 ? "一次行动 · 同步 ×2" : "单目标 ×1"}</strong></div>
             <div class="battle-target-progress__items">
-              ${(room.turn?.requiredTargetPlayerIds ?? battleOpponentIds(room.battle)).map((playerId) => {
+              ${battleOpponentIds(room.battle).map((playerId) => {
                 const pending = (room.turn?.remainingTargetPlayerIds ?? []).includes(playerId);
                 const selected = state.battle.targetPlayerId === playerId;
-                return `<button type="button" data-action="select-battle-target" data-target-player-id="${escapeHtml(playerId)}" data-done="${!pending}" class="${selected ? "is-selected" : ""}" ${room.turn?.canAct && !pending ? "disabled" : ""}><span>${pending ? "⇉" : "○"}</span><strong>${escapeHtml(Model.nicknameFor(room, playerId))}</strong><small>${pending ? "同步生效" : "查看"}</small></button>`;
+                const playerState = battlePlayerState(room, playerId);
+                const unavailable = playerState.code === "eliminated" || !pending;
+                return `<button type="button" data-action="select-battle-target" data-target-player-id="${escapeHtml(playerId)}" data-done="${unavailable}" data-player-state="${playerState.code}" class="${selected ? "is-selected" : ""}" ${unavailable ? "disabled" : ""}><span>${unavailable ? "○" : activeOpponents.length > 1 ? "⇉" : "→"}</span><strong>${escapeHtml(Model.nicknameFor(room, playerId))}</strong><small>${playerState.code === "eliminated" ? "已淘汰" : pending ? activeOpponents.length > 1 ? "同步生效" : "唯一目标" : "查看"}</small></button>`;
               }).join("")}
             </div>
           </div>
@@ -3430,7 +3473,7 @@
         ${selectedDefinition ? `
           <div class="target-instruction target-instruction--v073" data-target-mode="${selectedDefinition.targetMode}">
             <div class="target-instruction__heading"><span class="action-card__icon action-card__icon--${actionVisualMeta(selectedDefinition).group}" aria-hidden="true">${actionArtIcon(selectedDefinition)}</span><div><small>当前行动</small><strong>${escapeHtml(selectedDefinition.name)}</strong></div></div>
-            ${simultaneousAction ? `<div class="multi-target-action multi-target-action--v073"><span>同时作用</span>${(room.turn?.remainingTargetPlayerIds ?? []).map((playerId) => `<b>${escapeHtml(Model.nicknameFor(room, playerId))}</b>`).join("")}<small>资源与自损只结算 1 次</small></div>` : ""}
+            ${simultaneousAction ? `<div class="multi-target-action multi-target-action--v073"><span>同时作用</span>${activeOpponents.map((playerId) => `<b>${escapeHtml(Model.nicknameFor(room, playerId))}</b>`).join("")}<small>同一坐标/范围 · 资源与自损只结算 1 次</small></div>` : activeOpponents.length === 1 && room.maxPlayers === 3 ? `<div class="multi-target-action multi-target-action--single"><span>当前唯一目标</span><b>${escapeHtml(Model.nicknameFor(room, activeOpponents[0]))}</b><small>另一敌方已淘汰，不再同步结算</small></div>` : ""}
             <p>${selectedDefinition.type === Data.ACTION_TYPES.RADAR_SCAN
               ? `选择 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 扫描区域的左上起始格。`
               : selectedDefinition.targetMode === "line"
@@ -3456,18 +3499,23 @@
   }
 
   function renderTurnProgress(room) {
-    const required = room.turn?.requiredTargetPlayerIds ?? [];
-    if (required.length <= 1) return "";
+    if (room.maxPlayers !== 3) return "";
+    const required = activeBattleOpponentIds(room);
+    if (required.length === 0) return "";
+    const synchronized = required.length > 1;
+    const action = Data.getActionDefinition(state.battle.selectedAction);
+    const target = state.battle.target ? Model.formatTarget(state.battle.target) : "等待坐标";
     return `
       <div class="battle-turn-progress" aria-label="本回合同步目标">
         <div class="battle-turn-progress__summary">
-          <span>一次行动</span>
-          <strong>同步 ×${required.length}</strong>
+          <span>${synchronized ? "一次行动 · 资源/自损仅一次" : "单一有效目标"}</span>
+          <strong>${synchronized ? `同步 ×${required.length}` : "目标 ×1"}</strong>
+          <small>${action ? `${escapeHtml(action.name)} · ${escapeHtml(target)}` : "尚未选择行动"}</small>
         </div>
         <div class="battle-turn-progress__targets">
           ${required.map((playerId) => {
             const currentTarget = room.turn?.canAct && state.battle.targetPlayerId === playerId;
-            return `<span data-complete="false" data-current="${currentTarget}">⇉ ${escapeHtml(Model.nicknameFor(room, playerId))}</span>`;
+            return `<span data-complete="false" data-current="${currentTarget}">${synchronized ? "⇉" : "→"} ${escapeHtml(Model.nicknameFor(room, playerId))}</span>`;
           }).join("")}
         </div>
       </div>`;
@@ -3598,13 +3646,23 @@
     const visualState = resolutionVisualState(room);
     const meta = resolutionVisualMeta(room);
     const collapsed = state.battle.feedbackCollapsed;
+    const grouped = room.maxPlayers === 3 && feedbackTargets(feedback).length > 1;
+    const resultRows = grouped ? feedbackResultRows(room) : [];
+    const groupedSummary = grouped
+      ? `${feedback.actionName} → ${Model.formatTarget(feedback.target)} · 同步结算`
+      : describeLatestResolution(room);
     return `
       <section class="resolution-strip resolution-strip--v074 resolution-strip--${visualState} ${collapsed ? "resolution-strip--collapsed" : ""}" data-feedback-state="${visualState}" aria-label="最近一次行动反馈">
         <span class="resolution-strip__icon" aria-hidden="true">${escapeHtml(meta.icon)}</span>
         ${feedbackArtMarkup(room)}
         <div class="resolution-strip__content">
           <div class="resolution-strip__meta"><span>${escapeHtml(meta.label)}</span><small>行动 ${feedback.sequence ?? "—"}</small></div>
-          <strong>${escapeHtml(describeLatestResolution(room))}</strong>
+          <strong>${escapeHtml(groupedSummary)}</strong>
+          ${grouped ? `
+            <div class="resolution-player-results" aria-label="各防守方独立结果">
+              ${resultRows.map((row) => `<span data-result-state="${escapeHtml(row.code)}"><b>${escapeHtml(row.name)}</b><em>${escapeHtml(row.label)}</em></span>`).join("")}
+              <small>行动、弹药与行动方自损仅结算 1 次；各防守方结果按你的查看权限展示。</small>
+            </div>` : ""}
           ${ownDamage.length || decoys.length ? `
             <ul>
               ${ownDamage.map((event) => {
@@ -3641,11 +3699,23 @@
         const defenders = defenderIds.map((id) => Model.nicknameFor(room, id)).join(" + ") || "目标";
         const stateCode = publicActionState(record);
         const stateLabel = { hit: "命中", miss: "未命中", unknown: "结果隐藏", resolved: "已结算" }[stateCode];
+        const latestFeedback = room.latestResolution?.feedback;
+        const currentRows = latestFeedback?.sequence === record.sequence
+          ? feedbackResultRows(room)
+          : [];
+        const detailRows = currentRows.length > 0
+          ? currentRows
+          : defenderIds.map((playerId) => ({
+              name: Model.nicknameFor(room, playerId),
+              code: "private",
+              label: "独立结算 · 结果按权限显示",
+            }));
         return `<li class="event-item event-item--combat" data-event-state="${stateCode}">
           <span class="event-item__marker" aria-hidden="true"></span>
           <div class="event-item__body">
             <div class="event-item__route"><b>${escapeHtml(actorName)}</b><span>→</span><b>${escapeHtml(defenders)}</b><em>${escapeHtml(record.actionName)}</em></div>
             <p>${escapeHtml(Model.publicActionText(record, room))}</p>
+            ${defenderIds.length > 1 ? `<details class="event-defender-details"><summary>展开各方结算</summary><div>${detailRows.map((row) => `<span data-result-state="${escapeHtml(row.code)}"><b>${escapeHtml(row.name)}</b><em>${escapeHtml(row.label)}</em></span>`).join("")}</div><small>本条仅代表一次行动，不重复扣除资源或行动方自损。</small></details>` : ""}
           </div>
           <div class="event-item__meta"><span>${escapeHtml(stateLabel)}</span><small>#${record.sequence}</small></div>
         </li>`;
@@ -3741,6 +3811,91 @@
     return legacyOpponentId ? [legacyOpponentId] : [];
   }
 
+  function activeBattleOpponentIds(room = state.room) {
+    const eliminated = new Set(room?.battle?.match?.eliminatedPlayerIds ?? []);
+    return battleOpponentIds(room?.battle).filter((playerId) => !eliminated.has(playerId));
+  }
+
+  function battlePlayerState(room, playerId) {
+    if ((room.battle?.match?.eliminatedPlayerIds ?? []).includes(playerId)) {
+      return { code: "eliminated", label: "已淘汰" };
+    }
+    const seat = room.seats.find((candidate) => candidate.playerId === playerId);
+    if (seat && !seat.online) return { code: "offline", label: "离线" };
+    return { code: "online", label: "在线" };
+  }
+
+  function feedbackTargets(feedback) {
+    return feedback?.defenderIds ?? [feedback?.defenderId].filter(Boolean);
+  }
+
+  function feedbackResultForPlayer(room, playerId) {
+    const feedback = room.latestResolution?.feedback;
+    if (!feedback || !feedbackTargets(feedback).includes(playerId)) return null;
+    const ownId = room.own.playerId;
+    const isActor = feedback.actorId === ownId;
+    if (!isActor && playerId !== ownId) return null;
+
+    if (HIDDEN_RESULT_ACTIONS.includes(feedback.actionType)) {
+      const affected = playerId === ownId && (feedback.receivedHits ?? []).length > 0;
+      return {
+        code: "unknown",
+        label: affected ? "本方受击 · 详情已记录" : "结果未知",
+      };
+    }
+    if ([Data.ACTION_TYPES.DETECTION_BOMB, Data.ACTION_TYPES.RADAR_SCAN].includes(feedback.actionType)) {
+      if (!isActor) return { code: "private", label: "结果仅行动方可见" };
+      const result = feedback.privateResultsByDefender?.[playerId] ?? feedback.result;
+      if (feedback.actionType === Data.ACTION_TYPES.DETECTION_BOMB) {
+        return result === "underwater_signal_detected"
+          ? { code: "private-positive", label: "发现水下信号" }
+          : { code: "private-negative", label: "未发现水下信号" };
+      }
+      return result === "layout_detected"
+        ? { code: "private-positive", label: "发现舰队布局" }
+        : { code: "private-negative", label: "未发现舰队布局" };
+    }
+    if (feedback.actionType === Data.ACTION_TYPES.HELICOPTER_STRAFE) {
+      const cells = isActor
+        ? feedback.cellResultsByDefender?.[playerId] ?? feedback.cellResults ?? []
+        : feedback.cellResults ?? [];
+      const hits = cells.filter((cell) => cell.result === "hit").length;
+      const misses = cells.filter((cell) => cell.result === "miss").length;
+      return {
+        code: hits > 0 ? "hit" : "miss",
+        label: `命中 ${hits} 格 · 未命中 ${misses} 格`,
+      };
+    }
+    const result = isActor
+      ? feedback.resultsByDefender?.[playerId] ?? feedback.result
+      : feedback.result;
+    if (result === "hit") return { code: "hit", label: "命中" };
+    if (result === "miss") return { code: "miss", label: "未命中" };
+    return { code: "resolved", label: "已独立结算" };
+  }
+
+  function feedbackResultRows(room) {
+    const feedback = room.latestResolution?.feedback;
+    if (!feedback) return [];
+    const ownId = room.own.playerId;
+    const visibleIds = feedback.actorId === ownId
+      ? feedbackTargets(feedback)
+      : feedbackTargets(feedback).includes(ownId)
+        ? [ownId]
+        : [];
+    return visibleIds.map((playerId) => ({
+      playerId,
+      name: playerId === ownId ? `${Model.nicknameFor(room, playerId)}（你）` : Model.nicknameFor(room, playerId),
+      ...feedbackResultForPlayer(room, playerId),
+    })).filter((row) => row.code);
+  }
+
+  function mapLatestResultMeta(room, playerId) {
+    const feedback = room.latestResolution?.feedback;
+    if (!feedback || feedback.actorId !== room.own.playerId) return null;
+    return feedbackResultForPlayer(room, playerId);
+  }
+
   function isRemainingTurnTarget(room, playerId) {
     const remaining = room?.turn?.remainingTargetPlayerIds;
     return !Array.isArray(remaining) || remaining.includes(playerId);
@@ -3751,6 +3906,7 @@
   }
 
   function enemyTurnStatus(room, playerId) {
+    if ((room.battle?.match?.eliminatedPlayerIds ?? []).includes(playerId)) return "已淘汰";
     if (!room.turn?.canAct) return "查看";
     if ((room.turn.completedTargetPlayerIds ?? []).includes(playerId)) return "已完成";
     if (isRemainingTurnTarget(room, playerId)) {
@@ -3804,16 +3960,25 @@
     const nickname = Model.nicknameFor(room, playerId);
     const collapsed = battleMapIsCollapsed(playerId);
     const selected = state.battle.targetPlayerId === playerId;
+    const playerState = battlePlayerState(room, playerId);
+    const eliminated = playerState.code === "eliminated";
     const status = enemyTurnStatus(room, playerId);
-    const canTarget = !room.turn?.canAct || isRemainingTurnTarget(room, playerId);
+    const canTarget = !eliminated && (!room.turn?.canAct || isRemainingTurnTarget(room, playerId));
     const mobileActive = state.battle.mobileMap === playerId;
     const intel = currentIntelligenceArea(ownBattle, playerId);
     const activeAction = Data.getActionDefinition(state.battle.selectedAction);
+    const feedback = room.latestResolution?.feedback;
+    const affected = Boolean(feedback?.actorId === room.own.playerId && feedbackTargets(feedback).includes(playerId));
+    const resultMeta = mapLatestResultMeta(room, playerId);
+    const unread = state.battle.unreadResultPlayerIds.has(playerId);
     return `
       <section
-        class="battle-map-card battle-map-card--enemy battle-map-card--v072 battle-map-card--v073 ${selected ? "battle-map-card--targeted" : ""} ${collapsed ? "battle-map-card--collapsed" : ""} ${mobileActive ? "is-mobile-active" : ""}"
+        class="battle-map-card battle-map-card--enemy battle-map-card--v072 battle-map-card--v073 ${selected ? "battle-map-card--targeted" : ""} ${collapsed ? "battle-map-card--collapsed" : ""} ${mobileActive ? "is-mobile-active" : ""} ${eliminated ? "battle-map-card--eliminated" : ""}"
         data-map-panel="enemy"
         data-player-id="${escapeHtml(playerId)}"
+        data-player-state="${playerState.code}"
+        data-affected="${affected}"
+        data-unread-result="${unread}"
       >
         <div class="map-card__heading map-card__heading--v072">
           <button class="map-collapse-button" type="button" data-action="toggle-battle-map" data-map-id="${escapeHtml(playerId)}" aria-label="${collapsed ? "展开" : "最小化"}${escapeHtml(nickname)}的敌方地图" aria-expanded="${!collapsed}">${collapsed ? "+" : "−"}</button>
@@ -3822,18 +3987,19 @@
             type="button"
             data-action="select-battle-target"
             data-target-player-id="${escapeHtml(playerId)}"
-            ${canTarget ? "" : 'aria-disabled="true"'}
+            ${canTarget ? "" : 'aria-disabled="true" disabled'}
           >
             <span class="status-kicker">敌方海域</span>
             <h2>${escapeHtml(nickname)}</h2>
           </button>
-          <span class="map-turn-state" data-state="${status === "已完成" ? "done" : ["待操作", "同步目标"].includes(status) ? "pending" : "view"}">${status === "已完成" ? "✓" : ["待操作", "同步目标"].includes(status) ? "●" : "○"} ${status}</span>
+          <span class="map-turn-state" data-state="${eliminated ? "eliminated" : status === "已完成" ? "done" : ["待操作", "同步目标"].includes(status) ? "pending" : "view"}">${status === "已完成" ? "✓" : ["待操作", "同步目标"].includes(status) ? "●" : "○"} ${status}</span>
           <button
             class="marker-toggle ${state.battle.markerMode && selected ? "marker-toggle--active" : ""}"
             data-action="toggle-marker-mode"
             data-target-player-id="${escapeHtml(playerId)}"
             aria-pressed="${state.battle.markerMode && selected}"
             title="私人标记"
+            ${eliminated ? "disabled" : ""}
           >标记</button>
         </div>
         ${collapsed
@@ -3843,7 +4009,8 @@
              ${renderEnemyBoard(ownBattle, playerId)}
              ${renderRangeLegend(room, playerId)}
              <div class="map-caption map-caption--v072">
-               <span>${selected ? (state.battle.selectedAction ? "当前目标" : "已选中") : "独立敌方记录"}</span>
+               <span>${eliminated ? "已淘汰 · 历史只读" : selected ? (state.battle.selectedAction ? "当前目标" : "已选中") : "独立敌方记录"}</span>
+               ${affected && resultMeta ? `<b class="map-latest-result" data-result-state="${escapeHtml(resultMeta.code)}">${escapeHtml(Model.formatTarget(feedback.target))} · ${escapeHtml(resultMeta.label)}${unread ? " · 新" : ""}</b>` : ""}
                ${intel ? `<button class="intel-chip" data-action="clear-intelligence" data-kind="${intel.kind}">${intel.kind === "shock" ? "震爆区域" : intel.kind === "radar" ? `雷达 · ${intel.detected ? "发现" : "未发现"}` : `探测 · ${intel.detected ? "有信号" : "无信号"}`} ×</button>` : ""}
              </div>`}
       </section>`;
@@ -3868,14 +4035,34 @@
   function renderBattleMapTabs(room) {
     const opponents = battleOpponentIds(room.battle);
     const tabs = [
-      { id: "own", label: "己方" },
-      ...opponents.map((playerId) => ({ id: playerId, label: Model.nicknameFor(room, playerId) })),
+      { id: "own", label: "己方", own: true },
+      ...opponents.map((playerId) => {
+        const playerState = battlePlayerState(room, playerId);
+        const feedback = room.latestResolution?.feedback;
+        const affected = Boolean(feedback?.actorId === room.own.playerId && feedbackTargets(feedback).includes(playerId));
+        return {
+          id: playerId,
+          label: Model.nicknameFor(room, playerId),
+          own: false,
+          playerState,
+          affected,
+          target: affected ? Model.formatTarget(feedback.target) : null,
+          result: mapLatestResultMeta(room, playerId),
+          unread: state.battle.unreadResultPlayerIds.has(playerId),
+        };
+      }),
     ];
     return `
-      <div class="mobile-map-tabs mobile-map-tabs--v072" data-tab-count="${tabs.length}" role="tablist" aria-label="地图切换">
+      <div class="mobile-map-tabs mobile-map-tabs--v072 battle-map-tabs--v158" data-tab-count="${tabs.length}" role="tablist" aria-label="地图切换">
         ${tabs.map((tab) => `
-          <button role="tab" aria-selected="${state.battle.mobileMap === tab.id}" class="${state.battle.mobileMap === tab.id ? "is-active" : ""}" data-action="switch-map" data-map="${escapeHtml(tab.id)}">
-            ${escapeHtml(tab.label)}${tab.id === "own" && state.battle.ownMapAlert ? '<i class="alert-dot" aria-label="有新的己方受击信息"></i>' : ""}
+          <button role="tab" aria-selected="${state.battle.mobileMap === tab.id}" class="${state.battle.mobileMap === tab.id ? "is-active" : ""} ${tab.playerState?.code === "eliminated" ? "is-eliminated" : ""}" data-action="switch-map" data-map="${escapeHtml(tab.id)}" data-player-state="${tab.playerState?.code ?? "own"}" data-affected="${Boolean(tab.affected)}" data-unread-result="${Boolean(tab.unread)}">
+            <span class="battle-map-tab__identity"><i aria-hidden="true"></i><strong>${escapeHtml(tab.label)}</strong><small>${tab.own ? "己方完整情报" : tab.playerState.label}</small></span>
+            ${tab.own
+              ? state.battle.ownMapAlert ? '<b class="battle-map-tab__result" data-result-state="hit">本方有新受击信息</b>' : '<b class="battle-map-tab__result">舰队状态</b>'
+              : tab.affected && tab.result
+                ? `<b class="battle-map-tab__result" data-result-state="${escapeHtml(tab.result.code)}"><em>${escapeHtml(tab.target)}</em>${escapeHtml(tab.result.label)}</b>`
+                : `<b class="battle-map-tab__result">${tab.playerState.code === "eliminated" ? "历史记录保留" : "等待最新结果"}</b>`}
+            ${tab.unread ? '<i class="battle-map-tab__unread" aria-label="有未读的新结算结果"></i>' : ""}
           </button>`).join("")}
       </div>`;
   }
@@ -3903,7 +4090,10 @@
 
   function renderBridgeCommandDeck(room) {
     const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
-    const targetPlayerId = state.battle.targetPlayerId ?? battleOpponentIds(room.battle)[0];
+    const activeTargets = activeBattleOpponentIds(room);
+    const targetPlayerId = activeTargets.includes(state.battle.targetPlayerId)
+      ? state.battle.targetPlayerId
+      : activeTargets[0] ?? battleOpponentIds(room.battle)[0];
     const hasDraft = Boolean(selectedDefinition || state.battle.target || state.battle.markerMode);
     const targetText = state.battle.target ? Model.formatTarget(state.battle.target) : "选择目标";
     return `
@@ -4021,7 +4211,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 battle-page--v158 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
@@ -4340,8 +4530,8 @@
       <section class="pause-card pause-card--connection" role="alertdialog" aria-modal="true" aria-labelledby="pause-title">
         <div class="pause-card__icon" data-kind="paused" aria-hidden="true">Ⅱ</div>
         <span class="connection-status-chip" data-state="offline">${escapeHtml(offlineNames)} 已断线</span>
-        <h2 id="pause-title">对局已暂停</h2>
-        <p>等待玩家重连</p>
+        <h2 id="pause-title">${playing ? `${escapeHtml(offlineNames)} 离线，行动计时已冻结` : "等待离线玩家重连"}</h2>
+        <p>${playing ? `当前行动倒计时停在 ${formatCountdown(Math.ceil((room.connection?.pausedTimer?.remainingMs ?? 0) / 1_000))}，重连后从此处继续。` : "房间流程保持冻结，不会消耗准备或投掷时间。"}</p>
         ${deadline ? `<div class="reconnect-timer reconnect-timer--v074"><span>重连剩余</span><strong data-deadline="${deadline}">—</strong></div>` : '<div class="reconnect-timer reconnect-timer--v074"><span>状态</span><strong>等待在线</strong></div>'}
         <div class="pause-player-list">${offlineSeats.map((seat) => `<span><i></i>${escapeHtml(seat.nickname)}<small>离线</small></span>`).join("")}</div>
         <div class="modal__actions">
@@ -4666,15 +4856,16 @@
     const target = state.battle.target;
     if (!definition || !target) return;
     const remaining = state.room.battle.own.remainingUses?.[definition.type];
+    const activeTargets = activeBattleOpponentIds(state.room);
     const simultaneousAction =
       state.room.maxPlayers === 3 &&
-      (state.room.turn?.remainingTargetPlayerIds?.length ?? 0) > 1;
+      activeTargets.length > 1;
     const paragraphs = [
       `目标：${Model.formatTarget(target)}`,
       ...(simultaneousAction
-        ? [`敌方玩家：${state.room.turn.remainingTargetPlayerIds.map((playerId) => Model.nicknameFor(state.room, playerId)).join("、")}（同时生效）`]
+        ? [`敌方玩家：${activeTargets.map((playerId) => Model.nicknameFor(state.room, playerId)).join("、")}（同时生效）· 使用同一目标或范围`]
         : battleOpponentIds(state.room.battle).length > 1
-        ? [`敌方玩家：${Model.nicknameFor(state.room, state.battle.targetPlayerId)}`]
+        ? [`敌方玩家：${Model.nicknameFor(state.room, activeTargets[0] ?? state.battle.targetPlayerId)}（当前唯一有效目标）`]
         : []),
     ];
     if (definition.initialUses !== null) {
@@ -4858,7 +5049,10 @@
     state.battle.markerMode = false;
     state.battle.helicopterAxis =
       definition.targetMode === "line" ? state.battle.helicopterAxis : null;
-    const targetPlayerId = state.battle.targetPlayerId ?? battleOpponentIds(state.room?.battle)[0];
+    const activeTargets = activeBattleOpponentIds(state.room);
+    const targetPlayerId = activeTargets.includes(state.battle.targetPlayerId)
+      ? state.battle.targetPlayerId
+      : activeTargets[0] ?? null;
     if (targetPlayerId) {
       state.battle.targetPlayerId = targetPlayerId;
       state.battle.mobileMap = targetPlayerId;
@@ -4869,6 +5063,10 @@
   function handleEnemyCell(coordinate, targetPlayerId = state.battle.targetPlayerId) {
     const ownBattle = state.room?.battle?.own;
     if (!ownBattle || !targetPlayerId) return;
+    if (!activeBattleOpponentIds(state.room).includes(targetPlayerId)) {
+      showToast("该玩家已淘汰，地图与标记保持只读。", "info");
+      return;
+    }
     const simultaneousAction = isSimultaneousThreePlayerSelection();
     if (state.room?.turn?.canAct && !simultaneousAction && !isRemainingTurnTarget(state.room, targetPlayerId) && !state.battle.markerMode) {
       showToast("该敌方玩家本回合已完成操作。", "info");
@@ -4879,8 +5077,10 @@
       state.battle.targetPlayerId = targetPlayerId;
       state.battle.markerContext = null;
       prepareMarkerContext(state.room);
-      state.battle.target = null;
-      state.battle.actionId = null;
+      if (!simultaneousAction) {
+        state.battle.target = null;
+        state.battle.actionId = null;
+      }
     }
     const selectedEnemyMap = enemyMapFor(ownBattle, targetPlayerId);
     const effectiveOwnBattle = { ...ownBattle, enemyMap: selectedEnemyMap };
@@ -5529,12 +5729,25 @@
       state.battle.mobileMap = mapId;
       if (mapId === "own") {
         state.battle.ownMapAlert = false;
-      } else if ((state.room?.turn?.remainingTargetPlayerIds ?? []).includes(mapId)) {
+      } else {
+        state.battle.unreadResultPlayerIds.delete(mapId);
+        if (state.battle.lastResolutionKey) {
+          state.battle.viewedResolutionByPlayer.set(mapId, state.battle.lastResolutionKey);
+        }
+      }
+      if (
+        mapId !== "own" &&
+        activeBattleOpponentIds(state.room).includes(mapId) &&
+        (state.room?.turn?.remainingTargetPlayerIds ?? []).includes(mapId)
+      ) {
+        const preserveSharedTarget = isSimultaneousThreePlayerSelection(state.room);
         saveMarkers();
         state.battle.targetPlayerId = mapId;
         state.battle.markerContext = null;
-        state.battle.target = null;
-        state.battle.actionId = null;
+        if (!preserveSharedTarget) {
+          state.battle.target = null;
+          state.battle.actionId = null;
+        }
       }
       state.battle.actionDrawerOpen = false;
       state.battle.logOpen = false;
@@ -5558,6 +5771,10 @@
     }
     if (action === "select-battle-target") {
       const playerId = control.dataset.targetPlayerId;
+      if (!activeBattleOpponentIds(state.room).includes(playerId)) {
+        showToast("该玩家已淘汰，地图仅供查看历史记录。", "info");
+        return;
+      }
       if (state.room?.turn?.canAct && !isRemainingTurnTarget(state.room, playerId)) {
         showToast("该敌方玩家本回合已完成操作。", "info");
         return;
@@ -5566,8 +5783,10 @@
       state.battle.targetPlayerId = playerId;
       state.battle.mobileMap = playerId;
       state.battle.markerContext = null;
-      state.battle.target = null;
-      state.battle.actionId = null;
+      if (!isSimultaneousThreePlayerSelection(state.room)) {
+        state.battle.target = null;
+        state.battle.actionId = null;
+      }
       render();
       return;
     }
@@ -5648,6 +5867,10 @@
       const markerTarget = control.dataset.targetPlayerId;
       const marker = control.dataset.marker;
       if (!MARKER_CYCLE.includes(marker) || !markerTarget) return;
+      if (!activeBattleOpponentIds(state.room).includes(markerTarget)) {
+        showToast("已淘汰玩家的历史标记保持只读。", "info");
+        return;
+      }
       if (markerTarget !== state.battle.targetPlayerId) {
         saveMarkers();
         state.battle.targetPlayerId = markerTarget;
@@ -5666,6 +5889,10 @@
     }
     if (action === "toggle-marker-mode") {
       const markerTarget = control.dataset.targetPlayerId;
+      if (markerTarget && !activeBattleOpponentIds(state.room).includes(markerTarget)) {
+        showToast("已淘汰玩家的历史标记保持只读。", "info");
+        return;
+      }
       if (markerTarget && markerTarget !== state.battle.targetPlayerId) {
         saveMarkers();
         state.battle.targetPlayerId = markerTarget;

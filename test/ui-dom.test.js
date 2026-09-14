@@ -320,7 +320,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.5.7",
+    stage: "Ocean-v1.5.8",
     protocolVersion: "2.1",
   });
 
@@ -694,6 +694,8 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
 
   socket.serverEmit("room:state", threePlayerPlayingRoom());
   assert.equal(window.document.querySelectorAll(".battle-map-card .ocean-board").length, 3);
+  assert.equal(window.document.querySelectorAll(".battle-map-tabs--v158 [role=tab]").length, 3);
+  assert.equal(window.document.querySelectorAll('.battle-map-tabs--v158 [data-player-state="online"]').length, 2);
   assert.equal(
     window.document.querySelectorAll('[data-action="select-marker-tool"]').length,
     10,
@@ -715,9 +717,65 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   );
   assert.match(window.document.querySelector("#confirm-body").textContent, /乙、丙（同时生效）/);
   assert.match(window.document.querySelector("#confirm-body").textContent, /自损只结算一次/);
+  click(window, window.document.querySelector('[data-action="switch-map"][data-map="player-3"]'));
+  assert.equal(window.document.querySelector('.battle-map-tabs--v158 [data-map="player-3"]').getAttribute("aria-selected"), "true");
+  assert.match(window.document.querySelector(".chosen-target--v073").textContent, /A1/);
+  assert.equal(
+    window.document.querySelectorAll(
+      '.battle-map-card--enemy [data-action="enemy-cell"].board-cell--target-preview',
+    ).length,
+    32,
+  );
   click(window, window.document.querySelector("#confirm-cancel"));
 
-  let dynamicStateVersion = 9;
+  const groupedFeedback = threePlayerPlayingRoom();
+  groupedFeedback.stateVersion = 9;
+  groupedFeedback.battle.publicActionLog = [{
+    sequence: 4,
+    actorId: "player-1",
+    defenderId: null,
+    defenderIds: ["player-2", "player-3"],
+    actionType: Data.ACTION_TYPES.DESTROYER_I_RAM,
+    actionName: "驱逐舰Ⅰ冲撞",
+    target: { kind: "cell", coordinate: "G5" },
+    result: null,
+  }];
+  groupedFeedback.latestResolution = {
+    feedback: {
+      ...groupedFeedback.battle.publicActionLog[0],
+      actionId: "grouped-feedback",
+      sourceId: "destroyer-i",
+      resultsByDefender: { "player-2": "hit", "player-3": "miss" },
+      ownDamage: [],
+      ownDecoyChanges: [],
+      receivedHits: [],
+    },
+  };
+  socket.serverEmit("room:state", groupedFeedback);
+  assert.equal(window.document.querySelectorAll(".resolution-player-results > span").length, 2);
+  assert.match(window.document.querySelector(".resolution-player-results").textContent, /乙.*命中/s);
+  assert.match(window.document.querySelector(".resolution-player-results").textContent, /丙.*未命中/s);
+  assert.equal(window.document.querySelector('[data-map="player-2"]').dataset.unreadResult, "true");
+  assert.equal(window.document.querySelector('[data-map="player-3"]').dataset.unreadResult, "false");
+  assert.equal(window.document.querySelectorAll(".battle-effect-art").length, 1);
+  assert.equal(window.document.querySelectorAll(".board-cell--latest-result").length, 2);
+  assert.ok(window.document.querySelector(".event-defender-details"));
+
+  const eliminatedRoom = threePlayerPlayingRoom();
+  eliminatedRoom.stateVersion = 10;
+  eliminatedRoom.battle.match.eliminatedPlayerIds = ["player-2"];
+  eliminatedRoom.turn.requiredTargetPlayerIds = ["player-3"];
+  eliminatedRoom.turn.remainingTargetPlayerIds = ["player-3"];
+  socket.serverEmit("room:state", eliminatedRoom);
+  assert.equal(window.document.querySelector('[data-map="player-2"]').dataset.playerState, "eliminated");
+  click(window, window.document.querySelector('[data-action="switch-map"][data-map="player-2"]'));
+  click(window, window.document.querySelector(
+    `[data-action="select-action"][data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}"]`,
+  ));
+  assert.equal(window.document.querySelector('[data-map="player-3"]').getAttribute("aria-selected"), "true");
+  assert.match(window.document.querySelector(".battle-target-progress").textContent, /单目标 ×1/);
+
+  let dynamicStateVersion = 11;
   for (const mapSize of [10, 15]) {
     const mapRules = Data.createMapRules(mapSize);
     const deployment = baseRoom({
