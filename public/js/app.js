@@ -4088,6 +4088,25 @@
       </nav>`;
   }
 
+  function renderMobileCommandPeek(room) {
+    const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
+    const targetText = state.battle.target ? Model.formatTarget(state.battle.target) : "尚未选择目标";
+    const statusText = !room.turn?.canAct
+      ? "等待当前玩家行动"
+      : selectedDefinition
+        ? selectedDefinition.name
+        : "选择本回合行动";
+    return `
+      <section class="mobile-command-peek" data-has-action="${Boolean(selectedDefinition)}" data-has-target="${Boolean(state.battle.target)}" aria-label="移动端当前指令">
+        <button type="button" data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}">
+          <span>${escapeHtml(statusText)}</span>
+          <strong>${escapeHtml(targetText)}</strong>
+          <small>${state.battle.target ? "点击展开或确认" : "点击打开行动面板"}</small>
+        </button>
+        ${state.battle.target ? `<button class="mobile-command-peek__focus" type="button" data-action="focus-selected-target">回到目标</button><button class="mobile-command-peek__confirm" type="button" data-action="reopen-action-confirm">确认</button>` : ""}
+      </section>`;
+  }
+
   function renderBridgeCommandDeck(room) {
     const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
     const activeTargets = activeBattleOpponentIds(room);
@@ -4211,7 +4230,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 battle-page--v158 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 battle-page--v158 battle-page--v159 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
@@ -4221,6 +4240,7 @@
             ${finalSalvo ? renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) : ""}
             ${renderLatestFeedback(room)}
             ${renderBattleMapTabs(room)}
+            ${finalSalvo ? "" : renderMobileCommandPeek(room)}
             ${finalSalvo ? "" : renderBattleSideDock(room)}
             ${state.battle.actionDrawerOpen || state.battle.logOpen ? '<button class="battle-drawer-scrim" type="button" data-action="close-battle-drawers" aria-label="关闭战术侧边栏"></button>' : ""}
 
@@ -5848,6 +5868,23 @@
       if (!["all", "surface", "underwater"].includes(layer)) return;
       state.battle.tacticalLayer = layer;
       render();
+      return;
+    }
+    if (action === "focus-selected-target") {
+      const coordinate = state.battle.target?.coordinate;
+      if (!coordinate) return;
+      const activePanel = document.querySelector('.battle-map-card.is-mobile-active');
+      const cell = activePanel?.querySelector(`[data-coordinate="${coordinate}"]`);
+      const frame = cell?.closest(".board-frame");
+      if (!cell || !frame) return;
+      const left = cell.offsetLeft + cell.offsetWidth / 2 - frame.clientWidth / 2;
+      const top = cell.offsetTop + cell.offsetHeight / 2 - frame.clientHeight / 2;
+      if (typeof frame.scrollTo === "function") {
+        frame.scrollTo({ left, top, behavior: state.reduceMotion ? "auto" : "smooth" });
+      } else {
+        frame.scrollLeft = left;
+        frame.scrollTop = top;
+      }
       return;
     }
     if (action === "set-helicopter-axis") {
