@@ -93,6 +93,7 @@
     "close-battle-drawers": "panel_close",
     "set-event-channel": "log_switch",
     "set-tactical-layer": "map_switch",
+    "cycle-tactical-layer": "map_switch",
     "set-helicopter-axis": "ui_select",
     "select-marker-tool": "ui_select",
     "select-bridge-marker-tool": "ui_select",
@@ -197,6 +198,7 @@
       logOpen: false,
       eventChannel: "combat",
       tacticalLayer: "all",
+      tacticalLayerTransition: null,
       ownMapAlert: false,
       collapsedMaps: {},
       selectedIntelligenceSequence: null,
@@ -238,6 +240,7 @@
   let mapPanGesture = null;
   let suppressEnemyCellClickUntil = 0;
   let viewportRestoreTimer = null;
+  let tacticalLayerTransitionTimer = null;
   const preloadedArtAssets = new Set();
 
   function escapeHtml(value) {
@@ -291,6 +294,18 @@
 
   const ART_DIRECTIONS = Object.freeze(["north", "east", "south", "west"]);
   const FEEDBACK_ART_ROOT = "/assets/images/ocean-2.5d/feedback";
+  const UI_ART_ROOT = "/assets/images/ocean-2.5d/ui";
+  const LAYER_ART_ROOT = "/assets/images/ocean-2.5d/layers";
+  const UI_COMMAND_ICONS = Object.freeze({
+    action: "icon_attack_main",
+    cancel: "icon_cancel_action",
+    confirm: "icon_confirm_target",
+    lock: "icon_lock_target",
+    radar: "icon_radar_scan",
+    sonar: "icon_sonar_scan",
+    surface: "icon_emerge",
+    underwater: "icon_submerge",
+  });
   const SECOND_BATCH_ASSET_FILES = Object.freeze({
     tiles: Object.freeze([
       "tile_selected_blue", "tile_move_valid", "tile_move_hover", "tile_attack_range_red", "tile_attack_target_red", "tile_scan_range_cyan", "tile_radar_range_green", "tile_shock_range_purple", "tile_forbidden_dark", "tile_hit_confirm_orange", "tile_miss_confirm_white", "tile_warning_yellow", "tile_enemy_mark_red", "tile_self_mark_blue",
@@ -310,6 +325,35 @@
     return SECOND_BATCH_ASSET_FILES[group]?.includes(name)
       ? `${FEEDBACK_ART_ROOT}/${group}/${name}.webp`
       : "";
+  }
+
+  function uiCommandIcon(name, className = "") {
+    const file = UI_COMMAND_ICONS[name];
+    return file
+      ? `<img class="ui-command-icon ${escapeHtml(className)}" src="${UI_ART_ROOT}/icons-actions/${file}.webp" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />`
+      : "";
+  }
+
+  function tacticalLayerMeta(layer = state.battle.tacticalLayer) {
+    return {
+      all: { label: "综合视层", detail: "水面与潜层协同显示", icon: "sonar" },
+      surface: { label: "水面视层", detail: "突出水面舰艇、阴影与航迹", icon: "surface" },
+      underwater: { label: "潜层视层", detail: "突出潜航单位、焦散与声呐", icon: "underwater" },
+    }[layer] ?? { label: "综合视层", detail: "水面与潜层协同显示", icon: "sonar" };
+  }
+
+  function renderTacticalEnvironmentLayer(kind = "own") {
+    return `<div class="tactical-environment-layer tactical-environment-layer--${kind}" aria-hidden="true">
+      <span class="tactical-environment tactical-environment--surface"></span>
+      <span class="tactical-environment tactical-environment--foam"></span>
+      <span class="tactical-environment tactical-environment--caustics"></span>
+      <span class="tactical-environment tactical-environment--depth"></span>
+      <span class="tactical-environment tactical-environment--particles"></span>
+      <span class="tactical-environment tactical-environment--refraction"></span>
+      <span class="tactical-layer-transition tactical-layer-transition--sonar"></span>
+      <span class="tactical-layer-transition tactical-layer-transition--submerge"></span>
+      <span class="tactical-layer-transition tactical-layer-transition--emerge"></span>
+    </div>`;
   }
 
   function preloadArtAssets(urls) {
@@ -336,6 +380,9 @@
     const urls = [
       "/assets/images/ocean-2.5d/ocean/ocean_deep_active.webp",
       "/assets/images/ocean-2.5d/actions/action_radar_scan.webp",
+      `${LAYER_ART_ROOT}/surface/surface_specular_seamless.webp`,
+      `${LAYER_ART_ROOT}/underwater/underwater_depth_haze.webp`,
+      `${UI_ART_ROOT}/icons-actions/icon_confirm_target.webp`,
     ];
     const selectedFile = ACTION_ART_FILES[state.battle.selectedAction];
     if (selectedFile) urls.push(`/assets/images/ocean-2.5d/actions/${selectedFile}`);
@@ -345,6 +392,10 @@
         feedbackArtPath("vfx", "vfx_small_explosion"),
         feedbackArtPath("vfx", "vfx_small_water_splash"),
         feedbackArtPath("status", "status_target_locked"),
+        `${LAYER_ART_ROOT}/surface/surface_foam_overlay.webp`,
+        `${LAYER_ART_ROOT}/underwater/underwater_caustics_seamless.webp`,
+        `${LAYER_ART_ROOT}/underwater/underwater_particles.webp`,
+        `${LAYER_ART_ROOT}/transitions/sonar_scan_ring_sheet.webp`,
       );
     }
     preloadArtAssets(urls);
@@ -3088,7 +3139,7 @@
     }, options.replay
       ? "board-frame--replay board-frame--tactical-sea board-frame--own-sea"
       : "board-frame--tactical-sea board-frame--own-sea",
-    `${renderTacticalUnitArt(snapshot, { replay: options.replay, quality: state.effectiveQuality })}${renderBattleEffectLayer(effectModel)}`);
+    `${renderTacticalEnvironmentLayer("own")}${renderTacticalUnitArt(snapshot, { replay: options.replay, quality: state.effectiveQuality })}${renderBattleEffectLayer(effectModel)}`);
   }
 
   function currentIntelligenceArea(ownBattle, targetPlayerId = state.battle.targetPlayerId) {
@@ -3297,7 +3348,7 @@
           "aria-pressed": preview.has(coordinate) || hasMarker ? "true" : "false",
         },
       };
-    }, "board-frame--tactical-sea board-frame--enemy-sea", renderBattleEffectLayer(effectModel));
+    }, "board-frame--tactical-sea board-frame--enemy-sea", `${renderTacticalEnvironmentLayer("enemy")}${renderBattleEffectLayer(effectModel)}`);
   }
 
   function unitStateCode(unit, definition) {
@@ -3407,10 +3458,17 @@
     return status.label;
   }
 
+  function actionAvailabilityTier(status) {
+    if (status.enabled || status.code === "submitting") return "available";
+    if (["empty", "sunk"].includes(status.code)) return "exhausted";
+    return "limited";
+  }
+
   function renderActionCard(room, definition) {
     const status = Model.deriveActionStatus(room, definition);
     const selected = definition.type === state.battle.selectedAction;
     const meta = actionVisualMeta(definition);
+    const tier = actionAvailabilityTier(status);
     const sourceDefinition = Data.getUnitDefinitionByType(definition.sourceType);
     const global = isSimultaneousThreePlayerSelection(room);
     return `
@@ -3420,6 +3478,7 @@
         data-action="select-action"
         data-action-type="${definition.type}"
         data-status="${status.code}"
+        data-availability-tier="${tier}"
         data-action-group="${meta.group}"
         title="${escapeHtml(definition.warning)}"
         ${status.enabled ? "" : "disabled"}
@@ -3474,9 +3533,20 @@
   }
 
   function renderUnitActionDeck(room, ownBattle) {
+    const selectedSourceType = Data.getActionDefinition(state.battle.selectedAction)?.sourceType;
+    const orderedSources = [...ACTION_SOURCE_ORDER].sort((left, right) => {
+      const score = (sourceType) => {
+        if (sourceType === selectedSourceType) return -3;
+        const actions = Data.ACTION_DEFINITIONS.filter((action) => action.sourceType === sourceType);
+        if (actions.some((action) => Model.deriveActionStatus(room, action).enabled)) return -2;
+        if (actions.some((action) => actionAvailabilityTier(Model.deriveActionStatus(room, action)) === "limited")) return -1;
+        return 0;
+      };
+      return score(left) - score(right) || ACTION_SOURCE_ORDER.indexOf(left) - ACTION_SOURCE_ORDER.indexOf(right);
+    });
     return `
       <div class="unit-action-deck unit-action-deck--v076" aria-label="兵种行动与状态">
-        ${ACTION_SOURCE_ORDER.map((sourceType) => {
+        ${orderedSources.map((sourceType) => {
           const definition = Data.getUnitDefinitionByType(sourceType);
           const units = (ownBattle.units ?? []).filter((unit) => unit.type === sourceType);
           const actions = Data.ACTION_DEFINITIONS.filter((action) => action.sourceType === sourceType);
@@ -3519,6 +3589,36 @@
       </div>`;
   }
 
+  function renderActionAvailabilitySummary(room) {
+    const counts = Data.ACTION_DEFINITIONS.reduce((result, definition) => {
+      result[actionAvailabilityTier(Model.deriveActionStatus(room, definition))] += 1;
+      return result;
+    }, { available: 0, limited: 0, exhausted: 0 });
+    return `<div class="action-availability-summary" aria-label="行动状态总览">
+      <span data-tier="available"><i></i>可用 <b>${counts.available}</b></span>
+      <span data-tier="limited"><i></i>受限 <b>${counts.limited}</b></span>
+      <span data-tier="exhausted"><i></i>耗尽/失效 <b>${counts.exhausted}</b></span>
+    </div>`;
+  }
+
+  function renderActionCommandChain(room, selectedDefinition) {
+    const hasAction = Boolean(selectedDefinition);
+    const hasTarget = Boolean(state.battle.target);
+    return `<section class="action-command-chain" aria-label="行动指令流程">
+      <div class="action-command-step" data-step="action" data-complete="${hasAction}">
+        ${uiCommandIcon("action")}<span><small>01 行动</small><strong>${hasAction ? escapeHtml(selectedDefinition.name) : "选择武器"}</strong></span>
+      </div>
+      <i aria-hidden="true">›</i>
+      <div class="action-command-step" data-step="target" data-complete="${hasTarget}">
+        ${uiCommandIcon("lock")}<span><small>02 目标</small><strong>${hasTarget ? escapeHtml(Model.formatTarget(state.battle.target)) : "选择坐标"}</strong></span>
+      </div>
+      <i aria-hidden="true">›</i>
+      <button class="action-command-confirm" type="button" data-action="reopen-action-confirm" ${room.turn?.canAct && hasAction && hasTarget ? "" : "disabled"}>
+        ${uiCommandIcon("confirm")}<span><small>03 确认</small><strong>${hasTarget ? "执行指令" : "等待目标"}</strong></span>
+      </button>
+    </section>`;
+  }
+
   function renderActionPanel(room) {
     const ownBattle = room.battle.own;
     const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
@@ -3540,6 +3640,8 @@
           <span class="drawer-chevron" aria-hidden="true">⌃</span>
         </button>
         <div class="action-rail__content">
+        ${renderActionCommandChain(room, selectedDefinition)}
+        ${renderActionAvailabilitySummary(room)}
         <div class="bridge-target-readout" data-has-target="${Boolean(state.battle.target)}">
           <div><span>选择坐标</span><strong>${state.battle.target ? escapeHtml(Model.formatTarget(state.battle.target)) : "—"}</strong></div>
           <small>${selectedDefinition ? escapeHtml(selectedDefinition.name) : room.turn?.canAct ? "等待选择武器" : "战术链路已锁定"}</small>
@@ -3628,9 +3730,11 @@
     const currentSeat = room.seats.find((seat) => seat.playerId === current);
     const canAct = room.turn?.canAct;
     const botThinking = !canAct && currentSeat?.isBot && room.turnPhase === "ACTIVE";
+    const connectionState = state.connected && state.connection.phase === "online" ? "online" : state.connected ? "syncing" : "offline";
+    const connectionLabel = connectionState === "online" ? "实时在线" : connectionState === "syncing" ? "同步中" : "连接中断";
     return `
-      <header class="battle-header battle-header--v072">
-        <button class="bridge-menu-button" type="button" data-action="open-rules" aria-label="打开舰桥菜单"><span></span><span></span><span></span></button>
+      <header class="battle-header battle-header--v072 battle-header--v161">
+        <button class="bridge-menu-button" type="button" data-action="open-rules" aria-label="打开舰桥菜单" title="房间 OCEAN-${escapeHtml(room.roomCode)} · 连续超时 ${room.own.consecutiveActionTimeouts}/3"><span></span><span></span><span></span></button>
         <div class="battle-header__room">
           <small>房间号</small><span>OCEAN-${escapeHtml(room.roomCode)}</span>
           <button class="text-button" data-action="copy-room">复制</button>
@@ -3646,6 +3750,7 @@
             ? `<strong data-deadline="${room.deadlines.actionDeadlineAt}">—</strong>`
             : `<strong>${room.turnPhase === "RESOLVING" ? "结算中" : room.turnPhase === "AUTO_SKIPPING" ? "自动跳过" : "暂停"}</strong>`}
         </div>
+        <div class="battle-header__connection" data-state="${connectionState}"><i aria-hidden="true"></i><span>${connectionLabel}</span></div>
         <div class="battle-header__players">
           ${room.seats.map((seat) => {
             const eliminated = (room.battle?.match?.eliminatedPlayerIds ?? []).includes(seat.playerId);
@@ -4120,6 +4225,7 @@
   function renderOwnMapCard(room) {
     const collapsed = battleMapIsCollapsed("own");
     const mobileActive = state.battle.mobileMap === "own";
+    const layerMeta = tacticalLayerMeta();
     return `
       <section class="battle-map-card battle-map-card--own battle-map-card--v072 battle-map-card--v073 ${collapsed ? "battle-map-card--collapsed" : ""} ${mobileActive ? "is-mobile-active" : ""}" data-map-panel="own">
         <div class="map-card__heading map-card__heading--v072">
@@ -4129,7 +4235,7 @@
         </div>
         ${collapsed
           ? `<button class="battle-map-collapsed-summary" type="button" data-action="toggle-battle-map" data-map-id="own"><span>己方海域</span><strong>完整情报</strong></button>`
-          : `<div class="tactical-sea-toolbar"><span><i aria-hidden="true"></i>己方舰队投影</span><b>完整情报</b></div>${renderOwnBattleBoard(room.battle.own)}<div class="map-caption map-caption--v072"><span>己方完整情报</span></div>`}
+          : `<div class="tactical-sea-toolbar tactical-sea-toolbar--layer"><span>${uiCommandIcon(layerMeta.icon)}<i aria-hidden="true"></i>${layerMeta.label}</span><b>${layerMeta.detail}</b></div>${renderOwnBattleBoard(room.battle.own)}<div class="map-caption map-caption--v072"><span>己方完整情报 · ${layerMeta.label}</span></div>`}
       </section>`;
   }
 
@@ -4253,8 +4359,23 @@
     });
   }
 
+  function changeTacticalLayer(layer) {
+    if (!["all", "surface", "underwater"].includes(layer)) return;
+    const previousLayer = state.battle.tacticalLayer;
+    if (previousLayer === layer) return;
+    state.battle.tacticalLayer = layer;
+    state.battle.tacticalLayerTransition = `${previousLayer}-to-${layer}`;
+    render();
+    window.clearTimeout(tacticalLayerTransitionTimer);
+    tacticalLayerTransitionTimer = window.setTimeout(() => {
+      state.battle.tacticalLayerTransition = null;
+      document.querySelector(".battle-page--v161")?.removeAttribute("data-layer-transition");
+    }, state.reduceMotion ? 80 : 820);
+  }
+
   function renderMobileCommandPeek(room) {
     const selectedDefinition = Data.getActionDefinition(state.battle.selectedAction);
+    const layerMeta = tacticalLayerMeta();
     const targetText = state.battle.target ? Model.formatTarget(state.battle.target) : "尚未选择目标";
     const statusText = !room.turn?.canAct
       ? "等待当前玩家行动"
@@ -4268,6 +4389,7 @@
           <strong>${escapeHtml(targetText)}</strong>
           <small>${state.battle.target ? "点击展开或确认" : "点击打开行动面板"}</small>
         </button>
+        ${state.battle.mobileMap === "own" ? `<button class="mobile-command-peek__layer" type="button" data-action="cycle-tactical-layer" title="切换己方沙盘视层">${uiCommandIcon(layerMeta.icon)}<span>${layerMeta.label.replace("视层", "")}</span></button>` : ""}
         <button class="mobile-command-peek__center" type="button" data-action="center-battle-map">地图居中</button>
         ${state.battle.target ? `<button class="mobile-command-peek__focus" type="button" data-action="focus-selected-target">回到目标</button><button class="mobile-command-peek__confirm" type="button" data-action="reopen-action-confirm">确认</button>` : ""}
       </section>`;
@@ -4290,7 +4412,7 @@
               ["all", "综合"],
               ["surface", "水面"],
               ["underwater", "潜层"],
-            ].map(([value, label]) => `<button type="button" data-action="set-tactical-layer" data-layer="${value}" aria-pressed="${state.battle.tacticalLayer === value}" class="${state.battle.tacticalLayer === value ? "is-active" : ""}">${label}</button>`).join("")}
+            ].map(([value, label]) => `<button type="button" data-action="set-tactical-layer" data-layer="${value}" aria-pressed="${state.battle.tacticalLayer === value}" class="${state.battle.tacticalLayer === value ? "is-active" : ""}">${uiCommandIcon(value === "all" ? "sonar" : value)}<span>${label}</span></button>`).join("")}
           </div>
         </section>
         <section class="bridge-console-group bridge-marker-control">
@@ -4309,13 +4431,14 @@
         <section class="bridge-console-group bridge-confirm-control">
           <span>行动确认</span>
           <button class="bridge-confirm-button" type="button" data-action="reopen-action-confirm" ${state.battle.target ? "" : "disabled"}>
+            ${uiCommandIcon("confirm")}
             <small>${selectedDefinition ? escapeHtml(selectedDefinition.name) : "等待指令"}</small>
             <strong>${escapeHtml(targetText)}</strong>
           </button>
         </section>
         <section class="bridge-console-group bridge-cancel-control">
           <span>取消操作</span>
-          <button type="button" data-action="cancel-action-selection" ${hasDraft ? "" : "disabled"}>取消选择</button>
+          <button type="button" data-action="cancel-action-selection" ${hasDraft ? "" : "disabled"}>${uiCommandIcon("cancel")}<span>取消选择</span></button>
         </section>
         <section class="bridge-console-group bridge-help-control">
           <span>舰桥菜单</span>
@@ -4396,7 +4519,7 @@
     const opponents = battleOpponentIds(battle);
     void Sound?.preloadGroup?.("battle");
     return `
-      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 battle-page--v158 battle-page--v159 battle-page--v160 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
+      <section class="battle-page battle-page--v072 battle-page--v073 battle-page--v076 battle-page--carrier battle-page--v14 battle-page--v15 battle-page--v151 battle-page--v152 battle-page--v154 battle-page--v155 battle-page--v157 battle-page--v158 battle-page--v159 battle-page--v160 battle-page--v161 ${finalSalvo ? "" : "battle-page--v153"} battle-page--immersive page-enter" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${escapeHtml(state.battle.tacticalLayer)}" ${state.battle.tacticalLayerTransition ? `data-layer-transition="${escapeHtml(state.battle.tacticalLayerTransition)}"` : ""} data-targeting="${Boolean(state.battle.selectedAction)}" data-drawer-open="${state.battle.actionDrawerOpen ? "actions" : state.battle.logOpen ? "messages" : "none"}" aria-labelledby="battle-page-title">
         <h1 id="battle-page-title" class="sr-only">正式对战</h1>
         <div class="carrier-bridge-scene" aria-hidden="true"><div class="carrier-bridge-scene__glass"></div><div class="carrier-bridge-scene__horizon"></div><div class="carrier-bridge-scene__console"></div><div class="bridge-frame bridge-frame--left"></div><div class="bridge-frame bridge-frame--right"></div></div>
         <div class="carrier-bridge-interface">
@@ -6044,10 +6167,12 @@
       return;
     }
     if (action === "set-tactical-layer") {
-      const layer = control.dataset.layer;
-      if (!["all", "surface", "underwater"].includes(layer)) return;
-      state.battle.tacticalLayer = layer;
-      render();
+      changeTacticalLayer(control.dataset.layer);
+      return;
+    }
+    if (action === "cycle-tactical-layer") {
+      const layers = ["all", "surface", "underwater"];
+      changeTacticalLayer(layers[(layers.indexOf(state.battle.tacticalLayer) + 1) % layers.length]);
       return;
     }
     if (action === "focus-selected-target") {

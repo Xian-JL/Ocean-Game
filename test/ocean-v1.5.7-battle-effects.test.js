@@ -10,11 +10,11 @@ const app = fs.readFileSync(path.join(ROOT, "public/js/app.js"), "utf8");
 const css = fs.readFileSync(path.join(ROOT, "public/css/main.css"), "utf8");
 const html = fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8");
 
-test("v1.5.7 战场特效在 v1.6.0 发布元数据中继续保留", () => {
-  assert.equal(require("../package.json").version, "1.6.0");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.0");
-  assert.match(html, /Ocean-v1\.6\.0/);
-  assert.match(html, /main\.css\?v=1\.6\.0/);
+test("v1.5.7 战场特效在 v1.6.1 发布元数据中继续保留", () => {
+  assert.equal(require("../package.json").version, "1.6.1");
+  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
+  assert.match(html, /Ocean-v1\.6\.1/);
+  assert.match(html, /main\.css\?v=1\.6\.1/);
   assert.match(app, /battle-page--v157/);
 });
 

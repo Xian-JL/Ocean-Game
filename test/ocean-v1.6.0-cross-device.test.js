@@ -20,11 +20,9 @@ function functionBody(name, nextName) {
   return app.slice(start, end);
 }
 
-test("v1.6.0元数据、独立末级样式和页面类一致", () => {
-  assert.equal(require("../package.json").version, "1.6.0");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.0");
-  assert.match(html, /main\.css\?v=1\.6\.0/);
-  assert.match(html, /v1\.6\.0\.css\?v=1\.6\.0/);
+test("v1.6.0跨设备样式仍按历史顺序加载并保留页面类", () => {
+  assert.match(html, /main\.css\?v=1\.6\.[01]/);
+  assert.match(html, /v1\.6\.0\.css\?v=1\.6\.[01]/);
   assert.match(app, /battle-page--v159 battle-page--v160/);
 });
 

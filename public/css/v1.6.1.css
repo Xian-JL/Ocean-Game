@@ -1,0 +1,616 @@
+/* Ocean-v1.6.1 · tactical information hierarchy and sea-layer presentation */
+
+.battle-page--v161 {
+  --v161-panel: rgba(3, 18, 29, .96);
+  --v161-panel-soft: rgba(7, 30, 45, .88);
+  --v161-line: rgba(104, 205, 236, .32);
+  --v161-glow: rgba(48, 196, 239, .28);
+}
+
+.battle-page--v161 .ui-command-icon {
+  display: block;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 7px rgba(72, 213, 252, .46));
+  pointer-events: none;
+}
+
+.battle-page--v161 .battle-header--v161 {
+  background-color: rgba(2, 13, 21, .97);
+  background-image:
+    linear-gradient(180deg, rgba(2, 13, 21, .34), rgba(2, 13, 21, .88)),
+    url("/assets/images/ocean-2.5d/ui/panels/panel_top_info_bar.webp");
+  background-size: 100% 100%;
+}
+
+.battle-page--v161 .battle-header__connection {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 10px;
+  border-left: 1px solid rgba(118, 194, 218, .13);
+  color: #bdd4dc;
+  font-size: .61rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.battle-page--v161 .battle-header__connection i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #59e5ae;
+  box-shadow: 0 0 10px #59e5ae;
+}
+
+.battle-page--v161 .battle-header__connection[data-state="syncing"] i {
+  background: #f6c45d;
+  box-shadow: 0 0 10px #f6c45d;
+}
+
+.battle-page--v161 .battle-header__connection[data-state="offline"] i {
+  background: #ff6c78;
+  box-shadow: 0 0 10px #ff6c78;
+}
+
+.battle-page--v161 .resolution-strip--v074 {
+  background-color: rgba(3, 18, 29, .94);
+  background-image:
+    linear-gradient(90deg, rgba(3, 18, 29, .82), rgba(7, 33, 49, .76)),
+    url("/assets/images/ocean-2.5d/ui/panels/panel_alert_frame.webp");
+  background-size: 100% 100%;
+}
+
+.battle-page--v161 .action-rail--v073 {
+  isolation: isolate;
+  background-color: var(--v161-panel);
+  background-image:
+    linear-gradient(180deg, rgba(3, 18, 29, .78), rgba(3, 18, 29, .94)),
+    url("/assets/images/ocean-2.5d/ui/panels/panel_side_status_card.webp");
+  background-size: 100% 100%;
+}
+
+.battle-page--v161 .bridge-command-deck {
+  background-color: rgba(2, 15, 24, .98);
+  background-image:
+    linear-gradient(180deg, rgba(4, 25, 38, .72), rgba(2, 13, 21, .96)),
+    url("/assets/images/ocean-2.5d/ui/panels/panel_bottom_action_bar.webp");
+  background-size: 100% 100%;
+}
+
+.battle-page--v161 :where(.bridge-layer-control button,.bridge-cancel-control button,.bridge-help-control button,.mobile-command-peek > button) {
+  background-color: #071b29;
+  background-image: url("/assets/images/ocean-2.5d/ui/buttons/btn_secondary_dark.webp");
+  background-size: 100% 100%;
+}
+
+.battle-page--v161 .bridge-layer-control button.is-active {
+  background-color: #0b4870;
+  background-image: url("/assets/images/ocean-2.5d/ui/buttons/btn_primary_blue.webp");
+}
+
+.battle-page--v161 :where(.bridge-confirm-button,.action-command-confirm,.mobile-command-peek__confirm):not(:disabled) {
+  background-color: #075942;
+  background-image: url("/assets/images/ocean-2.5d/ui/buttons/btn_confirm_green.webp");
+  background-size: 100% 100%;
+}
+
+.battle-page--v161 :where(.bridge-confirm-button,.action-command-confirm,.mobile-command-peek__confirm):disabled {
+  background-color: #07131c;
+  background-image: url("/assets/images/ocean-2.5d/ui/buttons/btn_disabled_dark.webp");
+  background-size: 100% 100%;
+}
+
+.battle-page--v161 .bridge-help-control button[data-action="surrender"] {
+  background-color: #521a23;
+  background-image: url("/assets/images/ocean-2.5d/ui/buttons/btn_attack_red.webp");
+  background-size: 100% 100%;
+}
+
+.battle-page--v161 .bridge-layer-control button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.battle-page--v161 .bridge-layer-control .ui-command-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.battle-page--v161 .bridge-confirm-button {
+  grid-template-columns: 26px minmax(0, 1fr);
+}
+
+.battle-page--v161 .bridge-confirm-button .ui-command-icon {
+  grid-row: 1 / 3;
+  align-self: center;
+}
+
+.battle-page--v161 .bridge-cancel-control > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.battle-page--v161 .bridge-cancel-control .ui-command-icon {
+  width: 17px;
+  height: 17px;
+}
+
+.battle-page--v161 .action-command-chain {
+  position: relative;
+  z-index: 6;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 3px;
+  align-items: stretch;
+  padding: 5px;
+  border: 1px solid rgba(var(--accent-primary-rgb), .34);
+  border-radius: 10px;
+  background: rgba(2, 16, 25, .92);
+  box-shadow: inset 0 0 20px rgba(var(--accent-primary-rgb), .08), 0 8px 20px rgba(0, 0, 0, .2);
+}
+
+.battle-page--v161 .action-command-chain > i {
+  align-self: center;
+  color: rgba(var(--accent-primary-rgb), .46);
+  font: 800 1rem/1 Consolas, monospace;
+}
+
+.battle-page--v161 :where(.action-command-step,.action-command-confirm) {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  gap: 5px;
+  padding: 5px;
+  border: 1px solid rgba(var(--accent-primary-rgb), .16);
+  border-radius: 7px;
+  color: #d8e9ee;
+  background: rgba(8, 32, 46, .7);
+  text-align: left;
+}
+
+.battle-page--v161 .action-command-step[data-complete="true"] {
+  border-color: rgba(80, 224, 181, .44);
+  background: rgba(24, 94, 78, .22);
+}
+
+.battle-page--v161 :where(.action-command-step,.action-command-confirm) span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.battle-page--v161 :where(.action-command-step,.action-command-confirm) small {
+  color: #789aa8;
+  font-size: .48rem;
+  letter-spacing: .05em;
+}
+
+.battle-page--v161 :where(.action-command-step,.action-command-confirm) strong {
+  overflow: hidden;
+  font-size: .61rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.battle-page--v161 .action-command-confirm {
+  cursor: pointer;
+}
+
+.battle-page--v161 .action-command-confirm:disabled {
+  color: #748792;
+  cursor: not-allowed;
+}
+
+.battle-page--v161 .action-availability-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.battle-page--v161 .action-availability-summary span {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 3px;
+  border: 1px solid rgba(124, 177, 197, .16);
+  border-radius: 7px;
+  color: #9eb5bf;
+  background: rgba(4, 21, 31, .66);
+  font-size: .54rem;
+  white-space: nowrap;
+}
+
+.battle-page--v161 .action-availability-summary i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5ce3b1;
+  box-shadow: 0 0 7px currentColor;
+}
+
+.battle-page--v161 .action-availability-summary [data-tier="limited"] i { background: #f2bc59; }
+.battle-page--v161 .action-availability-summary [data-tier="exhausted"] i { background: #6c7e88; }
+.battle-page--v161 .action-availability-summary b { color: #e9f7fa; font: 800 .63rem/1 Consolas, monospace; }
+
+.battle-page--v161 .action-card[data-availability-tier="limited"] { opacity: .72; }
+.battle-page--v161 .action-card[data-availability-tier="exhausted"] { opacity: .43; filter: grayscale(.6); }
+.battle-page--v161 .action-card[data-availability-tier="available"] { border-color: rgba(82, 218, 180, .28); }
+
+.battle-page--v161 .unit-status__icon {
+  position: relative;
+}
+
+.battle-page--v161 .unit-status__icon::after {
+  position: absolute;
+  right: -7px;
+  bottom: -6px;
+  width: 18px;
+  height: 18px;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  content: "";
+  pointer-events: none;
+}
+
+.battle-page--v161 [data-unit-state="damaged"] .unit-status__icon::after { background-image: url("/assets/images/ocean-2.5d/ui/status-badges/badge_damaged.webp"); }
+.battle-page--v161 [data-unit-state="paralyzed"] .unit-status__icon::after { background-image: url("/assets/images/ocean-2.5d/ui/status-badges/badge_emp_disabled.webp"); }
+.battle-page--v161 [data-unit-state="sunk"] .unit-status__icon::after { background-image: url("/assets/images/ocean-2.5d/ui/status-badges/badge_destroyed.webp"); }
+
+.battle-page--v161 .action-card--selected::after {
+  position: absolute;
+  z-index: 3;
+  right: 3px;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  background: url("/assets/images/ocean-2.5d/ui/animations/target_lock_anim_sheet.webp") 0 0 / 800% 100% no-repeat;
+  content: "";
+  transform: translateY(-50%);
+  animation: v161-sprite 900ms steps(8) infinite;
+  pointer-events: none;
+}
+
+.battle-page--v161 .tactical-sea-toolbar--layer {
+  display: flex;
+  align-items: center;
+}
+
+.battle-page--v161 .tactical-sea-toolbar--layer .ui-command-icon {
+  display: inline-block;
+  width: 19px;
+  height: 19px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.battle-page--v161 .tactical-environment-layer {
+  position: absolute;
+  z-index: 4;
+  top: 23px;
+  right: 0;
+  bottom: 0;
+  left: 23px;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.battle-page--v161 .tactical-environment,
+.battle-page--v161 .tactical-layer-transition {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  transition: opacity 320ms ease, filter 320ms ease;
+}
+
+.battle-page--v161 .tactical-environment--surface {
+  background-image: url("/assets/images/ocean-2.5d/layers/surface/surface_specular_seamless.webp");
+  background-size: cover;
+  mix-blend-mode: screen;
+  animation: v161-water-drift 18s ease-in-out infinite alternate;
+}
+
+.battle-page--v161 .tactical-environment--foam {
+  background-image: url("/assets/images/ocean-2.5d/layers/surface/surface_foam_overlay.webp");
+  background-size: cover;
+  mix-blend-mode: screen;
+  animation: v161-foam-drift 22s linear infinite alternate;
+}
+
+.battle-page--v161 .tactical-environment--caustics {
+  background-image: url("/assets/images/ocean-2.5d/layers/underwater/underwater_caustics_seamless.webp");
+  background-size: cover;
+  mix-blend-mode: screen;
+  animation: v161-caustics 13s ease-in-out infinite alternate;
+}
+
+.battle-page--v161 .tactical-environment--depth {
+  background-image: url("/assets/images/ocean-2.5d/layers/underwater/underwater_depth_haze.webp");
+  background-size: cover;
+  mix-blend-mode: multiply;
+}
+
+.battle-page--v161 .tactical-environment--particles {
+  background-image: url("/assets/images/ocean-2.5d/layers/underwater/underwater_particles.webp");
+  background-size: cover;
+  mix-blend-mode: screen;
+  animation: v161-particles 16s linear infinite;
+}
+
+.battle-page--v161 .tactical-environment--refraction {
+  inset: -4%;
+  background-image: url("/assets/images/ocean-2.5d/layers/underwater/underwater_refraction_noise.webp");
+  background-size: cover;
+  mix-blend-mode: soft-light;
+  filter: blur(2px);
+  animation: v161-refraction 11s ease-in-out infinite alternate;
+}
+
+.battle-page--v161[data-tactical-layer="all"] .tactical-environment-layer--own .tactical-environment--surface { opacity: .22; }
+.battle-page--v161[data-tactical-layer="all"] .tactical-environment-layer--own .tactical-environment--foam { opacity: .09; }
+.battle-page--v161[data-tactical-layer="all"] .tactical-environment-layer--own .tactical-environment--caustics { opacity: .13; }
+.battle-page--v161[data-tactical-layer="all"] .tactical-environment-layer--own .tactical-environment--depth { opacity: .12; }
+.battle-page--v161[data-tactical-layer="all"] .tactical-environment-layer--own .tactical-environment--particles { opacity: .16; }
+
+.battle-page--v161[data-tactical-layer="surface"] .tactical-environment-layer--own .tactical-environment--surface { opacity: .42; }
+.battle-page--v161[data-tactical-layer="surface"] .tactical-environment-layer--own .tactical-environment--foam { opacity: .21; }
+
+.battle-page--v161[data-tactical-layer="underwater"] .tactical-environment-layer--own .tactical-environment--surface { opacity: .05; filter: brightness(.55); }
+.battle-page--v161[data-tactical-layer="underwater"] .tactical-environment-layer--own .tactical-environment--caustics { opacity: .48; }
+.battle-page--v161[data-tactical-layer="underwater"] .tactical-environment-layer--own .tactical-environment--depth { opacity: .56; }
+.battle-page--v161[data-tactical-layer="underwater"] .tactical-environment-layer--own .tactical-environment--particles { opacity: .48; }
+.battle-page--v161[data-tactical-layer="underwater"] .tactical-environment-layer--own .tactical-environment--refraction { opacity: .13; }
+
+.battle-page--v161 .tactical-environment-layer--enemy .tactical-environment--surface { opacity: .18; }
+.battle-page--v161 .tactical-environment-layer--enemy .tactical-environment--foam { opacity: .06; }
+.battle-page--v161 .tactical-environment-layer--enemy :is(.tactical-environment--caustics,.tactical-environment--depth,.tactical-environment--particles,.tactical-environment--refraction) { display: none; }
+
+.battle-page--v161[data-tactical-layer="all"] .battle-map-card--own .tactical-unit-art[data-art-layer="surface"] { opacity: 1; }
+.battle-page--v161[data-tactical-layer="all"] .battle-map-card--own .tactical-unit-art[data-art-layer="underwater"] { opacity: .66; filter: saturate(.75) hue-rotate(8deg) drop-shadow(0 0 6px rgba(68, 196, 255, .34)); }
+.battle-page--v161[data-tactical-layer="surface"] .battle-map-card--own .tactical-unit-art[data-art-layer="surface"] { opacity: 1; filter: drop-shadow(0 8px 6px rgba(0, 0, 0, .56)); }
+.battle-page--v161[data-tactical-layer="surface"] .battle-map-card--own .tactical-unit-art[data-art-layer="underwater"] { opacity: .06; filter: grayscale(1) blur(.7px); }
+.battle-page--v161[data-tactical-layer="underwater"] .battle-map-card--own .tactical-unit-art[data-art-layer="surface"] { opacity: .1; filter: grayscale(1) brightness(.62) blur(.45px); }
+.battle-page--v161[data-tactical-layer="underwater"] .battle-map-card--own .tactical-unit-art[data-art-layer="underwater"] { z-index: 7; opacity: 1; filter: saturate(1.18) drop-shadow(0 0 9px rgba(76, 216, 255, .74)); }
+
+.battle-page--v161[data-tactical-layer="surface"] .battle-map-card--own .board-cell[data-tactical-layer="underwater"],
+.battle-page--v161[data-tactical-layer="underwater"] .battle-map-card--own .board-cell[data-tactical-layer="surface"] { opacity: .08; }
+
+.battle-page--v161 .tactical-layer-transition {
+  z-index: 12;
+  top: 50%;
+  left: 50%;
+  width: min(56%, 420px);
+  height: min(56%, 420px);
+  inset-inline-end: auto;
+  inset-block-end: auto;
+  background-size: contain;
+  transform: translate(-50%, -50%);
+}
+
+.battle-page--v161 .tactical-layer-transition--sonar {
+  aspect-ratio: 1;
+  background-image: url("/assets/images/ocean-2.5d/layers/transitions/sonar_scan_ring_sheet.webp");
+  background-position: 0 0;
+  background-size: 800% 100%;
+}
+
+.battle-page--v161 .tactical-layer-transition--submerge { background-image: url("/assets/images/ocean-2.5d/layers/transitions/submerge_surface_wake.webp"); }
+.battle-page--v161 .tactical-layer-transition--emerge { background-image: url("/assets/images/ocean-2.5d/layers/transitions/emerge_surface_wake.webp"); }
+
+.battle-page--v161[data-layer-transition$="-to-underwater"] .tactical-layer-transition--sonar,
+.battle-page--v161[data-layer-transition$="-to-all"] .tactical-layer-transition--sonar {
+  opacity: .92;
+  animation: v161-sprite 820ms steps(8) both;
+}
+
+.battle-page--v161[data-layer-transition$="-to-underwater"] .tactical-layer-transition--submerge {
+  opacity: .72;
+  animation: v161-layer-wake 820ms ease-out both;
+}
+
+.battle-page--v161[data-layer-transition$="-to-surface"] .tactical-layer-transition--emerge {
+  opacity: .78;
+  animation: v161-layer-wake 820ms ease-out both;
+}
+
+@keyframes v161-sprite { from { background-position-x: 0; } to { background-position-x: 100%; } }
+@keyframes v161-layer-wake { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.56); } 24% { opacity: .82; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.08); } }
+@keyframes v161-water-drift { to { background-position: 2.5% 1.5%; transform: scale(1.025); } }
+@keyframes v161-foam-drift { to { background-position: -2.5% 2%; transform: scale(1.04) rotate(.25deg); } }
+@keyframes v161-caustics { to { background-position: 2% -2%; filter: brightness(1.14); transform: scale(1.035); } }
+@keyframes v161-particles { to { background-position: 1.8% -2.4%; } }
+@keyframes v161-refraction { to { transform: scale(1.035) translate(.7%, -.5%); } }
+
+html[data-quality="smooth"] .battle-page--v161 :is(.tactical-environment--foam,.tactical-environment--particles,.tactical-environment--refraction) { display: none; }
+html[data-quality="smooth"] .battle-page--v161 .tactical-environment--caustics { opacity: .2; animation: none; }
+
+@media (min-width: 1001px) {
+  .battle-page--v161 .carrier-bridge-interface { grid-template-rows: 58px minmax(0, 1fr); }
+  .battle-page--v161 .battle-header--v161 {
+    min-height: 58px;
+    grid-template-columns: 46px minmax(120px, .62fr) 126px minmax(280px, 1.7fr) 96px;
+    grid-template-areas: "menu turn timer players connection";
+    padding: 0 9px;
+  }
+  .battle-page--v161 :where(.battle-header__room,.battle-header__timeouts,.bridge-versus) { display: none; }
+  .battle-page--v161 .battle-header__turn { grid-area: turn; }
+  .battle-page--v161 .battle-header__timer { grid-area: timer; }
+  .battle-page--v161 .battle-header__players { grid-area: players; padding-inline: 18px; }
+  .battle-page--v161 .battle-header__connection { grid-area: connection; }
+  .battle-page--v161 .carrier-horizon-deck { top: 58px; height: 26px; padding-top: 5px; }
+  .battle-page--v161 .carrier-tactical-console,
+  .battle-page--v161 .carrier-tactical-console:has(.resolution-strip--v074) {
+    display: block;
+    height: calc(100dvh - 58px);
+    padding: 0 6px 88px;
+    overflow: hidden;
+  }
+  .battle-page--v161 .mobile-map-tabs,
+  .battle-page--v161 .mobile-map-tabs--v072 {
+    top: 3px;
+    right: 31%;
+    left: 31%;
+  }
+  .battle-page--v161 .resolution-strip--v074 {
+    position: absolute;
+    z-index: 48;
+    top: 54px;
+    right: clamp(292px, 19vw, 348px);
+    left: 74px;
+    display: grid;
+    width: auto;
+    min-height: 40px;
+    max-height: 46px;
+    margin: 0;
+    padding: 4px 8px;
+    overflow: hidden;
+  }
+  .battle-page--v161 .resolution-strip__content > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .battle-page--v161 .resolution-strip__content ul,
+  .battle-page--v161 .resolution-player-results { display: none; }
+  .battle-page--v161 :where(.battle-layout--v072,.battle-layout--v076) {
+    height: calc(100% - 88px);
+    grid-template-columns: minmax(0, 1fr) clamp(286px, 19vw, 342px);
+    gap: 5px;
+    padding: 52px 0 0 66px;
+  }
+  .battle-page--v161 .carrier-tactical-console:has(.resolution-strip--v074) :where(.battle-layout--v072,.battle-layout--v076) { padding-top: 98px; }
+  .battle-page--v161 :where(.battle-main-column,.battle-maps,.battle-map-card--v073) { height: 100%; min-height: 0; }
+  .battle-page--v161 .battle-map-card--v073 { padding: 0 3px; }
+  .battle-page--v161 .board-frame--tactical-sea { width: min(100%, 100cqh); max-width: 100%; height: auto; max-height: 100%; margin: 0 auto; aspect-ratio: 1; }
+  .battle-page--v161[data-map-size="10"] .battle-map-card .board-frame { --cell-size: clamp(40px, min(calc((100vw - 450px) / 11), calc((100dvh - 224px) / 11)), 68px); }
+  .battle-page--v161[data-map-size="12"] .battle-map-card .board-frame { --cell-size: clamp(35px, min(calc((100vw - 450px) / 13), calc((100dvh - 224px) / 13)), 60px); }
+  .battle-page--v161[data-map-size="15"] .battle-map-card .board-frame { --cell-size: clamp(28px, min(calc((100vw - 450px) / 16), calc((100dvh - 224px) / 16)), 49px); }
+  .battle-page--v161 .map-card__heading--v072 { display: none; }
+  .battle-page--v161 .tactical-sea-toolbar {
+    top: 7px;
+    left: 12px;
+    display: flex;
+    width: auto;
+    max-width: calc(100% - 24px);
+    align-items: center;
+    gap: 12px;
+    padding: 4px 7px;
+    border: 1px solid rgba(var(--accent-primary-rgb), .18);
+    border-radius: 7px;
+    opacity: .9;
+    color: #d8eef4;
+    background: rgba(2, 17, 27, .72);
+    pointer-events: none;
+  }
+  .battle-page--v161 .tactical-sea-toolbar b { overflow: hidden; color: #8fb2bf; font-size: .52rem; text-overflow: ellipsis; white-space: nowrap; }
+  .battle-page--v161 .map-caption--v072 { right: 12px; bottom: 7px; left: auto; display: block; width: auto; opacity: .78; }
+  .battle-page--v161 .battle-side-dock {
+    top: 50%;
+    left: 5px;
+    width: 56px;
+    border-radius: 9px;
+    transform: translateY(-50%);
+    background-image: linear-gradient(180deg, rgba(3, 20, 31, .94), rgba(2, 13, 21, .98));
+  }
+  .battle-page--v161 .battle-side-dock button { min-height: 62px; padding: 6px 3px; }
+  .battle-page--v161 .battle-side-dock .ui-svg-icon { width: 19px; height: 19px; }
+  .battle-page--v161 .battle-side-dock strong { font-size: .52rem; }
+  .battle-page--v161 .battle-side-dock small { min-width: 17px; font-size: .48rem; }
+  .battle-page--v161 .action-rail--v073 { border-radius: 8px; }
+  .battle-page--v161 .action-rail--v073 .action-rail__content { display: grid; gap: 6px; padding: 6px; }
+  .battle-page--v161 .action-command-chain { position: sticky; top: -6px; }
+  .battle-page--v161 .bridge-target-readout { display: none; }
+  .battle-page--v161 .opening-radar-task { margin: 0; padding: 7px; }
+  .battle-page--v161 .unit-action-deck--v076 { gap: 4px; }
+  .battle-page--v161 .unit-action-card { padding: 5px; }
+  .battle-page--v161 .unit-action-card--collapsed { padding-block: 4px; }
+  .battle-page--v161 .unit-action-card__toggle { grid-template-columns: 30px minmax(0, 1fr) auto auto 14px; gap: 5px; }
+  .battle-page--v161 .action-card { min-height: 50px; padding: 5px; }
+  .battle-page--v161 .bridge-command-deck {
+    position: absolute;
+    z-index: 52;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    min-height: 84px;
+    grid-template-columns: .92fr 1.28fr 1fr .7fr .82fr;
+  }
+  .battle-page--v161 .bridge-console-group { padding: 6px 8px; }
+  .battle-page--v161 .mobile-command-peek { display: none; }
+  .battle-page--v161 .tactical-environment-layer { top: 26px; left: 26px; }
+}
+
+@media (min-width: 1001px) and (max-width: 1280px) and (orientation: landscape) {
+  .battle-page--v161 .battle-header--v161 { grid-template-columns: 42px minmax(105px, .7fr) 112px minmax(240px, 1.5fr) 82px; }
+  .battle-page--v161 :where(.battle-layout--v072,.battle-layout--v076) { grid-template-columns: minmax(0, 1fr) clamp(270px, 25vw, 306px); padding-left: 57px; }
+  .battle-page--v161 .resolution-strip--v074 { left: 63px; right: clamp(276px, 25vw, 312px); }
+  .battle-page--v161 .battle-side-dock { width: 49px; }
+  .battle-page--v161 .battle-side-dock strong { display: none; }
+  .battle-page--v161 .bridge-command-deck { grid-template-columns: .95fr 1.22fr 1fr .67fr .78fr; }
+  .battle-page--v161 .bridge-console-group { padding-inline: 5px; }
+}
+
+@media (max-width: 700px), (min-width: 701px) and (max-width: 1000px) and (orientation: portrait) {
+  .battle-page--v161 .battle-header--v161 {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "turn timer connection";
+  }
+  .battle-page--v161 .battle-header__turn { grid-area: turn; }
+  .battle-page--v161 .battle-header__timer { grid-area: timer; }
+  .battle-page--v161 .battle-header__connection { grid-area: connection; padding-inline: 5px; border-left: 0; }
+  .battle-page--v161 .battle-header__connection span { display: none; }
+  .battle-page--v161 .tactical-sea-toolbar {
+    position: absolute;
+    z-index: 18;
+    top: 9px;
+    left: 9px;
+    display: flex;
+    width: auto;
+    max-width: calc(100% - 18px);
+    padding: 4px 6px;
+    border: 1px solid rgba(var(--accent-primary-rgb), .2);
+    border-radius: 7px;
+    opacity: .92;
+    background: rgba(2, 17, 27, .78);
+  }
+  .battle-page--v161 .tactical-sea-toolbar b { display: none; }
+  .battle-page--v161 .map-caption--v072 { display: none; }
+  .battle-page--v161 .mobile-command-peek { grid-template-columns: minmax(0, 1fr) repeat(4, auto); }
+  .battle-page--v161 .mobile-command-peek__layer { display: grid; min-width: 52px; place-items: center; gap: 1px; padding: 3px; font-size: .52rem; }
+  .battle-page--v161 .mobile-command-peek__layer .ui-command-icon { width: 24px; height: 24px; }
+  .battle-page--v161 .action-rail__content { display: grid; gap: 7px; }
+  .battle-page--v161 .action-command-chain { position: sticky; z-index: 9; top: 0; }
+  .battle-page--v161 .action-availability-summary { position: sticky; z-index: 8; top: 59px; background: rgba(3, 18, 29, .96); }
+  .battle-page--v161 .bridge-target-readout { display: none; }
+  .battle-page--v161 .tactical-environment-layer { top: 22px; left: 22px; }
+}
+
+@media (max-width: 520px) {
+  .battle-page--v161 .mobile-command-peek__center,
+  .battle-page--v161 .mobile-command-peek__focus { display: none; }
+  .battle-page--v161 .mobile-command-peek { grid-template-columns: minmax(0, 1fr) auto auto; }
+  .battle-page--v161 .action-command-chain { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .battle-page--v161 .action-command-chain > i:nth-of-type(2),
+  .battle-page--v161 .action-command-confirm { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .battle-page--v161 :where(.tactical-environment,.tactical-layer-transition,.action-card--selected::after) {
+    animation: none !important;
+    transition: none !important;
+  }
+  .battle-page--v161[data-layer-transition] .tactical-layer-transition--sonar { opacity: .58; background-position-x: 57%; }
+}
