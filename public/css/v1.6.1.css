@@ -464,6 +464,7 @@ html[data-quality="smooth"] .battle-page--v161 .tactical-environment--caustics {
   }
   .battle-page--v161 .mobile-map-tabs,
   .battle-page--v161 .mobile-map-tabs--v072 {
+    position: absolute;
     top: 3px;
     right: 31%;
     left: 31%;
@@ -486,7 +487,15 @@ html[data-quality="smooth"] .battle-page--v161 .tactical-environment--caustics {
   .battle-page--v161 .resolution-strip__content ul,
   .battle-page--v161 .resolution-player-results { display: none; }
   .battle-page--v161 :where(.battle-layout--v072,.battle-layout--v076) {
-    height: calc(100% - 88px);
+    position: absolute;
+    top: 0;
+    right: 6px;
+    bottom: 88px;
+    left: 6px;
+    width: auto;
+    height: auto;
+    grid-column: auto;
+    grid-row: auto;
     grid-template-columns: minmax(0, 1fr) clamp(286px, 19vw, 342px);
     gap: 5px;
     padding: 52px 0 0 66px;
@@ -518,9 +527,15 @@ html[data-quality="smooth"] .battle-page--v161 .tactical-environment--caustics {
   .battle-page--v161 .tactical-sea-toolbar b { overflow: hidden; color: #8fb2bf; font-size: .52rem; text-overflow: ellipsis; white-space: nowrap; }
   .battle-page--v161 .map-caption--v072 { right: 12px; bottom: 7px; left: auto; display: block; width: auto; opacity: .78; }
   .battle-page--v161 .battle-side-dock {
+    position: absolute;
     top: 50%;
     left: 5px;
     width: 56px;
+    height: auto;
+    grid-column: auto;
+    grid-row: auto;
+    align-self: auto;
+    align-content: center;
     border-radius: 9px;
     transform: translateY(-50%);
     background-image: linear-gradient(180deg, rgba(3, 20, 31, .94), rgba(2, 13, 21, .98));

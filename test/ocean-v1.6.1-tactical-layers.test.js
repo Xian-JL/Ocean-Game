@@ -37,7 +37,7 @@ test("v1.6.1元数据、缓存版本和末级样式一致", () => {
   assert.equal(require("../package.json").version, "1.6.1");
   assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
   assert.equal(require("../server/release").RELEASE_STAGE, "Ocean-v1.6.1");
-  assert.match(html, /v1\.6\.1\.css\?v=1\.6\.1/);
+  assert.match(html, /v1\.6\.1\.css\?v=1\.6\.1\.1/);
   assert.ok(html.indexOf("v1.6.1.css") > html.indexOf("v1.6.0.css"));
   assert.match(app, /battle-page--v160 battle-page--v161/);
 });
@@ -142,6 +142,19 @@ test("电脑、平板横屏、平板竖屏与主流手机继续被覆盖", () =>
   assert.match(css, /max-width: 700px/);
   assert.match(css, /max-width: 520px/);
   assert.match(app, /data-action="cycle-tactical-layer"/);
+});
+
+test("桌面战斗主体、地图标签和左侧战术栏脱离普通文档流", () => {
+  const start = css.indexOf("@media (min-width: 1001px) {");
+  const end = css.indexOf("@media (min-width: 1001px) and", start);
+  const desktop = css.slice(start, end);
+  assert.ok(start >= 0 && end > start);
+  assert.match(desktop, /mobile-map-tabs[\s\S]*position:\s*absolute/);
+  assert.match(desktop, /battle-layout--v072[\s\S]*position:\s*absolute/);
+  assert.match(desktop, /bottom:\s*88px/);
+  assert.match(desktop, /height:\s*auto/);
+  assert.match(desktop, /battle-side-dock[\s\S]*position:\s*absolute/);
+  assert.match(desktop, /battle-side-dock[\s\S]*height:\s*auto/);
 });
 
 test("v1.6.1不改变规则、协议和服务器权威结算边界", () => {
