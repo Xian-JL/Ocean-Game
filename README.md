@@ -219,6 +219,12 @@ npm start
 
 浏览器打开 `http://127.0.0.1:3000`。
 
+多人房间、对局状态和重连凭证摘要目前保存在单个服务器进程内存中；服务器重启或部署会中断现有房间，暂不支持跨重启恢复，也不要横向扩展为多个实例。需要持久化或多实例前，应先接入共享数据库/Redis 并完成并发结算与计时器回归。
+
+`/api/health` 与 `/api/ready` 仅提供存活状态。详细的 `/api/status` 和 `/api/metrics` 默认隐藏；部署时在服务环境变量中设置至少 16 个字符的 `OCEAN_OPERATIONS_TOKEN`，然后通过 `Authorization: Bearer <token>` 请求。不要把令牌写入仓库或公开页面。Socket 建房/加入限流默认忽略 `X-Forwarded-For`；只有确认反向代理会在末尾追加真实链路地址后，才设置 `TRUSTED_PROXY_HOPS` 为代理跳数。
+
+发布版本和静态资源缓存标识维护在 `public/js/release-config.js`。修改带版本查询参数的静态资源后，应同步提升其中的 `assetVersion`，并运行完整验收。
+
 ## 正式验收
 
 ```powershell
@@ -229,7 +235,7 @@ npm run acceptance
 
 ## 声音资源
 
-操作音效继续使用 v1.3.3.2 已冻结的 OGG/MP3 双格式本地素材，并保留浏览器合成回退。背景音乐文件仍为：
+操作音效继续使用 v1.3.3.2 已冻结的 OGG/MP3 双格式本地素材，并保留浏览器合成回退。原始音源保存在仓库 `assets/audio/effects/source/`，不由 Express 公开；转换后的运行文件和背景音乐位于 `public/assets/audio/`。背景音乐文件为：
 
 ```text
 public/assets/audio/music/ocean-theme.mp3

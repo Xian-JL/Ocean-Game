@@ -629,3 +629,9 @@ html[data-quality="smooth"] .battle-page--v161 .tactical-environment--caustics {
   }
   .battle-page--v161[data-layer-transition] .tactical-layer-transition--sonar { opacity: .58; background-position-x: 57%; }
 }
+.entry-volatile-notice {
+  margin: 0 0 12px;
+  color: var(--text-muted, #9db2c2);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}

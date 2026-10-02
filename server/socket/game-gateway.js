@@ -1,6 +1,7 @@
 "use strict";
 
 const { RuleValidationError } = require("../game/errors");
+const { isIP } = require("node:net");
 const {
   chooseBotFinalSalvo,
   createBotActionIntent,
@@ -91,6 +92,21 @@ function readActionId(intent) {
     : null;
 }
 
+function resolveClientAddress(handshake, trustedProxyHops = 0) {
+  const directAddress = String(handshake?.address ?? "unknown").trim() || "unknown";
+  if (!Number.isInteger(trustedProxyHops) || trustedProxyHops < 1) {
+    return directAddress;
+  }
+
+  const forwarded = handshake?.headers?.["x-forwarded-for"];
+  const chain = (Array.isArray(forwarded) ? forwarded.join(",") : String(forwarded ?? ""))
+    .split(",")
+    .map((address) => address.trim())
+    .filter((address) => isIP(address));
+  const clientIndex = chain.length - trustedProxyHops;
+  return clientIndex >= 0 ? chain[clientIndex] : directAddress;
+}
+
 class SocketGameGateway {
   constructor(options) {
     if (!options?.io || !options?.roomService) {
@@ -99,6 +115,10 @@ class SocketGameGateway {
 
     this.io = options.io;
     this.roomService = options.roomService;
+    this.trustedProxyHops = options.trustedProxyHops ?? 0;
+    if (!Number.isInteger(this.trustedProxyHops) || this.trustedProxyHops < 0) {
+      throw new TypeError("trustedProxyHops 必须是非负整数。");
+    }
     this.nowIso = options.nowIso ?? (() => new Date().toISOString());
     this.nowMs = options.nowMs ?? Date.now;
     this.logger = options.logger ?? console;
@@ -524,11 +544,7 @@ class SocketGameGateway {
 
   #consumeRequestBudget(socket, eventName) {
     this.rateLimiter.consume(`socket:${socket.id}:all`, GENERAL_REQUEST_LIMIT);
-    const address = String(
-      socket.handshake?.headers?.["x-forwarded-for"] ??
-        socket.handshake?.address ??
-        "unknown",
-    ).split(",", 1)[0].trim();
+    const address = resolveClientAddress(socket.handshake, this.trustedProxyHops);
     if (eventName === CLIENT_EVENTS.CREATE_ROOM) {
       this.rateLimiter.consume(`address:${address}:create`, CREATE_ROOM_LIMIT);
     }
@@ -1068,5 +1084,6 @@ module.exports = {
   DEFAULT_TIMER_SWEEP_MS,
   SocketGameGateway,
   playerChannel,
+  resolveClientAddress,
   roomChannel,
 };

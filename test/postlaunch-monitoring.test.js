@@ -47,7 +47,8 @@ test("结构化错误日志省略异常消息、堆栈和私密上下文", () =>
 });
 
 test("就绪与指标接口提供请求编号、资源用量和聚合计数", async (context) => {
-  const runtime = createOceanServer();
+  const operationsToken = "test-only-operations-token-2026";
+  const runtime = createOceanServer({ operationsToken });
   runtime.httpServer.listen(0, "127.0.0.1");
   await once(runtime.httpServer, "listening");
   context.after(() => new Promise((resolve) => runtime.io.close(resolve)));
@@ -59,7 +60,9 @@ test("就绪与指标接口提供请求编号、资源用量和聚合计数", as
   assert.match(readyResponse.headers.get("x-request-id"), /^[0-9a-f-]{36}$/);
   assert.equal((await readyResponse.json()).status, "ready");
 
-  const metricsResponse = await fetch(`${baseUrl}/api/metrics`);
+  const metricsResponse = await fetch(`${baseUrl}/api/metrics`, {
+    headers: { Authorization: `Bearer ${operationsToken}` },
+  });
   assert.equal(metricsResponse.status, 200);
   assert.equal(metricsResponse.headers.get("cache-control"), "no-store");
   const metrics = await metricsResponse.json();

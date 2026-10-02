@@ -314,7 +314,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
 
   const socket = new FakeSocket();
   window.io = () => socket;
-  for (const script of ["game-data.js", "ui-model.js", "audio-system.js", "tutorial-system.js", "app.js"]) {
+  for (const script of ["release-config.js", "game-data.js", "ui-model.js", "audio-system.js", "tutorial-system.js", "app.js"]) {
     window.eval(
       fs.readFileSync(path.join(PROJECT_ROOT, "public/js", script), "utf8"),
     );

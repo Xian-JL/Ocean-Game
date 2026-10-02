@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const { once } = require("node:events");
 const test = require("node:test");
 const { createOceanServer } = require("../server/app");
+const { ASSET_VERSION } = require("../server/release");
 
 test("运行监控 Ocean-v1.6.1 提供健康检查、游戏入口和 Socket.IO 协议入口", async (context) => {
   const fixedTime = "2026-08-07T00:00:00.000Z";
@@ -32,6 +33,7 @@ test("运行监控 Ocean-v1.6.1 提供健康检查、游戏入口和 Socket.IO �
     service: "ocean",
     stage: "Ocean-v1.6.1",
     socketProtocol: "2.1",
+    roomStatePersistence: "in-memory",
     timestamp: fixedTime,
   });
 
@@ -45,6 +47,9 @@ test("运行监控 Ocean-v1.6.1 提供健康检查、游戏入口和 Socket.IO �
   assert.match(home, /\/js\/game-data\.js/);
   assert.match(home, /\/js\/ui-model\.js/);
   assert.match(home, /\/js\/app\.js/);
+  assert.ok(home.includes(`/js/app.js?v=${ASSET_VERSION}`));
+  assert.equal(home.includes("__OCEAN_ASSET_VERSION__"), false);
+  assert.equal(homeResponse.headers.get("cache-control"), "no-cache");
 
   for (const asset of [
     "/css/main.css",
@@ -56,6 +61,19 @@ test("运行监控 Ocean-v1.6.1 提供健康检查、游戏入口和 Socket.IO �
     assert.equal(assetResponse.status, 200, asset);
     assert.ok((await assetResponse.text()).length > 500, asset);
   }
+
+  const versionedAssetResponse = await fetch(
+    `${baseUrl}/js/app.js?v=1.6.1.2`,
+  );
+  assert.equal(
+    versionedAssetResponse.headers.get("cache-control"),
+    "public, max-age=31536000, immutable",
+  );
+  const unversionedAssetResponse = await fetch(`${baseUrl}/js/app.js`);
+  assert.equal(
+    unversionedAssetResponse.headers.get("cache-control"),
+    "public, max-age=0, must-revalidate",
+  );
 
   const socketClientResponse = await fetch(
     `${baseUrl}/socket.io/socket.io.js`,

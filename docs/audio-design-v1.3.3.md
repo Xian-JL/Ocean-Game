@@ -18,7 +18,7 @@ v1.3.3 只更新音效资源与浏览器播放层，不修改 rule-v1.8、page-f
 - 直升机：真实旋翼片段。
 - 部署、私人标记、房间、教程和通用界面使用 Kenney 与已筛选短音效。
 
-所有声音均从 `/public/assets/audio/effects/source/` 本地读取，不依赖运行时外部网站。
+原始音源保存在仓库的 `assets/audio/effects/source/`，由 `npm run audio:build` 转换为 `public/assets/audio/effects/runtime/` 的生产格式；浏览器只请求清单引用的运行文件，不依赖外部网站。
 
 ## 信息安全
 

@@ -37,7 +37,7 @@ test("v1.6.1元数据、缓存版本和末级样式一致", () => {
   assert.equal(require("../package.json").version, "1.6.1");
   assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
   assert.equal(require("../server/release").RELEASE_STAGE, "Ocean-v1.6.1");
-  assert.match(html, /v1\.6\.1\.css\?v=1\.6\.1\.1/);
+  assert.match(html, /v1\.6\.1\.css\?v=__OCEAN_ASSET_VERSION__/);
   assert.ok(html.indexOf("v1.6.1.css") > html.indexOf("v1.6.0.css"));
   assert.match(app, /battle-page--v160 battle-page--v161/);
 });

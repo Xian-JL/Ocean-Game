@@ -6,7 +6,7 @@ const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
 const AUDIO_ROOT = path.join(ROOT, "public/assets/audio/effects");
-const SOURCE_ROOT = path.join(AUDIO_ROOT, "source");
+const SOURCE_ROOT = path.join(ROOT, "assets/audio/effects/source");
 const RUNTIME_ROOT = path.join(AUDIO_ROOT, "runtime");
 const audioSource = fs.readFileSync(path.join(ROOT, "public/js/audio-system.js"), "utf8");
 const sourceFiles = [...new Set([...audioSource.matchAll(/sample\("([^"]+\.(?:wav|ogg|mp3|flac))"/g)].map((match) => match[1]))].sort();

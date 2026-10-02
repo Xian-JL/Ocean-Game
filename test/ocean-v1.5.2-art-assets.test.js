@@ -15,7 +15,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(ASSET_ROOT, "source-asset-
 function filesUnder(relativeDirectory) {
   const directory = path.join(ASSET_ROOT, relativeDirectory);
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
-    const relativePath = path.join(relativeDirectory, entry.name);
+    const relativePath = path.join(relativeDirectory, entry.name).split(path.sep).join("/");
     return entry.isDirectory() ? filesUnder(relativePath) : [relativePath];
   });
 }
@@ -76,7 +76,7 @@ test("整船跨格投影使用 CSP 兼容 data 属性而非动态内联定位", 
   assert.doesNotMatch(artSection, /style=/);
   assert.match(css, /grid-row:\s*var\(--art-row\) \/ span var\(--art-row-span\)/);
   assert.match(css, /grid-column:\s*var\(--art-column\) \/ span var\(--art-column-span\)/);
-  assert.match(html, /main\.css\?v=1\.6\.1/);
+  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
 });
 
 test("2.5D单位只进入部署、己方战场与复盘，不进入敌方安全地图", () => {

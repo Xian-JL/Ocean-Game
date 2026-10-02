@@ -95,5 +95,5 @@ test("敌方未知海图不渲染舰体，版本和缓存标识一致", () => {
   assert.doesNotMatch(app.slice(enemyStart, enemyEnd), /renderTacticalUnitArt/);
   assert.equal(require("../package.json").version, "1.6.1");
   assert.equal(Data.RELEASE.stage, "Ocean-v1.6.1");
-  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=1\.6\.1/);
+  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=__OCEAN_ASSET_VERSION__/);
 });

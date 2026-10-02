@@ -4,8 +4,8 @@
 |---|---|---|
 | `/api/health` | Render 健康检查 | 状态、阶段、协议、时间 |
 | `/api/ready` | 发布后就绪确认 | ready 状态、阶段、时间 |
-| `/api/status` | 快速运行概览 | 连接、房间总数和阶段分布 |
-| `/api/metrics` | 故障与容量观察 | 内存、连接、房间、请求及错误代码计数 |
+| `/api/status` | 受保护的运行概览 | 连接、房间总数和阶段分布；需 `OCEAN_OPERATIONS_TOKEN` Bearer 凭证 |
+| `/api/metrics` | 受保护的故障与容量观察 | 内存、连接、房间、请求及错误代码计数；需 `OCEAN_OPERATIONS_TOKEN` Bearer 凭证 |
 
 指标随实例重启归零：本项目不引入数据库，也不接入需要账号或费用的监控服务。
 

@@ -14,7 +14,7 @@ test("v1.5.7 战场特效在 v1.6.1 发布元数据中继续保留", () => {
   assert.equal(require("../package.json").version, "1.6.1");
   assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
   assert.match(html, /Ocean-v1\.6\.1/);
-  assert.match(html, /main\.css\?v=1\.6\.1/);
+  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
   assert.match(app, /battle-page--v157/);
 });
 

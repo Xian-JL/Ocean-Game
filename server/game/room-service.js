@@ -3,6 +3,7 @@
 const {
   createHash,
   randomBytes,
+  randomInt,
   randomUUID,
   timingSafeEqual,
 } = require("node:crypto");
@@ -71,7 +72,7 @@ function fail(code, message, details = {}) {
   throw new RuleValidationError(code, message, details);
 }
 
-function createRoomCode(random = Math.random) {
+function createRoomCode(random = () => randomInt(ROOM_CODE_ALPHABET.length) / ROOM_CODE_ALPHABET.length) {
   if (typeof random !== "function") {
     fail("INVALID_RANDOM_SOURCE", "房间码随机源必须是函数。");
   }
@@ -109,7 +110,7 @@ class InMemoryRoomService {
   constructor(options = {}) {
     this.rooms = new Map();
     this.random = options.random ?? Math.random;
-    this.roomCodeFactory = options.roomCodeFactory ?? (() => createRoomCode(this.random));
+    this.roomCodeFactory = options.roomCodeFactory ?? (() => createRoomCode());
     this.playerIdFactory = options.playerIdFactory ?? (() => randomUUID());
     this.reconnectTokenFactory = options.reconnectTokenFactory ??
       (() => randomBytes(32).toString("base64url"));

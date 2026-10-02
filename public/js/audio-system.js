@@ -330,7 +330,7 @@
     const pending = loadManifest()
       .then(async (manifest) => {
         const entry = manifest?.assets?.[file];
-        const candidates = entry ? [entry.ogg, entry.mp3] : [`source/${file}`];
+        const candidates = entry ? [entry.ogg, entry.mp3] : [];
         for (const candidate of candidates) {
           try {
             return await decodeCandidate(audioContext, candidate);

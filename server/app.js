@@ -2,15 +2,28 @@
 
 const path = require("node:path");
 const http = require("node:http");
-const { randomUUID } = require("node:crypto");
+const { randomUUID, timingSafeEqual } = require("node:crypto");
+const fs = require("node:fs");
 const express = require("express");
 const { Server } = require("socket.io");
 const { InMemoryRoomService } = require("./game/room-service");
 const { SocketGameGateway } = require("./socket/game-gateway");
 const { OperationalTelemetry } = require("./operations/telemetry");
-const { RELEASE_STAGE, SOCKET_PROTOCOL_VERSION } = require("./release");
+const { ASSET_VERSION, RELEASE_STAGE, SOCKET_PROTOCOL_VERSION } = require("./release");
 
 const PUBLIC_DIRECTORY = path.resolve(__dirname, "..", "public");
+const INDEX_HTML = fs.readFileSync(path.join(PUBLIC_DIRECTORY, "index.html"), "utf8");
+
+function isOperationsRequestAuthorized(request, token) {
+  if (typeof token !== "string" || token.length < 16) return false;
+  const authorization = request?.headers?.authorization;
+  if (typeof authorization !== "string" || !authorization.startsWith("Bearer ")) {
+    return false;
+  }
+  const supplied = Buffer.from(authorization.slice(7), "utf8");
+  const expected = Buffer.from(token, "utf8");
+  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
+}
 
 const SECURITY_HEADERS = Object.freeze({
   "Content-Security-Policy": [
@@ -76,6 +89,8 @@ function createOceanServer(options = {}) {
     finishedRoomRetentionMs: options.finishedRoomRetentionMs,
   });
   const telemetry = options.telemetry ?? new OperationalTelemetry({ nowIso });
+  const operationsToken = options.operationsToken ?? process.env.OCEAN_OPERATIONS_TOKEN ?? "";
+  const trustedProxyHops = options.trustedProxyHops ?? Number(process.env.TRUSTED_PROXY_HOPS ?? 0);
   let io = null;
 
   const app = express();
@@ -100,12 +115,17 @@ function createOceanServer(options = {}) {
       service: "ocean",
       stage: RELEASE_STAGE,
       socketProtocol: SOCKET_PROTOCOL_VERSION,
+      roomStatePersistence: "in-memory",
       timestamp: nowIso(),
     });
   });
 
-  app.get("/api/status", (_request, response) => {
+  app.get("/api/status", (request, response) => {
     response.setHeader("Cache-Control", "no-store");
+    if (!isOperationsRequestAuthorized(request, operationsToken)) {
+      response.status(404).end();
+      return;
+    }
     response.status(200).json({
       status: "ok",
       service: "ocean",
@@ -128,8 +148,19 @@ function createOceanServer(options = {}) {
     });
   });
 
-  app.get("/api/metrics", (_request, response) => {
+  app.get(["/", "/index.html"], (_request, response) => {
+    response.setHeader("Cache-Control", "no-cache");
+    response.type("html").send(
+      INDEX_HTML.replaceAll("__OCEAN_ASSET_VERSION__", ASSET_VERSION),
+    );
+  });
+
+  app.get("/api/metrics", (request, response) => {
     response.setHeader("Cache-Control", "no-store");
+    if (!isOperationsRequestAuthorized(request, operationsToken)) {
+      response.status(404).end();
+      return;
+    }
     const memory = process.memoryUsage();
     response.status(200).json({
       status: "ok",
@@ -152,6 +183,25 @@ function createOceanServer(options = {}) {
       etag: true,
       index: "index.html",
       maxAge: 0,
+      setHeaders(response, filePath) {
+        const requestUrl = new URL(response.req.originalUrl, "http://ocean.local");
+        const isHtml = path.extname(filePath).toLowerCase() === ".html";
+        if (isHtml) {
+          response.setHeader("Cache-Control", "no-cache");
+          return;
+        }
+        const isAudioAsset = requestUrl.pathname.startsWith("/assets/audio/");
+        const expectedVersion = isAudioAsset ? "1.3.3.2" : ASSET_VERSION;
+        if (requestUrl.searchParams.get("v") === expectedVersion) {
+          response.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+          return;
+        }
+        if (/\.(?:webp|svg|mp3|ogg|wav|flac|aiff)$/i.test(filePath)) {
+          response.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+          return;
+        }
+        response.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+      },
     }),
   );
 
@@ -163,6 +213,7 @@ function createOceanServer(options = {}) {
   const gameGateway = new SocketGameGateway({
     io,
     roomService,
+    trustedProxyHops,
     nowIso,
     nowMs: clock,
     logger: options.logger,
@@ -192,4 +243,5 @@ module.exports = {
   SECURITY_HEADERS,
   allowSameOriginRequest,
   createOceanServer,
+  isOperationsRequestAuthorized,
 };

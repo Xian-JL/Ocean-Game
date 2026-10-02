@@ -1,19 +1,22 @@
 "use strict";
 
 (function initializeGameData(root, factory) {
-  const api = factory();
+  const releaseConfig = root?.OceanReleaseConfig ??
+    (typeof require === "function" ? require("./release-config") : null);
+  const api = factory(releaseConfig);
   if (typeof module === "object" && module.exports) {
     module.exports = api;
   }
   if (root) {
     root.OceanGameData = api;
   }
-})(typeof globalThis === "object" ? globalThis : this, function createGameData() {
+})(typeof globalThis === "object" ? globalThis : this, function createGameData(releaseConfig) {
+  if (!releaseConfig) throw new Error("Ocean 发布配置没有加载。");
   const RELEASE = Object.freeze({
-    version: "1.6.1",
-    stage: "Ocean-v1.6.1",
-    ruleVersion: "1.8",
-    socketProtocolVersion: "2.1",
+    version: releaseConfig.version,
+    stage: releaseConfig.stage,
+    ruleVersion: releaseConfig.ruleVersion,
+    socketProtocolVersion: releaseConfig.socketProtocolVersion,
   });
   const SUPPORTED_MAP_SIZES = Object.freeze([10, 12, 15]);
   const ALL_ROW_LABELS = "ABCDEFGHIJKLMNO";
@@ -918,6 +921,7 @@
     COLUMNS,
     ROWS,
     RELEASE,
+    ASSET_VERSION: releaseConfig.assetVersion,
     UNIT_DEFINITIONS,
     UNIT_TYPES,
     SUPPORTED_MAP_SIZES,

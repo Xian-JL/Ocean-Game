@@ -6,3 +6,6 @@ services:
     buildCommand: npm ci
     startCommand: npm run start:public
     healthCheckPath: /api/health
+    envVars:
+      - key: OCEAN_OPERATIONS_TOKEN
+        sync: false

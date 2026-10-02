@@ -146,7 +146,7 @@ function createBrowser(baseUrl, clients, options = {}) {
     clients.push(activeClient);
     return activeClient;
   };
-  for (const script of ["game-data.js", "ui-model.js", "tutorial-system.js", "app.js"]) {
+  for (const script of ["release-config.js", "game-data.js", "ui-model.js", "tutorial-system.js", "app.js"]) {
     window.eval(
       fs.readFileSync(path.join(PROJECT_ROOT, "public/js", script), "utf8"),
     );

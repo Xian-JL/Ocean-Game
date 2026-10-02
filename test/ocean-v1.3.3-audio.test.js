@@ -80,7 +80,7 @@ test("v1.3.3 音效映射引用的本地素材全部随发布包存在", () => {
   assert.ok(sampleFiles.length >= 35, "真实素材映射数量不足");
   for (const file of new Set(sampleFiles)) {
     assert.equal(
-      fs.existsSync(path.join(ROOT, "public/assets/audio/effects/source", file)),
+      fs.existsSync(path.join(ROOT, "assets/audio/effects/source", file)),
       true,
       `缺少音效素材：${file}`,
     );

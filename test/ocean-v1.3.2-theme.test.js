@@ -33,7 +33,7 @@ test("theme-bootstrap 首帧引导存在且与 app.js 使用同一存储键", ()
   assert.match(bootstrap, /ocean\.accent\.v1/);
   assert.match(app, /THEME_STORAGE_KEY = "ocean\.theme\.v1"/);
   assert.match(app, /ACCENT_STORAGE_KEY = "ocean\.accent\.v1"/);
-  assert.match(html, /<script src="\/js\/theme-bootstrap\.js"><\/script>/);
+  assert.match(html, /<script src="\/js\/theme-bootstrap\.js(?:\?v=[^"]+)?"><\/script>/);
   assert.equal(/<script src="\/js\/theme-bootstrap\.js" defer/.test(html), false);
   assert.match(bootstrap, /documentRoot\.dataset\.theme = theme/);
 });

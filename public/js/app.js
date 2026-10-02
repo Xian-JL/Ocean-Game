@@ -296,6 +296,11 @@
   const FEEDBACK_ART_ROOT = "/assets/images/ocean-2.5d/feedback";
   const UI_ART_ROOT = "/assets/images/ocean-2.5d/ui";
   const LAYER_ART_ROOT = "/assets/images/ocean-2.5d/layers";
+  const ASSET_VERSION = Data.ASSET_VERSION;
+
+  function versionedArtUrl(url) {
+    return `${url}?v=${encodeURIComponent(ASSET_VERSION)}`;
+  }
   const UI_COMMAND_ICONS = Object.freeze({
     action: "icon_attack_main",
     cancel: "icon_cancel_action",
@@ -323,14 +328,14 @@
 
   function feedbackArtPath(group, name) {
     return SECOND_BATCH_ASSET_FILES[group]?.includes(name)
-      ? `${FEEDBACK_ART_ROOT}/${group}/${name}.webp`
+      ? versionedArtUrl(`${FEEDBACK_ART_ROOT}/${group}/${name}.webp`)
       : "";
   }
 
   function uiCommandIcon(name, className = "") {
     const file = UI_COMMAND_ICONS[name];
     return file
-      ? `<img class="ui-command-icon ${escapeHtml(className)}" src="${UI_ART_ROOT}/icons-actions/${file}.webp" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />`
+      ? `<img class="ui-command-icon ${escapeHtml(className)}" src="${versionedArtUrl(`${UI_ART_ROOT}/icons-actions/${file}.webp`)}" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />`
       : "";
   }
 
@@ -365,7 +370,7 @@
         const image = new Image();
         image.decoding = "async";
         image.fetchPriority = "low";
-        image.src = url;
+        image.src = versionedArtUrl(url);
       }
     };
     if (typeof window.requestIdleCallback === "function") {
@@ -538,8 +543,8 @@
     if (!asset || !bounds) return "";
     const viewBox = UNIT_ART_VIEWBOXES[asset.replace("/assets/images/ocean-2.5d/units/", "")];
     const artwork = viewBox
-      ? `<svg class="tactical-hull-viewport" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><image href="${asset}" x="0" y="0" width="512" height="512" /></svg>`
-      : `<img src="${asset}" alt="" loading="eager" decoding="async" fetchpriority="auto" draggable="false" />`;
+      ? `<svg class="tactical-hull-viewport" viewBox="${viewBox}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><image href="${versionedArtUrl(asset)}" x="0" y="0" width="512" height="512" /></svg>`
+      : `<img src="${versionedArtUrl(asset)}" alt="" loading="eager" decoding="async" fetchpriority="auto" draggable="false" />`;
     return `<span
       class="tactical-unit-art tactical-unit-art--${kind} tactical-unit-art--${stateCode}${selected ? " tactical-unit-art--selected" : ""}"
       data-grid-row="${bounds.row}"
@@ -614,7 +619,7 @@
   function actionArtIcon(definition) {
     const file = ACTION_ART_FILES[definition?.type];
     return file
-      ? `<img class="action-art-icon" src="/assets/images/ocean-2.5d/actions/${file}" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />`
+      ? `<img class="action-art-icon" src="${versionedArtUrl(`/assets/images/ocean-2.5d/actions/${file}`)}" alt="" loading="lazy" decoding="async" fetchpriority="low" draggable="false" />`
       : uiIcon("action-radar");
   }
 
@@ -2054,6 +2059,7 @@
         </div>
 
         <div class="entry-console entry-console--v07">
+          <p class="entry-volatile-notice" role="note">服务器维护或重启会中断正在进行的房间；当前对局暂不支持跨重启恢复。</p>
           ${!online ? `
             <article class="connection-help connection-help--compact" role="status" aria-live="polite">
               <span class="connection-help__signal" aria-hidden="true"></span>

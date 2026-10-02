@@ -52,12 +52,15 @@ test("内存服务限制房间总数，并在保留期后清理关闭房间", ()
 
 test("公开状态接口只返回聚合运行信息，不包含私密对局标识", async (context) => {
   let nowMs = 20_000;
-  const runtime = createOceanServer({ nowMs: () => nowMs, startedAtMs: 10_000 });
+  const operationsToken = "test-only-operations-token-2026";
+  const runtime = createOceanServer({ nowMs: () => nowMs, startedAtMs: 10_000, operationsToken });
   runtime.httpServer.listen(0, "127.0.0.1");
   await once(runtime.httpServer, "listening");
   context.after(() => new Promise((resolve) => runtime.io.close(resolve)));
   const address = runtime.httpServer.address();
-  const response = await fetch(`http://127.0.0.1:${address.port}/api/status`);
+  const response = await fetch(`http://127.0.0.1:${address.port}/api/status`, {
+    headers: { Authorization: `Bearer ${operationsToken}` },
+  });
   assert.equal(response.status, 200);
   const status = await response.json();
   assert.equal(status.stage, "Ocean-v1.6.1");
