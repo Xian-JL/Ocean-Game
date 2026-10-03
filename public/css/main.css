@@ -2307,6 +2307,10 @@ p {
   letter-spacing: 0.08em;
 }
 
+.header-room[hidden] {
+  display: none !important;
+}
+
 .app {
   width: min(1600px, calc(100% - 36px));
   flex: 1;
@@ -5397,7 +5401,7 @@ kbd {
 
   .brand small,
   .header-room,
-  .connection-pill span,
+  .connection-pill #connection-text,
   .global-header__tools > .button {
     display: none;
   }

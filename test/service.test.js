@@ -63,7 +63,7 @@ test("运行监控 Ocean-v1.6.1 提供健康检查、游戏入口和 Socket.IO �
   }
 
   const versionedAssetResponse = await fetch(
-    `${baseUrl}/js/app.js?v=1.6.1.2`,
+    `${baseUrl}/js/app.js?v=1.6.1.3`,
   );
   assert.equal(
     versionedAssetResponse.headers.get("cache-control"),

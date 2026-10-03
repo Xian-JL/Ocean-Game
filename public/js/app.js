@@ -561,7 +561,8 @@
   function renderTacticalUnitArt(snapshot, options = {}) {
     const sprites = [];
     for (const unit of snapshot?.units ?? []) {
-      const definition = Data.getUnitDefinitionByType(unit.type);
+      const definition = Data.getUnitDefinitionById(unit.id) ??
+        Data.getUnitDefinitionByType(unit.type);
       if (!definition || !Array.isArray(unit.cells) || unit.cells.length === 0) continue;
       const layer = definition.category === "underwater" ? "underwater" : "surface";
       const selected = options.selectedId === unit.id;
@@ -3558,6 +3559,9 @@
           const actions = Data.ACTION_DEFINITIONS.filter((action) => action.sourceType === sourceType);
           if (!definition || units.length === 0 || actions.length === 0) return "";
           const sourceState = sourceUnitState(units, definition);
+          const sourceLabel = units.length > 1
+            ? definition.name.replace(/\s+\d+$/, "")
+            : definition.name;
           const hp = units.reduce((sum, unit) => sum + unit.hp, 0);
           const maxHp = units.length * definition.initialHp;
           const hpPercent = Math.max(0, Math.min(100, (hp / maxHp) * 100));
@@ -3569,7 +3573,7 @@
               <button class="unit-action-card__toggle" type="button" data-action="toggle-unit-card" data-source-type="${sourceType}" aria-expanded="${expanded}">
                 <span class="unit-status__icon unit-status__icon--${definition.category}" aria-hidden="true">${uiIcon(unitIconName(sourceType))}</span>
                 <div class="unit-action-card__identity">
-                  <div><strong>${escapeHtml(definition.name)}${units.length > 1 ? ` ×${units.length}` : ""}</strong><small>${escapeHtml(sourceState.label)}</small></div>
+                  <div><strong>${escapeHtml(sourceLabel)}${units.length > 1 ? ` ×${units.length}` : ""}</strong><small>${escapeHtml(sourceState.label)}</small></div>
                   <div class="hp-track hp-track--compact" aria-label="生命值 ${Model.formatHp(hp)} / ${maxHp}"><i style="--hp-percent:${hpPercent}%"></i></div>
                 </div>
                 <span class="hp-meter hp-meter--compact"><b>${Model.formatHp(hp)}</b><i>/ ${maxHp}</i></span>

@@ -6,7 +6,7 @@
     stage: "Ocean-v1.6.1",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.1",
-    assetVersion: "1.6.1.2",
+    assetVersion: "1.6.1.3",
   });
   if (typeof module === "object" && module.exports) {
     module.exports = config;

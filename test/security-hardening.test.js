@@ -52,7 +52,7 @@ test("运维接口默认隐藏，配置令牌后要求 Bearer 授权", async (co
 test("发布配置统一提供产品与资源缓存版本", () => {
   const html = fs.readFileSync(path.join(__dirname, "../public/index.html"), "utf8");
   assert.equal(release.version, "1.6.1");
-  assert.equal(release.assetVersion, "1.6.1.2");
+  assert.equal(release.assetVersion, "1.6.1.3");
   assert.match(html, /__OCEAN_ASSET_VERSION__/);
   for (const assetPath of ["theme-bootstrap.js", "release-config.js", "game-data.js", "ui-model.js", "audio-system.js", "tutorial-system.js", "app.js", "main.css", "v1.6.0.css", "v1.6.1.css"]) {
     assert.match(html, new RegExp(`${assetPath.replaceAll(".", "\\.")}\\?v=__OCEAN_ASSET_VERSION__`));
