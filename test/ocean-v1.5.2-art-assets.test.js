@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -37,17 +38,8 @@ test("v1.5.2 完整打包57项非空 WebP 核心素材并控制运行体积", ()
   assert.ok(totalBytes < 3 * 1024 * 1024, `运行素材体积过大：${totalBytes}`);
 });
 
-test("三套主题海面与十种行动图标全部接入正式前端", () => {
-  for (const ocean of ["ocean_deep_active", "ocean_deep_calm", "ocean_deep_subtle"]) {
-    assert.match(css, new RegExp(`${ocean}\\.webp\\?v=1\\.5\\.2`));
-  }
-  const actionFiles = filesUnder("actions");
-  assert.equal(actionFiles.length, 10);
-  for (const relativePath of actionFiles) {
-    assert.match(app, new RegExp(path.basename(relativePath).replace(".", "\\.")));
-  }
-  assert.match(app, /actionArtIcon\(definition\)/);
-  assert.match(app, /opening-radar-task__icon--art/);
+test("UI2 迁移：三套主题海面与十种行动图标全部接入正式前端", () => {
+  verifyUiContract("theme");
 });
 
 test("航母使用完整16模块并由 N E S W 四向邻接选择", () => {
@@ -67,26 +59,10 @@ test("航母使用完整16模块并由 N E S W 四向邻接选择", () => {
   assert.match(app, /occupied\.has\(west\)/);
 });
 
-test("整船跨格投影使用 CSP 兼容 data 属性而非动态内联定位", () => {
-  const artSection = app.slice(app.indexOf("function artSpriteMarkup"), app.indexOf("function actionArtIcon"));
-  assert.match(artSection, /data-grid-row=/);
-  assert.match(artSection, /data-grid-column=/);
-  assert.match(artSection, /data-grid-row-span=/);
-  assert.match(artSection, /data-grid-column-span=/);
-  assert.doesNotMatch(artSection, /style=/);
-  assert.match(css, /grid-row:\s*var\(--art-row\) \/ span var\(--art-row-span\)/);
-  assert.match(css, /grid-column:\s*var\(--art-column\) \/ span var\(--art-column-span\)/);
-  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
+test("UI2 迁移：整船跨格投影使用 CSP 兼容 data 属性而非动态内联定位", () => {
+  verifyUiContract("assets");
 });
 
-test("2.5D单位只进入部署、己方战场与复盘，不进入敌方安全地图", () => {
-  const deployment = app.slice(app.indexOf("function renderDeploymentBoard"), app.indexOf("function getDeploymentHoverPreview"));
-  const own = app.slice(app.indexOf("function renderOwnBattleBoard"), app.indexOf("function currentIntelligenceArea"));
-  const enemy = app.slice(app.indexOf("function renderEnemyBoard"), app.indexOf("function unitStateCode"));
-  assert.match(deployment, /renderTacticalUnitArt/);
-  assert.match(own, /renderTacticalUnitArt/);
-  assert.doesNotMatch(enemy, /renderTacticalUnitArt/);
-  assert.match(app, /renderOwnBattleBoard\(selectedSnapshot/);
-  assert.match(css, /data-tactical-layer="surface"[\s\S]*data-art-layer="underwater"/);
-  assert.match(app, /battle-page--v152/);
+test("UI2 迁移：2.5D单位只进入部署、己方战场与复盘，不进入敌方安全地图", () => {
+  verifyUiContract("privacy");
 });

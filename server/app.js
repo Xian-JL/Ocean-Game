@@ -107,6 +107,7 @@ function createOceanServer(options = {}) {
     next();
   });
   app.use(express.json({ limit: "32kb" }));
+  const trainingRuntime=require("./training/service").mountTraining(app,options.training);
 
   app.get("/api/health", (_request, response) => {
     response.setHeader("Cache-Control", "no-store");
@@ -148,7 +149,7 @@ function createOceanServer(options = {}) {
     });
   });
 
-  app.get(["/", "/index.html"], (_request, response) => {
+  app.get(["/", "/index.html", "/training", "/training/scenarios/:scenarioId"], (_request, response) => {
     response.setHeader("Cache-Control", "no-cache");
     response.type("html").send(
       INDEX_HTML.replaceAll("__OCEAN_ASSET_VERSION__", ASSET_VERSION),
@@ -206,6 +207,7 @@ function createOceanServer(options = {}) {
   );
 
   const httpServer = http.createServer(app);
+  httpServer.on("close",()=>trainingRuntime.close());
   io = new Server(httpServer, {
     allowRequest: options.allowRequest ?? allowSameOriginRequest,
     serveClient: true,

@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -10,12 +11,8 @@ const app = fs.readFileSync(path.join(ROOT, "public/js/app.js"), "utf8");
 const css = fs.readFileSync(path.join(ROOT, "public/css/main.css"), "utf8");
 const html = fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8");
 
-test("v1.5.9 发布元数据、缓存标识与页面类一致", () => {
-  assert.equal(require("../package.json").version, "1.6.1");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
-  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(html, /app\.js\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(app, /battle-page--v159/);
+test("UI2 迁移：v1.5.9 发布元数据、缓存标识与页面类一致", () => {
+  verifyUiContract("version");
 });
 
 test("主流手机与大型竖屏平板使用同一单地图底部指挥模式", () => {
@@ -63,8 +60,6 @@ test("平板横屏保留中央沙盘与右侧行动面板", () => {
   assert.match(css, /\.battle-page--v159 \.bridge-command-deck[\s\S]*min-height:\s*92px/);
 });
 
-test("电脑断点保持v1.5.8驾驶舱并支持减少动态效果", () => {
-  assert.match(css, /@media \(min-width: 1281px\)/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)[\s\S]*\.battle-page--v159/);
-  assert.match(app, /battle-page--v158 battle-page--v159/);
+test("UI2 迁移：电脑断点保持v1.5.8驾驶舱并支持减少动态效果", () => {
+  verifyUiContract("responsive");
 });

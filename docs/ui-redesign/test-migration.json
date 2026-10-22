@@ -1,0 +1,187 @@
+[
+  {
+    "file": "ocean-v1.2.6-ui.test.js",
+    "oldTest": "v1.2.6 三人行动在两张敌图同步预览，并明确资源与自损仅结算一次",
+    "newContract": "command"
+  },
+  {
+    "file": "ocean-v1.3.3-consistency.test.js",
+    "oldTest": "正式前端不再包含会误导当前规则的历史关键文案",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.3.3.2-theme-background.test.js",
+    "oldTest": "航母界面使用正确主题标识并清除无效简写选择器",
+    "newContract": "theme"
+  },
+  {
+    "file": "ocean-v1.4-tactical-sea.test.js",
+    "oldTest": "v1.4 战斗地图使用真实海面并保留原坐标按钮",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.4-tactical-sea.test.js",
+    "oldTest": "正式对战使用单一近全屏主地图和互斥战术侧栏",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.4.2-theme-map.test.js",
+    "oldTest": "手机地图尺寸、强制高对比和当前缓存版本继续有效",
+    "newContract": "version"
+  },
+  {
+    "file": "ocean-v1.4.2.1-ui-fixes.test.js",
+    "oldTest": "雷达明确选择扫描区域左上起始格，其他区域武器继续使用中心格",
+    "newContract": "range"
+  },
+  {
+    "file": "ocean-v1.4.2.1-ui-fixes.test.js",
+    "oldTest": "桌面行动和消息侧栏使用独立视口上限与内部滚动区",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.4.2.2-map-tabs.test.js",
+    "oldTest": "v1.5 缓存版本生效且手机底部抽屉规则保持原样",
+    "newContract": "version"
+  },
+  {
+    "file": "ocean-v1.5-command-bridge.test.js",
+    "oldTest": "v1.5 正式战斗页具有概念图对应的五区舰桥结构",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.5-command-bridge.test.js",
+    "oldTest": "水面与潜层只写入本地界面状态且手机端关闭透视控制台",
+    "newContract": "responsive"
+  },
+  {
+    "file": "ocean-v1.5.1-layout-fix.test.js",
+    "oldTest": "v1.5.1 使用剩余高度约束整张战术海图",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.5.1-layout-fix.test.js",
+    "oldTest": "v1.5.1 布局修复在 v1.6.1 中继续保留",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.5.2-art-assets.test.js",
+    "oldTest": "三套主题海面与十种行动图标全部接入正式前端",
+    "newContract": "theme"
+  },
+  {
+    "file": "ocean-v1.5.2-art-assets.test.js",
+    "oldTest": "整船跨格投影使用 CSP 兼容 data 属性而非动态内联定位",
+    "newContract": "assets"
+  },
+  {
+    "file": "ocean-v1.5.2-art-assets.test.js",
+    "oldTest": "2.5D单位只进入部署、己方战场与复盘，不进入敌方安全地图",
+    "newContract": "privacy"
+  },
+  {
+    "file": "ocean-v1.5.3-full-console.test.js",
+    "oldTest": "桌面布局紧贴左右栏和反馈并覆盖历史正方形限制",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.5.3-full-console.test.js",
+    "oldTest": "敌方未知海图不渲染舰体，版本和缓存标识一致",
+    "newContract": "version"
+  },
+  {
+    "file": "ocean-v1.5.4-feedback-assets.test.js",
+    "oldTest": "v1.5.4素材与满幅沙盘在 v1.6.1 中继续保留",
+    "newContract": "assets"
+  },
+  {
+    "file": "ocean-v1.5.5-interaction-polish.test.js",
+    "oldTest": "v1.5.5 交互优化在 v1.6.1 发布元数据中继续保留",
+    "newContract": "version"
+  },
+  {
+    "file": "ocean-v1.5.7-battle-effects.test.js",
+    "oldTest": "v1.5.7 战场特效在 v1.6.1 发布元数据中继续保留",
+    "newContract": "version"
+  },
+  {
+    "file": "ocean-v1.5.8-three-player-ui.test.js",
+    "oldTest": "v1.5.8 发布元数据、缓存标识与页面类一致",
+    "newContract": "version"
+  },
+  {
+    "file": "ocean-v1.5.8-three-player-ui.test.js",
+    "oldTest": "三人行动使用同一目标同步两名存活敌方且资源和自损只提示一次",
+    "newContract": "command"
+  },
+  {
+    "file": "ocean-v1.5.8-three-player-ui.test.js",
+    "oldTest": "淘汰地图保留为只读历史且新行动自动聚焦存活敌方",
+    "newContract": "command"
+  },
+  {
+    "file": "ocean-v1.5.9-responsive-layout.test.js",
+    "oldTest": "v1.5.9 发布元数据、缓存标识与页面类一致",
+    "newContract": "version"
+  },
+  {
+    "file": "ocean-v1.5.9-responsive-layout.test.js",
+    "oldTest": "电脑断点保持v1.5.8驾驶舱并支持减少动态效果",
+    "newContract": "responsive"
+  },
+  {
+    "file": "ocean-v1.6.0-cross-device.test.js",
+    "oldTest": "v1.6.0跨设备样式仍按历史顺序加载并保留页面类",
+    "newContract": "responsive"
+  },
+  {
+    "file": "ocean-v1.6.1-tactical-layers.test.js",
+    "oldTest": "v1.6.1元数据、缓存版本和末级样式一致",
+    "newContract": "version"
+  },
+  {
+    "file": "ocean-v1.6.1-tactical-layers.test.js",
+    "oldTest": "UI美术只装饰既有按钮并保留可访问文字",
+    "newContract": "layout"
+  },
+  {
+    "file": "ocean-v1.6.1-tactical-layers.test.js",
+    "oldTest": "行动可用性按可用、受限、耗尽分级并优先排序",
+    "newContract": "availability"
+  },
+  {
+    "file": "ocean-v1.6.1-tactical-layers.test.js",
+    "oldTest": "顶部实时信息增加在线、同步中和中断三态",
+    "newContract": "connection"
+  },
+  {
+    "file": "ui-v0.7.2.test.js",
+    "oldTest": "v0.7.2 对战页使用己方 + 独立敌方多地图工作区",
+    "newContract": "layout"
+  },
+  {
+    "file": "ui-v0.7.2.test.js",
+    "oldTest": "v1.2.6 三人回合明确显示一次行动同步两名目标",
+    "newContract": "command"
+  },
+  {
+    "file": "ui-v0.7.3.test.js",
+    "oldTest": "v0.7.3 首次行动使用独立雷达任务卡且普通确认框不再堆叠完整规则说明",
+    "newContract": "command"
+  },
+  {
+    "file": "ui-v0.7.3.test.js",
+    "oldTest": "v1.2.6 三人全部行动拥有同步双目标提示和两张地图范围图例",
+    "newContract": "command"
+  },
+  {
+    "file": "ui-v0.7.4.test.js",
+    "oldTest": "v0.7.4 玩家状态显式区分行动中、离线与已淘汰",
+    "newContract": "connection"
+  },
+  {
+    "file": "ui-v0.7.5.test.js",
+    "oldTest": "v0.7.5 FINAL_SALVO 使用独立阶段 UI 且普通行动面板不参与终局选择",
+    "newContract": "salvo"
+  }
+]

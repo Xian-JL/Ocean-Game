@@ -1,0 +1,188 @@
+{
+  "build": "1.6.1-ui2.709d0e9902",
+  "kind": "synthetic demo, actual browser frames",
+  "frames": [
+    {
+      "file": "radar-frames/full-00.jpg",
+      "timestamp": 1792647447962
+    },
+    {
+      "file": "radar-frames/full-01.jpg",
+      "timestamp": 1792647448004
+    },
+    {
+      "file": "radar-frames/full-02.jpg",
+      "timestamp": 1792647448046
+    },
+    {
+      "file": "radar-frames/full-03.jpg",
+      "timestamp": 1792647448085
+    },
+    {
+      "file": "radar-frames/full-04.jpg",
+      "timestamp": 1792647448131
+    },
+    {
+      "file": "radar-frames/full-05.jpg",
+      "timestamp": 1792647448168
+    },
+    {
+      "file": "radar-frames/full-06.jpg",
+      "timestamp": 1792647448199
+    },
+    {
+      "file": "radar-frames/full-07.jpg",
+      "timestamp": 1792647448236
+    },
+    {
+      "file": "radar-frames/full-08.jpg",
+      "timestamp": 1792647448274
+    },
+    {
+      "file": "radar-frames/full-09.jpg",
+      "timestamp": 1792647448311
+    },
+    {
+      "file": "radar-frames/full-10.jpg",
+      "timestamp": 1792647448346
+    },
+    {
+      "file": "radar-frames/full-11.jpg",
+      "timestamp": 1792647448386
+    },
+    {
+      "file": "radar-frames/full-12.jpg",
+      "timestamp": 1792647448427
+    },
+    {
+      "file": "radar-frames/full-13.jpg",
+      "timestamp": 1792647448467
+    },
+    {
+      "file": "radar-frames/full-14.jpg",
+      "timestamp": 1792647448499
+    },
+    {
+      "file": "radar-frames/full-15.jpg",
+      "timestamp": 1792647448536
+    },
+    {
+      "file": "radar-frames/full-16.jpg",
+      "timestamp": 1792647448563
+    },
+    {
+      "file": "radar-frames/full-17.jpg",
+      "timestamp": 1792647448603
+    },
+    {
+      "file": "radar-frames/full-18.jpg",
+      "timestamp": 1792647448645
+    },
+    {
+      "file": "radar-frames/full-19.jpg",
+      "timestamp": 1792647448683
+    },
+    {
+      "file": "radar-frames/full-20.jpg",
+      "timestamp": 1792647448715
+    },
+    {
+      "file": "radar-frames/full-21.jpg",
+      "timestamp": 1792647448749
+    },
+    {
+      "file": "radar-frames/full-22.jpg",
+      "timestamp": 1792647448786
+    },
+    {
+      "file": "radar-frames/full-23.jpg",
+      "timestamp": 1792647448825
+    },
+    {
+      "file": "radar-frames/full-24.jpg",
+      "timestamp": 1792647448862
+    },
+    {
+      "file": "radar-frames/full-25.jpg",
+      "timestamp": 1792647448907
+    },
+    {
+      "file": "radar-frames/full-26.jpg",
+      "timestamp": 1792647448944
+    },
+    {
+      "file": "radar-frames/full-27.jpg",
+      "timestamp": 1792647448982
+    },
+    {
+      "file": "radar-frames/full-28.jpg",
+      "timestamp": 1792647449015
+    },
+    {
+      "file": "radar-frames/full-29.jpg",
+      "timestamp": 1792647449049
+    },
+    {
+      "file": "radar-frames/full-30.jpg",
+      "timestamp": 1792647449084
+    },
+    {
+      "file": "radar-frames/full-31.jpg",
+      "timestamp": 1792647449123
+    },
+    {
+      "file": "radar-frames/full-32.jpg",
+      "timestamp": 1792647449161
+    },
+    {
+      "file": "radar-frames/full-33.jpg",
+      "timestamp": 1792647449201
+    },
+    {
+      "file": "radar-frames/full-34.jpg",
+      "timestamp": 1792647449248
+    },
+    {
+      "file": "radar-frames/full-35.jpg",
+      "timestamp": 1792647449289
+    },
+    {
+      "file": "radar-frames/full-36.jpg",
+      "timestamp": 1792647449335
+    },
+    {
+      "file": "radar-frames/full-37.jpg",
+      "timestamp": 1792647449374
+    },
+    {
+      "file": "radar-frames/full-38.jpg",
+      "timestamp": 1792647449408
+    },
+    {
+      "file": "radar-frames/full-39.jpg",
+      "timestamp": 1792647449439
+    },
+    {
+      "file": "radar-frames/full-40.jpg",
+      "timestamp": 1792647449474
+    },
+    {
+      "file": "radar-frames/full-41.jpg",
+      "timestamp": 1792647449509
+    },
+    {
+      "file": "radar-frames/full-42.jpg",
+      "timestamp": 1792647449552
+    },
+    {
+      "file": "radar-frames/full-43.jpg",
+      "timestamp": 1792647449590
+    },
+    {
+      "file": "radar-frames/full-44.jpg",
+      "timestamp": 1792647449633
+    }
+  ],
+  "encodedArtifact": "radar-demo.gif",
+  "note": "原始浏览器JPEG连续采样帧；GIF保留间隔，末帧停留800ms。不是完整帧率录像或fps性能数据。"
+}

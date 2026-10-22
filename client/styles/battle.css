@@ -1,0 +1,51 @@
+body[data-page=P05] .global-header,body[data-page=P05] .global-footer{display:none}
+body[data-page=P05] .app{max-width:none;padding:0}
+.ocean-console{height:100dvh;display:grid;grid-template-rows:64px minmax(0,1fr) auto;overflow:hidden;background:var(--surface-page)}
+.battle-header{display:flex;align-items:center;gap:24px;padding:0 24px;border-bottom:1px solid var(--line);min-width:0}
+.battle-header .brand{margin-right:12px}.battle-header__room{display:grid}.battle-header__turn{display:grid;min-width:0;margin-left:auto}.battle-header__turn strong{font-size:16px;overflow-wrap:anywhere}.battle-header__turn[data-own-turn=true] strong{color:var(--accent-ink)}
+.battle-header__timer{display:grid;min-width:80px;font-variant-numeric:tabular-nums}.battle-header__timer strong{font-size:24px;line-height:1.15;font-weight:500}
+.battle-header__connection{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary)}
+.console-workspace{display:grid;grid-template-columns:240px minmax(0,1fr) 304px;gap:16px;padding:16px 24px;min-height:0;min-width:0}
+.fleet-panel,.action-rail{min-height:0;display:flex;flex-direction:column;border:1px solid var(--line);background:var(--surface-panel);border-radius:12px;overflow:hidden}
+.console-panel-heading{display:flex;align-items:center;justify-content:space-between;padding:20px 16px 12px;flex-shrink:0}.console-panel-heading h2{font-size:18px}.console-panel-heading .eyebrow{margin:0 0 4px}
+.drawer-close{display:none}
+.fleet-list{overflow:auto;min-height:0;padding:0 16px}.fleet-unit{padding:14px 0;border-bottom:1px solid var(--line)}
+.fleet-unit__identity{display:flex;align-items:center;gap:8px;font-size:14px}.fleet-unit__identity strong{flex:1;overflow-wrap:anywhere}.fleet-unit__identity>span{font-variant-numeric:tabular-nums;white-space:nowrap}.fleet-unit__identity svg{width:20px;height:20px;color:var(--text-secondary)}
+.hp-track{height:3px;background:var(--line);border-radius:3px;overflow:hidden;margin:8px 0}.hp-track i{height:100%;background:var(--accent-primary);display:block}
+.fleet-unit[data-unit-state=sunk]{opacity:.6}.fleet-unit[data-unit-state=paralyzed] small{color:var(--intel)}.fleet-unit details{font-size:12px;margin-top:5px}.fleet-unit summary{cursor:pointer;color:var(--text-secondary)}.unit-resource-row{display:flex;flex-wrap:wrap;gap:8px}.unit-resource-badge{font-size:12px;color:var(--text-secondary)}
+.decoy-status{display:flex;gap:12px;justify-content:space-between;padding:16px 0;font-size:14px}
+.fleet-links{display:grid;gap:8px;padding:16px;border-top:1px solid var(--line);margin-top:auto}.fleet-links button{text-align:left;font-size:12px}
+.battle-main-column{display:flex;flex-direction:column;min-width:0;min-height:0;gap:8px}
+.map-navigation{display:flex;align-items:center;gap:8px;flex-shrink:0;min-width:0}
+.mobile-map-tabs{display:flex;gap:8px;flex:1;min-width:0}.mobile-map-tabs>button{flex:1;padding:6px 10px;text-align:left;min-width:0;min-height:48px}
+.battle-map-tab__identity{display:flex;align-items:center;gap:8px}.battle-map-tab__identity strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}.battle-map-tab__identity small{display:none}
+.battle-map-tab__result{display:block;font-size:12px;font-weight:400;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}.battle-map-tab__result em{margin-right:8px}.battle-map-tab__unread{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--warning)}
+.map-tools{display:flex;gap:8px}.map-tools button{font-size:12px;padding:8px}.map-tools button[data-action="toggle-marker-mode"],.map-tools button[data-action="cycle-tactical-layer"]{display:none}.sync-note{font-size:12px;color:var(--text-secondary);margin:0;min-height:20px}
+.battle-maps{flex:1;min-height:0;min-width:0;position:relative;container-type:size;display:grid;place-items:center}
+.battle-map-card{display:none;min-width:0;min-height:0;width:100%;height:100%;position:relative}.battle-map-card.is-mobile-active{display:flex;flex-direction:column;justify-content:center}
+.battle-map-card>.map-card__heading,.battle-map-card>.tactical-sea-toolbar,.map-caption,.map-range-legend{display:none}
+.battle-map-card .board-frame{width:min(100%,100cqh);height:auto;aspect-ratio:1;margin:auto;max-height:100%;overflow:auto;--cell-size:calc((min(100cqw,100cqh) - 26px)/var(--board-size,12))}
+.battle-map-card .ocean-board{width:100%;height:100%;grid-template-columns:24px repeat(var(--board-size),minmax(24px,1fr));grid-template-rows:24px repeat(var(--board-size),minmax(24px,1fr));border-radius:8px;overflow:hidden}
+.battle-map-card:has(.marker-palette){justify-content:flex-start}.battle-map-card:has(.marker-palette) .board-frame{width:min(100%,calc(100cqh - 56px));height:auto}
+.feedback-slot{flex-shrink:0;height:52px;position:relative}.feedback-empty{font-size:12px;color:var(--text-secondary);padding:16px 0}
+.resolution-strip{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--surface-panel);border:1px solid var(--line);border-radius:8px;height:52px;font-size:12px;overflow:hidden}
+.resolution-strip__content{min-width:0;flex:1}.resolution-strip__content>strong{font-size:12px;line-height:1.5;font-weight:500;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.resolution-strip__meta,.resolution-artwork{display:none}
+.resolution-strip__toggle{font-size:12px;padding:2px 8px;min-height:30px;flex-shrink:0}
+.resolution-strip:not(.resolution-strip--collapsed){position:absolute;bottom:0;left:0;right:0;z-index:30;height:auto;max-height:200px;overflow:auto;box-shadow:var(--shadow-overlay)}
+.resolution-player-results{display:grid;gap:6px;margin-top:8px}.resolution-player-results>span{display:flex;gap:12px}.resolution-player-results em{color:var(--accent-ink)}
+.action-rail__content{padding:0 16px 16px;overflow:auto;min-height:0}
+.action-list{display:grid;gap:8px}.action-card{display:flex;width:100%;align-items:center;gap:10px;padding:10px;text-align:left;min-height:58px}.action-card__body{display:grid;gap:3px;min-width:0;flex:1}.action-card__body strong{font-size:14px;white-space:normal}.action-card__icon{color:var(--accent-ink)}.action-card--selected{background:var(--accent-soft);border-color:var(--accent-ink)}
+.action-disabled-reason{font-size:12px;color:var(--text-secondary);margin:4px 6px 8px}.restricted-actions{margin-top:16px;font-size:12px}.restricted-actions summary{min-height:44px;display:flex;align-items:center;cursor:pointer;color:var(--text-secondary)}.restricted-actions summary:before{content:"＋";margin-right:8px}.restricted-actions[open] summary:before{content:"−"}
+.action-detail{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}.action-detail p,.action-guidance,.opening-radar-task{font-size:12px;color:var(--text-secondary);line-height:1.7;margin:12px 0}.opening-radar-task{color:var(--accent-ink)}.axis-switch{display:flex;gap:8px;margin-top:16px}.axis-switch button{flex:1}
+.command-dock{border-top:1px solid var(--line);display:flex;align-items:center;gap:24px;padding:12px 24px;min-height:80px;background:var(--surface-panel);z-index:35}
+.command-utilities{display:flex;align-items:center;gap:12px}.layer-switch{display:flex;gap:8px}.layer-switch button{font-size:12px;padding:8px}.command-utilities>button{font-size:12px}
+.command-summary{flex:1;min-width:0;display:grid;grid-template-columns:auto 1fr;gap:2px 16px;align-items:center}
+.command-summary>strong{font-size:14px}.command-summary>span{font-size:16px;font-weight:600}.command-summary>small{grid-column:1/-1;font-size:12px;line-height:1.5}.command-risk{max-width:760px;color:var(--warning)}.command-notice{color:var(--warning)}
+.command-controls{display:flex;align-items:center;gap:12px}.command-execute{min-width:140px;min-height:48px;font-weight:600;font-size:14px}
+.mobile-console-nav{display:none}.battle-drawer-scrim{position:fixed;inset:64px 0 0;background:#020810a8;border:0;border-radius:0;z-index:90;padding:0}
+.log-panel{display:none;position:fixed;z-index:100;top:80px;right:24px;bottom:110px;width:min(560px,calc(100vw - 48px));background:var(--surface-panel);border:1px solid var(--line);border-radius:16px;padding:20px;overflow:hidden;box-shadow:var(--shadow-overlay)}
+.log-panel--open{display:flex;flex-direction:column}.log-panel__toggle{width:100%;text-align:left}.log-panel__toggle small{display:none}.event-tabs{display:flex;gap:8px;margin-bottom:12px}.event-tabs button{flex:1;display:flex;justify-content:space-between;font-size:12px}.event-center__content{overflow:auto;min-height:0;font-size:14px}.event-list,.combat-event-list,.private-event-list,.system-event-list{padding:0;list-style:none}.event-center li{padding:14px 0;border-bottom:1px solid var(--line)}.event-center li p{font-size:13px;margin:8px 0}.event-center li small{display:block}
+.event-card__header,.event-meta,.event-card__actors{display:flex;flex-wrap:wrap;gap:8px;font-size:12px}.event-card__badge{font-size:12px}.private-intel-card{margin-bottom:12px}.private-intel-card button{font-size:12px}
+.ocean-console--salvo{grid-template-rows:64px minmax(0,1fr)}.ocean-console--salvo .console-workspace{grid-template-columns:240px minmax(0,1fr)}.ocean-console--salvo .battle-main-column{overflow:auto}.ocean-console--salvo .battle-maps{min-height:320px;max-height:500px;flex:0 0 400px}.final-salvo-stage{padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--surface-panel)}.final-salvo-stage__header{display:flex;gap:16px;align-items:center;margin-bottom:16px}.final-salvo-stage__header p{font-size:14px;color:var(--text-secondary)}.final-salvo-stage__grid{display:grid;grid-template-columns:1fr 240px;gap:24px}.salvo-decoy-grid{display:flex;flex-wrap:wrap;gap:12px;margin:16px 0}.salvo-decoy-card{display:grid;justify-items:center;gap:4px;min-width:80px}.salvo-player-list{display:grid;gap:12px;margin:12px 0}.salvo-player-status{display:flex;gap:8px;font-size:14px}.salvo-player-status>div{display:grid}.salvo-submit-summary,.salvo-multi-target-note,.salvo-locked-choice,.salvo-empty-choice{font-size:12px;color:var(--text-secondary);margin-top:12px}
+
+.mobile-map-tabs>button:focus-visible .battle-map-tab__identity strong{white-space:normal;max-width:none;overflow-wrap:anywhere}

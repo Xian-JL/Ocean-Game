@@ -1,0 +1,312 @@
+{
+  "assetVersion": "1.6.1-ui2.709d0e9902",
+  "capturedDate": "2026-10-22",
+  "environment": "browser-smoke.json",
+  "items": [
+    {
+      "path": "browser-smoke.json",
+      "bytes": 1947,
+      "sha256": "98301c1e7d7a0a267c365398ec0b0ac4b3a17ccfaca640d8d5a1f17861dba2c3"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1814,
+      "sha256": "b3091f1588dee86908d8d3949e9bd79d9fec6abc7f7eb14068b5d4a19f1f87d4"
+    },
+    {
+      "path": "visual/catalog-desktop.jpg",
+      "bytes": 68260,
+      "sha256": "ce1d73a217fde9f57af6ceeb35d8a4098b34fc943dcbadf8085ac162ddc26402",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/coach-desktop.jpg",
+      "bytes": 69797,
+      "sha256": "6d959046bc50c68b1108cdb419d0a74cbfced2f55fee15aac2adc148d8d16021",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/00.jpg",
+      "bytes": 81532,
+      "sha256": "01cdd10dac10c7886f46c3ed6803d0223fc0659962fbf04d85e3bfc279e96e41",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/01.jpg",
+      "bytes": 83440,
+      "sha256": "5cef5435ac3aa4b55217570b09c932dce724af89b0e25cdf42788a9b27b88389",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/02.jpg",
+      "bytes": 85993,
+      "sha256": "9a823cf25cb32f77602ea7f081fd61ad46d9ef793d4a4f0eb0362b48bfad6b39",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/03.jpg",
+      "bytes": 69033,
+      "sha256": "8e6ead414733f492b1d848eb32ca6c009e9bd5f062b09cbc7f6868cf26ed8607",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/04.jpg",
+      "bytes": 69107,
+      "sha256": "97cb382bbdb48949e44d839e88b36d5f399a7632743c17b6df189645c2b964f4",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/05.jpg",
+      "bytes": 69201,
+      "sha256": "785e4cfc44f948cdf96dce39e8bfca8dce6d5d0dff8904b7a099766b7cb0abfd",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/06.jpg",
+      "bytes": 69223,
+      "sha256": "85dda111b5eb384a5e67a2c678d2d997eed7c7f43819493cee1be2a2afb63ca5",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/07.jpg",
+      "bytes": 69229,
+      "sha256": "553d5b10e38eed72fd7d6e74647ed2b4512c161d797068d4b0d5214b2b3a1842",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/08.jpg",
+      "bytes": 69297,
+      "sha256": "03c238898e2a1f0542db717aebcafe6ccf5b58328b929dbae618bb791cf5cd51",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/09.jpg",
+      "bytes": 69305,
+      "sha256": "e0d889757691374d19e5b05f2a896381867b7b2ceb0661194d782ebe4547c0a7",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/10.jpg",
+      "bytes": 69311,
+      "sha256": "7d4f7ef59271c2c1cc12329296791adc7c45d87f78a548c3dd78426c7e166381",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/11.jpg",
+      "bytes": 69334,
+      "sha256": "a928059c41e7ff6e173eb4c08a98f4041fdd473c39817b51d839fbd2532c28e6",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/12.jpg",
+      "bytes": 69314,
+      "sha256": "3feea9fcc5ddb7d0db492734966d0fce04b2c6e028504196cb299c219cd08d04",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/13.jpg",
+      "bytes": 69317,
+      "sha256": "77f2f69c08cf056c36eb98575ca5f6652b31d04602ecc1467d297683e1b6364c",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/14.jpg",
+      "bytes": 69280,
+      "sha256": "b4cde2d47c182f8f5d03d9dcf937f5cbfc4f146986554ae06f242d40e09184e1",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/15.jpg",
+      "bytes": 69291,
+      "sha256": "658a4136d9aa31955224372faac31c907b109b87f6d4ce814747576e1ab032d1",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/16.jpg",
+      "bytes": 69285,
+      "sha256": "b7e988ee50cf5f49d7705391c7d98c8271bde7be1e910e775f4d075bf4111250",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/17.jpg",
+      "bytes": 69290,
+      "sha256": "e133e55a5d9a8c609980e5f9d0f522f92f960ee1734a98d26d542115e0bcaebc",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/18.jpg",
+      "bytes": 69283,
+      "sha256": "95dd61b28a366cfe5b1c494a2939d8dcfb4bf5090b561f553e7640e98a5adfd1",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/19.jpg",
+      "bytes": 69292,
+      "sha256": "bf08359050708208413ae15014ea32d87e0fc20fe236b33edb62577e2f2f80d6",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/20.jpg",
+      "bytes": 69333,
+      "sha256": "b25e531f7b84edc8b54e1f846f5d5a7c566ccf36ed8f9a699f66aac155513ac8",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/21.jpg",
+      "bytes": 69262,
+      "sha256": "402c8a8f2dfc9f1952460b7e45444d0a91933adf50efe07ec2544cd93d8f606c",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/22.jpg",
+      "bytes": 69303,
+      "sha256": "5caca0524e4c4d2811ca7a0dd048585bd31805f0d781726d7e95b18dcd8dd1e7",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/23.jpg",
+      "bytes": 69284,
+      "sha256": "8f8fe69c0d698ac4f37fea7efe878777c9f5af9de8fbf9dce8a73c543dac5c46",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/24.jpg",
+      "bytes": 69260,
+      "sha256": "7382b201257c93a46a3d021552a1dab0b826e66144406c74b57a235ed47925b8",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/25.jpg",
+      "bytes": 69273,
+      "sha256": "d477cb72bdf71aa6163a15d9fd1a6f956c6da3812a2c5d01a3dc71cf3c21c6e4",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/26.jpg",
+      "bytes": 69301,
+      "sha256": "c9dd393c29f25aaad46f7099010521c7cbfa37b2888d57d404a50b50903b84bf",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/27.jpg",
+      "bytes": 69274,
+      "sha256": "726a2e782a47e394545faf6e8664a2881506120c09391f36c6da246c3d03107e",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/28.jpg",
+      "bytes": 69287,
+      "sha256": "f80f4b2786ee738eaedcd697a4b1cc95f23bb29a16493a10f09ace0cdc4cf13a",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/29.jpg",
+      "bytes": 69281,
+      "sha256": "6f2628bfdb6958d8d2a0baffa834afef1a3f0adfc4dbb41e3761138c17ea8248",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames/30.jpg",
+      "bytes": 69264,
+      "sha256": "4a9cc553c7b1960d4ed28d2b0953efd0bcd98c90c5560952e1943c5cc32e3e30",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/interaction-frames.json",
+      "bytes": 4752,
+      "sha256": "e783c748d0c60ad5b55819aa2dd11c7251cd1d4023e710132325908d54fabfb4"
+    },
+    {
+      "path": "visual/training-interaction.gif",
+      "bytes": 6182527,
+      "sha256": "1f3551cdc101e77d993a4662fcdb6110269c25e417be421939103ab05e028633"
+    },
+    {
+      "path": "visual/workbench-desktop.jpg",
+      "bytes": 86006,
+      "sha256": "a925c729a66f303feb609f03eae0a4592c32ec9ab16b3eb3b21db7153b4fdbd2",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "path": "visual/workbench-mobile-390.jpg",
+      "bytes": 49934,
+      "sha256": "9c89512d99a585d6119c237ee81c519e94370200af3ac020d2c5c478c7e71bd7",
+      "format": "JPEG",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "note": "当前证据以原始索引的build字段为准；短雷达序列明确保留历史构建。最终测试结果只引用final-acceptance.log。",
+  "archivedEvidence": {
+    "url": "https://github.com/Xian-JL/Ocean-Game/releases/download/v1.6.2/Ocean-v1.6.2-evidence.zip",
+    "note": "Unretained raw frames/GIFs are in this ZIP at their original project-relative paths. Original build fingerprints remain historical."
+  }
+}

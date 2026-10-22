@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -53,18 +54,8 @@ test("v0.7.4 私人情报只读取安全视图 intelligenceAreas 与本机标记
   assert.equal(app.includes("battleState.actionLog"), false);
 });
 
-test("v0.7.4 玩家状态显式区分行动中、离线与已淘汰", () => {
-  includesAll(app, [
-    'playerState = eliminated ? "eliminated"',
-    'seat.playerId === current ? "active"',
-    'data-player-state="${playerState}"',
-    'const stateText = eliminated ? "已淘汰"',
-  ]);
-  includesAll(css, [
-    '[data-player-state="active"]',
-    '[data-player-state="offline"]',
-    '[data-player-state="eliminated"]',
-  ]);
+test("UI2 迁移：v0.7.4 玩家状态显式区分行动中、离线与已淘汰", () => {
+  verifyUiContract("connection");
 });
 
 test("v0.7.4 断线重连与 Toast 使用现代非阻断状态反馈", () => {

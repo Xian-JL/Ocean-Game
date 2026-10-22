@@ -14,6 +14,11 @@ const FROZEN_HASHES = Object.freeze({
   "docs/develop_environment.txt": "ee39fed4f7c0591a5ae4697b15e6e857bac5b1dd36b83f81a1420c20788beb11",
 });
 const REQUIRED_PATHS = Object.freeze([
+  "spec.md",
+  "client/modules.json",
+  "scripts/build-ui.js",
+  "server/training/catalog.json",
+  "docs/releases/v1.6.2/README.md",
   "package.json",
   "package-lock.json",
   "public/index.html",

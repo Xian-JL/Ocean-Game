@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -14,21 +15,8 @@ function includesAll(source, values) {
   for (const value of values) assert.equal(source.includes(value), true, `缺少：${value}`);
 }
 
-test("v0.7.5 FINAL_SALVO 使用独立阶段 UI 且普通行动面板不参与终局选择", () => {
-  includesAll(app, [
-    "function renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys)",
-    "final-salvo-stage--v075",
-    "salvo-decoy-grid",
-    "salvo-submit-panel",
-    'data-action="submit-final-salvo"',
-    '${finalSalvo ? "" : renderActionPanel(room)}',
-  ]);
-  includesAll(css, [
-    ".final-salvo-stage--v075",
-    ".salvo-decoy-card",
-    ".salvo-player-status",
-    ".battle-layout--final",
-  ]);
+test("UI2 迁移：v0.7.5 FINAL_SALVO 使用独立阶段 UI 且普通行动面板不参与终局选择", () => {
+  verifyUiContract("salvo");
 });
 
 test("v0.7.5 最终齐射仅展示己方秘密选择与其他玩家提交状态，不暴露对方鱼雷坐标", () => {

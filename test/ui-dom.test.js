@@ -321,7 +321,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   }
   socket.connect();
   socket.serverEmit("system:ready", {
-    stage: "Ocean-v1.6.1",
+    stage: "Ocean-v1.6.2",
     protocolVersion: "2.1",
   });
 
@@ -505,24 +505,19 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   assert.match(window.document.querySelector("#app").textContent, /甲 获得第一回合/);
 
   socket.serverEmit("room:state", playingRoom());
-  assert.ok(window.document.querySelector(".battle-page--v153"));
-  assert.ok(window.document.querySelector(".battle-page--v155"));
+  assert.ok(window.document.querySelector(".ocean-console"));
+  assert.ok(window.document.querySelector(".command-dock"));
   assert.ok(window.document.querySelector(".battle-map-card--own .tactical-hull-viewport image"));
   assert.equal(window.document.querySelector(".battle-map-card--enemy .tactical-hull-viewport"), null);
   assert.equal(window.document.querySelectorAll(".action-card").length, 10);
-  assert.equal(window.document.querySelectorAll('[data-action="toggle-unit-card"]').length, 7);
-  const firstUnitToggle = window.document.querySelector('[data-action="toggle-unit-card"]');
-  assert.equal(firstUnitToggle.getAttribute("aria-expanded"), "false");
-  click(window, firstUnitToggle);
-  assert.equal(window.document.querySelector('[data-action="toggle-unit-card"]').getAttribute("aria-expanded"), "true");
-  assert.equal(window.document.querySelector(".unit-action-card__details").hidden, false);
-  click(window, window.document.querySelector('[data-action="toggle-unit-card"]'));
-  assert.equal(window.document.querySelector('[data-action="toggle-unit-card"]').getAttribute("aria-expanded"), "false");
+  assert.equal(window.document.querySelectorAll('.fleet-unit').length,8);
+  assert.match(window.document.querySelector('.fleet-panel').textContent,/航空母舰/);
+  assert.ok(window.document.querySelector('.restricted-actions'));
   assert.equal(window.document.querySelectorAll('.battle-map-card [data-action="enemy-cell"]').length, 144);
   const battleMainColumn = window.document.querySelector(".battle-main-column");
   assert.ok(battleMainColumn);
-  assert.ok(battleMainColumn.firstElementChild.classList.contains("battle-maps"));
-  assert.ok(battleMainColumn.lastElementChild.classList.contains("event-center"));
+  assert.ok(battleMainColumn.firstElementChild.classList.contains("map-navigation"));
+  assert.ok(battleMainColumn.lastElementChild.classList.contains("feedback-slot"));
   assert.equal(window.document.querySelector(".battle-lower .event-center"), null);
   for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
     assertBoardCoordinateAlignment(board);
@@ -537,27 +532,17 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   click(window, pirate);
   assert.ok(window.document.querySelector(".battle-map-card--enemy.is-mobile-active"));
   assert.equal(window.document.querySelector(".log-panel--open"), null);
-  assert.equal(
-    window.document.querySelector(`[data-source-type="${Data.UNIT_TYPES.PIRATE_SHIP}"] [data-action="toggle-unit-card"]`).getAttribute("aria-expanded"),
-    "true",
-  );
   const enemyA1 = window.document.querySelector(
     '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A1"]',
   );
   click(window, enemyA1);
-  assert.equal(window.document.querySelector("#confirm-dialog").open, true);
-  assert.match(window.document.querySelector("#confirm-body").textContent, /目标：A1/);
-  assert.ok(window.document.querySelector("#confirm-body [data-deadline]"));
-  assert.equal(window.document.querySelector("#confirm-body").textContent.includes("未命中无伤害"), false);
-  click(window, window.document.querySelector("#confirm-cancel"));
-
-  assert.equal(
-    window.document.querySelectorAll('[data-action="select-marker-tool"]').length,
-    5,
-  );
-  click(window, window.document.querySelector(
-    '[data-action="select-marker-tool"][data-marker="surface_yes"]',
-  ));
+  assert.equal(window.document.querySelector("#confirm-dialog").open,false);
+  assert.match(window.document.querySelector('.command-dock').textContent,/A1/);
+  assert.equal(socket.emitted.filter(e=>e.eventName==='action:submit').length,0,'选点不提交');
+  click(window,window.document.querySelector('[data-action="cancel-action-selection"]'));
+  click(window,window.document.querySelector('[data-action="toggle-marker-mode"]'));
+  assert.equal(window.document.querySelectorAll('[data-action="select-marker-tool"]').length,5);
+  click(window,window.document.querySelector('[data-action="select-marker-tool"][data-marker="surface_yes"]'));
   const enemyA2 = window.document.querySelector(
     '.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="A2"]',
   );
@@ -699,7 +684,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
   assert.equal(window.document.querySelectorAll('.battle-map-tabs--v158 [data-player-state="online"]').length, 2);
   assert.equal(
     window.document.querySelectorAll('[data-action="select-marker-tool"]').length,
-    10,
+    5,
   );
   for (const board of window.document.querySelectorAll(".battle-map-card .ocean-board")) {
     assertBoardCoordinateAlignment(board);
@@ -716,18 +701,18 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
     ).length,
     32,
   );
-  assert.match(window.document.querySelector("#confirm-body").textContent, /乙、丙（同时生效）/);
-  assert.match(window.document.querySelector("#confirm-body").textContent, /自损只结算一次/);
+  assert.match(window.document.querySelector(".command-dock").textContent, /乙、丙.*同步两方/);
+  assert.match(window.document.querySelector(".sync-note").textContent, /成本只算一次/);
   click(window, window.document.querySelector('[data-action="switch-map"][data-map="player-3"]'));
   assert.equal(window.document.querySelector('.battle-map-tabs--v158 [data-map="player-3"]').getAttribute("aria-selected"), "true");
-  assert.match(window.document.querySelector(".chosen-target--v073").textContent, /A1/);
+  assert.match(window.document.querySelector(".command-dock").textContent, /A1/);
   assert.equal(
     window.document.querySelectorAll(
       '.battle-map-card--enemy [data-action="enemy-cell"].board-cell--target-preview',
     ).length,
     32,
   );
-  click(window, window.document.querySelector("#confirm-cancel"));
+  click(window, window.document.querySelector('[data-action="cancel-action-selection"]'));
 
   const groupedFeedback = threePlayerPlayingRoom();
   groupedFeedback.stateVersion = 9;
@@ -774,7 +759,7 @@ test("正式页面脚本在浏览器 DOM 中闭环渲染 P01～P06、O01～O06 �
     `[data-action="select-action"][data-action-type="${Data.ACTION_TYPES.RADAR_SCAN}"]`,
   ));
   assert.equal(window.document.querySelector('[data-map="player-3"]').getAttribute("aria-selected"), "true");
-  assert.match(window.document.querySelector(".battle-target-progress").textContent, /单目标 ×1/);
+  assert.match(window.document.querySelector(".sync-note").textContent, /唯一有效目标/);
 
   let dynamicStateVersion = 11;
   for (const mapSize of [10, 15]) {

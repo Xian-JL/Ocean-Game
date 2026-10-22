@@ -1,0 +1,66 @@
+{
+  "date": "2026-10-22",
+  "assetVersion": "1.6.1-ui2.709d0e9902",
+  "browser": "Codex in-app Chromium; exact engine version unavailable through exposed interface",
+  "desktop": {
+    "viewport": [
+      1280,
+      720
+    ],
+    "theme": "ocean-dark",
+    "effectiveQuality": "smooth",
+    "reduced": false
+  },
+  "mobile": {
+    "emulation": [
+      390,
+      844
+    ],
+    "deviceScaleFactor": 1,
+    "viewportWidth": 390,
+    "documentScrollWidth": 390,
+    "confirmButtonEnabled": true,
+    "confirmRect": {
+      "top": 672.203125,
+      "bottom": 720.203125
+    },
+    "note": "模拟尺寸，非真实手机；测试后已恢复桌面"
+  },
+  "checks": [
+    {
+      "case": "catalog",
+      "result": "90主题 / 163变体显示、搜索入口可见"
+    },
+    {
+      "case": "CAMP-W01 desktop",
+      "result": "驱逐舰Ⅰ→B1→确认→敌驱逐舰Ⅱ3→2、己方3→2.5、任务完成"
+    },
+    {
+      "case": "coach",
+      "result": "主动揭示后解析包含两方实际伤害与合成部署"
+    },
+    {
+      "case": "reset",
+      "result": "恢复初始检查点后可重新选择并完成任务"
+    },
+    {
+      "case": "CAMP-W01 mobile",
+      "result": "行动抽屉→选行动→选B1→启用确认→提交完成；无横向溢出"
+    },
+    {
+      "case": "radar demo",
+      "result": "单次播放后主效果/装饰节点归零，取消立即归零，reduced显示静态说明"
+    },
+    {
+      "case": "coach controlled disclosure regression",
+      "result": "主动揭示后自动展开；内层时间控制折叠不关闭外层。已在真实浏览器和jsdom复验。"
+    }
+  ],
+  "consoleWarningsAndErrors": [],
+  "unmeasured": [
+    "真实iOS/Android",
+    "跨浏览器/三主题/五强调色/三地图全矩阵",
+    "正式p95/fps/内存/CPU压力",
+    "逐场景完整人工完成及源分支穷举复核"
+  ]
+}

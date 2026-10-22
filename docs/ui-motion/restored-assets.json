@@ -1,0 +1,520 @@
+{
+  "date": "2026-10-22",
+  "assetVersion": "1.6.1-ui2.da71186532",
+  "assets": [
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_ping_beacon.webp",
+      "bytes": 36750,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "979591f4629353e35bae8644623edcfa79e7177e6434ef5f81688262e6367618",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_shadow_large.webp",
+      "bytes": 3958,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "1e768a325dcbdd805dd40010ff4bbceae1e22f80b45e9dbbf3397e7efa4405ca",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_shadow_medium.webp",
+      "bytes": 3958,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "1e768a325dcbdd805dd40010ff4bbceae1e22f80b45e9dbbf3397e7efa4405ca",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_shadow_small.webp",
+      "bytes": 3958,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "1e768a325dcbdd805dd40010ff4bbceae1e22f80b45e9dbbf3397e7efa4405ca",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_target_arrow.webp",
+      "bytes": 22184,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "c485edcd617871fb351e2819488afc64073138ab0f5d1d735f979a7dc7166758",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_wake_large.webp",
+      "bytes": 55158,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "128f265b6bdfbc1c0672f079b86376262402c70fdc1ee2d960b4bc092e179ac6",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_wake_medium.webp",
+      "bytes": 68142,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "63e0b67920afaf1c0fc19086bbcb10c478f2369cc68934e65e6c7989055c97fe",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_wake_small.webp",
+      "bytes": 43912,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "163e0e57c3f50d18943b5626afe44abf13c650c27e9178bd8b7ad88b80eb5035",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_burning.webp",
+      "bytes": 62592,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "ad49e5b20dae570210855838f4f7fe2628f711ed9e09507e8b7a54af77794c6f",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_damaged_heavy.webp",
+      "bytes": 45166,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "207a70957db951a17e16a5dfca8a864192d0b37551e96fbb89d49d0355f81494",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_damaged_light.webp",
+      "bytes": 100094,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "246941dc143da6a2e5202d75396716dd4c8bf70575af7cb4ab1d242fd558ceff",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_decoy_active.webp",
+      "bytes": 74670,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "e5ba12549efa3456a9a886df0d2177ab3eb414c84909886f07079c8ff9816fce",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_destroyed_marker.webp",
+      "bytes": 69364,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "d495a355f25e95d8c9d60f8a93ac868055c960d0a50fd24cf067b5757fdc1ecf",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_emp_disabled.webp",
+      "bytes": 95510,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "6860a566f3b61b359838aad0a8a6ef4e5cd2460c5754eccbdc0fdaab94da5014",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_flooding.webp",
+      "bytes": 47776,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "9a2081ab0d7b01914a11df06214bda985707273ea84fd662a9185f4da38afccf",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_low_hp_warning.webp",
+      "bytes": 55956,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "8a827a90a3726effbd2ad0c6cd864dc8ffc25ef10551c42369c6e9f8e594f674",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_revealed_radar.webp",
+      "bytes": 83784,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "1a6bc75eb6ba1a96c747abac6bfc2b97a3e4b83a12f500140b90710864e9c603",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_revealed_sonar.webp",
+      "bytes": 82260,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "2f755388fec1fd7781fd3395d9d0d39c30aad61aa0f3ce5ba4400598f7233fab",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_sinking.webp",
+      "bytes": 75098,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "f49c357ae9e6a64d4f44d3b6f17e470f2e115c2faa3ebadc3c6f5c2de2c6b897",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_target_locked.webp",
+      "bytes": 91636,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "0c98f326ec55318961757d71f798ab93be66a5bf35f4c9cfdac3726551c10669",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_attack_range_red.webp",
+      "bytes": 36186,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "f423db3c146e331423d043dec2ccd72ac72023187738267f916021e73db2bc92",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_attack_target_red.webp",
+      "bytes": 77030,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "85f4720fce392b74f37f67b764735540de3fbd18f180576c83707b9103dae5eb",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_enemy_mark_red.webp",
+      "bytes": 69816,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "4c93c1d1b4b5d3fe59c9392814167980b6e072c14145b53b51d7babef33072f4",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_forbidden_dark.webp",
+      "bytes": 67484,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "1083347a4cc624c38cdb3c8da4b2a6c28d9a96c71c50f0cb2659fbc7bfb83c2e",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_hit_confirm_orange.webp",
+      "bytes": 70226,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "082c3e13257359fdc9fc6bc267a64488dddf9aca8e28cea21b9b8757046c7799",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_miss_confirm_white.webp",
+      "bytes": 79086,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "f137c17b375a4a0d0ee79862f712514cf1487a4e5e96bc43557afa46205724e3",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_move_hover.webp",
+      "bytes": 62718,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "a83899e5ddfd1028c122da16a43430166b6bd6367a72082ce434b9e0152b6a27",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_move_valid.webp",
+      "bytes": 40978,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "2867dbbeff1747f540e6a5371a83f31690e2c048d9f55d569015965e0290a380",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_radar_range_green.webp",
+      "bytes": 75046,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "f9bb15200ae938677914f64d9d0b3d29d8d64a58e4272ec7741f85259d2bccf7",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_scan_range_cyan.webp",
+      "bytes": 102792,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "0cff6299bae7442d06aa1a1c248ad8fada1dff8f4a2ecb6f785332292b721612",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_selected_blue.webp",
+      "bytes": 62260,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "338c2dac8cbfb6e66a0d20522b2ba14d25a7de01409c16ba8119514d926f0a0e",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_self_mark_blue.webp",
+      "bytes": 102392,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "001da0b247e1acc55cf680f3eba9a220da6699a8ac648d9dddb2bda0a9bc3943",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_shock_range_purple.webp",
+      "bytes": 105672,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "e86858dd933f1c929739ea489791893dfd7801b7aa07e668abd31d1ce0de4013",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_warning_yellow.webp",
+      "bytes": 100834,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "d14225800bf99dde3d9ed174b9de425c6c959f5ca24b91a8f12c7fd228a9f32b",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_debris_sparks.webp",
+      "bytes": 62592,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "ad49e5b20dae570210855838f4f7fe2628f711ed9e09507e8b7a54af77794c6f",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_emp_impact.webp",
+      "bytes": 69364,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "d495a355f25e95d8c9d60f8a93ac868055c960d0a50fd24cf067b5757fdc1ecf",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_emp_pulse.webp",
+      "bytes": 105672,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "e86858dd933f1c929739ea489791893dfd7801b7aa07e668abd31d1ce0de4013",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_helicopter_trace.webp",
+      "bytes": 40216,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "18ba1b3e393bfd9903652eaac5a8ef0b80667e01c4448fdc76361b7b13b6cb22",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_large_explosion.webp",
+      "bytes": 62592,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "ad49e5b20dae570210855838f4f7fe2628f711ed9e09507e8b7a54af77794c6f",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_large_water_splash.webp",
+      "bytes": 85916,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "bf3ed6606e1cb0c48ccc1d66989e8646fa2948e64deaa084d32ab1c24ba56e81",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_missile_launch.webp",
+      "bytes": 55956,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "8a827a90a3726effbd2ad0c6cd864dc8ffc25ef10551c42369c6e9f8e594f674",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_nuclear_flash_core.webp",
+      "bytes": 75098,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "f49c357ae9e6a64d4f44d3b6f17e470f2e115c2faa3ebadc3c6f5c2de2c6b897",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_nuclear_shock_ring.webp",
+      "bytes": 95112,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "038d9b1e8520dc58731314c0f7ea4749a548341018d892512c03b3335c5742a3",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_radar_sweep.webp",
+      "bytes": 27430,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "8aca1565c3e123ccacf1c07cf54dc86caf0d45fd4d18fdb6175ec070e281aa3e",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_small_explosion.webp",
+      "bytes": 100094,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "246941dc143da6a2e5202d75396716dd4c8bf70575af7cb4ab1d242fd558ceff",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_small_water_splash.webp",
+      "bytes": 47776,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "9a2081ab0d7b01914a11df06214bda985707273ea84fd662a9185f4da38afccf",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_sonar_ping.webp",
+      "bytes": 74670,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "e5ba12549efa3456a9a886df0d2177ab3eb414c84909886f07079c8ff9816fce",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_torpedo_trail.webp",
+      "bytes": 40216,
+      "width": 512,
+      "height": 512,
+      "alpha": true,
+      "sha256": "18ba1b3e393bfd9903652eaac5a8ef0b80667e01c4448fdc76361b7b13b6cb22",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/surface/surface_foam_overlay.webp",
+      "bytes": 481124,
+      "width": 2048,
+      "height": 2048,
+      "alpha": true,
+      "sha256": "326a3d1321f6c9b2b2252b344281d2e26a8db66727bbce386ab63d93561136bc",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/surface/surface_specular_seamless.webp",
+      "bytes": 733852,
+      "width": 2048,
+      "height": 2048,
+      "alpha": false,
+      "sha256": "3fd0dbcb9a7b6a7bb6433574b4fef1db18a1267495af95c15ef84f383a9be180",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/transitions/emerge_surface_wake.webp",
+      "bytes": 265862,
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "88d1f1ba5624bf58abf1cbcf6927bbd7ab1161e41d48f8a8732305692da97b0b",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/transitions/sonar_scan_ring_sheet.webp",
+      "bytes": 88310,
+      "width": 2048,
+      "height": 256,
+      "alpha": true,
+      "sha256": "2e124fca28f6b5e64a7f5e404302422b96930547cd54c4ee5ba29a4f8cfd3eb2",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/transitions/submerge_surface_wake.webp",
+      "bytes": 238078,
+      "width": 1024,
+      "height": 1024,
+      "alpha": true,
+      "sha256": "64530d16215e4d4ad3539964834024681a4896f167dbf527bb1dca7c0154d1b5",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/underwater/underwater_caustics_seamless.webp",
+      "bytes": 100090,
+      "width": 2048,
+      "height": 2048,
+      "alpha": false,
+      "sha256": "f2e07268c4130b644be50d738a8f8629761695f37c6ce6f50c95d9c292d5f54e",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/underwater/underwater_depth_haze.webp",
+      "bytes": 613478,
+      "width": 2048,
+      "height": 2048,
+      "alpha": true,
+      "sha256": "ec53fc39d2e332a86cec2e1037f23ff7a4bf3b489edf9277d8f6032cebe3a5a3",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/underwater/underwater_particles.webp",
+      "bytes": 84098,
+      "width": 2048,
+      "height": 2048,
+      "alpha": true,
+      "sha256": "11818028aa71f1200a68de16cac02c5fe1770e9836b0c1a5f07f849546ea102b",
+      "source": "retained project asset; no new generation"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/underwater/underwater_refraction_noise.webp",
+      "bytes": 32694,
+      "width": 1024,
+      "height": 1024,
+      "alpha": false,
+      "sha256": "33504e2d8b80f0013370d7302833b6acee42af8ce36b5b713f6c151def22274a",
+      "source": "retained project asset; no new generation"
+    }
+  ],
+  "note": "Inventory of existing feedback and environmental assets, not a claim that all are simultaneously rendered. Actual role-filtered resources remain bounded."
+}

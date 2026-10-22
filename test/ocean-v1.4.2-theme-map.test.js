@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -46,11 +47,6 @@ test("桌面对战海面严格收束为随视口放大的方形坐标盘", () =>
   assert.match(finalOverrides, /tactical-ocean-v1\.4\.webp/);
 });
 
-test("手机地图尺寸、强制高对比和当前缓存版本继续有效", () => {
-  assert.match(css, /@media \(max-width: 900px\)[\s\S]*--cell-size: 42px/);
-  assert.match(css, /forced-colors: active[\s\S]*board-frame--tactical-sea/);
-  assert.match(html, /\/css\/main\.css\?v=__OCEAN_ASSET_VERSION__/);
-  for (const size of [10, 12, 15]) {
-    assert.match(css, new RegExp(`data-map-size="${size}"`));
-  }
+test("UI2 迁移：手机地图尺寸、强制高对比和当前缓存版本继续有效", () => {
+  verifyUiContract("version");
 });

@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -74,26 +75,10 @@ test("舰体放大保留潜层、受损、瘫痪、沉没和选择状态", () =>
   assert.match(patch, /pointer-events:\s*none/);
 });
 
-test("桌面布局紧贴左右栏和反馈并覆盖历史正方形限制", () => {
-  assert.match(patch, /@media \(min-width: 901px\)/);
-  assert.match(patch, /grid-template-columns: 76px minmax\(0, 1fr\)/);
-  assert.match(patch, /grid-template-rows: auto auto minmax\(0, 1fr\)/);
-  assert.match(patch, /padding: 8px 12px 120px/);
-  assert.match(patch, /\.battle-layout--v076\s*\{[^}]*grid-row: 3;[^}]*gap: 8px;[^}]*padding: 0/);
-  assert.match(patch, /\.board-frame--tactical-sea\s*\{[^}]*width: 100%;[^}]*height: 100%;[^}]*aspect-ratio: auto;[^}]*transform: none/);
-  assert.match(patch, /\.board-frame--tactical-sea \.ocean-board\s*\{[^}]*height: 100%;[^}]*aspect-ratio: auto/);
-  assert.match(patch, /\.tactical-unit-art-layer\s*\{[^}]*top: 26px;[^}]*left: 26px/);
-  assert.match(patch, /:has\(\.battle-turn-progress\)[^{]*\{[^}]*height: calc\(100dvh - 92px\)/);
-  assert.doesNotMatch(patch, /font-family:|\.action-rail--v073\s*\{/);
-  assert.ok(app.includes('${finalSalvo ? "" : "battle-page--v153"}'));
+test("UI2 迁移：桌面布局紧贴左右栏和反馈并覆盖历史正方形限制", () => {
+  verifyUiContract("layout");
 });
 
-test("敌方未知海图不渲染舰体，版本和缓存标识一致", () => {
-  const enemyStart = app.indexOf("  function renderEnemyMapCard");
-  const enemyEnd = app.indexOf("\n  function ", enemyStart + 3);
-  assert.ok(enemyStart > 0 && enemyEnd > enemyStart);
-  assert.doesNotMatch(app.slice(enemyStart, enemyEnd), /renderTacticalUnitArt/);
-  assert.equal(require("../package.json").version, "1.6.1");
-  assert.equal(Data.RELEASE.stage, "Ocean-v1.6.1");
-  assert.match(fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8"), /main\.css\?v=__OCEAN_ASSET_VERSION__/);
+test("UI2 迁移：敌方未知海图不渲染舰体，版本和缓存标识一致", () => {
+  verifyUiContract("version");
 });

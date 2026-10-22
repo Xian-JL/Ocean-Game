@@ -1,0 +1,164 @@
+{
+  "build": "1.6.1-ui2.709d0e9902",
+  "kind": "actual training browser screenshots",
+  "url": "http://127.0.0.1:3006/training/scenarios/CAMP-W01",
+  "frames": [
+    {
+      "file": "interaction-frames/00.jpg",
+      "timestamp": 1792647362385,
+      "label": "初始检查点"
+    },
+    {
+      "file": "interaction-frames/01.jpg",
+      "timestamp": 1792647362824,
+      "label": "选择驱逐舰Ⅰ"
+    },
+    {
+      "file": "interaction-frames/02.jpg",
+      "timestamp": 1792647363209,
+      "label": "B1草稿未提交"
+    },
+    {
+      "file": "interaction-frames/03.jpg",
+      "timestamp": 1792647363589,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/04.jpg",
+      "timestamp": 1792647363636,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/05.jpg",
+      "timestamp": 1792647363674,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/06.jpg",
+      "timestamp": 1792647363710,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/07.jpg",
+      "timestamp": 1792647363755,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/08.jpg",
+      "timestamp": 1792647363794,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/09.jpg",
+      "timestamp": 1792647363835,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/10.jpg",
+      "timestamp": 1792647363873,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/11.jpg",
+      "timestamp": 1792647363926,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/12.jpg",
+      "timestamp": 1792647363964,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/13.jpg",
+      "timestamp": 1792647363998,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/14.jpg",
+      "timestamp": 1792647364031,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/15.jpg",
+      "timestamp": 1792647364067,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/16.jpg",
+      "timestamp": 1792647364105,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/17.jpg",
+      "timestamp": 1792647364144,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/18.jpg",
+      "timestamp": 1792647364184,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/19.jpg",
+      "timestamp": 1792647364222,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/20.jpg",
+      "timestamp": 1792647364260,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/21.jpg",
+      "timestamp": 1792647364306,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/22.jpg",
+      "timestamp": 1792647364360,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/23.jpg",
+      "timestamp": 1792647364401,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/24.jpg",
+      "timestamp": 1792647364442,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/25.jpg",
+      "timestamp": 1792647364488,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/26.jpg",
+      "timestamp": 1792647364556,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/27.jpg",
+      "timestamp": 1792647364605,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/28.jpg",
+      "timestamp": 1792647364656,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/29.jpg",
+      "timestamp": 1792647364714,
+      "label": "实际规则结算与短反馈"
+    },
+    {
+      "file": "interaction-frames/30.jpg",
+      "timestamp": 1792647364761,
+      "label": "实际规则结算与短反馈"
+    }
+  ],
+  "encodedArtifact": "training-interaction.gif",
+  "note": "原始浏览器JPEG连续采样帧；GIF保留间隔，末帧停留800ms。不是完整帧率录像或fps性能数据。"
+}

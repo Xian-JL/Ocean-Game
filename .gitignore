@@ -9,3 +9,12 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 .vscode/
+
+# UI delivery evidence: preserve final, compact acceptance logs.
+!docs/ui-redesign/evidence/tests/final-*.log
+
+!docs/ui-motion/evidence/tests/final-*.log
+!docs/training-camp/evidence/tests/final-*.log
+
+# Compact release verification
+!docs/releases/v1.6.2/acceptance.log

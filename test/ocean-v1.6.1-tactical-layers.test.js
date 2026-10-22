@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -33,13 +34,8 @@ function functionBody(name, nextName) {
   return app.slice(start, end);
 }
 
-test("v1.6.1元数据、缓存版本和末级样式一致", () => {
-  assert.equal(require("../package.json").version, "1.6.1");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
-  assert.equal(require("../server/release").RELEASE_STAGE, "Ocean-v1.6.1");
-  assert.match(html, /v1\.6\.1\.css\?v=__OCEAN_ASSET_VERSION__/);
-  assert.ok(html.indexOf("v1.6.1.css") > html.indexOf("v1.6.0.css"));
-  assert.match(app, /battle-page--v160 battle-page--v161/);
+test("UI2 迁移：v1.6.1元数据、缓存版本和末级样式一致", () => {
+  verifyUiContract("version");
 });
 
 test("60项UI素材已优化为独立WebP并能正常解码标识", () => {
@@ -58,13 +54,8 @@ test("9项海域分层与过渡素材已优化为独立WebP", () => {
   files.forEach(assertWebp);
 });
 
-test("UI美术只装饰既有按钮并保留可访问文字", () => {
-  assert.match(app, /UI_COMMAND_ICONS = Object\.freeze/);
-  assert.match(app, /alt="" loading="lazy" decoding="async"/);
-  assert.match(app, /\["all", "综合"\]/);
-  assert.match(app, /hasTarget \? "执行指令" : "等待目标"/);
-  const iconMap = app.match(/UI_COMMAND_ICONS = Object\.freeze\(\{[\s\S]*?\n  \}\);/)?.[0] ?? "";
-  assert.doesNotMatch(iconMap, /(?:move|patrol|endTurn)/);
+test("UI2 迁移：UI美术只装饰既有按钮并保留可访问文字", () => {
+  verifyUiContract("layout");
 });
 
 test("行动面板形成行动、目标、确认三步指挥链", () => {
@@ -75,24 +66,12 @@ test("行动面板形成行动、目标、确认三步指挥链", () => {
   assert.match(body, /room\.turn\?\.canAct && hasAction && hasTarget/);
 });
 
-test("行动可用性按可用、受限、耗尽分级并优先排序", () => {
-  const tier = functionBody("actionAvailabilityTier", "renderActionCard");
-  const deck = functionBody("renderUnitActionDeck", "renderActionAvailabilitySummary");
-  assert.match(tier, /available/);
-  assert.match(tier, /exhausted/);
-  assert.match(tier, /limited/);
-  assert.match(deck, /selectedSourceType/);
-  assert.match(deck, /ACTION_SOURCE_ORDER\.indexOf/);
-  assert.match(app, /data-availability-tier/);
+test("UI2 迁移：行动可用性按可用、受限、耗尽分级并优先排序", () => {
+  verifyUiContract("availability");
 });
 
-test("顶部实时信息增加在线、同步中和中断三态", () => {
-  const body = functionBody("renderBattleHeader", "resolutionVisualState");
-  assert.match(body, /connectionState/);
-  assert.match(body, /实时在线/);
-  assert.match(body, /同步中/);
-  assert.match(body, /连接中断/);
-  assert.match(css, /battle-header__connection\[data-state="offline"\]/);
+test("UI2 迁移：顶部实时信息增加在线、同步中和中断三态", () => {
+  verifyUiContract("connection");
 });
 
 test("己方沙盘提供综合、水面和潜层三种明确视觉环境", () => {

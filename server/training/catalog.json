@@ -1,0 +1,3082 @@
+[
+  {
+    "id": "CAMP-D01",
+    "parentId": "CAMP-D01",
+    "code": "D01",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "10×10",
+    "objective": "10×10：完成舰队与2枚鱼雷部署，观察5格/5HP航母与坐标边界",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D02",
+    "parentId": "CAMP-D02",
+    "code": "D02",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "12×12",
+    "objective": "12×12：完成舰队与3枚鱼雷部署，观察6格/6HP航母",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      12
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D03",
+    "parentId": "CAMP-D03",
+    "code": "D03",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "15×15",
+    "objective": "15×15：完成舰队与5枚鱼雷部署，观察8格/8HP航母及手机平移",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D04",
+    "parentId": "CAMP-D04",
+    "code": "D04",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "七类八实例",
+    "objective": "七类八实例：切换每个单位、旋转直线舰、放置2×2/单格；两艘摩托艇独立选择",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D05",
+    "parentId": "CAMP-D05",
+    "code": "D05",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "航母四向连通的非直线形状合法；完成一组弯折部署并准备",
+    "objective": "航母四向连通的非直线形状合法；完成一组弯折部署并准备",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D06",
+    "parentId": "CAMP-D06",
+    "code": "D06",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "航母只对角相接/断开非法；尝试后根据提示改为四向连通",
+    "objective": "航母只对角相接/断开非法；尝试后根据提示改为四向连通",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D07",
+    "parentId": "CAMP-D07",
+    "code": "D07",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "部署越界；尝试边缘旋转/放置，调整后成功",
+    "objective": "部署越界；尝试边缘旋转/放置，调整后成功",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D08",
+    "parentId": "CAMP-D08",
+    "code": "D08",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "单位/鱼雷重叠非法；移开其中一项后成功",
+    "objective": "单位/鱼雷重叠非法；移开其中一项后成功",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D09",
+    "parentId": "CAMP-D09",
+    "code": "D09",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "舰队或鱼雷未完成不能准备；补足缺项，包含占格数量不符的可见解释",
+    "objective": "舰队或鱼雷未完成不能准备；补足缺项，包含占格数量不符的可见解释",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D10",
+    "parentId": "CAMP-D10",
+    "code": "D10",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "随机部署、选择后调整、删除/重新放置、准备锁定；不把锁定后拖拽当作舰艇移动",
+    "objective": "随机部署、选择后调整、删除/重新放置、准备锁定；不把锁定后拖拽当作舰艇移动",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D11",
+    "parentId": "CAMP-D11",
+    "code": "D11",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "部署截止自动补齐/准备",
+    "objective": "部署截止自动补齐/准备：训练推进时钟，由现有生命周期决定实际处理，不能硬写假结果",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D12",
+    "parentId": "CAMP-D12",
+    "code": "D12",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "主动掷骰、不能同轮重复投掷；两人同点重投后服务器确定先手",
+    "objective": "主动掷骰、不能同轮重复投掷；两人同点重投后服务器确定先手",
+    "action": "pirate_attack",
+    "kind": "rolling",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-D13",
+    "parentId": "CAMP-D13",
+    "code": "D13",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "三人投掷",
+    "objective": "三人投掷：全部席位本轮完成才判定，按现规则进入下一轮或确定先手",
+    "action": "pirate_attack",
+    "kind": "rolling",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-D14",
+    "parentId": "CAMP-D14",
+    "code": "D14",
+    "variant": "default",
+    "group": "D",
+    "groupName": "部署与开局",
+    "title": "每个人首个正常行动必须雷达；轮到第二/第三名时仍受限，不能用全局第1回合假代",
+    "objective": "每个人首个正常行动必须雷达；轮到第二/第三名时仍受限，不能用全局第1回合假代",
+    "action": "pirate_attack",
+    "kind": "opening",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-W01",
+    "parentId": "CAMP-W01",
+    "code": "W01",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "驱逐舰Ⅰ新格命中",
+    "objective": "驱逐舰Ⅰ新格命中：目标−1、自损0.5；切防守视角理解真实HP与攻击方信息差",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W02",
+    "parentId": "CAMP-W02",
+    "code": "W02",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "驱逐舰Ⅱ新格命中",
+    "objective": "驱逐舰Ⅱ新格命中：同样伤害/自损，体验其实际射程形状与Ⅰ的不同",
+    "action": "destroyer_ii_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W03:destroyer-i",
+    "parentId": "CAMP-W03",
+    "code": "W03",
+    "variant": "destroyer-i",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "两驱逐舰分别攻击空海域 · 驱逐舰Ⅰ",
+    "objective": "两驱逐舰分别攻击空海域：未命中且无命中自损；每艘各有子场景",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W03:destroyer-ii",
+    "parentId": "CAMP-W03",
+    "code": "W03",
+    "variant": "destroyer-ii",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "两驱逐舰分别攻击空海域 · 驱逐舰Ⅱ",
+    "objective": "两驱逐舰分别攻击空海域：未命中且无命中自损；每艘各有子场景",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W04:destroyer-i",
+    "parentId": "CAMP-W04",
+    "code": "W04",
+    "variant": "destroyer-i",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "两驱逐舰分别碰到有效鱼雷 · 驱逐舰Ⅰ",
+    "objective": "两驱逐舰分别碰到有效鱼雷：鱼雷触发、自损1；每艘各有子场景",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W04:destroyer-ii",
+    "parentId": "CAMP-W04",
+    "code": "W04",
+    "variant": "destroyer-ii",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "两驱逐舰分别碰到有效鱼雷 · 驱逐舰Ⅱ",
+    "objective": "两驱逐舰分别碰到有效鱼雷：鱼雷触发、自损1；每艘各有子场景",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W05",
+    "parentId": "CAMP-W05",
+    "code": "W05",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "驱逐舰可命中水下作战单位；不能把“冲撞”视觉误解成只打水面",
+    "objective": "驱逐舰可命中水下作战单位；不能把“冲撞”视觉误解成只打水面",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W06",
+    "parentId": "CAMP-W06",
+    "code": "W06",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "两驱逐舰共享已用目标限制",
+    "objective": "两驱逐舰共享已用目标限制：一艘用过后另一艘也不能再选该坐标，按正式验证原因处理",
+    "action": "destroyer_ii_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W07",
+    "parentId": "CAMP-W07",
+    "code": "W07",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "驱逐舰新目标越射程/无合法射程，分别识别不可选与没有合法目标；不能假提交成功",
+    "objective": "驱逐舰新目标越射程/无合法射程，分别识别不可选与没有合法目标；不能假提交成功",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W08",
+    "parentId": "CAMP-W08",
+    "code": "W08",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "海盗新格命中",
+    "objective": "海盗新格命中：目标−2、海盗−1，并观察海盗受伤引起己方航母−0.5",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W09",
+    "parentId": "CAMP-W09",
+    "code": "W09",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "被攻击的目标是敌方海盗",
+    "objective": "被攻击的目标是敌方海盗：敌方海盗受伤与其航母联动；观察双方各自合法信息",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W10:empty",
+    "parentId": "CAMP-W10",
+    "code": "W10",
+    "variant": "empty",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "海盗打空、打有效鱼雷、打已受击单位格；分别比较自损、鱼雷与不重复伤害 · 空海域",
+    "objective": "海盗打空、打有效鱼雷、打已受击单位格；分别比较自损、鱼雷与不重复伤害",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W10:decoy",
+    "parentId": "CAMP-W10",
+    "code": "W10",
+    "variant": "decoy",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "海盗打空、打有效鱼雷、打已受击单位格；分别比较自损、鱼雷与不重复伤害 · 有效鱼雷",
+    "objective": "海盗打空、打有效鱼雷、打已受击单位格；分别比较自损、鱼雷与不重复伤害",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W10:old",
+    "parentId": "CAMP-W10",
+    "code": "W10",
+    "variant": "old",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "海盗打空、打有效鱼雷、打已受击单位格；分别比较自损、鱼雷与不重复伤害 · 旧受击格",
+    "objective": "海盗打空、打有效鱼雷、打已受击单位格；分别比较自损、鱼雷与不重复伤害",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W11:motorboat",
+    "parentId": "CAMP-W11",
+    "code": "W11",
+    "variant": "motorboat",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "摩托艇撞航母新格 · 摩托艇1",
+    "objective": "摩托艇撞航母新格：航母−1、所选摩托艇沉没；分别用1/2号实例",
+    "action": "motorboat_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W11:motorboat-2",
+    "parentId": "CAMP-W11",
+    "code": "W11",
+    "variant": "motorboat-2",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "摩托艇撞航母新格 · 摩托艇2",
+    "objective": "摩托艇撞航母新格：航母−1、所选摩托艇沉没；分别用1/2号实例",
+    "action": "motorboat_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W12",
+    "parentId": "CAMP-W12",
+    "code": "W12",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "摩托艇撞其他水面舰",
+    "objective": "摩托艇撞其他水面舰：显示命中但目标不掉HP，摩托艇沉没；不把命中等同扣血",
+    "action": "motorboat_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W13",
+    "parentId": "CAMP-W13",
+    "code": "W13",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "摩托艇撞水下单位",
+    "objective": "摩托艇撞水下单位：判定未命中，双方不受伤；与W12对照",
+    "action": "motorboat_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W14:decoy",
+    "parentId": "CAMP-W14",
+    "code": "W14",
+    "variant": "decoy",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "摩托艇撞有效鱼雷、空格、已受击格 · 有效鱼雷",
+    "objective": "摩托艇撞有效鱼雷、空格、已受击格：三种情况分别运行，结果由正式内核产生",
+    "action": "motorboat_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W14:empty",
+    "parentId": "CAMP-W14",
+    "code": "W14",
+    "variant": "empty",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "摩托艇撞有效鱼雷、空格、已受击格 · 空海域",
+    "objective": "摩托艇撞有效鱼雷、空格、已受击格：三种情况分别运行，结果由正式内核产生",
+    "action": "motorboat_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W14:old",
+    "parentId": "CAMP-W14",
+    "code": "W14",
+    "variant": "old",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "摩托艇撞有效鱼雷、空格、已受击格 · 旧受击格",
+    "objective": "摩托艇撞有效鱼雷、空格、已受击格：三种情况分别运行，结果由正式内核产生",
+    "action": "motorboat_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W15:unit",
+    "parentId": "CAMP-W15",
+    "code": "W15",
+    "variant": "unit",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "潜射导弹命中与未中 · 完整单位",
+    "objective": "潜射导弹命中与未中：攻击方两者均未知；教官解析比较真实目标−1/无伤",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W15:empty",
+    "parentId": "CAMP-W15",
+    "code": "W15",
+    "variant": "empty",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "潜射导弹命中与未中 · 空海域",
+    "objective": "潜射导弹命中与未中：攻击方两者均未知；教官解析比较真实目标−1/无伤",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W16:decoy",
+    "parentId": "CAMP-W16",
+    "code": "W16",
+    "variant": "decoy",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "潜射导弹碰鱼雷、残骸/已受击格 · 有效鱼雷",
+    "objective": "潜射导弹碰鱼雷、残骸/已受击格：攻击方仍保密，按实战规则处理鱼雷/重复伤害",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W16:wreck",
+    "parentId": "CAMP-W16",
+    "code": "W16",
+    "variant": "wreck",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "潜射导弹碰鱼雷、残骸/已受击格 · 残骸",
+    "objective": "潜射导弹碰鱼雷、残骸/已受击格：攻击方仍保密，按实战规则处理鱼雷/重复伤害",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W16:old",
+    "parentId": "CAMP-W16",
+    "code": "W16",
+    "variant": "old",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "潜射导弹碰鱼雷、残骸/已受击格 · 旧受击格",
+    "objective": "潜射导弹碰鱼雷、残骸/已受击格：攻击方仍保密，按实战规则处理鱼雷/重复伤害",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W17:carrier",
+    "parentId": "CAMP-W17",
+    "code": "W17",
+    "variant": "carrier",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "核弹命中航母与其他作战单位 · 航母",
+    "objective": "核弹命中航母与其他作战单位：解析比较2伤与1伤；攻击方均只见保密执行",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W17:surface",
+    "parentId": "CAMP-W17",
+    "code": "W17",
+    "variant": "surface",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "核弹命中航母与其他作战单位 · 水面单位",
+    "objective": "核弹命中航母与其他作战单位：解析比较2伤与1伤；攻击方均只见保密执行",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W18:empty",
+    "parentId": "CAMP-W18",
+    "code": "W18",
+    "variant": "empty",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "核弹打空、有效鱼雷、残骸/已受击格 · 空海域",
+    "objective": "核弹打空、有效鱼雷、残骸/已受击格：三个变体均可操作、资源按正式规则消耗",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W18:decoy",
+    "parentId": "CAMP-W18",
+    "code": "W18",
+    "variant": "decoy",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "核弹打空、有效鱼雷、残骸/已受击格 · 有效鱼雷",
+    "objective": "核弹打空、有效鱼雷、残骸/已受击格：三个变体均可操作、资源按正式规则消耗",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W18:wreck",
+    "parentId": "CAMP-W18",
+    "code": "W18",
+    "variant": "wreck",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "核弹打空、有效鱼雷、残骸/已受击格 · 残骸",
+    "objective": "核弹打空、有效鱼雷、残骸/已受击格：三个变体均可操作、资源按正式规则消耗",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W18:old",
+    "parentId": "CAMP-W18",
+    "code": "W18",
+    "variant": "old",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "核弹打空、有效鱼雷、残骸/已受击格 · 旧受击格",
+    "objective": "核弹打空、有效鱼雷、残骸/已受击格：三个变体均可操作、资源按正式规则消耗",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W19",
+    "parentId": "CAMP-W19",
+    "code": "W19",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "同一单位格的伤害资格",
+    "objective": "同一单位格的伤害资格：先命中后换武器重复攻击，比较与该单位另一未伤格的区别",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W20:fraction",
+    "parentId": "CAMP-W20",
+    "code": "W20",
+    "variant": "fraction",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "HP不足以承受请求伤害时截断到0、半点HP与沉没；不出现负HP或过量扣血 · 半点HP",
+    "objective": "HP不足以承受请求伤害时截断到0、半点HP与沉没；不出现负HP或过量扣血",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W20:sunk",
+    "parentId": "CAMP-W20",
+    "code": "W20",
+    "variant": "sunk",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "HP不足以承受请求伤害时截断到0、半点HP与沉没；不出现负HP或过量扣血 · 已沉没",
+    "objective": "HP不足以承受请求伤害时截断到0、半点HP与沉没；不出现负HP或过量扣血",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W21:destroyed-decoy",
+    "parentId": "CAMP-W21",
+    "code": "W21",
+    "variant": "destroyed-decoy",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "对已摧毁鱼雷/残骸再次操作，比较有效鱼雷/活舰；不凭纹理猜测额外信息 · 已毁鱼雷",
+    "objective": "对已摧毁鱼雷/残骸再次操作，比较有效鱼雷/活舰；不凭纹理猜测额外信息",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W21:wreck",
+    "parentId": "CAMP-W21",
+    "code": "W21",
+    "variant": "wreck",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "对已摧毁鱼雷/残骸再次操作，比较有效鱼雷/活舰；不凭纹理猜测额外信息 · 残骸",
+    "objective": "对已摧毁鱼雷/残骸再次操作，比较有效鱼雷/活舰；不凭纹理猜测额外信息",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W22:sunk",
+    "parentId": "CAMP-W22",
+    "code": "W22",
+    "variant": "sunk",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "潜艇/核潜艇沉没或瘫痪时来源不可用；两摩托艇只剩一艘时可用来源正确 · 已沉没",
+    "objective": "潜艇/核潜艇沉没或瘫痪时来源不可用；两摩托艇只剩一艘时可用来源正确",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W22:paralyzed",
+    "parentId": "CAMP-W22",
+    "code": "W22",
+    "variant": "paralyzed",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "潜艇/核潜艇沉没或瘫痪时来源不可用；两摩托艇只剩一艘时可用来源正确 · 瘫痪",
+    "objective": "潜艇/核潜艇沉没或瘫痪时来源不可用；两摩托艇只剩一艘时可用来源正确",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W22:second-boat",
+    "parentId": "CAMP-W22",
+    "code": "W22",
+    "variant": "second-boat",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "潜艇/核潜艇沉没或瘫痪时来源不可用；两摩托艇只剩一艘时可用来源正确 · 仅摩托艇2可用",
+    "objective": "潜艇/核潜艇沉没或瘫痪时来源不可用；两摩托艇只剩一艘时可用来源正确",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W23:submarine_missile",
+    "parentId": "CAMP-W23",
+    "code": "W23",
+    "variant": "submarine_missile",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动 · 导弹耗尽",
+    "objective": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动有可执行耗尽变体",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W23:nuclear_bomb",
+    "parentId": "CAMP-W23",
+    "code": "W23",
+    "variant": "nuclear_bomb",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动 · 核弹耗尽",
+    "objective": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动有可执行耗尽变体",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W23:shock_bomb",
+    "parentId": "CAMP-W23",
+    "code": "W23",
+    "variant": "shock_bomb",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动 · 震爆耗尽",
+    "objective": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动有可执行耗尽变体",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W23:detection_bomb",
+    "parentId": "CAMP-W23",
+    "code": "W23",
+    "variant": "detection_bomb",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动 · 探测耗尽",
+    "objective": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动有可执行耗尽变体",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W23:radar_scan",
+    "parentId": "CAMP-W23",
+    "code": "W23",
+    "variant": "radar_scan",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动 · 雷达耗尽",
+    "objective": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动有可执行耗尽变体",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W23:helicopter_strafe",
+    "parentId": "CAMP-W23",
+    "code": "W23",
+    "variant": "helicopter_strafe",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动 · 扫射耗尽",
+    "objective": "导弹4、核弹2、震爆1、探测1、雷达1、扫射1的使用/耗尽限制；每个有限行动有可执行耗尽变体",
+    "action": "submarine_missile",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W24",
+    "parentId": "CAMP-W24",
+    "code": "W24",
+    "variant": "default",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "“辅助弹药仍在”和“还有实际攻击能力”不同",
+    "objective": "“辅助弹药仍在”和“还有实际攻击能力”不同：按正式判定识别耗尽、无射程与终局入口",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I01:positive",
+    "parentId": "CAMP-I01",
+    "code": "I01",
+    "variant": "positive",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达positive/negative · 有信号",
+    "objective": "雷达positive/negative：4×4左上锚点，返回是否有布局，不显示精确格/数量",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I01:negative",
+    "parentId": "CAMP-I01",
+    "code": "I01",
+    "variant": "negative",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达positive/negative · 无信号",
+    "objective": "雷达positive/negative：4×4左上锚点，返回是否有布局，不显示精确格/数量",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I02:10-valid",
+    "parentId": "CAMP-I02",
+    "code": "I02",
+    "variant": "10-valid",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生 · 10 · 合法锚点",
+    "objective": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I02:10-invalid",
+    "parentId": "CAMP-I02",
+    "code": "I02",
+    "variant": "10-invalid",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生 · 10 · 非法锚点",
+    "objective": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I02:12-valid",
+    "parentId": "CAMP-I02",
+    "code": "I02",
+    "variant": "12-valid",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生 · 12 · 合法锚点",
+    "objective": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      12
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I02:12-invalid",
+    "parentId": "CAMP-I02",
+    "code": "I02",
+    "variant": "12-invalid",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生 · 12 · 非法锚点",
+    "objective": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      12
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I02:15-valid",
+    "parentId": "CAMP-I02",
+    "code": "I02",
+    "variant": "15-valid",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生 · 15 · 合法锚点",
+    "objective": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I02:15-invalid",
+    "parentId": "CAMP-I02",
+    "code": "I02",
+    "variant": "15-invalid",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生 · 15 · 非法锚点",
+    "objective": "雷达边缘可用/不可用锚点，10/12/15三图；范围由Data与正式规则产生",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I03:unit",
+    "parentId": "CAMP-I03",
+    "code": "I03",
+    "variant": "unit",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达遇完整舰体、残骸、有效鱼雷/已毁鱼雷 · 完整单位",
+    "objective": "雷达遇完整舰体、残骸、有效鱼雷/已毁鱼雷：按当前内核分别观察布局判定，解析明确其差异",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I03:wreck",
+    "parentId": "CAMP-I03",
+    "code": "I03",
+    "variant": "wreck",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达遇完整舰体、残骸、有效鱼雷/已毁鱼雷 · 残骸",
+    "objective": "雷达遇完整舰体、残骸、有效鱼雷/已毁鱼雷：按当前内核分别观察布局判定，解析明确其差异",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I03:decoy",
+    "parentId": "CAMP-I03",
+    "code": "I03",
+    "variant": "decoy",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达遇完整舰体、残骸、有效鱼雷/已毁鱼雷 · 有效鱼雷",
+    "objective": "雷达遇完整舰体、残骸、有效鱼雷/已毁鱼雷：按当前内核分别观察布局判定，解析明确其差异",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I03:destroyed-decoy",
+    "parentId": "CAMP-I03",
+    "code": "I03",
+    "variant": "destroyed-decoy",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "雷达遇完整舰体、残骸、有效鱼雷/已毁鱼雷 · 已毁鱼雷",
+    "objective": "雷达遇完整舰体、残骸、有效鱼雷/已毁鱼雷：按当前内核分别观察布局判定，解析明确其差异",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I04:positive",
+    "parentId": "CAMP-I04",
+    "code": "I04",
+    "variant": "positive",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测positive来自未伤水下格，negative无有效信号；只有布尔结果 · 有信号",
+    "objective": "探测positive来自未伤水下格，negative无有效信号；只有布尔结果",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I04:negative",
+    "parentId": "CAMP-I04",
+    "code": "I04",
+    "variant": "negative",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测positive来自未伤水下格，negative无有效信号；只有布尔结果 · 无信号",
+    "objective": "探测positive来自未伤水下格，negative无有效信号；只有布尔结果",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I05:decoy",
+    "parentId": "CAMP-I05",
+    "code": "I05",
+    "variant": "decoy",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸 · 有效鱼雷",
+    "objective": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸：各分支实际运行，避免“探测=只探潜艇”的误解",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I05:destroyed-decoy",
+    "parentId": "CAMP-I05",
+    "code": "I05",
+    "variant": "destroyed-decoy",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸 · 已毁鱼雷",
+    "objective": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸：各分支实际运行，避免“探测=只探潜艇”的误解",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I05:old",
+    "parentId": "CAMP-I05",
+    "code": "I05",
+    "variant": "old",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸 · 旧受击格",
+    "objective": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸：各分支实际运行，避免“探测=只探潜艇”的误解",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I05:surface",
+    "parentId": "CAMP-I05",
+    "code": "I05",
+    "variant": "surface",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸 · 水面单位",
+    "objective": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸：各分支实际运行，避免“探测=只探潜艇”的误解",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I05:wreck",
+    "parentId": "CAMP-I05",
+    "code": "I05",
+    "variant": "wreck",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸 · 残骸",
+    "objective": "探测遇有效鱼雷、已毁鱼雷、已受击水下格、水面舰、残骸：各分支实际运行，避免“探测=只探潜艇”的误解",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I06:valid",
+    "parentId": "CAMP-I06",
+    "code": "I06",
+    "variant": "valid",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测边角合法区域/非法目标，按三图规则体验范围与纠错 · valid",
+    "objective": "探测边角合法区域/非法目标，按三图规则体验范围与纠错",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I06:invalid",
+    "parentId": "CAMP-I06",
+    "code": "I06",
+    "variant": "invalid",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "探测边角合法区域/非法目标，按三图规则体验范围与纠错 · invalid",
+    "objective": "探测边角合法区域/非法目标，按三图规则体验范围与纠错",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I07",
+    "parentId": "CAMP-I07",
+    "code": "I07",
+    "variant": "default",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "震爆命中水下单位",
+    "objective": "震爆命中水下单位：不直接扣血，防守方下个适用回合受限，再按正式时序解除",
+    "action": "shock_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I08:surface",
+    "parentId": "CAMP-I08",
+    "code": "I08",
+    "variant": "surface",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "震爆只覆盖水面/空海域/失效目标 · 水面单位",
+    "objective": "震爆只覆盖水面/空海域/失效目标：攻击方与成功时一样不获知是否瘫痪",
+    "action": "shock_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I08:empty",
+    "parentId": "CAMP-I08",
+    "code": "I08",
+    "variant": "empty",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "震爆只覆盖水面/空海域/失效目标 · 空海域",
+    "objective": "震爆只覆盖水面/空海域/失效目标：攻击方与成功时一样不获知是否瘫痪",
+    "action": "shock_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I08:wreck",
+    "parentId": "CAMP-I08",
+    "code": "I08",
+    "variant": "wreck",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "震爆只覆盖水面/空海域/失效目标 · 残骸",
+    "objective": "震爆只覆盖水面/空海域/失效目标：攻击方与成功时一样不获知是否瘫痪",
+    "action": "shock_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I09",
+    "parentId": "CAMP-I09",
+    "code": "I09",
+    "variant": "default",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "震爆同时影响多个水下单位，以及连续状态推进时只在实际变化后恢复；不凭帧数缩短",
+    "objective": "震爆同时影响多个水下单位，以及连续状态推进时只在实际变化后恢复；不凭帧数缩短瘫痪",
+    "action": "shock_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I10:locked",
+    "parentId": "CAMP-I10",
+    "code": "I10",
+    "variant": "locked",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "直升机未解锁、仅一艘驱逐舰沉没、两艘均沉没 · 未解锁",
+    "objective": "直升机未解锁、仅一艘驱逐舰沉没、两艘均沉没：逐步观察解锁条件",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I10:one-sunk",
+    "parentId": "CAMP-I10",
+    "code": "I10",
+    "variant": "one-sunk",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "直升机未解锁、仅一艘驱逐舰沉没、两艘均沉没 · 仅一艘驱逐舰沉没",
+    "objective": "直升机未解锁、仅一艘驱逐舰沉没、两艘均沉没：逐步观察解锁条件",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I10:unlocked",
+    "parentId": "CAMP-I10",
+    "code": "I10",
+    "variant": "unlocked",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "直升机未解锁、仅一艘驱逐舰沉没、两艘均沉没 · 已解锁",
+    "objective": "直升机未解锁、仅一艘驱逐舰沉没、两艘均沉没：逐步观察解锁条件",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I11:row",
+    "parentId": "CAMP-I11",
+    "code": "I11",
+    "variant": "row",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "扫射整行与整列 · 整行",
+    "objective": "扫射整行与整列：混合命中/未命中与原规则skipped，逐格事实及仅1次使用",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I11:column",
+    "parentId": "CAMP-I11",
+    "code": "I11",
+    "variant": "column",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "扫射整行与整列 · 整列",
+    "objective": "扫射整行与整列：混合命中/未命中与原规则skipped，逐格事实及仅1次使用",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I12",
+    "parentId": "CAMP-I12",
+    "code": "I12",
+    "variant": "default",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "扫射同一航母多个新格",
+    "objective": "扫射同一航母多个新格：单次最多2伤；与其他单位按格伤害及海盗联动比较",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I13:underwater",
+    "parentId": "CAMP-I13",
+    "code": "I13",
+    "variant": "underwater",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "扫射遇水下单位、有效鱼雷、残骸、旧受击格 · 水下单位",
+    "objective": "扫射遇水下单位、有效鱼雷、残骸、旧受击格：由当前正式内核给出结果，不套用单格武器的鱼雷逻辑",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I13:decoy",
+    "parentId": "CAMP-I13",
+    "code": "I13",
+    "variant": "decoy",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "扫射遇水下单位、有效鱼雷、残骸、旧受击格 · 有效鱼雷",
+    "objective": "扫射遇水下单位、有效鱼雷、残骸、旧受击格：由当前正式内核给出结果，不套用单格武器的鱼雷逻辑",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I13:wreck",
+    "parentId": "CAMP-I13",
+    "code": "I13",
+    "variant": "wreck",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "扫射遇水下单位、有效鱼雷、残骸、旧受击格 · 残骸",
+    "objective": "扫射遇水下单位、有效鱼雷、残骸、旧受击格：由当前正式内核给出结果，不套用单格武器的鱼雷逻辑",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I13:old",
+    "parentId": "CAMP-I13",
+    "code": "I13",
+    "variant": "old",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "扫射遇水下单位、有效鱼雷、残骸、旧受击格 · 旧受击格",
+    "objective": "扫射遇水下单位、有效鱼雷、残骸、旧受击格：由当前正式内核给出结果，不套用单格武器的鱼雷逻辑",
+    "action": "helicopter_strafe",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I14:occupied",
+    "parentId": "CAMP-I14",
+    "code": "I14",
+    "variant": "occupied",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药 · 确定有目标",
+    "objective": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药",
+    "action": "pirate_attack",
+    "kind": "markers",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I14:surface_yes",
+    "parentId": "CAMP-I14",
+    "code": "I14",
+    "variant": "surface_yes",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药 · 水面有目标",
+    "objective": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药",
+    "action": "pirate_attack",
+    "kind": "markers",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I14:surface_no",
+    "parentId": "CAMP-I14",
+    "code": "I14",
+    "variant": "surface_no",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药 · 水面无目标",
+    "objective": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药",
+    "action": "pirate_attack",
+    "kind": "markers",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I14:underwater_yes",
+    "parentId": "CAMP-I14",
+    "code": "I14",
+    "variant": "underwater_yes",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药 · 水下有目标",
+    "objective": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药",
+    "action": "pirate_attack",
+    "kind": "markers",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I14:underwater_no",
+    "parentId": "CAMP-I14",
+    "code": "I14",
+    "variant": "underwater_no",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药 · 水下无目标",
+    "objective": "五种私人标记分别添加、替换、删除；不能覆盖公开事实，不消耗回合/弹药",
+    "action": "pirate_attack",
+    "kind": "markers",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-I15",
+    "parentId": "CAMP-I15",
+    "code": "I15",
+    "variant": "default",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "三人不同敌图的标记隔离；切图保留各自注记，无网络业务提交",
+    "objective": "三人不同敌图的标记隔离；切图保留各自注记，无网络业务提交",
+    "action": "pirate_attack",
+    "kind": "markers",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-I16",
+    "parentId": "CAMP-I16",
+    "code": "I16",
+    "variant": "default",
+    "group": "I",
+    "groupName": "侦察与标记",
+    "title": "玩家视角只靠布尔情报与标记作推断；查看解析后比较“推断”和“官方事实”，不能",
+    "objective": "玩家视角只靠布尔情报与标记作推断；查看解析后比较“推断”和“官方事实”，不能把教官展示写进实战标记",
+    "action": "pirate_attack",
+    "kind": "markers",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-F01",
+    "parentId": "CAMP-F01",
+    "code": "F01",
+    "variant": "default",
+    "group": "F",
+    "groupName": "三人模式",
+    "title": "同次常规攻击对甲hit、对乙miss；同一坐标/区域、成本与自损一次",
+    "objective": "同次常规攻击对甲命中、对乙未命中；同一坐标/区域、成本与自损一次",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-F02",
+    "parentId": "CAMP-F02",
+    "code": "F02",
+    "variant": "default",
+    "group": "F",
+    "groupName": "三人模式",
+    "title": "对甲乙都hit，仍只消耗一次、只按现有三人规则自损一次；比较局部状态",
+    "objective": "对甲乙都命中，仍只消耗一次、只按现有三人规则自损一次；比较局部状态",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-F03",
+    "parentId": "CAMP-F03",
+    "code": "F03",
+    "variant": "default",
+    "group": "F",
+    "groupName": "三人模式",
+    "title": "三人保密武器真实结果不同但攻击方两方均保密；侦察两方布尔结果独立",
+    "objective": "三人保密武器真实结果不同但攻击方两方均保密；侦察两方布尔结果独立",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-F04",
+    "parentId": "CAMP-F04",
+    "code": "F04",
+    "variant": "default",
+    "group": "F",
+    "groupName": "三人模式",
+    "title": "一人淘汰后剩余双方继续、目标切换、淘汰图只读；不能继续影响已淘汰席位",
+    "objective": "一人淘汰后剩余双方继续、目标切换、淘汰图只读；不能继续影响已淘汰席位",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-F05",
+    "parentId": "CAMP-F05",
+    "code": "F05",
+    "variant": "default",
+    "group": "F",
+    "groupName": "三人模式",
+    "title": "当前玩家淘汰后不可继续发行动；根据原流程查看后续状态/结算，不开启正式观战功",
+    "objective": "当前玩家淘汰后不可继续发行动；根据原流程查看后续状态/结算，不开启正式观战功能",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-F06",
+    "parentId": "CAMP-F06",
+    "code": "F06",
+    "variant": "default",
+    "group": "F",
+    "groupName": "三人模式",
+    "title": "某席位无本回合合法行动的自动跳过，以及该跳过不作为一次实际行动；与永久无攻击",
+    "objective": "某席位无本回合合法行动的自动跳过，以及该跳过不作为一次实际行动；与永久无攻击能力区分",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-E01",
+    "parentId": "CAMP-E01",
+    "code": "E01",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "普通攻击击沉航母导致胜负，直接终局不再进入下一正常回合",
+    "objective": "普通攻击击沉航母导致胜负，直接终局不再进入下一正常回合",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E02",
+    "parentId": "CAMP-E02",
+    "code": "E02",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "海盗攻击引发敌航母沉没的特殊终局，按现有END_REASONS核对优先级",
+    "objective": "海盗攻击引发敌航母沉没的特殊终局，按现有终局原因核对优先级",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E03",
+    "parentId": "CAMP-E03",
+    "code": "E03",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "海盗自损/联动导致己方航母沉没的特殊终局",
+    "objective": "海盗自损/联动导致己方航母沉没的特殊终局",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E04",
+    "parentId": "CAMP-E04",
+    "code": "E04",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "海盗链导致双方航母同时沉没的分支与实际胜负/平局优先级，不能自行统一成普通平",
+    "objective": "海盗链导致双方航母同时沉没的分支与实际胜负/平局优先级，不能自行统一成普通平局",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E05",
+    "parentId": "CAMP-E05",
+    "code": "E05",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "最后有效攻击后无常规攻击能力，进入最终齐射；不因为还有辅助动作而无限拖延",
+    "objective": "最后有效攻击后无常规攻击能力，进入最终齐射；不因为还有辅助动作而无限拖延",
+    "action": "nuclear_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E06",
+    "parentId": "CAMP-E06",
+    "code": "E06",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "选择己方有效鱼雷只是草稿，确认后秘密锁定；不能选已毁鱼雷/同轮重复提交",
+    "objective": "选择己方有效鱼雷只是草稿，确认后秘密锁定；不能选已毁鱼雷/同轮重复提交",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E07",
+    "parentId": "CAMP-E07",
+    "code": "E07",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "等待其他合成席位、全员提交后同时结算；轮次推进不按动画先后计算",
+    "objective": "等待其他合成席位、全员提交后同时结算；轮次推进不按动画先后计算",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E08:hit",
+    "parentId": "CAMP-E08",
+    "code": "E08",
+    "variant": "hit",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；从endgame · 命中",
+    "objective": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；按真实齐射规则比较不同结果",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E08:miss",
+    "parentId": "CAMP-E08",
+    "code": "E08",
+    "variant": "miss",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；从endgame · 未中",
+    "objective": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；按真实齐射规则比较不同结果",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E08:old",
+    "parentId": "CAMP-E08",
+    "code": "E08",
+    "variant": "old",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；从endgame · 旧受击格",
+    "objective": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；按真实齐射规则比较不同结果",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E08:wreck",
+    "parentId": "CAMP-E08",
+    "code": "E08",
+    "variant": "wreck",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；从endgame · 残骸",
+    "objective": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；按真实齐射规则比较不同结果",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E08:no-decoy",
+    "parentId": "CAMP-E08",
+    "code": "E08",
+    "variant": "no-decoy",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；从endgame · 无可用鱼雷",
+    "objective": "齐射命中/未中、目标已伤/残骸、鱼雷不足的不同合法结算路径；按真实齐射规则比较不同结果",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E09:higher-hp",
+    "parentId": "CAMP-E09",
+    "code": "E09",
+    "variant": "higher-hp",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "多轮齐射结束按航母HP高低判胜，以及HP相同平局；剩余鱼雷/终止条件按内核执 · 航母HP较高",
+    "objective": "多轮齐射结束按航母HP高低判胜，以及HP相同平局；剩余鱼雷/终止条件按内核执行",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E09:tie",
+    "parentId": "CAMP-E09",
+    "code": "E09",
+    "variant": "tie",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "多轮齐射结束按航母HP高低判胜，以及HP相同平局；剩余鱼雷/终止条件按内核执 · HP相同",
+    "objective": "多轮齐射结束按航母HP高低判胜，以及HP相同平局；剩余鱼雷/终止条件按内核执行",
+    "action": "pirate_attack",
+    "kind": "salvo",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E10:surrender",
+    "parentId": "CAMP-E10",
+    "code": "E10",
+    "variant": "surrender",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "投降、连续三次行动超时、断线超过重连期的终局分别体验；三人时按其真实淘汰/继 · 投降",
+    "objective": "投降、连续三次行动超时、断线超过重连期的终局分别体验；三人时按其真实淘汰/继续规则",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E10:three-timeouts",
+    "parentId": "CAMP-E10",
+    "code": "E10",
+    "variant": "three-timeouts",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "投降、连续三次行动超时、断线超过重连期的终局分别体验；三人时按其真实淘汰/继 · 三次超时",
+    "objective": "投降、连续三次行动超时、断线超过重连期的终局分别体验；三人时按其真实淘汰/继续规则",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E10:disconnect",
+    "parentId": "CAMP-E10",
+    "code": "E10",
+    "variant": "disconnect",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "投降、连续三次行动超时、断线超过重连期的终局分别体验；三人时按其真实淘汰/继 · 断线超期",
+    "objective": "投降、连续三次行动超时、断线超过重连期的终局分别体验；三人时按其真实淘汰/继续规则",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E11",
+    "parentId": "CAMP-E11",
+    "code": "E11",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "双方断线导致取消，与胜/负/平区分；不伪装为正常胜利",
+    "objective": "双方断线导致取消，与胜/负/平区分；不伪装为正常胜利",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-E12",
+    "parentId": "CAMP-E12",
+    "code": "E12",
+    "variant": "default",
+    "group": "E",
+    "groupName": "齐射与终局",
+    "title": "结算才可看完整部署复盘；再来一局双方确认/撤回/离开后的真实阶段变化",
+    "objective": "结算才可看完整部署复盘；再来一局双方确认/撤回/离开后的真实阶段变化",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X01:not-turn",
+    "parentId": "CAMP-X01",
+    "code": "X01",
+    "variant": "not-turn",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "非自己回合、RESOLVING、断线同步中不可行动；找到限制原因并等/同步到 · 不是自己回合",
+    "objective": "非自己回合、正在结算、断线同步中不可行动；找到限制原因并等/同步到合法状态",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X01:resolving",
+    "parentId": "CAMP-X01",
+    "code": "X01",
+    "variant": "resolving",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "非自己回合、RESOLVING、断线同步中不可行动；找到限制原因并等/同步到 · 正在结算",
+    "objective": "非自己回合、正在结算、断线同步中不可行动；找到限制原因并等/同步到合法状态",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X01:offline",
+    "parentId": "CAMP-X01",
+    "code": "X01",
+    "variant": "offline",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "非自己回合、RESOLVING、断线同步中不可行动；找到限制原因并等/同步到 · 同步中",
+    "objective": "非自己回合、正在结算、断线同步中不可行动；找到限制原因并等/同步到合法状态",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X02:out-of-bounds",
+    "parentId": "CAMP-X02",
+    "code": "X02",
+    "variant": "out-of-bounds",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "目标越界、形式/轴不匹配、非法范围 · 目标越界",
+    "objective": "目标越界、形式/轴不匹配、非法范围：用正式输入能触发的拒绝与纠错；不要求用户构造坏JSON",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X02:axis",
+    "parentId": "CAMP-X02",
+    "code": "X02",
+    "variant": "axis",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "目标越界、形式/轴不匹配、非法范围 · 目标形式错误",
+    "objective": "目标越界、形式/轴不匹配、非法范围：用正式输入能触发的拒绝与纠错；不要求用户构造坏JSON",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X02:range",
+    "parentId": "CAMP-X02",
+    "code": "X02",
+    "variant": "range",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "目标越界、形式/轴不匹配、非法范围 · 射程限制",
+    "objective": "目标越界、形式/轴不匹配、非法范围：用正式输入能触发的拒绝与纠错；不要求用户构造坏JSON",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X03",
+    "parentId": "CAMP-X03",
+    "code": "X03",
+    "variant": "default",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "选点不提交、取消草稿、修改目标、确认连点防重；效果播放不追加请求",
+    "objective": "选点不提交、取消草稿、修改目标、确认连点防重；效果播放不追加请求",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X04",
+    "parentId": "CAMP-X04",
+    "code": "X04",
+    "variant": "default",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "提交已接受但响应丢失",
+    "objective": "提交已接受但响应丢失：显示结果未知、先同步再确认结果，禁止重复扣资源",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X05",
+    "parentId": "CAMP-X05",
+    "code": "X05",
+    "variant": "default",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "旧stateVersion冲突、过期目标与过期回合",
+    "objective": "旧状态版本冲突、过期目标与过期回合：同步后重新选择，不拿旧草稿误发",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X06:resume",
+    "parentId": "CAMP-X06",
+    "code": "X06",
+    "variant": "resume",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "连接中断、重连期限内恢复原座位、超过期限恢复失败；区分“已恢复”与“服务重启 · 期限内恢复",
+    "objective": "连接中断、重连期限内恢复原座位、超过期限恢复失败；区分“已恢复”与“服务重启房间不存在”",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X06:expired",
+    "parentId": "CAMP-X06",
+    "code": "X06",
+    "variant": "expired",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "连接中断、重连期限内恢复原座位、超过期限恢复失败；区分“已恢复”与“服务重启 · 超过重连期",
+    "objective": "连接中断、重连期限内恢复原座位、超过期限恢复失败；区分“已恢复”与“服务重启房间不存在”",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X06:missing-room",
+    "parentId": "CAMP-X06",
+    "code": "X06",
+    "variant": "missing-room",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "连接中断、重连期限内恢复原座位、超过期限恢复失败；区分“已恢复”与“服务重启 · 房间不存在",
+    "objective": "连接中断、重连期限内恢复原座位、超过期限恢复失败；区分“已恢复”与“服务重启房间不存在”",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X07:resume",
+    "parentId": "CAMP-X07",
+    "code": "X07",
+    "variant": "resume",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "对手短暂断线、恢复、超期，以及双方同时离线的不同流程 · 期限内恢复",
+    "objective": "对手短暂断线、恢复、超期，以及双方同时离线的不同流程",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X07:expired",
+    "parentId": "CAMP-X07",
+    "code": "X07",
+    "variant": "expired",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "对手短暂断线、恢复、超期，以及双方同时离线的不同流程 · 超过重连期",
+    "objective": "对手短暂断线、恢复、超期，以及双方同时离线的不同流程",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X07:both",
+    "parentId": "CAMP-X07",
+    "code": "X07",
+    "variant": "both",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "对手短暂断线、恢复、超期，以及双方同时离线的不同流程 · 双方离线",
+    "objective": "对手短暂断线、恢复、超期，以及双方同时离线的不同流程",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X08:deployment",
+    "parentId": "CAMP-X08",
+    "code": "X08",
+    "variant": "deployment",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "部署/行动/重连时钟 · 部署计时",
+    "objective": "部署/行动/重连时钟：暂停练习、单步推进、推进至截止前、越过截止，由规则阈值决定结果",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X08:action",
+    "parentId": "CAMP-X08",
+    "code": "X08",
+    "variant": "action",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "部署/行动/重连时钟 · 行动计时",
+    "objective": "部署/行动/重连时钟：暂停练习、单步推进、推进至截止前、越过截止，由规则阈值决定结果",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X08:reconnect",
+    "parentId": "CAMP-X08",
+    "code": "X08",
+    "variant": "reconnect",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "部署/行动/重连时钟 · 重连计时",
+    "objective": "部署/行动/重连时钟：暂停练习、单步推进、推进至截止前、越过截止，由规则阈值决定结果",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X09",
+    "parentId": "CAMP-X09",
+    "code": "X09",
+    "variant": "default",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "页面后台后回前台",
+    "objective": "页面后台后回前台：同步校时，无历史攻击/音效补播；本例使用训练适配器受控模拟",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X10",
+    "parentId": "CAMP-X10",
+    "code": "X10",
+    "variant": "default",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "移动端海图平移、边缘选点、抽屉/低高度布局；键盘方向/Home/End/En",
+    "objective": "移动端海图平移、边缘选点、抽屉/低高度布局；键盘方向/Home/End/Enter与删除标记",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X11:high",
+    "parentId": "CAMP-X11",
+    "code": "X11",
+    "variant": "high",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "high/smooth/reduced、音效开/关、三主题；相同规则和信息， · 高画质",
+    "objective": "高画质/流畅/减少动画、音效开/关、三主题；相同规则和信息，动画不遮挡执行、不暗示隐藏结果",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X11:smooth",
+    "parentId": "CAMP-X11",
+    "code": "X11",
+    "variant": "smooth",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "high/smooth/reduced、音效开/关、三主题；相同规则和信息， · 流畅",
+    "objective": "高画质/流畅/减少动画、音效开/关、三主题；相同规则和信息，动画不遮挡执行、不暗示隐藏结果",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X11:reduced",
+    "parentId": "CAMP-X11",
+    "code": "X11",
+    "variant": "reduced",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "high/smooth/reduced、音效开/关、三主题；相同规则和信息， · 减少动画",
+    "objective": "高画质/流畅/减少动画、音效开/关、三主题；相同规则和信息，动画不遮挡执行、不暗示隐藏结果",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X11:muted",
+    "parentId": "CAMP-X11",
+    "code": "X11",
+    "variant": "muted",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "high/smooth/reduced、音效开/关、三主题；相同规则和信息， · 静音",
+    "objective": "高画质/流畅/减少动画、音效开/关、三主题；相同规则和信息，动画不遮挡执行、不暗示隐藏结果",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-X12",
+    "parentId": "CAMP-X12",
+    "code": "X12",
+    "variant": "default",
+    "group": "X",
+    "groupName": "限制与恢复",
+    "title": "退出/刷新/重进训练、切场景与训练服务重启",
+    "objective": "退出/刷新/重进训练、切场景与训练服务重启：局面按约定恢复或明确重来，正式房间凭证不被覆盖",
+    "action": "pirate_attack",
+    "kind": "recovery",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-W07:no-target",
+    "parentId": "CAMP-W07",
+    "code": "W07",
+    "variant": "no-target",
+    "group": "W",
+    "groupName": "伤害与资源",
+    "title": "驱逐舰没有合法目标",
+    "objective": "驱逐舰新目标越射程/无合法射程，分别识别不可选与没有合法目标；不能假提交成功",
+    "action": "destroyer_i_ram",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-F03:radar",
+    "parentId": "CAMP-F03",
+    "code": "F03",
+    "variant": "radar",
+    "group": "F",
+    "groupName": "三人模式",
+    "title": "三人雷达 · 两方结果独立",
+    "objective": "三人保密武器真实结果不同但攻击方两方均保密；侦察两方布尔结果独立",
+    "action": "radar_scan",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-F03:detection",
+    "parentId": "CAMP-F03",
+    "code": "F03",
+    "variant": "detection",
+    "group": "F",
+    "groupName": "三人模式",
+    "title": "三人探测 · 两方结果独立",
+    "objective": "三人保密武器真实结果不同但攻击方两方均保密；侦察两方布尔结果独立",
+    "action": "detection_bomb",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 3
+  },
+  {
+    "id": "CAMP-R01",
+    "parentId": "CAMP-R01",
+    "code": "R01",
+    "variant": "default",
+    "group": "R",
+    "groupName": "房间与阶段",
+    "title": "等待房间与合成席位加入",
+    "objective": "观察等待页；让另一个合成席位加入，进入部署，不建立公开房间。",
+    "action": "pirate_attack",
+    "kind": "lobby",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-R02",
+    "parentId": "CAMP-R02",
+    "code": "R02",
+    "variant": "default",
+    "group": "R",
+    "groupName": "房间与阶段",
+    "title": "满员与阶段限制拒绝加入",
+    "objective": "模拟第三席位尝试加入已满的训练房间，识别真实拒绝原因。",
+    "action": "pirate_attack",
+    "kind": "lobby",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-R03",
+    "parentId": "CAMP-R03",
+    "code": "R03",
+    "variant": "default",
+    "group": "R",
+    "groupName": "房间与阶段",
+    "title": "准备后取消准备",
+    "objective": "其他席位尚未准备时，本方完成部署并准备，再取消准备恢复编辑。",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-R04",
+    "parentId": "CAMP-R04",
+    "code": "R04",
+    "variant": "default",
+    "group": "R",
+    "groupName": "房间与阶段",
+    "title": "开局前断线与关闭",
+    "objective": "在部署阶段模拟断线并推进超过重连期，观察房间关闭而不是正常胜负。",
+    "action": "pirate_attack",
+    "kind": "deployment",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-R05",
+    "parentId": "CAMP-R05",
+    "code": "R05",
+    "variant": "default",
+    "group": "R",
+    "groupName": "房间与阶段",
+    "title": "昵称与房间码格式纠错",
+    "objective": "在训练字段中先体验空昵称、非法房间码，再输入合法值通过同一验证器；不创建真实房间。",
+    "action": "pirate_attack",
+    "kind": "lobby",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2
+  },
+  {
+    "id": "CAMP-R06",
+    "parentId": "CAMP-R06",
+    "code": "R06",
+    "variant": "default",
+    "group": "R",
+    "groupName": "房间与阶段",
+    "title": "赛后离开与留下方",
+    "objective": "以留下的合成席位视角，模拟另一方赛后离开，观察等待页与保留座位。",
+    "action": "pirate_attack",
+    "kind": "battle",
+    "version": "1.5.0",
+    "maps": [
+      10,
+      12,
+      15
+    ],
+    "players": 2,
+    "viewer": "cadet-2"
+  }
+]

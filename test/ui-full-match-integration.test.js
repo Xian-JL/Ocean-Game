@@ -257,38 +257,12 @@ function unitStatus(dom, unitName) {
 }
 
 async function performAction(dom, actionType, coordinate) {
-  const { window } = dom;
-  click(
-    window,
-    await waitFor(
-      () => window.document.querySelector(
-        `[data-action="select-action"][data-action-type="${actionType}"]:not(:disabled)`,
-      ),
-      `行动 ${actionType} 未开放`,
-    ),
-  );
-  click(
-    window,
-    await waitFor(
-      () => window.document.querySelector(
-        `.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="${coordinate}"].board-cell--legal-target`,
-      ),
-      `目标 ${coordinate} 未成为合法目标`,
-    ),
-  );
-  click(
-    window,
-    await waitFor(
-      () => window.document.querySelector(
-        "#confirm-dialog[open] #confirm-accept:not(:disabled)",
-      ),
-      `行动 ${actionType} 未打开确认层`,
-    ),
-  );
-  await waitFor(
-    () => !window.document.querySelector("#confirm-dialog")?.open,
-    `行动 ${actionType} 提交后确认层未关闭`,
-  );
+  const {window}=dom;
+  click(window,await waitFor(()=>window.document.querySelector(`[data-action="select-action"][data-action-type="${actionType}"]:not(:disabled)`),`行动 ${actionType} 未开放`));
+  click(window,await waitFor(()=>window.document.querySelector(`.battle-map-card--enemy [data-action="enemy-cell"][data-coordinate="${coordinate}"].board-cell--legal-target`),`目标 ${coordinate} 未成为合法目标`));
+  assert.equal(window.document.querySelector("#confirm-dialog").open,false,"选点应更新本地摘要，不弹旧模态框");
+  assert.match(window.document.querySelector(".command-dock").textContent,new RegExp(coordinate));
+  click(window,await waitFor(()=>window.document.querySelector('[data-action="execute-command"]:not(:disabled)'),`行动 ${actionType} 摘要未就绪`));
 }
 
 async function createAndEnterBattle(baseUrl, clients, browsers, options = {}) {

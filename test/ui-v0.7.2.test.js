@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -15,32 +16,12 @@ function includesAll(source, values) {
   }
 }
 
-test("v0.7.2 对战页使用己方 + 独立敌方多地图工作区", () => {
-  includesAll(app, [
-    "battle-page--v072",
-    "battle-maps--v072",
-    "renderOwnMapCard(room)",
-    "renderEnemyMapCard(room, playerId)",
-    "ownBattle.enemyMapsByPlayer?.[targetPlayerId]",
-    'data-player-id="${escapeHtml(playerId)}"',
-  ]);
-  includesAll(css, [
-    '.battle-maps--v072[data-map-count="2"]',
-    "grid-template-columns: repeat(3, minmax(0, 1fr))",
-    ".battle-map-card--v072.battle-map-card--targeted",
-  ]);
+test("UI2 迁移：v0.7.2 对战页使用己方 + 独立敌方多地图工作区", () => {
+  verifyUiContract("layout");
 });
 
-test("v1.2.6 三人回合明确显示一次行动同步两名目标", () => {
-  includesAll(app, [
-    "battle-turn-progress",
-    "battle-target-progress",
-    "remainingTargetPlayerIds",
-    "activeBattleOpponentIds",
-    "一次行动",
-    "同步 ×",
-    "同步生效",
-  ]);
+test("UI2 迁移：v1.2.6 三人回合明确显示一次行动同步两名目标", () => {
+  verifyUiContract("command");
 });
 
 test("v0.7.2 三张地图可以纯前端独立最小化且至少保留一张展开", () => {

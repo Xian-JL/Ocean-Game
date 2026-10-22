@@ -1,0 +1,39 @@
+{
+  "generatedImages": [],
+  "newBitmapBytes": 0,
+  "codeNativeMotion": true,
+  "restoredLegacyBitmaps": true,
+  "restoredInventory": "restored-assets.json",
+  "reusedOcean": [
+    {
+      "path": "assets/images/ocean-2.5d/ocean/ocean_deep_calm.webp",
+      "bytes": 177960,
+      "width": 2048,
+      "height": 2048,
+      "transparent": false,
+      "source": "existing project WebP; dimensions/alpha inspected with Pillow on 2026-10-22",
+      "sha256": "1edca213f0a83193350a1674f5c5c82e92407b022b92c2d4daabc4320b00da76"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/surface/surface_specular_seamless.webp",
+      "bytes": 733852,
+      "width": 2048,
+      "height": 2048,
+      "transparent": false,
+      "source": "existing project WebP; dimensions/alpha inspected with Pillow on 2026-10-22",
+      "sha256": "3fd0dbcb9a7b6a7bb6433574b4fef1db18a1267495af95c15ef84f383a9be180"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/underwater/underwater_caustics_seamless.webp",
+      "bytes": 100090,
+      "width": 2048,
+      "height": 2048,
+      "transparent": false,
+      "source": "existing project WebP; dimensions/alpha inspected with Pillow on 2026-10-22",
+      "sha256": "f2e07268c4130b644be50d738a8f8629761695f37c6ce6f50c95d9c292d5f54e"
+    }
+  ],
+  "preheat": "Existing artwork demand decoding and idle preheat in client/artwork.js; new motion geometry has no bitmap preheat",
+  "retainedHullAssets": "Existing units/carrier module imagery; source directory public/assets/images/ocean-2.5d/units; no new files generated",
+  "legacyFeedback": "Existing role-filtered impact/trail/ring images are visible again and composed with new CSS/DOM geometry; max4 high/max2 smooth. No generated image."
+}

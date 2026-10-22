@@ -1,0 +1,198 @@
+{
+  "date": "2026-10-21",
+  "browser": "Codex in-app browser; exact browser version not reported by the inspection interface",
+  "devices": "desktop and 390x844 CSS viewport emulation; not real mobile hardware",
+  "currentBuild": "1.6.1-ui2.bd6adf487f",
+  "captures": [
+    {
+      "file": "actions-phone.jpg",
+      "format": "JPEG",
+      "rasterWidth": 390,
+      "rasterHeight": 844,
+      "bytes": 29896,
+      "sha256": "475a97664eb98143424b6de6f4b020662bff6fd8b3db28b7ebbb31b33b1f4762",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "battle-desktop-reference.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1280,
+      "rasterHeight": 720,
+      "bytes": 89587,
+      "sha256": "a46711057081aa39401387bfa7e0adb42b9c378a442b356b1a74867f0107b1d7",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "battle-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1280,
+      "rasterHeight": 720,
+      "bytes": 88703,
+      "sha256": "72196d67f3f63920e52e068cef2769b40769f5c374635f0bdcca0ec255d5ec9a",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "battle-light-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1280,
+      "rasterHeight": 720,
+      "bytes": 78597,
+      "sha256": "b2e1fedfc4bdc070dcff7a1d1a986978d30e6d8f439132f35d3b761c1a45180e",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "battle-light-phone.jpg",
+      "format": "JPEG",
+      "rasterWidth": 390,
+      "rasterHeight": 844,
+      "bytes": 31189,
+      "sha256": "ec2c58c5c3a7a2109fa4011ae31468df02e93749d1c7ec0e30c1189a3d4774f3",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "battle-phone.jpg",
+      "format": "JPEG",
+      "rasterWidth": 390,
+      "rasterHeight": 844,
+      "bytes": 41540,
+      "sha256": "7f241eb90534ee1ad3c85a1cf17c7e2330a4fdd4a8b2f4f6c814c5ab6c490402",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "components-dark.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 1406,
+      "bytes": 91911,
+      "sha256": "42b8eadb9635672d5d546b260404f5a20a42c9e40db22aaf303dae6084c7619e",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "components-dusk.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 1406,
+      "bytes": 91327,
+      "sha256": "0a100e8ac993f741bdc309ffa83ba4bc7f4527493244fe96ffe2a3388f910760",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "components-light.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 1406,
+      "bytes": 90328,
+      "sha256": "28c8e6758eb12ccecdaed7665d1234af97dcab320d8c9a3db8b5abe4d59e6caf",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "deployment-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 1576,
+      "bytes": 117766,
+      "sha256": "9934f47194ef4b0d46c5527e796fd324571fa1c6bf6a01be716dde147984d95c",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "entry-desktop-reference.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 1008,
+      "bytes": 68778,
+      "sha256": "85fced88e3e947b81eef698ccf51531fd65efd407375ad12ce4b1954b0447d6d",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "entry-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 1008,
+      "bytes": 68470,
+      "sha256": "c0a6b452722798f2ddd38340120c6b49b8b9f447253ca2d249c7f3314cdc3af5",
+      "captureBuild": "1.6.1-ui2.bd6adf487f",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "result-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 2334,
+      "bytes": 150323,
+      "sha256": "938c3cd910db5202fd26b74cc08352287b58a40c9791eb85e1f0a2a483bc254c",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "rolling-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 831,
+      "bytes": 38355,
+      "sha256": "81498dd8ce678458846a47c6d7be9aeb631791e8138aff1c5ebc0525f7b1a144",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "settings-phone.jpg",
+      "format": "JPEG",
+      "rasterWidth": 390,
+      "rasterHeight": 844,
+      "bytes": 37531,
+      "sha256": "43dbc973ff79c10c0017c8135ffcadd1825a545b18ad549f0ba387b3175fa861",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "target-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1280,
+      "rasterHeight": 720,
+      "bytes": 93158,
+      "sha256": "b7e0d41abdec1625c3d1cae83f595557bd3c968a5be2f7f36ed3fafe5f3e6ba1",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "target-phone.jpg",
+      "format": "JPEG",
+      "rasterWidth": 390,
+      "rasterHeight": 844,
+      "bytes": 46741,
+      "sha256": "f86285f471474ce6f1bf9cc4cf605eac0b05e7fab329a693b4d7e012fb363131",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "tutorial-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 1363,
+      "bytes": 113965,
+      "sha256": "ce6cae76d110e8f2022cdd062c515d0956c9e818f852589f4aa36e4e6324858d",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    },
+    {
+      "file": "waiting-desktop.jpg",
+      "format": "JPEG",
+      "rasterWidth": 1265,
+      "rasterHeight": 723,
+      "bytes": 44624,
+      "sha256": "94194bc534a6348d95c2d6dff17505267f9f7f54ddf28ec54d2eafe28f196a5d",
+      "captureBuild": "earlier UI2 build, visual reference",
+      "kind": "real browser screenshot; component files explicitly use demonstration content"
+    }
+  ]
+}

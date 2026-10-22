@@ -1,0 +1,140 @@
+{
+  "specVersion": "1.5",
+  "date": "2026-10-22",
+  "specSha256": "100bdaa921fa43fc8bfb24ff6b7574d14059d1825d19745e672924c904b46501",
+  "baseCommit": "959ed06 (working tree also contains the prior UI2 implementation)",
+  "assetVersion": "1.6.2-ui2.604da58b80",
+  "modules": [
+    "runtime.js",
+    "motion.js",
+    "training.js",
+    "artwork.js",
+    "preferences.js",
+    "transport.js",
+    "tutorial-view.js",
+    "entry-view.js",
+    "deployment-view.js",
+    "battle-map.js",
+    "command-view.js",
+    "battle-view.js",
+    "result-view.js",
+    "deployment-input.js",
+    "commands.js",
+    "connection.js",
+    "events.js",
+    "input.js",
+    "accessibility.js",
+    "bootstrap.js"
+  ],
+  "files": {
+    "package.json": {
+      "bytes": 1483,
+      "sha256": "f7a3b4a3447c1605cd1244998bc1becd7b2f5bb27cbbf520a1dba6fa9130829e"
+    },
+    "package-lock.json": {
+      "bytes": 62126,
+      "sha256": "b7ba2a9842ad32a1dbbe8506d798c0fabc707788f9b6cf16f9981ee748b5218d"
+    },
+    "scripts/build-ui.js": {
+      "bytes": 2369,
+      "sha256": "a34de6b4b06813927482cc9dcc64b428b30fab60779aaadc6c3c8e9b1b3928d0"
+    },
+    "public/js/app.js": {
+      "bytes": 363016,
+      "sha256": "2182d58455957ddf363d81ef210895be8e7695a6e3a115d4263a5cf6041e1564"
+    },
+    "public/css/ocean.css": {
+      "bytes": 73743,
+      "sha256": "686d79ba37d2259006482dfb2f55bbde3a4155ffbd156e6a19eebcf8daf2bda0"
+    },
+    "public/index.html": {
+      "bytes": 19683,
+      "sha256": "36653d75798787019d198b46b030260f3f0efca1bf473d843d3c7c626ca0c9c4"
+    },
+    "public/js/release-config.js": {
+      "bytes": 454,
+      "sha256": "5aacdad27d37730253fefd0fc65abb473cffb68e7b9b3e3610c497a98e78c6c5"
+    },
+    "client/motion.js": {
+      "bytes": 15718,
+      "sha256": "49525c31702eb9f2cb220ce9af1f36f49560240e0659dc4da89e278f75809a17"
+    },
+    "client/training.js": {
+      "bytes": 22791,
+      "sha256": "591c1b419ea470881dd39e8939188fd2748ec5baffb794b26771d09186e48962"
+    },
+    "client/artwork.js": {
+      "bytes": 19038,
+      "sha256": "8dbf00716135264048e59651492a05cf1c4f9802e1bcee95a3d603f2e5e9004e"
+    },
+    "client/deployment-view.js": {
+      "bytes": 27225,
+      "sha256": "fbd94be65bf1be479e44e3f1d50669f54270913f5803148d6b6e4440b8adacd9"
+    },
+    "client/accessibility.js": {
+      "bytes": 9542,
+      "sha256": "189330b38f69fcc12cd618cefdefe38b0ec4478aaf60b4ec6699d6259507f882"
+    },
+    "client/bootstrap.js": {
+      "bytes": 3561,
+      "sha256": "3f66f91880485ad31aa980fcb751fea81399373392c67ebd6153d880e75025d0"
+    },
+    "client/commands.js": {
+      "bytes": 19933,
+      "sha256": "fae8c74f9644b2999207199a95cb6f6c9cf19be8f441239c9c9acd466f81c5dd"
+    },
+    "client/transport.js": {
+      "bytes": 28089,
+      "sha256": "635c56b77c993006c55ba8a12bd3ddf617e51d97d8d7cda6b33c38eacdbbee25"
+    },
+    "client/styles/motion.css": {
+      "bytes": 12655,
+      "sha256": "63eb42217ecbe853f2c16cc97c93464204910a4b7e02b67f34b70c39cac2292a"
+    },
+    "client/styles/map.css": {
+      "bytes": 10127,
+      "sha256": "1cef3b284372af494facff88d606a556983fd689e139dbbd2e3309a21bf10607"
+    },
+    "client/styles/responsive.css": {
+      "bytes": 12404,
+      "sha256": "02e8dff5530631d441fccde1387b0276846a6ea853eb895dca306d6e9b3afb00"
+    },
+    "client/battle-map.js": {
+      "bytes": 25767,
+      "sha256": "9dadb5906d8e7605658f52f0e4e7bf78d9e5ab8f6cc9111157e9f9cb15731fbd"
+    },
+    "client/styles/training.css": {
+      "bytes": 3657,
+      "sha256": "cc89620f9630ceb43669b5c6baeca1ad0830f8382d19d2d1437c2b56902e2f9b"
+    },
+    "public/js/audio-system.js": {
+      "bytes": 24603,
+      "sha256": "cb132501d269057284aa74f5ec4bd4513a9b04cfaef738f77cf0611b6cbfb35b"
+    },
+    "server/training/scenarios.js": {
+      "bytes": 17876,
+      "sha256": "51d1465f0b84be8f6ecf59fb7ee465b9c4b5c9807477cfcbfb3047abb48c52d4"
+    },
+    "server/training/service.js": {
+      "bytes": 29199,
+      "sha256": "84a5671d81a6496db475388074fdcd09acf0cc809411f72aa6d6949156280f58"
+    },
+    "server/training/catalog.json": {
+      "bytes": 89018,
+      "sha256": "19b52bd70a93336f1ccea66f4ed1ca3c7e04e39e8ae822ed223dd5609e211c8f"
+    }
+  },
+  "automatedTests": {
+    "tests": 727,
+    "pass": 727,
+    "fail": 0,
+    "skipped": 0,
+    "log": "docs/releases/v1.6.2/acceptance.log",
+    "logSha256": "8437d76951dde1eb3d2523d295b3b655c5e64ad96c660b48126160c3279aa1ad"
+  },
+  "implementationModel": {
+    "model": "GPT-6.1 Sol",
+    "authorization": "User explicitly allowed current Sol continuation"
+  },
+  "independentAcceptance": "pending"
+}

@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -25,8 +26,6 @@ test("战斗外框使用 clip 裁切，不再建立会破坏 sticky 的滚动容
   assert.doesNotMatch(fixes, /overflow: hidden/);
 });
 
-test("v1.5 缓存版本生效且手机底部抽屉规则保持原样", () => {
-  assert.match(html, /\/css\/main\.css\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(css, /@media \(max-width: 900px\)[\s\S]*max-height: min\(78dvh, 720px\)/);
-  assert.match(css, /@media \(max-width: 900px\)[\s\S]*position: fixed/);
+test("UI2 迁移：v1.5 缓存版本生效且手机底部抽屉规则保持原样", () => {
+  verifyUiContract("version");
 });

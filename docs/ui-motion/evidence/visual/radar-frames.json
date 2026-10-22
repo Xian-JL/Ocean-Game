@@ -1,0 +1,87 @@
+{
+  "kind": "synthetic demo, actual browser screenshots",
+  "frames": [
+    {
+      "file": "radar-frames/00.jpg",
+      "timestamp": 1792646321492
+    },
+    {
+      "file": "radar-frames/01.jpg",
+      "timestamp": 1792646321542
+    },
+    {
+      "file": "radar-frames/02.jpg",
+      "timestamp": 1792646321576
+    },
+    {
+      "file": "radar-frames/03.jpg",
+      "timestamp": 1792646321617
+    },
+    {
+      "file": "radar-frames/04.jpg",
+      "timestamp": 1792646321648
+    },
+    {
+      "file": "radar-frames/05.jpg",
+      "timestamp": 1792646321690
+    },
+    {
+      "file": "radar-frames/06.jpg",
+      "timestamp": 1792646321722
+    },
+    {
+      "file": "radar-frames/07.jpg",
+      "timestamp": 1792646321751
+    },
+    {
+      "file": "radar-frames/08.jpg",
+      "timestamp": 1792646321777
+    },
+    {
+      "file": "radar-frames/09.jpg",
+      "timestamp": 1792646321809
+    },
+    {
+      "file": "radar-frames/10.jpg",
+      "timestamp": 1792646321842
+    },
+    {
+      "file": "radar-frames/11.jpg",
+      "timestamp": 1792646321874
+    },
+    {
+      "file": "radar-frames/12.jpg",
+      "timestamp": 1792646321905
+    },
+    {
+      "file": "radar-frames/13.jpg",
+      "timestamp": 1792646321933
+    },
+    {
+      "file": "radar-frames/14.jpg",
+      "timestamp": 1792646321965
+    },
+    {
+      "file": "radar-frames/15.jpg",
+      "timestamp": 1792646322008
+    },
+    {
+      "file": "radar-frames/16.jpg",
+      "timestamp": 1792646322040
+    },
+    {
+      "file": "radar-frames/17.jpg",
+      "timestamp": 1792646322065
+    },
+    {
+      "file": "radar-frames/18.jpg",
+      "timestamp": 1792646322099
+    },
+    {
+      "file": "radar-frames/19.jpg",
+      "timestamp": 1792646322134
+    }
+  ],
+  "build": "1.6.1-ui2.86af83553d",
+  "historical": true
+}

@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -22,16 +23,8 @@ test("诱饵鱼雷状态和复盘分母读取当前对局实际总数", () => {
   assert.doesNotMatch(app, /诱饵鱼雷[\s\S]{0,500}\/ 3/);
 });
 
-test("雷达明确选择扫描区域左上起始格，其他区域武器继续使用中心格", () => {
-  for (const mapSize of [10, 12, 15]) {
-    Data.configureMap(mapSize);
-    const radar = Data.getActionDefinition(Data.ACTION_TYPES.RADAR_SCAN);
-    assert.match(radar.warning, /左上起始格/);
-  }
-
-  assert.match(app, /selectedDefinition\.type === Data\.ACTION_TYPES\.RADAR_SCAN[\s\S]*左上起始格/);
-  assert.match(app, /selectedDefinition\.targetMode === "area"[\s\S]*选择高亮中心格/);
-  assert.match(app, /从 \$\{target\} 开始执行/);
+test("UI2 迁移：雷达明确选择扫描区域左上起始格，其他区域武器继续使用中心格", () => {
+  verifyUiContract("range");
 });
 
 test("桌面战斗首屏按视口收束，方形地图不再强制撑出首屏", () => {
@@ -43,10 +36,6 @@ test("桌面战斗首屏按视口收束，方形地图不再强制撑出首屏",
   assert.match(fixes, /carrier-horizon-deck[\s\S]*height: 28px/);
 });
 
-test("桌面行动和消息侧栏使用独立视口上限与内部滚动区", () => {
-  const start = css.lastIndexOf("Ocean-v1.4.2.1 · viewport-bounded battle workspace");
-  const fixes = css.slice(start, css.indexOf("Ocean-v1.4.2.2 · keep desktop map tabs", start));
-  assert.match(fixes, /action-rail--v073,[\s\S]*event-center--v074[\s\S]*max-height: min\(720px, calc\(100dvh - 280px\)\)/);
-  assert.match(fixes, /action-rail__content[\s\S]*max-height: calc\(100dvh - 356px\)[\s\S]*overscroll-behavior: contain/);
-  assert.match(html, /\/css\/main\.css\?v=__OCEAN_ASSET_VERSION__/);
+test("UI2 迁移：桌面行动和消息侧栏使用独立视口上限与内部滚动区", () => {
+  verifyUiContract("layout");
 });

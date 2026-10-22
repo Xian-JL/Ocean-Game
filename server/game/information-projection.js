@@ -471,6 +471,7 @@ function createPlayerView(battleState, viewerId) {
     opponentIds,
     match: {
       status: battleState.match.status,
+      eliminatedPlayerIds: [...(battleState.match.eliminatedPlayerIds ?? [])],
       result: clone(battleState.match.result),
       finalSalvo: safeFinalSalvo,
     },
@@ -498,6 +499,7 @@ function createResolutionDelivery(battleState, actionRecord, viewerId) {
   return {
     match: {
       status: battleState.match.status,
+      eliminatedPlayerIds: [...(battleState.match.eliminatedPlayerIds ?? [])],
       result: clone(battleState.match.result),
     },
     publicRecord: createPublicActionRecord(actionRecord),

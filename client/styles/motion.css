@@ -1,0 +1,126 @@
+
+/* Fixed facts and hitboxes; one environmental layer. */
+html:not([data-reduce-motion=true])[data-quality=high] body[data-page=P05] .tactical-environment--surface{
+ animation:ocean-drift 16s ease-in-out infinite alternate;will-change:transform;opacity:.09}
+html[data-quality=high] [data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--surface{animation:none}
+html[data-quality=high] [data-tactical-layer=underwater] .tactical-environment--caustics{animation:ocean-drift 18s ease-in-out infinite alternate}
+html[data-theme=ocean-light] .tactical-environment--surface{opacity:.07}
+@keyframes ocean-drift{from{transform:translate(-3px,0);opacity:var(--ambient-min,.12)}to{transform:translate(3px,2px);opacity:var(--ambient-max,.24)}}
+.battle-effect-art{animation:none!important;isolation:isolate;--fx-color:#92deef}
+.battle-effect-art--hit{--fx-color:#f0bb79}.battle-effect-art--miss{--fx-color:#c9e4ed}
+.battle-effect-art--private-positive{--fx-color:#8edac1}.battle-effect-art--private-negative{--fx-color:#b6cad9}
+
+.motion-glyph{position:absolute;inset:2px;overflow:hidden;pointer-events:none;color:var(--fx-color)}
+.motion-glyph i{position:absolute;display:none;pointer-events:none;border-color:currentColor}
+.motion-ring{display:block!important;border:2.5px solid;border-radius:50%;inset:12%;animation:motion-ring var(--effect-duration,1000ms) ease-out both}
+.motion-core{inset:35%;border-radius:50%;background:currentColor;opacity:0}
+.motion-ray{height:3px;left:0;right:0;top:50%;background:currentColor;transform-origin:center;animation:motion-ray var(--effect-duration,1000ms) ease-out both}
+.motion-ring--second{inset:22%;animation-delay:80ms}
+.motion-ram-one .motion-ray,.motion-ram-two .motion-ray,.motion-cross .motion-ray,.motion-wake .motion-ray,.motion-missile .motion-ray,.motion-strafe .motion-ray{display:block}
+.motion-ram-two .motion-ray{top:38%}.motion-ram-two .motion-ray--second{top:62%;animation-delay:70ms}
+.motion-cross .motion-ray{rotate:35deg}.motion-cross .motion-ray--second{rotate:-35deg;animation-delay:60ms}
+.motion-wake .motion-ray{width:50%;rotate:30deg;left:0}.motion-wake .motion-ray--second{rotate:-30deg;left:50%}
+.motion-missile .motion-ray{height:3px;rotate:-35deg}.motion-missile .motion-ring{inset:30%}
+.motion-nuclear .motion-core{display:block;animation:motion-core var(--effect-duration) ease-out both}
+.motion-nuclear .motion-ring{border-width:2px}.motion-emp .motion-ring{border-style:dashed;border-width:2px}
+.motion-sonar .motion-ring--second{display:block;animation-delay:140ms}
+.motion-radar .motion-ring{border-radius:3px;inset:1%;animation:motion-envelope var(--effect-duration) ease-out both}
+.motion-scan{inset:0 auto 0 0;width:4px;background:currentColor;animation:motion-scan var(--effect-duration) linear both}
+.motion-radar .motion-scan{display:block}
+.motion-strafe .motion-ring{display:none!important}.motion-strafe .motion-ray{height:100%;width:3px;top:0;right:auto;animation:motion-scan var(--effect-duration) linear both}
+@keyframes motion-ring{0%{transform:scale(.4);opacity:0}20%{opacity:.95}100%{transform:scale(1.15);opacity:0}}
+@keyframes motion-ray{0%{transform:scaleX(.1);opacity:0}30%{opacity:1}70%{transform:scaleX(1);opacity:.75}100%{opacity:0;transform:scaleX(.85)}}
+@keyframes motion-core{0%,15%{opacity:0;transform:scale(.5)}40%{opacity:.48;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
+@keyframes motion-scan{0%{left:0;opacity:0}15%{opacity:.95}85%{opacity:.95}100%{left:100%;opacity:0}}
+@keyframes motion-envelope{0%{opacity:0}20%,75%{opacity:.8}100%{opacity:0}}
+html[data-quality=smooth] .motion-ring--second,html[data-quality=smooth] .motion-ray--second{display:none!important}
+html[data-reduce-motion=true] .battle-effect-layer{display:none!important}
+html[data-theme=ocean-light] .motion-glyph{filter:brightness(.6)}
+.page-enter{animation:motion-page 180ms ease-out both}
+@keyframes motion-page{from{opacity:.8;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+@keyframes motion-lock{from{transform:scale(1.14);opacity:.75}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.tactical-environment,.motion-glyph,.page-enter{animation:none!important}.battle-effect-layer{display:none!important}}
+@media(forced-colors:active){.battle-effect-layer,.tactical-environment-layer{display:none!important}}
+
+dialog[open]{animation:motion-page 200ms ease-out both}html[data-reduce-motion=true] dialog[open]{animation:none}.tactical-layer-transition{animation:none}html[data-quality=high] [data-tactical-layer=underwater] .tactical-layer-transition--sonar{animation:motion-envelope 420ms ease-out both}
+
+html[data-motion-hidden=true] .tactical-environment{animation-play-state:paused!important}
+.motion-salvo-neutral{position:relative}.motion-salvo-neutral:after{content:"";position:absolute;inset:-6px;border:1px solid var(--accent-primary);border-radius:50%;pointer-events:none;animation:motion-ring 1100ms ease-out both}
+
+html[data-theme=ocean-light]{--ambient-min:.03;--ambient-max:.06}
+[data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--surface{opacity:.02}
+
+/* Shared phases have action-specific offsets in motionDefinitions. */
+.motion-glyph:before{content:"";position:absolute;inset:8%;border:1px solid currentColor;opacity:0;animation:motion-envelope var(--lock-duration,160ms) ease-out both;pointer-events:none}
+.motion-ring{animation-duration:var(--release-duration,500ms);animation-delay:var(--release-start,420ms)}
+.motion-ray{animation-duration:var(--travel-duration,300ms);animation-delay:var(--travel-start,160ms)}
+.motion-core{animation-duration:var(--travel-duration,400ms)!important;animation-delay:var(--travel-start,220ms)!important}
+.motion-scan{animation-duration:var(--travel-duration,800ms);animation-delay:var(--travel-start,160ms)}
+.motion-radar .motion-ring{animation-duration:var(--release-duration,300ms);animation-delay:var(--release-start,1000ms)}
+.motion-sonar .motion-ring,.motion-emp .motion-ring{animation-duration:var(--travel-duration,690ms);animation-delay:var(--travel-start,160ms)}
+.motion-sonar .motion-ring--second{animation-delay:calc(var(--travel-start,160ms) + 140ms)}
+html[data-quality=smooth] .motion-ring{animation-duration:var(--effect-duration);animation-delay:0ms}
+
+.motion-demo{max-width:1000px;margin:40px auto;padding:24px}
+.demo-controls{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin:24px 0}.demo-controls label{display:grid;gap:8px}
+.demo-stage{max-width:500px;height:320px;border:1px solid var(--line);border-radius:12px;position:relative;background:var(--surface-panel);overflow:hidden}
+#demo-layer{position:absolute;inset:24px;pointer-events:none}#demo-layer>.battle-effect-art{position:absolute;inset:0}
+#demo-badge{position:absolute;left:16px;bottom:16px;font-size:14px}
+.motion-demo details{margin:20px 0}.motion-demo details button{margin:12px 4px}
+
+html[data-quality=smooth] .page-enter{animation-duration:110ms}html[data-quality=smooth] dialog[open]{animation-duration:140ms}
+.board-cell--effect-paralyzed{box-shadow:inset 0 0 0 1px #a793d2}.board-cell--effect-decoy{outline:1px solid var(--accent-primary);outline-offset:-2px}
+
+
+/* Preserve the original assets. New geometry adds a readable timeline around them. */
+.battle-effect-art{--impact-size:clamp(84px,calc(var(--cell-size,36px)*2.5),112px);overflow:visible}
+.battle-effect-art>img{display:block;z-index:2;opacity:0;max-width:none;pointer-events:none;animation:restored-impact var(--effect-duration,1000ms) ease-out both;filter:drop-shadow(0 0 6px var(--fx-color))}
+.battle-effect-art>.battle-effect-art__trail{z-index:1;animation-name:restored-trail}
+.battle-effect-art>.battle-effect-art__ring{z-index:1;animation-name:restored-ring}
+.battle-effect-art>.battle-effect-art__scan{z-index:1;animation-name:restored-scan}
+.battle-effect-art>.battle-effect-art__debris,.battle-effect-art>.battle-effect-art__status{z-index:3}
+.battle-effect-art>.motion-glyph{z-index:4;filter:drop-shadow(0 0 4px currentColor)}
+.battle-effect-art[data-effect-scope=cell]>.motion-glyph,.battle-effect-art[data-effect-scope=cell]>img{
+ inset:auto;left:50%;top:50%;width:var(--impact-size);height:var(--impact-size);translate:-50% -50%}
+.battle-effect-art[data-effect-scope=cell]>.motion-glyph{overflow:visible}
+.battle-effect-art[data-effect-action=nuclear_bomb]{--fx-color:#c4acff}
+.battle-effect-art[data-effect-action=shock_bomb]{--fx-color:#bca0ff}
+.battle-effect-art[data-effect-action=submarine_missile]{--fx-color:#8ddfff}
+.battle-effect-art[data-effect-action=helicopter_strafe]>.battle-effect-art__trail{object-fit:fill}
+@keyframes restored-impact{0%{opacity:0;transform:scale(.45)}18%,52%{opacity:.95;transform:scale(1)}100%{opacity:0;transform:scale(1.18)}}
+@keyframes restored-trail{0%{opacity:0;transform:scaleX(.25)}22%,60%{opacity:.9;transform:scaleX(1)}100%{opacity:0;transform:scaleX(1.12)}}
+@keyframes restored-ring{0%{opacity:0;transform:scale(.25)}30%{opacity:.9}100%{opacity:0;transform:scale(1.2)}}
+@keyframes restored-scan{0%{opacity:0;transform:translateX(-8%)}25%,70%{opacity:.85}100%{opacity:0;transform:translateX(8%)}}
+
+/* Restore hull shadow, wake, damage/EMP/decoy imagery without moving the hull. */
+.tactical-unit-art>.tactical-prop,.tactical-unit-art>.tactical-status-art{
+ display:block;position:absolute;inset:-7%;width:114%;height:114%;object-fit:contain;pointer-events:none}
+.tactical-unit-art>.tactical-prop--shadow{z-index:0;opacity:.6;filter:none;transform:translate(2%,4%)}
+.tactical-unit-art>.tactical-prop--wake{z-index:1;opacity:.65;mix-blend-mode:screen;filter:none}
+.tactical-unit-art>.tactical-status-art{z-index:4;opacity:.85;filter:none}
+.tactical-unit-art>svg,.tactical-unit-art>img:last-child{position:relative;z-index:3}
+.tactical-unit-art--sunk>.tactical-status-art{opacity:1}
+html[data-quality=smooth] .tactical-unit-art>.tactical-prop--shadow{display:none}
+html[data-quality=smooth] .tactical-unit-art>.tactical-prop--wake{opacity:.4}
+
+/* Existing surface/underwater textures return; only one ambient layer moves. */
+.tactical-environment--foam{display:block;background:url("/assets/images/ocean-2.5d/layers/surface/surface_foam_overlay.webp") center/cover;opacity:.14;mix-blend-mode:screen}
+.tactical-environment--surface{mix-blend-mode:screen}
+html:not([data-reduce-motion=true])[data-quality=high] body[data-page=P05] .tactical-environment--surface{opacity:.2}
+[data-tactical-layer=surface] .battle-map-card--own .tactical-environment--foam{opacity:.22}
+[data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--caustics{opacity:.32;mix-blend-mode:screen}
+[data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--depth{display:block;background:url("/assets/images/ocean-2.5d/layers/underwater/underwater_depth_haze.webp") center/cover;opacity:.32}
+[data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--particles{display:block;background:url("/assets/images/ocean-2.5d/layers/underwater/underwater_particles.webp") center/cover;opacity:.22;mix-blend-mode:screen}
+[data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--refraction{display:block;background:url("/assets/images/ocean-2.5d/layers/underwater/underwater_refraction_noise.webp") center/cover;opacity:.12;mix-blend-mode:soft-light}
+[data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--foam{opacity:.025}
+html[data-quality=smooth] .tactical-environment--particles,html[data-quality=smooth] .tactical-environment--refraction{display:none}
+.tactical-layer-transition--sonar{background-image:url("/assets/images/ocean-2.5d/layers/transitions/sonar_scan_ring_sheet.webp");background-size:800% 100%;background-position:0 0}
+.tactical-layer-transition--submerge{background:url("/assets/images/ocean-2.5d/layers/transitions/submerge_surface_wake.webp") center/cover}
+.tactical-layer-transition--emerge{background:url("/assets/images/ocean-2.5d/layers/transitions/emerge_surface_wake.webp") center/cover}
+[data-layer-transition$="-to-underwater"] .tactical-layer-transition--submerge,[data-layer-transition$="-to-surface"] .tactical-layer-transition--emerge{animation:motion-envelope 420ms ease-out both}
+html[data-motion-hidden=true] .tactical-layer-transition{animation:none!important}
+html[data-theme=ocean-light] .battle-effect-art{filter:contrast(1.3)}
+
+.tactical-layer-transition{opacity:0}.ocean-console:not([data-layer-transition]) .tactical-layer-transition{animation:none!important}
+.tactical-environment--foam{opacity:.06}

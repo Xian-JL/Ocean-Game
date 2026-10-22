@@ -8,16 +8,11 @@
     />
     <meta
       name="description"
-      content="《海战 OCEAN》v1.6.1 战术信息层级与海域分层优化版"
+      content="《海战 OCEAN》v1.6.2 舰队控制台、训练营与动态特效增强版"
     />
     <meta name="theme-color" content="#06131f" />
     <title>海战 OCEAN</title>
-    <link rel="preload" href="/assets/images/battle/carrier-bridge-ocean.webp?v=__OCEAN_ASSET_VERSION__" as="image" type="image/webp" />
-    <link rel="preload" href="/assets/images/ocean-2.5d/ocean/ocean_deep_active.webp?v=__OCEAN_ASSET_VERSION__" as="image" type="image/webp" />
-    <link rel="preload" href="/assets/images/ocean-2.5d/layers/surface/surface_specular_seamless.webp?v=__OCEAN_ASSET_VERSION__" as="image" type="image/webp" />
-    <link rel="stylesheet" href="/css/main.css?v=__OCEAN_ASSET_VERSION__" />
-    <link rel="stylesheet" href="/css/v1.6.0.css?v=__OCEAN_ASSET_VERSION__" />
-    <link rel="stylesheet" href="/css/v1.6.1.css?v=__OCEAN_ASSET_VERSION__" />
+    <link rel="stylesheet" href="/css/ocean.css?v=__OCEAN_ASSET_VERSION__" />
     <script src="/js/theme-bootstrap.js?v=__OCEAN_ASSET_VERSION__"></script>
     <script src="/socket.io/socket.io.js" defer></script>
     <script src="/js/release-config.js?v=__OCEAN_ASSET_VERSION__" defer></script>
@@ -77,7 +72,7 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.6.1</span>
+          <span id="footer-release">Ocean-v1.6.2</span>
           <span aria-hidden="true">·</span>
           <span id="footer-protocol">Rule 1.8 · Socket 2.1</span>
         </span>
@@ -195,6 +190,8 @@
       </div>
 
       <div class="modal__actions">
+        <button class="button button--secondary" type="button" data-action="open-audio-settings">声音设置</button>
+        <button class="button button--secondary" type="button" data-action="open-personalize">个性化设置</button>
         <button class="button button--primary" type="button" data-action="close-rules">
           完成
         </button>
@@ -242,9 +239,7 @@
         </section>
       </div>
 
-      <p class="audio-dialog__hint">
-        背景音乐文件位置：<code>public/assets/audio/music/ocean-theme.mp3</code>
-      </p>
+      <p class="audio-dialog__hint">声音偏好保存在当前浏览器。</p>
       <div class="modal__actions">
         <button class="button button--primary" type="button" data-action="close-audio-settings">完成</button>
       </div>
@@ -336,6 +331,7 @@
       </div>
     </dialog>
 
+    <dialog id="battle-menu-dialog" class="modal" aria-labelledby="battle-menu-title"><h2 id="battle-menu-title">作战菜单</h2><div class="menu-actions"><button data-action="open-rules">游戏说明</button><button data-action="open-audio-settings">声音设置</button><button data-action="open-personalize">个性化设置</button></div><div class="menu-danger"><button class="button button--danger-quiet" data-action="surrender">投降</button></div><div class="modal__actions"><button data-action="close-battle-menu">返回战场</button></div></dialog>
     <noscript>
       <div class="noscript-message">
         本游戏需要 JavaScript 才能连接实时对局服务，请在浏览器中启用后刷新页面。

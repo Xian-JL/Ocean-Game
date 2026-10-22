@@ -29,7 +29,7 @@ test("十种战斗行动具有十种独立音效并在行动成功后播放", ()
     assert.match(app, new RegExp(`${action}: "${effect}"`));
     assert.match(audio, new RegExp(`${effect}: \\[`));
   }
-  assert.match(app, /Sound\?\.playEffect\?\.\(ACTION_EFFECTS\[definition\.type\]/);
+  assert.match(app, /Sound\?\.playEffect\?\.\(ACTION_EFFECTS\[feedback\.actionType\]/);
 });
 
 test("隐藏武器音效只按行动类型选择，不读取命中与伤害结果", () => {
@@ -37,9 +37,12 @@ test("隐藏武器音效只按行动类型选择，不读取命中与伤害结�
   const end = app.indexOf("async function submitFinalSalvo", start);
   const submitSource = app.slice(start, end);
   assert.ok(start >= 0 && end > start);
-  assert.match(submitSource, /ACTION_EFFECTS\[definition\.type\]/);
+  assert.doesNotMatch(submitSource, /playEffect[\s\S]*ACTION_EFFECTS/);
+  const owner=app.match(/Sound\?\.playEffect\?\.\(ACTION_EFFECTS\[feedback\.actionType\][^\n]+/);
+  assert.ok(owner,'安全结算事件必须拥有主动作音效');
+  assert.match(app,/description && freshMotion/);
   for (const forbidden of ["inflictedDamage", "receivedHits", "privateResults", "feedback.result"]) {
-    assert.equal(submitSource.includes(forbidden), false, `行动音效读取了秘密结果：${forbidden}`);
+    assert.equal(owner[0].includes(forbidden), false, `行动音效读取了秘密结果：${forbidden}`);
   }
   for (const effect of ["attack_missile", "attack_nuclear", "attack_shock"]) {
     assert.equal((app.match(new RegExp(`"${effect}"`, "g")) ?? []).length, 1);
@@ -55,7 +58,7 @@ test("主要界面、部署、标记、教程与系统状态均接入语义音�
     "pause", "eliminated", "victory", "defeat", "final_salvo",
   ]) {
     assert.match(audio, new RegExp(`${effect}: \\[`), `音效库缺少 ${effect}`);
-    assert.equal(app.includes(`"${effect}"`), true, `界面未接入 ${effect}`);
+    assert.equal((app.includes(`"${effect}"`) || app.includes(`'${effect}'`)), true, `界面未接入 ${effect}`);
   }
 });
 

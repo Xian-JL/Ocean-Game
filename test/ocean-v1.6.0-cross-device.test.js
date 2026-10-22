@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -20,10 +21,8 @@ function functionBody(name, nextName) {
   return app.slice(start, end);
 }
 
-test("v1.6.0跨设备样式仍按历史顺序加载并保留页面类", () => {
-  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(html, /v1\.6\.0\.css\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(app, /battle-page--v159 battle-page--v160/);
+test("UI2 迁移：v1.6.0跨设备样式仍按历史顺序加载并保留页面类", () => {
+  verifyUiContract("responsive");
 });
 
 test("画质设置提供自动、高画质和流畅三档且只保存在本机", () => {
@@ -43,12 +42,13 @@ test("自动画质根据减少动画、设备内存、核心数和视口评估",
   assert.match(body, /compactViewport/);
 });
 
-test("流畅模式省略阴影航迹并收束短时战斗特效", () => {
+test("流畅模式减少装饰成本但保留两层主要战斗特效", () => {
   const effects = functionBody("tacticalArtEffects", "artCoordinate");
   const battleEffects = functionBody("battleEffectAssets", "renderBattleEffectLayer");
   assert.match(effects, /quality === "smooth"/);
   assert.match(app, /quality: state\.effectiveQuality/);
-  assert.match(battleEffects, /slice\(0, 1\)/);
+  assert.match(battleEffects, /slice\(0, 2\)/);
+  assert.match(battleEffects, /"primary", "impact", "ring", "scan", "trail"/);
   assert.match(css, /html\[data-quality="smooth"\]/);
   assert.match(css, /tactical-prop--wake/);
 });

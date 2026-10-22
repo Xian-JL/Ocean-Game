@@ -1,0 +1,12 @@
+{
+  "version": "1.6.2",
+  "dependencyInstall": "npm ci --omit=dev",
+  "health": "ok",
+  "entry": "ok",
+  "runtimeCss": "ok",
+  "trainingVariants": 163,
+  "trainingSession": "PLAYING",
+  "crossToken": "rejected",
+  "proxyAddr": "2.0.8",
+  "result": "PASS"
+}

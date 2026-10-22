@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-21",
+  "currentBuild": "1.6.1-ui2.bd6adf487f",
+  "desktopViewport": [
+    1280,
+    720
+  ],
+  "mobileEmulation": [
+    390,
+    844
+  ],
+  "emulationRestored": true,
+  "observedFlows": [
+    "Create bot room",
+    "Random deployment and ready",
+    "Roll dice",
+    "Select radar target without submission",
+    "Explicit confirmation and feedback",
+    "Fleet map",
+    "Surrender and result",
+    "Leave room",
+    "Latest build homepage"
+  ],
+  "consoleWarningsAndErrorsOnFinalHomepage": [],
+  "limitations": "Manual smoke checks only; screenshots may be from earlier UI2 builds as manifest labels state. No real mobile hardware, full browser matrix or formal performance measurement."
+}

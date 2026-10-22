@@ -1,0 +1,770 @@
+{
+  "build": "1.6.1-ui2.da71186532",
+  "quality": "high",
+  "frames": [
+    {
+      "file": "high-00.jpg",
+      "timestamp": 1792655284995,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-01.jpg",
+      "timestamp": 1792655285089,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-02.jpg",
+      "timestamp": 1792655285156,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-03.jpg",
+      "timestamp": 1792655285231,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.95"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-04.jpg",
+      "timestamp": 1792655285299,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.923409"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.923409"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.923409"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-05.jpg",
+      "timestamp": 1792655285372,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.681308"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.681308"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.681308"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-06.jpg",
+      "timestamp": 1792655285436,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.471306"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.471306"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.471306"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-07.jpg",
+      "timestamp": 1792655285501,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.294784"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.294784"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.294784"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-08.jpg",
+      "timestamp": 1792655285561,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.151266"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.151266"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.151266"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-09.jpg",
+      "timestamp": 1792655285633,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.0448507"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.0448507"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0.0448507"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-10.jpg",
+      "timestamp": 1792655285703,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-11.jpg",
+      "timestamp": 1792655285767,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-12.jpg",
+      "timestamp": 1792655285834,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-13.jpg",
+      "timestamp": 1792655285901,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-14.jpg",
+      "timestamp": 1792655285964,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-15.jpg",
+      "timestamp": 1792655286025,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-16.jpg",
+      "timestamp": 1792655286082,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-17.jpg",
+      "timestamp": 1792655286143,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-18.jpg",
+      "timestamp": 1792655286197,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-19.jpg",
+      "timestamp": 1792655286257,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-20.jpg",
+      "timestamp": 1792655286324,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-21.jpg",
+      "timestamp": 1792655286383,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-22.jpg",
+      "timestamp": 1792655286438,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-23.jpg",
+      "timestamp": 1792655286493,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-24.jpg",
+      "timestamp": 1792655286557,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-25.jpg",
+      "timestamp": 1792655286622,
+      "metrics": {
+        "images": [
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          },
+          {
+            "display": "block",
+            "loaded": true,
+            "opacity": "0"
+          }
+        ],
+        "rays": [
+          "block",
+          "block"
+        ],
+        "scope": "cell",
+        "size": 84
+      }
+    },
+    {
+      "file": "high-26.jpg",
+      "timestamp": 1792655286688,
+      "metrics": null
+    },
+    {
+      "file": "high-27.jpg",
+      "timestamp": 1792655286789,
+      "metrics": null
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -19,12 +20,8 @@ test("三套主题均覆盖页面环境背景而不只改变按键", () => {
   assert.match(css, /ocean-dusk.*carrier-bridge-scene::before/);
 });
 
-test("航母界面使用正确主题标识并清除无效简写选择器", () => {
-  assert.equal(css.includes('data-theme="light"'), false);
-  assert.equal(css.includes('data-theme="dusk"'), false);
-  assert.match(css, /data-theme="ocean-light"/);
-  assert.match(css, /data-theme="ocean-dusk"/);
-  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
+test("UI2 迁移：航母界面使用正确主题标识并清除无效简写选择器", () => {
+  verifyUiContract("theme");
 });
 
 test("主题背景修正继续保留高对比度降级", () => {

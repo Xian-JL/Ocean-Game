@@ -1,0 +1,527 @@
+{
+  "version": "1.5",
+  "actions": [
+    {
+      "id": "destroyer_i_ram",
+      "shape": "ram-one",
+      "duration": 850,
+      "smooth": 320,
+      "lockEnd": 160,
+      "travelEnd": 420,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 160
+        },
+        {
+          "phase": "travel",
+          "start": 160,
+          "end": 420
+        },
+        {
+          "phase": "release",
+          "start": 420,
+          "end": 850
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized target cell; neutral fixed-edge decoration",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "only authorized hit/miss or area boolean",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "destroyer_ii_ram",
+      "shape": "ram-two",
+      "duration": 1000,
+      "smooth": 320,
+      "lockEnd": 180,
+      "travelEnd": 480,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 180
+        },
+        {
+          "phase": "travel",
+          "start": 180,
+          "end": 480
+        },
+        {
+          "phase": "release",
+          "start": 480,
+          "end": 1000
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized target cell; neutral fixed-edge decoration",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "only authorized hit/miss or area boolean",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "pirate_attack",
+      "shape": "cross",
+      "duration": 900,
+      "smooth": 320,
+      "lockEnd": 180,
+      "travelEnd": 450,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 180
+        },
+        {
+          "phase": "travel",
+          "start": 180,
+          "end": 450
+        },
+        {
+          "phase": "release",
+          "start": 450,
+          "end": 900
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized target cell; neutral fixed-edge decoration",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "only authorized hit/miss or area boolean",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "motorboat_ram",
+      "shape": "wake",
+      "duration": 750,
+      "smooth": 320,
+      "lockEnd": 140,
+      "travelEnd": 340,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 140
+        },
+        {
+          "phase": "travel",
+          "start": 140,
+          "end": 340
+        },
+        {
+          "phase": "release",
+          "start": 340,
+          "end": 750
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized target cell; neutral fixed-edge decoration",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "only authorized hit/miss or area boolean",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "submarine_missile",
+      "shape": "missile",
+      "duration": 1000,
+      "smooth": 320,
+      "lockEnd": 160,
+      "travelEnd": 520,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 160
+        },
+        {
+          "phase": "travel",
+          "start": 160,
+          "end": 520
+        },
+        {
+          "phase": "release",
+          "start": 520,
+          "end": 1000
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized target cell; neutral fixed-edge decoration",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "attacker: unknown, invariant across hidden outcomes",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "nuclear_bomb",
+      "shape": "nuclear",
+      "duration": 1400,
+      "smooth": 360,
+      "lockEnd": 220,
+      "travelEnd": 620,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 220
+        },
+        {
+          "phase": "travel",
+          "start": 220,
+          "end": 620
+        },
+        {
+          "phase": "release",
+          "start": 620,
+          "end": 1400
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized target cell; neutral fixed-edge decoration",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "attacker: unknown, invariant across hidden outcomes",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "shock_bomb",
+      "shape": "emp",
+      "duration": 1000,
+      "smooth": 320,
+      "lockEnd": 160,
+      "travelEnd": 600,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 160
+        },
+        {
+          "phase": "travel",
+          "start": 160,
+          "end": 600
+        },
+        {
+          "phase": "release",
+          "start": 600,
+          "end": 1000
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized area from Data target cells",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "attacker: unknown, invariant across hidden outcomes",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "detection_bomb",
+      "shape": "sonar",
+      "duration": 1200,
+      "smooth": 320,
+      "lockEnd": 160,
+      "travelEnd": 850,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 160
+        },
+        {
+          "phase": "travel",
+          "start": 160,
+          "end": 850
+        },
+        {
+          "phase": "release",
+          "start": 850,
+          "end": 1200
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized area from Data target cells",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "only authorized hit/miss or area boolean",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "radar_scan",
+      "shape": "radar",
+      "duration": 1300,
+      "smooth": 360,
+      "lockEnd": 160,
+      "travelEnd": 1000,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 160
+        },
+        {
+          "phase": "travel",
+          "start": 160,
+          "end": 1000
+        },
+        {
+          "phase": "release",
+          "start": 1000,
+          "end": 1300
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized area from Data target cells",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "only authorized hit/miss or area boolean",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    },
+    {
+      "id": "helicopter_strafe",
+      "shape": "strafe",
+      "duration": 1400,
+      "smooth": 360,
+      "lockEnd": 180,
+      "travelEnd": 900,
+      "stages": [
+        {
+          "phase": "lock",
+          "start": 0,
+          "end": 180
+        },
+        {
+          "phase": "travel",
+          "start": 180,
+          "end": 900
+        },
+        {
+          "phase": "release",
+          "start": 900,
+          "end": 1400
+        }
+      ],
+      "trigger": "fresh accepted server resolution; never submit ACK or restored snapshot",
+      "scope": "authorized row/column",
+      "allowedLayers": "only currently visible authorized map; clipping inside ocean-board",
+      "resources": {
+        "newBitmap": 0,
+        "geometry": "6 CSS/DOM children; no particle system",
+        "legacyBitmaps": {
+          "highMax": 4,
+          "smoothMax": 2
+        },
+        "singleCellDecorationPx": [
+          84,
+          112
+        ]
+      },
+      "safeInput": "role-filtered battleEffectModel",
+      "resultPolicy": "only authorized hit/miss or area boolean",
+      "reduced": "static facts, no effect layer",
+      "cancellation": [
+        "new event",
+        "map change",
+        "hidden",
+        "reduced motion",
+        "leave/reset",
+        "1800ms deadline"
+      ]
+    }
+  ],
+  "mainEffects": 1,
+  "queue": 0,
+  "particles": 0,
+  "environment": {
+    "periods": [
+      16000,
+      18000
+    ],
+    "movingLayers": 1,
+    "maxShiftPx": 3
+  },
+  "assets": "Existing role-filtered impact/trail/ring bitmaps restored, composed with code-native geometry; hull shadow/wake/status and existing sea textures restored"
+}

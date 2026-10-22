@@ -1,0 +1,75 @@
+/* Single ownership of viewport changes: H first in effect (last rule), then A/B/C/D. */
+@media(min-width:1280px) and (max-width:1439px){
+  .console-workspace{grid-template-columns:192px minmax(0,1fr) 280px;gap:12px;padding:12px}
+  .console-panel-heading{padding:16px 12px 10px}.fleet-list,.action-rail__content{padding-inline:12px}
+  .command-dock{padding:12px;gap:16px}.command-utilities{gap:8px}.layer-switch{gap:8px}
+  .ocean-console--salvo .console-workspace{grid-template-columns:192px minmax(0,1fr)}
+}
+@media(min-width:1024px) and (max-width:1279px){
+  .console-workspace{grid-template-columns:minmax(0,1fr) 280px;padding:12px;gap:12px}
+  .fleet-panel{display:none}.fleet-panel--open{display:flex;position:fixed;z-index:100;top:80px;bottom:110px;left:16px;width:300px;box-shadow:var(--shadow-overlay)}
+  .fleet-panel .drawer-close{display:grid}.battle-header{padding-inline:16px;gap:16px}.battle-header__room{display:none}
+  .command-dock{gap:12px;padding:12px}.command-utilities{gap:8px}.layer-switch{display:none}
+  .mobile-console-nav{display:flex;position:fixed;left:16px;bottom:14px;z-index:40;gap:8px}.mobile-console-nav button{font-size:12px;background:var(--surface-panel);padding:8px}.mobile-console-nav svg{display:none}
+  .command-dock{padding-left:264px}.command-utilities{display:none}
+  .ocean-console--salvo .console-workspace{grid-template-columns:minmax(0,1fr)}
+  .deployment-layout{grid-template-columns:190px minmax(0,1fr)}.deployment-panel--guide{grid-column:1/-1;border:0;padding:0;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+}
+@media(max-width:1023px){
+  .global-header{padding:0 20px;height:64px}.app{padding:24px 20px}.global-footer{padding:20px;font-size:12px}.header-room{display:none}
+  .entry-page{gap:32px;grid-template-columns:1fr 1fr;margin:12px auto}.entry-hero{min-height:540px}.entry-hero h1{font-size:64px}.entry-hero__tagline{font-size:28px}.entry-form-card{padding:20px}
+  .deployment-layout{grid-template-columns:190px minmax(0,1fr);gap:16px}.deployment-panel--guide{grid-column:1/-1;border:0;padding:0;display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+  .ocean-console{height:auto;min-height:100dvh;display:block;overflow:clip;padding-bottom:calc(var(--command-height,80px) + 80px + env(safe-area-inset-bottom))}
+  .battle-header{height:60px;padding:8px max(12px,env(safe-area-inset-right));gap:12px;position:sticky;top:0;z-index:50;background:var(--surface-page)}
+  .battle-header .brand,.battle-header__room{display:none}.battle-header__turn{margin-left:0;flex:1}.battle-header__turn strong{font-size:14px}.battle-header__turn small{font-size:12px}.battle-header__timer{min-width:64px}.battle-header__timer strong{font-size:20px}.battle-header__timer small{font-size:12px}.battle-header__connection span{display:none}
+  .console-workspace{display:block;padding:12px;min-height:0}.battle-main-column{gap:8px}.map-navigation{gap:8px}.map-tools{display:flex;flex-wrap:wrap;gap:8px}.map-navigation{flex-wrap:wrap}.map-navigation>.mobile-map-tabs{flex-basis:100%}.map-tools button{min-height:44px}.map-tools button[data-action="toggle-marker-mode"],.map-tools button[data-action="cycle-tactical-layer"]{display:block}
+  .battle-maps{container-type:normal;display:block;height:clamp(430px,62dvh,820px);min-height:430px;flex:none}
+  .battle-map-card{height:100%;min-height:0}.battle-map-card.is-mobile-active{display:flex;justify-content:flex-start}
+  .battle-map-card .board-frame,.battle-map-card:has(.marker-palette) .board-frame{width:100%;height:100%;max-height:100%;aspect-ratio:auto;--cell-size:42px;margin:0;overflow:auto}
+  .battle-map-card .ocean-board{width:max-content;height:max-content;grid-template-columns:24px repeat(var(--board-size),42px);grid-template-rows:24px repeat(var(--board-size),42px)}
+  .battle-map-tab__identity strong{max-width:120px}.battle-map-tab__result{max-width:180px}
+  .action-rail,.fleet-panel{display:none;position:fixed;z-index:110;left:12px;right:12px;bottom:12px;width:auto;max-height:82dvh;height:auto;box-shadow:var(--shadow-overlay);border-radius:16px}
+  .action-rail--open,.fleet-panel--open{display:flex}.drawer-close{display:grid}.action-rail__content,.fleet-list{max-height:calc(82dvh - 100px)}
+  .fleet-links{grid-template-columns:repeat(3,minmax(0,1fr));padding:12px;gap:8px}.fleet-links button{font-size:12px;padding:8px}
+  .log-panel{top:auto;bottom:12px;left:12px;right:12px;width:auto;max-height:82dvh;height:70dvh}
+  .battle-drawer-scrim{inset:0;z-index:100}
+  .command-dock{position:fixed;left:12px;right:12px;bottom:calc(68px + env(safe-area-inset-bottom));z-index:60;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:70px;display:flex;gap:12px;box-shadow:var(--shadow-overlay);max-height:35dvh;overflow:auto}
+  .command-utilities{display:none}.command-summary{display:flex;flex-direction:column;align-items:flex-start;gap:2px}.command-summary>strong{font-size:12px}.command-summary>span{font-size:14px}.command-summary>small{font-size:12px}.command-risk{max-height:4.5em;overflow:auto}
+  .command-controls{gap:8px}.command-controls>button{min-width:44px;padding:8px;font-size:12px}.command-execute{min-width:84px!important;min-height:48px}
+  .mobile-console-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;position:fixed;bottom:0;left:0;right:0;z-index:60;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--surface-panel);border-top:1px solid var(--line)}
+  .mobile-console-nav button{display:flex;align-items:center;justify-content:center;gap:6px;min-width:0;padding:8px 4px;font-size:12px;border-color:transparent}.mobile-console-nav svg{width:18px;height:18px}
+  .ocean-console[data-drawer-open]:not([data-drawer-open=none]) .command-dock,.ocean-console[data-drawer-open]:not([data-drawer-open=none]) .mobile-console-nav{visibility:hidden}
+  .feedback-slot{order:0}.feedback-empty{padding:8px 0}.resolution-strip:not(.resolution-strip--collapsed){max-height:200px}
+  .ocean-console--salvo .console-workspace{display:block}.ocean-console--salvo .battle-maps{height:430px;max-height:none}.final-salvo-stage__grid{grid-template-columns:1fr}.final-salvo-stage__header{align-items:flex-start}.final-salvo-stage__state{font-size:12px}
+}
+@media(max-width:700px){
+  .global-header{padding:0 16px;gap:12px}.brand__mark{width:24px;height:24px}.brand strong{font-size:14px}.global-header__tools{gap:8px}.header-audio{display:none}.connection-pill{margin-right:0}.connection-pill #connection-text{max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .app{padding:20px 16px}.global-footer{padding:20px 16px}.global-footer__meta{gap:6px}.global-footer__meta #footer-protocol{display:none}
+  .entry-page{display:flex;flex-direction:column;gap:24px;margin:0}.entry-hero{width:100%;min-height:0;padding:12px 0}.entry-hero__badge{margin-bottom:12px}.entry-hero h1{font-size:48px;margin-bottom:12px}.entry-hero__tagline{font-size:24px;line-height:1.4}.entry-hero__tagline br{display:none}.entry-hero__description{display:none}.entry-facts{margin-top:16px;gap:24px}.entry-facts span{display:flex;align-items:baseline;gap:6px}.entry-facts strong{font-size:16px}.entry-console{width:100%}.entry-volatile-notice{font-size:12px;margin-bottom:12px}.entry-form-card{padding:20px}.entry-form-card__header{margin-bottom:20px}.entry-form-card__header h2{font-size:20px}
+  .room-topbar{align-items:flex-start;margin-bottom:16px;gap:12px}.room-topbar h1{font-size:26px}.room-topbar>div>p:not(.eyebrow){font-size:12px}.room-topbar__meta{display:grid;gap:4px;flex-shrink:0}.room-code-card>span,.room-code-card .text-button{display:none}.timer-card{font-size:12px}
+  .waiting-layout{grid-template-columns:1fr;gap:16px}.lobby-room-card,.waiting-panel{padding:20px}.lobby-room-code{font-size:36px}.lobby-room-actions{gap:8px}.waiting-page{margin:0}
+  .seat-list--compact{gap:8px}.seat-list--compact .seat-card{font-size:12px;gap:6px}.seat-card__number{display:none}
+  .deployment-progress-strip{gap:8px;font-size:12px}.deployment-progress-strip__status small{display:none}.deployment-progress-strip__summary{gap:8px}.deployment-progress-strip__summary .status-kicker{display:none}
+  .deployment-layout{display:flex;flex-direction:column;gap:20px}.deployment-panel--fleet{width:100%;border:0;padding:0;max-height:200px;overflow:auto}.deployment-panel--fleet>.panel-heading{margin-bottom:8px}.deployment-map-card{width:100%}.deployment-panel--guide{display:block;width:100%}.deployment-toolbar{bottom:0;padding:12px;margin-inline:-4px;gap:8px}.deployment-toolbar__actions{gap:8px}.deployment-toolbar__status{font-size:12px}
+  .rolling-stage{gap:8px;margin:32px 0}.die-player{padding:12px 6px;font-size:14px}.die{font-size:72px}.die--waiting{font-size:52px}.rolling-result{font-size:14px}
+  .result-hero{padding:24px 0;flex-wrap:wrap;gap:16px}.result-hero h1{font-size:36px}.result-hero__replay-link{margin-left:auto}.result-player-grid{grid-template-columns:1fr}.result-player-card{padding:16px}.result-hero__facts{gap:12px!important}.rematch-player-grid{flex-direction:column;gap:12px!important}.replay-layout{grid-template-columns:1fr}
+  .tutorial-header{align-items:flex-start;gap:12px}.tutorial-header h1{font-size:26px}.tutorial-header p{font-size:12px}.tutorial-header>button{flex-shrink:0;font-size:12px}.tutorial-simulator,.tutorial-quiz-layout{grid-template-columns:1fr!important}.tutorial-concept-card{padding:16px 0;border:0;border-top:1px solid var(--line)}.tutorial-chapters{margin:16px 0}.tutorial-chapters>button{min-width:150px}.tutorial-chapters small{display:none}
+  .modal{padding:20px;width:calc(100vw - 24px)}.modal__actions{bottom:-20px}.quick-rule-grid{grid-template-columns:1fr}.toast-region{top:72px;right:12px;max-width:calc(100vw - 24px)}.toast:nth-child(n+2){display:none}
+}
+@media(max-height:599px){
+  .ocean-console{height:auto;min-height:100dvh;display:block;overflow:clip;padding-bottom:90px}
+  .battle-header{height:52px;padding:4px 12px;gap:12px;position:sticky;top:0;background:var(--surface-page);z-index:50}.battle-header__room,.battle-header .brand{display:none}.battle-header__turn{margin-left:0;flex:1}
+  .console-workspace{display:block;padding:8px 12px}.fleet-panel,.action-rail{display:none}.fleet-panel--open,.action-rail--open{display:flex;position:fixed;right:12px;left:auto;top:12px;bottom:12px;width:min(360px,80vw);max-height:none;z-index:110}.drawer-close{display:grid}.battle-main-column{display:flex}.battle-maps{height:360px;container-type:normal;min-height:0;flex:none;display:block}
+  .battle-map-card .board-frame,.battle-map-card:has(.marker-palette) .board-frame{width:100%;height:100%;aspect-ratio:auto;max-height:none;overflow:auto}.battle-map-card .ocean-board{width:max-content;height:max-content;grid-template-columns:24px repeat(var(--board-size),42px);grid-template-rows:24px repeat(var(--board-size),42px)}
+  .command-dock{position:sticky;bottom:0;margin:0 12px;left:auto;right:auto;max-height:35dvh;padding:8px 12px;gap:12px;overflow:auto;align-items:flex-start}.command-utilities{display:none}.command-summary{display:grid}.command-summary small{font-size:12px}.command-risk{display:block;max-height:3em;overflow:auto}.mobile-console-nav{display:flex;position:static;padding:8px 12px}.mobile-console-nav button{flex:1}.mobile-console-nav svg{display:none}
+  .log-panel{top:12px;bottom:12px;right:12px;left:auto;width:min(480px,90vw);height:auto;max-height:none}.battle-drawer-scrim{inset:0;z-index:100}.ocean-console--salvo .battle-maps{height:360px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+html[data-reduce-motion=true] *,body.reduce-motion *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+html[data-quality=smooth] .tactical-environment-layer .tactical-environment{animation:none!important}
+@media(forced-colors:active){
+  .ocean-board{background:Canvas!important}.board-cell,.board-axis{color:CanvasText!important;border:1px solid GrayText}.board-cell--target-preview{outline:2px solid Highlight!important}.tactical-environment-layer,.battle-effect-layer{display:none}
+  .button--primary,.command-execute{border:2px solid Highlight}.board-cell--enemy-hit::after{content:"命中"}.board-cell--enemy-miss::after{content:"未中"}
+}

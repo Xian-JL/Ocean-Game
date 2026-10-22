@@ -1,0 +1,206 @@
+  function actionVisualMeta(definition) {
+    const table = {
+      [Data.ACTION_TYPES.DESTROYER_I_RAM]: { group: "surface", glyph: "Ⅰ", icon: "action-destroyer-i", groupName: "舰艇攻击" },
+      [Data.ACTION_TYPES.DESTROYER_II_RAM]: { group: "surface", glyph: "Ⅱ", icon: "action-destroyer-ii", groupName: "舰艇攻击" },
+      [Data.ACTION_TYPES.PIRATE_ATTACK]: { group: "surface", glyph: "盗", icon: "action-pirate", groupName: "舰艇攻击" },
+      [Data.ACTION_TYPES.MOTORBOAT_RAM]: { group: "surface", glyph: "摩", icon: "action-motorboat", groupName: "舰艇攻击" },
+      [Data.ACTION_TYPES.SUBMARINE_MISSILE]: { group: "underwater", glyph: "↗", icon: "action-missile", groupName: "潜航武器" },
+      [Data.ACTION_TYPES.NUCLEAR_BOMB]: { group: "underwater", glyph: "☢", icon: "action-nuclear", groupName: "潜航武器" },
+      [Data.ACTION_TYPES.SHOCK_BOMB]: { group: "underwater", glyph: "震", icon: "action-shock", groupName: "潜航武器" },
+      [Data.ACTION_TYPES.DETECTION_BOMB]: { group: "underwater", glyph: "探", icon: "action-detection", groupName: "潜航武器" },
+      [Data.ACTION_TYPES.HELICOPTER_STRAFE]: { group: "carrier", glyph: "✦", icon: "action-helicopter", groupName: "舰载系统" },
+      [Data.ACTION_TYPES.RADAR_SCAN]: { group: "carrier", glyph: "◎", icon: "action-radar", groupName: "舰载系统" },
+    };
+    return table[definition.type] ?? { group: "surface", glyph: "•", icon: "action-radar", groupName: "行动" };
+  }
+
+  function compactActionStatus(status) {
+    if (status.code === "available") return "可用";
+    if (status.code === "submitting") return "结算中";
+    if (status.code === "waiting") return "等待回合";
+    if (status.code === "sunk") return "单位沉没";
+    if (status.code === "paralyzed") return "单位瘫痪";
+    if (status.code === "empty") return "已耗尽";
+    if (status.label.includes("首个行动") || status.label.includes("先扫描")) return "需先雷达";
+    if (status.label.includes("首个行动并同时")) return "须首项使用";
+    if (status.label.includes("驱逐舰均沉没")) return "尚未解锁";
+    return status.label;
+  }
+
+  function actionAvailabilityTier(status) {
+    if (status.enabled || status.code === "submitting") return "available";
+    if (["empty", "sunk"].includes(status.code)) return "exhausted";
+    return "limited";
+  }
+
+
+  function renderActionCard(room, definition) {
+    const status = Model.deriveActionStatus(room, definition);
+    const selected = definition.type === state.battle.selectedAction;
+    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected ? 'action-card--selected' : ''}" data-action="select-action" data-action-type="${definition.type}" aria-pressed="${selected}" ${status.enabled ? '' : 'disabled'}><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${escapeHtml(definition.name)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>${!status.enabled ? `<p class="action-disabled-reason">${escapeHtml(status.label)}</p>` : ''}</div>`;
+  }
+
+  function renderActionGroups(room) {
+    const groups = [
+      { key: "surface", label: "舰艇攻击" },
+      { key: "underwater", label: "潜航武器" },
+      { key: "carrier", label: "舰载系统" },
+    ];
+    return `
+      <div class="action-list action-list--v073">
+        ${groups.map((group) => {
+          const actions = Data.ACTION_DEFINITIONS.filter((definition) => actionVisualMeta(definition).group === group.key);
+          return `<section class="action-group action-group--${group.key}" aria-label="${group.label}">
+            <div class="action-group__heading"><span>${group.label}</span><b>${actions.filter((definition) => Model.deriveActionStatus(room, definition).enabled).length}</b></div>
+            <div class="action-group__grid">${actions.map((definition) => renderActionCard(room, definition)).join("")}</div>
+          </section>`;
+        }).join("")}
+      </div>`;
+  }
+
+  const ACTION_SOURCE_ORDER = Object.freeze([
+    Data.UNIT_TYPES.DESTROYER_I,
+    Data.UNIT_TYPES.DESTROYER_II,
+    Data.UNIT_TYPES.PIRATE_SHIP,
+    Data.UNIT_TYPES.MOTORBOAT,
+    Data.UNIT_TYPES.SUBMARINE,
+    Data.UNIT_TYPES.NUCLEAR_SUBMARINE,
+    Data.UNIT_TYPES.AIRCRAFT_CARRIER,
+  ]);
+
+  function sourceUnitState(units, definition) {
+    const alive = units.filter((unit) => unit.hp > 0);
+    if (alive.length === 0) return { code: "sunk", label: "已沉没" };
+    if (alive.every((unit) => unit.paralyzed)) return { code: "paralyzed", label: "瘫痪" };
+    if (alive.length < units.length) return { code: "damaged", label: `${alive.length}/${units.length} 可用` };
+    if (alive.some((unit) => unit.hp < definition.initialHp)) return { code: "damaged", label: "受伤" };
+    return { code: "ready", label: "作战中" };
+  }
+
+  function renderUnitActionDeck(room, ownBattle) {
+    const selectedSourceType = Data.getActionDefinition(state.battle.selectedAction)?.sourceType;
+    const orderedSources = [...ACTION_SOURCE_ORDER].sort((left, right) => {
+      const score = (sourceType) => {
+        if (sourceType === selectedSourceType) return -3;
+        const actions = Data.ACTION_DEFINITIONS.filter((action) => action.sourceType === sourceType);
+        if (actions.some((action) => Model.deriveActionStatus(room, action).enabled)) return -2;
+        if (actions.some((action) => actionAvailabilityTier(Model.deriveActionStatus(room, action)) === "limited")) return -1;
+        return 0;
+      };
+      return score(left) - score(right) || ACTION_SOURCE_ORDER.indexOf(left) - ACTION_SOURCE_ORDER.indexOf(right);
+    });
+    return `
+      <div class="unit-action-deck unit-action-deck--v076" aria-label="兵种行动与状态">
+        ${orderedSources.map((sourceType) => {
+          const definition = Data.getUnitDefinitionByType(sourceType);
+          const units = (ownBattle.units ?? []).filter((unit) => unit.type === sourceType);
+          const actions = Data.ACTION_DEFINITIONS.filter((action) => action.sourceType === sourceType);
+          if (!definition || units.length === 0 || actions.length === 0) return "";
+          const sourceState = sourceUnitState(units, definition);
+          const sourceLabel = units.length > 1
+            ? definition.name.replace(/\s+\d+$/, "")
+            : definition.name;
+          const hp = units.reduce((sum, unit) => sum + unit.hp, 0);
+          const maxHp = units.length * definition.initialHp;
+          const hpPercent = Math.max(0, Math.min(100, (hp / maxHp) * 100));
+          const availableCount = actions.filter((action) => Model.deriveActionStatus(room, action).enabled).length;
+          const selectedSource = Data.getActionDefinition(state.battle.selectedAction)?.sourceType === sourceType;
+          const expanded = selectedSource || state.battle.expandedUnitCards.has(sourceType);
+          return `
+            <section class="unit-action-card unit-action-card--${sourceState.code} ${expanded ? "unit-action-card--expanded" : "unit-action-card--collapsed"}" data-source-type="${sourceType}" data-unit-state="${sourceState.code}">
+              <button class="unit-action-card__toggle" type="button" data-action="toggle-unit-card" data-source-type="${sourceType}" aria-expanded="${expanded}">
+                <span class="unit-status__icon unit-status__icon--${definition.category}" aria-hidden="true">${uiIcon(unitIconName(sourceType))}</span>
+                <div class="unit-action-card__identity">
+                  <div><strong>${escapeHtml(sourceLabel)}${units.length > 1 ? ` ×${units.length}` : ""}</strong><small>${escapeHtml(sourceState.label)}</small></div>
+                  <div class="hp-track hp-track--compact" aria-label="生命值 ${Model.formatHp(hp)} / ${maxHp}"><i style="--hp-percent:${hpPercent}%"></i></div>
+                </div>
+                <span class="hp-meter hp-meter--compact"><b>${Model.formatHp(hp)}</b><i>/ ${maxHp}</i></span>
+                <span class="unit-action-card__availability">${availableCount}/${actions.length}</span>
+                <span class="unit-action-card__chevron" aria-hidden="true">⌄</span>
+              </button>
+              <div class="unit-action-card__details" ${expanded ? "" : "hidden"}>
+                ${units.length > 1 ? `<div class="unit-instance-row">${units.map((unit, index) => `<span data-unit-state="${unitStateCode(unit, definition)}">艇 ${index + 1} · ${Model.formatHp(unit.hp)}/${definition.initialHp}</span>`).join("")}</div>` : ""}
+                <div class="unit-action-card__resources">${unitResourceBadges(ownBattle, units[0]) || `<span class="unit-resource-badge">可用行动 <b>${availableCount}/${actions.length}</b></span>`}</div>
+                <div class="unit-action-card__actions">
+                  ${actions.map((action) => renderActionCard(room, action)).join("")}
+                </div>
+              </div>
+            </section>`;
+        }).join("")}
+        <section class="unit-action-card unit-action-card--decoy" aria-label="诱饵鱼雷状态">
+          <header class="unit-action-card__header">
+            <span class="unit-status__icon unit-status__icon--decoy" aria-hidden="true">${uiIcon("ship-decoy")}</span>
+            <div class="unit-action-card__identity"><div><strong>诱饵鱼雷</strong><small>战术装置</small></div></div>
+            <span class="hp-meter hp-meter--compact"><b>${ownBattle.decoys.filter((decoy) => !decoy.destroyed).length}</b><i>/ ${ownBattle.decoys.length}</i></span>
+          </header>
+        </section>
+      </div>`;
+  }
+
+  function renderActionAvailabilitySummary(room) {
+    const counts = Data.ACTION_DEFINITIONS.reduce((result, definition) => {
+      result[actionAvailabilityTier(Model.deriveActionStatus(room, definition))] += 1;
+      return result;
+    }, { available: 0, limited: 0, exhausted: 0 });
+    return `<div class="action-availability-summary" aria-label="行动状态总览">
+      <span data-tier="available"><i></i>可用 <b>${counts.available}</b></span>
+      <span data-tier="limited"><i></i>受限 <b>${counts.limited}</b></span>
+      <span data-tier="exhausted"><i></i>耗尽/失效 <b>${counts.exhausted}</b></span>
+    </div>`;
+  }
+
+  function renderActionCommandChain(room, selectedDefinition) {
+    const hasAction = Boolean(selectedDefinition);
+    const hasTarget = Boolean(state.battle.target);
+    return `<section class="action-command-chain" aria-label="行动指令流程">
+      <div class="action-command-step" data-step="action" data-complete="${hasAction}">
+        ${uiCommandIcon("action")}<span><small>01 行动</small><strong>${hasAction ? escapeHtml(selectedDefinition.name) : "选择武器"}</strong></span>
+      </div>
+      <i aria-hidden="true">›</i>
+      <div class="action-command-step" data-step="target" data-complete="${hasTarget}">
+        ${uiCommandIcon("lock")}<span><small>02 目标</small><strong>${hasTarget ? escapeHtml(Model.formatTarget(state.battle.target)) : "选择坐标"}</strong></span>
+      </div>
+      <i aria-hidden="true">›</i>
+      <button class="action-command-confirm" type="button" data-action="reopen-action-confirm" ${room.turn?.canAct && hasAction && hasTarget ? "" : "disabled"}>
+        ${uiCommandIcon("confirm")}<span><small>03 确认</small><strong>${hasTarget ? "执行指令" : "等待目标"}</strong></span>
+      </button>
+    </section>`;
+  }
+
+
+  function renderActionPanel(room) {
+    const definition = Data.getActionDefinition(state.battle.selectedAction);
+    const available = Data.ACTION_DEFINITIONS.filter(item => Model.deriveActionStatus(room, item).enabled);
+    const restricted = Data.ACTION_DEFINITIONS.filter(item => !Model.deriveActionStatus(room, item).enabled);
+    return `<aside class="action-rail ${state.battle.actionDrawerOpen ? 'action-rail--open' : ''}" aria-label="行动与单位状态" data-scroll-key="actions">
+      <header class="console-panel-heading"><div><span class="eyebrow">指令编排</span><h2>${openingRadarRequired(room) ? '首次雷达扫描' : room.turn?.canAct ? '选择行动' : '等待行动'}</h2></div><button class="drawer-close icon-button" data-action="close-battle-drawers" aria-label="关闭行动面板">×</button></header>
+      <div class="action-rail__content" data-scroll-key="action-content">
+        ${openingRadarRequired(room) ? `<p class="opening-radar-task">首个行动回合先扫描海域。选择 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 区域的左上起始格。</p>` : ''}
+        <div class="action-list" aria-label="可用行动">${available.map(item => renderActionCard(room,item)).join('') || '<p class="empty-state">当前没有可提交的行动。</p>'}</div>
+        <details class="restricted-actions" ${available.length === 0 ? 'open' : ''}><summary>受限或已耗尽 · ${restricted.length}</summary><div class="action-list">${restricted.map(item => renderActionCard(room,item)).join('')}</div></details>
+        ${definition ? `<section class="action-detail"><h3>${escapeHtml(definition.name)}</h3><p>${escapeHtml(definition.warning)}</p>${definition.targetMode === 'line' ? `<div class="axis-switch" role="group" aria-label="直升机扫射方向"><button data-action="set-helicopter-axis" data-axis="row" aria-pressed="${state.battle.helicopterAxis === 'row'}">按行</button><button data-action="set-helicopter-axis" data-axis="column" aria-pressed="${state.battle.helicopterAxis === 'column'}">按列</button></div>` : ''}</section>` : '<p class="action-guidance">选择行动，再到海图选择目标。确认执行前，你可以随时调整。</p>'}
+      </div></aside>`;
+  }
+
+  function renderTurnProgress(room) {
+    if (room.maxPlayers !== 3) return "";
+    const required = activeBattleOpponentIds(room);
+    if (required.length === 0) return "";
+    const synchronized = required.length > 1;
+    const action = Data.getActionDefinition(state.battle.selectedAction);
+    const target = state.battle.target ? Model.formatTarget(state.battle.target) : "等待坐标";
+    return `
+      <div class="battle-turn-progress" aria-label="本回合同步目标">
+        <div class="battle-turn-progress__summary">
+          <span>${synchronized ? "一次行动 · 资源/自损仅一次" : "单一有效目标"}</span>
+          <strong>${synchronized ? `同步 ×${required.length}` : "目标 ×1"}</strong>
+          <small>${action ? `${escapeHtml(action.name)} · ${escapeHtml(target)}` : "尚未选择行动"}</small>
+        </div>
+        <div class="battle-turn-progress__targets">
+          ${required.map((playerId) => {
+            const currentTarget = room.turn?.canAct && state.battle.targetPlayerId === playerId;
+            return `<span data-complete="false" data-current="${currentTarget}">${synchronized ? "⇉" : "→"} ${escapeHtml(Model.nicknameFor(room, playerId))}</span>`;
+          }).join("")}
+        </div>
+      </div>`;
+  }

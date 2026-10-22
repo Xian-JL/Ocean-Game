@@ -1,0 +1,32 @@
+[
+  {
+    "testFile": "test/ocean-v1.3.3-audio.test.js",
+    "old": "主动作音效在submit ACK后按definition.type播放",
+    "new": "安全新鲜resolution事件按feedback.actionType播放；submit不能再播放同一主音",
+    "reason": "v1.5提交与结果时间线分离、三人/同步防重；没有弱化隐藏结果边界"
+  },
+  {
+    "testFile": "test/ocean-v1.3.3-audio.test.js",
+    "old": "仅检查submit函数不读取秘密并包含ACTION_EFFECTS",
+    "new": "检查实际事件所有者只按actionType选音且freshMotion门控，submit无重复主音",
+    "reason": "触发点迁移，秘密字段禁止规则保留"
+  },
+  {
+    "testFile": "test/ocean-v1.3.3-audio.test.js",
+    "old": "语义音效名称必须是双引号字面量",
+    "new": "兼容单/双引号，所有语义音效仍须存在",
+    "reason": "引号风格不是行为契约；胜负/齐射在对应安全状态事件中触发"
+  },
+  {
+    "testFile": "test/ocean-v1.5.7-battle-effects.test.js",
+    "old": "3.6秒计时与历史main.css效果动画",
+    "new": "1.8秒清理、活动ocean.css层不拦截输入、无旧3.6秒到达动画",
+    "reason": "spec v1.5明确收紧时长且继续只加载ocean.css"
+  },
+  {
+    "testFile": "test/ocean-v1.6.0-cross-device.test.js",
+    "old": "流畅模式最多1张主要贴图",
+    "new": "流畅模式最多2张主要贴图，并保留primary/impact/ring/scan/trail形态",
+    "reason": "2026-10-22用户指出旧特效被隐藏、新动作太弱，授权恢复；仍保留减少动画、隐私与生命周期检查。"
+  }
+]

@@ -1,0 +1,1050 @@
+{
+  "generated_images": [],
+  "reason": "Existing vessel, ocean and feedback assets satisfy current implementation; code-native components provide the new controls.",
+  "assets": [
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_destroyer_1_ram.webp",
+      "bytes": 24668,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_destroyer_2_ram.webp",
+      "bytes": 24778,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_detection_bomb.webp",
+      "bytes": 29726,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_helicopter_strafe.webp",
+      "bytes": 33028,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_motorboat_ram.webp",
+      "bytes": 28580,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_nuclear_bomb.webp",
+      "bytes": 16700,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_pirate_raid.webp",
+      "bytes": 27928,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_radar_scan.webp",
+      "bytes": 29564,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_shock_bomb.webp",
+      "bytes": 36606,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/actions/action_submarine_missile.webp",
+      "bytes": 18884,
+      "group": "actions",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/props/prop_ping_beacon.webp",
+      "bytes": 36750,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/props/prop_shadow_large.webp",
+      "bytes": 3958,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/props/prop_shadow_medium.webp",
+      "bytes": 3958,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/props/prop_shadow_small.webp",
+      "bytes": 3958,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/props/prop_target_arrow.webp",
+      "bytes": 22184,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/props/prop_wake_large.webp",
+      "bytes": 55158,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/props/prop_wake_medium.webp",
+      "bytes": 68142,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/props/prop_wake_small.webp",
+      "bytes": 43912,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_burning.webp",
+      "bytes": 62592,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_damaged_heavy.webp",
+      "bytes": 45166,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_damaged_light.webp",
+      "bytes": 100094,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_decoy_active.webp",
+      "bytes": 74670,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_destroyed_marker.webp",
+      "bytes": 69364,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_emp_disabled.webp",
+      "bytes": 95510,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_flooding.webp",
+      "bytes": 47776,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_low_hp_warning.webp",
+      "bytes": 55956,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_revealed_radar.webp",
+      "bytes": 83784,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_revealed_sonar.webp",
+      "bytes": 82260,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_sinking.webp",
+      "bytes": 75098,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/status/status_target_locked.webp",
+      "bytes": 91636,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_attack_range_red.webp",
+      "bytes": 36186,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_attack_target_red.webp",
+      "bytes": 77030,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_enemy_mark_red.webp",
+      "bytes": 69816,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_forbidden_dark.webp",
+      "bytes": 67484,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_hit_confirm_orange.webp",
+      "bytes": 70226,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_miss_confirm_white.webp",
+      "bytes": 79086,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_move_hover.webp",
+      "bytes": 62718,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_move_valid.webp",
+      "bytes": 40978,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_radar_range_green.webp",
+      "bytes": 75046,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_scan_range_cyan.webp",
+      "bytes": 102792,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_selected_blue.webp",
+      "bytes": 62260,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_self_mark_blue.webp",
+      "bytes": 102392,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_shock_range_purple.webp",
+      "bytes": 105672,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/tiles/tile_warning_yellow.webp",
+      "bytes": 100834,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_debris_sparks.webp",
+      "bytes": 62592,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_emp_impact.webp",
+      "bytes": 69364,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_emp_pulse.webp",
+      "bytes": 105672,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_helicopter_trace.webp",
+      "bytes": 40216,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_large_explosion.webp",
+      "bytes": 62592,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_large_water_splash.webp",
+      "bytes": 85916,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_missile_launch.webp",
+      "bytes": 55956,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_nuclear_flash_core.webp",
+      "bytes": 75098,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_nuclear_shock_ring.webp",
+      "bytes": 95112,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_radar_sweep.webp",
+      "bytes": 27430,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_small_explosion.webp",
+      "bytes": 100094,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_small_water_splash.webp",
+      "bytes": 47776,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_sonar_ping.webp",
+      "bytes": 74670,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/feedback/vfx/vfx_torpedo_trail.webp",
+      "bytes": 40216,
+      "group": "feedback",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/surface/surface_foam_overlay.webp",
+      "bytes": 481124,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/surface/surface_specular_seamless.webp",
+      "bytes": 733852,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/transitions/emerge_surface_wake.webp",
+      "bytes": 265862,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/transitions/sonar_scan_ring_sheet.webp",
+      "bytes": 88310,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/transitions/submerge_surface_wake.webp",
+      "bytes": 238078,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/underwater/underwater_caustics_seamless.webp",
+      "bytes": 100090,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/underwater/underwater_depth_haze.webp",
+      "bytes": 613478,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/underwater/underwater_particles.webp",
+      "bytes": 84098,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/layers/underwater/underwater_refraction_noise.webp",
+      "bytes": 32694,
+      "group": "layers",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ocean/ocean_deep_active.webp",
+      "bytes": 226446,
+      "group": "ocean",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ocean/ocean_deep_calm.webp",
+      "bytes": 177960,
+      "group": "ocean",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ocean/ocean_deep_subtle.webp",
+      "bytes": 89236,
+      "group": "ocean",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/animations/button_glow_pulse_sheet.webp",
+      "bytes": 85768,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/animations/radar_ping_anim_sheet.webp",
+      "bytes": 98746,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/animations/target_lock_anim_sheet.webp",
+      "bytes": 100574,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/animations/warning_flash_anim_sheet.webp",
+      "bytes": 79924,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/buttons/btn_attack_red.webp",
+      "bytes": 9746,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/buttons/btn_confirm_green.webp",
+      "bytes": 9452,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/buttons/btn_disabled_dark.webp",
+      "bytes": 8960,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/buttons/btn_hover_glow.webp",
+      "bytes": 7644,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/buttons/btn_pressed_overlay.webp",
+      "bytes": 8048,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/buttons/btn_primary_blue.webp",
+      "bytes": 9702,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/buttons/btn_secondary_dark.webp",
+      "bytes": 9348,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/buttons/btn_warning_orange.webp",
+      "bytes": 8864,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_attack_main.webp",
+      "bytes": 20582,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_cancel_action.webp",
+      "bytes": 17428,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_confirm_target.webp",
+      "bytes": 18358,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_decoy.webp",
+      "bytes": 17996,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_emerge.webp",
+      "bytes": 17440,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_emp_shock.webp",
+      "bytes": 18640,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_end_turn.webp",
+      "bytes": 17778,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_lock_target.webp",
+      "bytes": 16576,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_missile.webp",
+      "bytes": 17108,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_move.webp",
+      "bytes": 18904,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_nuclear_strike.webp",
+      "bytes": 18326,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_patrol.webp",
+      "bytes": 17980,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_radar_scan.webp",
+      "bytes": 20282,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_sonar_scan.webp",
+      "bytes": 20728,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_submerge.webp",
+      "bytes": 17500,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/icons-actions/icon_torpedo.webp",
+      "bytes": 17590,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/arrow_collapse.webp",
+      "bytes": 5526,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/arrow_expand.webp",
+      "bytes": 5434,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/cursor_move.webp",
+      "bytes": 5650,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/cursor_target.webp",
+      "bytes": 6002,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/divider_line_blue.webp",
+      "bytes": 2242,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/divider_line_warning.webp",
+      "bytes": 2196,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/highlight_corner_frame.webp",
+      "bytes": 8946,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/loading_spinner_tactical.webp",
+      "bytes": 9516,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/marker_blue_ping.webp",
+      "bytes": 6416,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/misc/marker_red_ping.webp",
+      "bytes": 5858,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_alert_frame.webp",
+      "bytes": 10168,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_bottom_action_bar.webp",
+      "bytes": 7678,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_compact_popup.webp",
+      "bytes": 11744,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_match_result.webp",
+      "bytes": 14794,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_player_tag_blue.webp",
+      "bytes": 6346,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_player_tag_red.webp",
+      "bytes": 5714,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_room_card.webp",
+      "bytes": 19362,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_round_banner.webp",
+      "bytes": 11678,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_side_status_card.webp",
+      "bytes": 15290,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/panels/panel_top_info_bar.webp",
+      "bytes": 6310,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_burning.webp",
+      "bytes": 7318,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_damaged.webp",
+      "bytes": 8072,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_decoy_active.webp",
+      "bytes": 7188,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_destroyed.webp",
+      "bytes": 7722,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_detected_radar.webp",
+      "bytes": 8196,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_detected_sonar.webp",
+      "bytes": 8482,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_emp_disabled.webp",
+      "bytes": 7198,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_flooding.webp",
+      "bytes": 7102,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_hidden.webp",
+      "bytes": 7480,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_locked.webp",
+      "bytes": 7924,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_low_hp.webp",
+      "bytes": 6784,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/ui/status-badges/badge_warning.webp",
+      "bytes": 7396,
+      "group": "ui",
+      "policy": "available, selectively reused; old decorative skins not required"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n0e0s0w0.webp",
+      "bytes": 17314,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n0e0s0w1.webp",
+      "bytes": 17072,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n0e0s1w0.webp",
+      "bytes": 14050,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n0e0s1w1.webp",
+      "bytes": 15464,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n0e1s0w0.webp",
+      "bytes": 13146,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n0e1s0w1.webp",
+      "bytes": 15538,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n0e1s1w0.webp",
+      "bytes": 15612,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n0e1s1w1.webp",
+      "bytes": 14464,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n1e0s0w0.webp",
+      "bytes": 17324,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n1e0s0w1.webp",
+      "bytes": 14132,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n1e0s1w0.webp",
+      "bytes": 14420,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n1e0s1w1.webp",
+      "bytes": 13954,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n1e1s0w0.webp",
+      "bytes": 14550,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n1e1s0w1.webp",
+      "bytes": 15776,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n1e1s1w0.webp",
+      "bytes": 14414,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/carrier/carrier_n1e1s1w1.webp",
+      "bytes": 15560,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/decoy/east.webp",
+      "bytes": 12134,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/decoy/north.webp",
+      "bytes": 11576,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/decoy/south.webp",
+      "bytes": 11618,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/decoy/west.webp",
+      "bytes": 12722,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/destroyer-1/east.webp",
+      "bytes": 12290,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/destroyer-1/north.webp",
+      "bytes": 14420,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/destroyer-1/south.webp",
+      "bytes": 16376,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/destroyer-1/west.webp",
+      "bytes": 12634,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/destroyer-2/east.webp",
+      "bytes": 12880,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/destroyer-2/north.webp",
+      "bytes": 11452,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/destroyer-2/south.webp",
+      "bytes": 11774,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/destroyer-2/west.webp",
+      "bytes": 11698,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/motorboat/east.webp",
+      "bytes": 13000,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/motorboat/north.webp",
+      "bytes": 12618,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/motorboat/south.webp",
+      "bytes": 12682,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/motorboat/west.webp",
+      "bytes": 13092,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/nuclear-submarine/east.webp",
+      "bytes": 9782,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/nuclear-submarine/north.webp",
+      "bytes": 10526,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/nuclear-submarine/south.webp",
+      "bytes": 11132,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/nuclear-submarine/west.webp",
+      "bytes": 9500,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/pirate/east.webp",
+      "bytes": 24308,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/pirate/north.webp",
+      "bytes": 27106,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/pirate/south.webp",
+      "bytes": 25310,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/pirate/west.webp",
+      "bytes": 23930,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/submarine/east.webp",
+      "bytes": 9458,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/submarine/north.webp",
+      "bytes": 8966,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/submarine/south.webp",
+      "bytes": 9042,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    },
+    {
+      "path": "assets/images/ocean-2.5d/units/submarine/west.webp",
+      "bytes": 9596,
+      "group": "units",
+      "policy": "reuse according to visible role and quality"
+    }
+  ]
+}

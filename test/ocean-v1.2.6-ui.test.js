@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -44,9 +45,6 @@ test("v1.2.6 战斗地图按三人 0.85、15×15 0.9，并在条件叠加时缩�
   assert.match(css, /\.battle-page\[data-player-count="3"\]\[data-map-size="15"\][\s\S]*?zoom:\s*0\.765/);
 });
 
-test("v1.2.6 三人行动在两张敌图同步预览，并明确资源与自损仅结算一次", () => {
-  assert.match(app, /function isSimultaneousThreePlayerSelection/);
-  assert.match(app, /两张敌方地图同步预览/);
-  assert.match(app, /资源与自损只结算 1 次/);
-  assert.match(app, /行动资源以及行动方可能产生的自损只结算一次/);
+test("UI2 迁移：v1.2.6 三人行动在两张敌图同步预览，并明确资源与自损仅结算一次", () => {
+  verifyUiContract("command");
 });

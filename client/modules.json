@@ -1,0 +1,22 @@
+[
+  "runtime.js",
+  "motion.js",
+  "training.js",
+  "artwork.js",
+  "preferences.js",
+  "transport.js",
+  "tutorial-view.js",
+  "entry-view.js",
+  "deployment-view.js",
+  "battle-map.js",
+  "command-view.js",
+  "battle-view.js",
+  "result-view.js",
+  "deployment-input.js",
+  "commands.js",
+  "connection.js",
+  "events.js",
+  "input.js",
+  "accessibility.js",
+  "bootstrap.js"
+]

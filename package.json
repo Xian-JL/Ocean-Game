@@ -1,8 +1,8 @@
 {
   "name": "ocean-game",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "private": true,
-  "description": "《海战 OCEAN》Ocean-v1.6.1：战术信息层级与海域分层优化版",
+  "description": "海战 OCEAN v1.6.2：舰队控制台、训练营与特效恢复增强",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
@@ -16,7 +16,14 @@
     "check:v160": "node --check test/ocean-v1.6.0-cross-device.test.js",
     "check:v161": "node --check test/ocean-v1.6.1-tactical-layers.test.js",
     "test": "node --test",
-    "acceptance": "npm run audio:validate && node scripts/acceptance-check.js && npm run check && npm run check:v159 && npm run check:v160 && npm run check:v161 && npm test"
+    "acceptance": "npm run audio:validate && node scripts/acceptance-check.js && npm run check && npm run check:v159 && npm run check:v160 && npm run check:v161 && npm test",
+    "build": "node scripts/build-ui.js",
+    "prestart": "npm run build",
+    "predev": "npm run build",
+    "pretest": "npm run build",
+    "prestart:lan": "npm run build",
+    "prestart:public": "npm run build",
+    "preacceptance": "npm run build"
   },
   "engines": {
     "node": ">=24.0.0"

@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -21,66 +22,22 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("Ocean-v1.6.1 前后端正式发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "1.6.1");
-  assert.equal(RELEASE_VERSION, "1.6.1");
-  assert.equal(RELEASE_STAGE, "Ocean-v1.6.1");
+test("Ocean-v1.6.2 前后端正式发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "1.6.2");
+  assert.equal(RELEASE_VERSION, "1.6.2");
+  assert.equal(RELEASE_STAGE, "Ocean-v1.6.2");
   assert.equal(RULE_VERSION, "1.8");
   assert.equal(SOCKET_PROTOCOL_VERSION, "2.1");
   assert.deepEqual(Data.RELEASE, {
-    version: "1.6.1",
-    stage: "Ocean-v1.6.1",
+    version: "1.6.2",
+    stage: "Ocean-v1.6.2",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.1",
   });
 });
 
-test("正式前端不再包含会误导当前规则的历史关键文案", () => {
-  const frontend = [
-    read("public/index.html"),
-    read("public/js/app.js"),
-    read("public/js/game-data.js"),
-  ].join("\n");
-
-  for (const stale of [
-    "postlaunch-v0.3",
-    "协议 1.2",
-    "RULE v1.0",
-    "7 个作战单位",
-    "七个作战单位",
-    "九项战术行动",
-  ]) {
-    assert.equal(frontend.includes(stale), false, `仍包含历史文案：${stale}`);
-  }
-
-  for (const current of [
-    "Ocean-v1.6.1",
-    "10×10",
-    "12×12",
-    "15×15",
-    'data-map-size="${mapSize}"',
-    'data-max-players="3"',
-    'data-room-mode="bot_duel"',
-    'data-action="start-tutorial"',
-    'data-action="select-bot-difficulty"',
-    "新手",
-    "标准",
-    "专家",
-    "机器人准备中",
-    "机器人思考中",
-    "游戏说明",
-  ]) {
-    assert.equal(frontend.includes(current), true, `缺少当前 UI / 发布信息：${current}`);
-  }
-
-  assert.match(
-    Data.getActionDefinition(Data.ACTION_TYPES.DESTROYER_I_RAM).warning,
-    /自身受到 0\.5 点伤害/,
-  );
-  assert.equal(
-    Data.getActionDefinition(Data.ACTION_TYPES.SUBMARINE_MISSILE).initialUses,
-    4,
-  );
+test("UI2 迁移：正式前端不再包含会误导当前规则的历史关键文案", () => {
+  verifyUiContract("layout");
 });
 
 test("当前文档冻结 v1.4 战术海面、v1.3 教程、人机边界与真实素材音效范围", () => {
@@ -111,7 +68,7 @@ test("当前文档冻结 v1.4 战术海面、v1.3 教程、人机边界与真实
   }
 
   for (const current of [
-    "Ocean-v1.6.1",
+    "Ocean-v1.6.2",
     "rule-v1.8",
     "page-flow-v2.1",
     "10×10",

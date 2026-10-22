@@ -238,6 +238,19 @@
     gainNode.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   }
 
+  let transientEpoch=0;
+  const transientSources=new Set(),transientTimers=new Set();
+  function registerTransient(source){
+    transientSources.add(source);
+    source.onended=()=>{transientSources.delete(source);source.disconnect?.();};
+  }
+  function cancelTransientEffects(){
+    transientEpoch++;
+    for(const source of transientSources){try{source.stop();source.disconnect?.();}catch(_){}}
+    transientSources.clear();
+    for(const timer of transientTimers)clearTimeout(timer);transientTimers.clear();activeEffectCount=0;
+  }
+
   function playTone(note) {
     const audioContext = ensureContext();
     if (!audioContext) return;
@@ -255,6 +268,7 @@
     applyEnvelope(gain, start, note.duration, note.gain);
     oscillator.connect(gain);
     gain.connect(ensureMasterChain()?.effectsBus ?? audioContext.destination);
+    registerTransient(oscillator);
     oscillator.start(start);
     oscillator.stop(start + note.duration + 0.025);
   }
@@ -293,6 +307,7 @@
     }
     applyEnvelope(gain, start, note.duration, note.gain);
     gain.connect(ensureMasterChain()?.effectsBus ?? audioContext.destination);
+    registerTransient(source);
     source.start(start);
     source.stop(start + note.duration + 0.025);
   }
@@ -367,16 +382,18 @@
     gainNode.gain.value = Math.max(0.0001, layer.gain * effectsVolume);
     source.connect(gainNode);
     gainNode.connect(chain.effectsBus);
+    registerTransient(source);
     source.start(start, layer.offset, duration);
     source.stop(start + duration / layer.playbackRate + 0.03);
     return true;
   }
 
   async function playSampleEffect(name) {
+    const epoch=transientEpoch,requestedAt=Date.now();
     const layers = SAMPLE_EFFECTS[name];
     if (!layers) return false;
     const buffers = await Promise.all(layers.map((layer) => loadSample(layer.file)));
-    if (!effectsEnabled) return true;
+    if (!effectsEnabled || epoch!==transientEpoch || Date.now()-requestedAt>120) return true;
     let played = false;
     for (let index = 0; index < layers.length; index += 1) {
       played = playDecodedSample(layers[index], buffers[index]) || played;
@@ -403,9 +420,11 @@
       (note) => (note.delay + note.duration) * 1000,
     ));
     activeEffectCount += 1;
-    setTimeout(() => {
+    const effectTimer=setTimeout(() => {
+      transientTimers.delete(effectTimer);
       activeEffectCount = Math.max(0, activeEffectCount - 1);
     }, durationMs + 120);
+    transientTimers.add(effectTimer);
     const audioContext = ensureContext();
     if (typeof root.fetch !== "function" || typeof audioContext?.decodeAudioData !== "function") {
       for (const note of pattern) {
@@ -425,6 +444,7 @@
 
   function setEffectsEnabled(value) {
     effectsEnabled = Boolean(value);
+    if(!effectsEnabled)cancelTransientEffects();
     savePreference(EFFECTS_KEY, effectsEnabled);
     if (effectsEnabled) playEffect("success");
     return effectsEnabled;
@@ -493,6 +513,7 @@
     EFFECT_NAMES,
     MUSIC_PATH,
     playEffect,
+    cancelTransientEffects,
     preloadEffects,
     preloadGroup,
     preferences,

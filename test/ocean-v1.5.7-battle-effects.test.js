@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -10,21 +11,19 @@ const app = fs.readFileSync(path.join(ROOT, "public/js/app.js"), "utf8");
 const css = fs.readFileSync(path.join(ROOT, "public/css/main.css"), "utf8");
 const html = fs.readFileSync(path.join(ROOT, "public/index.html"), "utf8");
 
-test("v1.5.7 战场特效在 v1.6.1 发布元数据中继续保留", () => {
-  assert.equal(require("../package.json").version, "1.6.1");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
-  assert.match(html, /Ocean-v1\.6\.1/);
-  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(app, /battle-page--v157/);
+test("UI2 迁移：v1.5.7 战场特效在 v1.6.1 发布元数据中继续保留", () => {
+  verifyUiContract("version");
 });
 
-test("v1.5.7 在沙盘上创建3.6秒短时特效层且不接管交互", () => {
+test("spec v1.5 特效层收紧到1.8秒并保持不接管交互", () => {
   assert.match(app, /resolutionEffectVisible:\s*false/);
   assert.match(app, /scheduleResolutionEffectHide\(nextResolutionKey\)/);
-  assert.match(app, /},\s*3_600\);/);
+  assert.match(app, /},\s*1_800\);/);
   assert.match(app, /class="battle-effect-layer"/);
-  assert.match(css, /\.battle-page--v157 \.battle-effect-layer[\s\S]*pointer-events:\s*none/);
-  assert.match(css, /animation:\s*battle-effect-arrival 3\.6s/);
+  const activeCss=fs.readFileSync(path.join(ROOT,"public/css/ocean.css"),"utf8");
+  assert.match(activeCss,/\.battle-effect-layer[^{}]*\{[^}]*pointer-events:\s*none/);
+  assert.match(app,/motionRuntime\.timer=setTimeout[\s\S]*?,1800\)/);
+  assert.doesNotMatch(activeCss,/battle-effect-arrival 3\.6s/);
 });
 
 test("十项行动分别映射导弹、核爆、电磁、声呐、雷达、扫射与通用命中反馈", () => {

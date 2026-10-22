@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -21,21 +22,12 @@ function functionBody(name, nextName) {
   return app.slice(start, end);
 }
 
-test("v1.5.8 发布元数据、缓存标识与页面类一致", () => {
-  assert.equal(require("../package.json").version, "1.6.1");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
-  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(html, /app\.js\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(app, /battle-page--v158/);
+test("UI2 迁移：v1.5.8 发布元数据、缓存标识与页面类一致", () => {
+  verifyUiContract("version");
 });
 
-test("三人行动使用同一目标同步两名存活敌方且资源和自损只提示一次", () => {
-  const simultaneous = functionBody("isSimultaneousThreePlayerSelection", "markersForTarget");
-  const confirmation = functionBody("openActionConfirmation", "submitSelectedAction");
-  assert.match(simultaneous, /activeBattleOpponentIds\(room\)\.length > 1/);
-  assert.match(confirmation, /使用同一目标或范围/);
-  assert.match(confirmation, /行动资源以及行动方可能产生的自损只结算一次/);
-  assert.match(app, /同一坐标\/范围 · 资源与自损只结算 1 次/);
+test("UI2 迁移：三人行动使用同一目标同步两名存活敌方且资源和自损只提示一次", () => {
+  verifyUiContract("command");
 });
 
 test("切换两张敌方地图时保留同步行动的坐标与范围预览", () => {
@@ -83,14 +75,8 @@ test("战斗日志保持一次行动记录并用可展开明细列出各方结�
   assert.match(css, /\.event-defender-details summary/);
 });
 
-test("淘汰地图保留为只读历史且新行动自动聚焦存活敌方", () => {
-  const selectAction = functionBody("selectAction", "handleEnemyCell");
-  const enemyCard = functionBody("renderEnemyMapCard", "renderOwnMapCard");
-  assert.match(selectAction, /activeBattleOpponentIds\(state\.room\)/);
-  assert.match(selectAction, /activeTargets\.includes\(state\.battle\.targetPlayerId\)/);
-  assert.match(enemyCard, /battle-map-card--eliminated/);
-  assert.match(enemyCard, /已淘汰 · 历史只读/);
-  assert.match(app, /另一敌方已淘汰，不再同步结算/);
+test("UI2 迁移：淘汰地图保留为只读历史且新行动自动聚焦存活敌方", () => {
+  verifyUiContract("command");
 });
 
 test("三人结算动画固定在到达时正在查看的地图，其他地图仅保留静态结果", () => {

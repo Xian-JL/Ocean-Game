@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -32,33 +33,12 @@ test("v0.7.3 行动面板按舰艇攻击、潜航武器、舰载系统分组且�
   ]);
 });
 
-test("v0.7.3 首次行动使用独立雷达任务卡且普通确认框不再堆叠完整规则说明", () => {
-  includesAll(app, [
-    "function openingRadarRequired(room)",
-    "opening-radar-task",
-    "首次行动",
-    "开始扫描",
-  ]);
-  const confirmation = app.slice(
-    app.indexOf("function openActionConfirmation()"),
-    app.indexOf("async function submitSelectedAction()"),
-  );
-  assert.equal(confirmation.includes("definition.warning"), false);
+test("UI2 迁移：v0.7.3 首次行动使用独立雷达任务卡且普通确认框不再堆叠完整规则说明", () => {
+  verifyUiContract("command");
 });
 
-test("v1.2.6 三人全部行动拥有同步双目标提示和两张地图范围图例", () => {
-  includesAll(app, [
-    "multi-target-action--v073",
-    "同时作用",
-    "资源与自损只结算 1 次",
-    "renderRangeLegend(room, playerId)",
-    "两张敌方地图同步预览",
-    "isSimultaneousThreePlayerSelection(room)",
-  ]);
-  includesAll(css, [
-    ".multi-target-action--v073",
-    ".range-legend--v073",
-  ]);
+test("UI2 迁移：v1.2.6 三人全部行动拥有同步双目标提示和两张地图范围图例", () => {
+  verifyUiContract("command");
 });
 
 test("v0.7.3 地图格统一暴露公开结果、未知结果、私人标记与范围状态", () => {

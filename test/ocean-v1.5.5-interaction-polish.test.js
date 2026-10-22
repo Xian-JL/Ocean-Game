@@ -1,4 +1,5 @@
 "use strict";
+const { verifyUiContract } = require("../test-fixtures/ui-contract");
 
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -22,12 +23,8 @@ function functionBody(name, nextName) {
   return app.slice(start, end);
 }
 
-test("v1.5.5 交互优化在 v1.6.1 发布元数据中继续保留", () => {
-  assert.equal(require("../package.json").version, "1.6.1");
-  assert.equal(require("../public/js/game-data").RELEASE.stage, "Ocean-v1.6.1");
-  assert.match(html, /Ocean-v1\.6\.1/);
-  assert.match(html, /main\.css\?v=__OCEAN_ASSET_VERSION__/);
-  assert.match(app, /battle-page--v155/);
+test("UI2 迁移：v1.5.5 交互优化在 v1.6.1 发布元数据中继续保留", () => {
+  verifyUiContract("version");
 });
 
 test("选择行动自动切换敌方地图、展开来源单位并收起日志", () => {
