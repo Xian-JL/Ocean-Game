@@ -18,3 +18,13 @@ Thumbs.db
 
 # Compact release verification
 !docs/releases/v1.6.2/acceptance.log
+
+!docs/training-camp/core-combat-acceptance.log
+
+# UI SPEC 2.0 development verification
+!docs/ui-v2/development-acceptance.log
+!docs/ui-v2/development-intermediate-test.log
+
+# Local release packaging and release verification
+.release-output/
+!docs/releases/v1.6.3/acceptance.log

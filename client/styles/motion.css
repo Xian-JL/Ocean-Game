@@ -4,7 +4,7 @@ html:not([data-reduce-motion=true])[data-quality=high] body[data-page=P05] .tact
  animation:ocean-drift 16s ease-in-out infinite alternate;will-change:transform;opacity:.09}
 html[data-quality=high] [data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--surface{animation:none}
 html[data-quality=high] [data-tactical-layer=underwater] .tactical-environment--caustics{animation:ocean-drift 18s ease-in-out infinite alternate}
-html[data-theme=ocean-light] .tactical-environment--surface{opacity:.07}
+html[data-theme=armory-ivory] .tactical-environment--surface{opacity:.07}
 @keyframes ocean-drift{from{transform:translate(-3px,0);opacity:var(--ambient-min,.12)}to{transform:translate(3px,2px);opacity:var(--ambient-max,.24)}}
 .battle-effect-art{animation:none!important;isolation:isolate;--fx-color:#92deef}
 .battle-effect-art--hit{--fx-color:#f0bb79}.battle-effect-art--miss{--fx-color:#c9e4ed}
@@ -33,9 +33,9 @@ html[data-theme=ocean-light] .tactical-environment--surface{opacity:.07}
 @keyframes motion-core{0%,15%{opacity:0;transform:scale(.5)}40%{opacity:.48;transform:scale(1)}100%{opacity:0;transform:scale(1.5)}}
 @keyframes motion-scan{0%{left:0;opacity:0}15%{opacity:.95}85%{opacity:.95}100%{left:100%;opacity:0}}
 @keyframes motion-envelope{0%{opacity:0}20%,75%{opacity:.8}100%{opacity:0}}
-html[data-quality=smooth] .motion-ring--second,html[data-quality=smooth] .motion-ray--second{display:none!important}
+/* Secondary rays/rings carry weapon identity in smooth mode too. */
 html[data-reduce-motion=true] .battle-effect-layer{display:none!important}
-html[data-theme=ocean-light] .motion-glyph{filter:brightness(.6)}
+html[data-theme=armory-ivory] .motion-glyph{filter:brightness(.6)}
 .page-enter{animation:motion-page 180ms ease-out both}
 @keyframes motion-page{from{opacity:.8;transform:translateY(4px)}to{opacity:1;transform:none}}
 
@@ -48,7 +48,7 @@ dialog[open]{animation:motion-page 200ms ease-out both}html[data-reduce-motion=t
 html[data-motion-hidden=true] .tactical-environment{animation-play-state:paused!important}
 .motion-salvo-neutral{position:relative}.motion-salvo-neutral:after{content:"";position:absolute;inset:-6px;border:1px solid var(--accent-primary);border-radius:50%;pointer-events:none;animation:motion-ring 1100ms ease-out both}
 
-html[data-theme=ocean-light]{--ambient-min:.03;--ambient-max:.06}
+html[data-theme=armory-ivory]{--ambient-min:.03;--ambient-max:.06}
 [data-tactical-layer=underwater] .battle-map-card--own .tactical-environment--surface{opacity:.02}
 
 /* Shared phases have action-specific offsets in motionDefinitions. */
@@ -74,7 +74,7 @@ html[data-quality=smooth] .page-enter{animation-duration:110ms}html[data-quality
 
 
 /* Preserve the original assets. New geometry adds a readable timeline around them. */
-.battle-effect-art{--impact-size:clamp(84px,calc(var(--cell-size,36px)*2.5),112px);overflow:visible}
+.battle-effect-art{--impact-size:clamp(96px,calc(var(--cell-size,36px)*2.8),128px);overflow:visible}
 .battle-effect-art>img{display:block;z-index:2;opacity:0;max-width:none;pointer-events:none;animation:restored-impact var(--effect-duration,1000ms) ease-out both;filter:drop-shadow(0 0 6px var(--fx-color))}
 .battle-effect-art>.battle-effect-art__trail{z-index:1;animation-name:restored-trail}
 .battle-effect-art>.battle-effect-art__ring{z-index:1;animation-name:restored-ring}
@@ -120,7 +120,9 @@ html[data-quality=smooth] .tactical-environment--particles,html[data-quality=smo
 .tactical-layer-transition--emerge{background:url("/assets/images/ocean-2.5d/layers/transitions/emerge_surface_wake.webp") center/cover}
 [data-layer-transition$="-to-underwater"] .tactical-layer-transition--submerge,[data-layer-transition$="-to-surface"] .tactical-layer-transition--emerge{animation:motion-envelope 420ms ease-out both}
 html[data-motion-hidden=true] .tactical-layer-transition{animation:none!important}
-html[data-theme=ocean-light] .battle-effect-art{filter:contrast(1.3)}
+html[data-theme=armory-ivory] .battle-effect-art{filter:contrast(1.3)}
 
 .tactical-layer-transition{opacity:0}.ocean-console:not([data-layer-transition]) .tactical-layer-transition{animation:none!important}
 .tactical-environment--foam{opacity:.06}
+
+html[data-quality=smooth] .battle-effect-art{--impact-size:clamp(80px,calc(var(--cell-size,36px)*2.5),112px)}

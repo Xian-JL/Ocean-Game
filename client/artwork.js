@@ -8,7 +8,7 @@
   }
 
   function uiIcon(name, className = "") {
-    return `<svg class="ui-svg-icon ${escapeHtml(className)}" aria-hidden="true" focusable="false"><use href="/assets/icons/ocean-ui.svg#${escapeHtml(name)}"></use></svg>`;
+    return `<svg class="ui-svg-icon ${escapeHtml(className)}" aria-hidden="true" focusable="false"><use href="/assets/icons/ocean-ui.svg?v=${encodeURIComponent(Data.ASSET_VERSION)}#${escapeHtml(name)}"></use></svg>`;
   }
 
   function unitIconName(unitType) {
@@ -375,6 +375,12 @@
     return sprites.length > 0
       ? `<div class="tactical-unit-art-layer" aria-label="2.5D 作战单位投影">${sprites.join("")}</div>`
       : "";
+  }
+
+  function armorySourceProjection(unit){
+    const folder=UNIT_ART_FOLDERS[unit.type],key=folder+"/east.webp";
+    if(!folder)return uiIcon(unitIconName(unit.type));
+    return `<svg viewBox="${UNIT_ART_VIEWBOXES[key]}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><image href="${versionedArtUrl('/assets/images/ocean-2.5d/units/'+key)}" width="512" height="512"/></svg>`;
   }
 
   function actionArtIcon(definition) {

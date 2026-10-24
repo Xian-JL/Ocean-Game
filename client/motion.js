@@ -1,15 +1,15 @@
   // Input is the existing role-filtered effect model, never raw outcomes.
   const motionDefinitions = Object.freeze({
-    destroyer_i_ram:{shape:'ram-one',duration:850,smooth:320,lockEnd:160,travelEnd:420},
-    destroyer_ii_ram:{shape:'ram-two',duration:1000,smooth:320,lockEnd:180,travelEnd:480},
-    pirate_attack:{shape:'cross',duration:900,smooth:320,lockEnd:180,travelEnd:450},
-    motorboat_ram:{shape:'wake',duration:750,smooth:320,lockEnd:140,travelEnd:340},
-    submarine_missile:{shape:'missile',duration:1000,smooth:320,lockEnd:160,travelEnd:520},
-    nuclear_bomb:{shape:'nuclear',duration:1400,smooth:360,lockEnd:220,travelEnd:620},
-    shock_bomb:{shape:'emp',duration:1000,smooth:320,lockEnd:160,travelEnd:600},
-    detection_bomb:{shape:'sonar',duration:1200,smooth:320,lockEnd:160,travelEnd:850},
-    radar_scan:{shape:'radar',duration:1300,smooth:360,lockEnd:160,travelEnd:1000},
-    helicopter_strafe:{shape:'strafe',duration:1400,smooth:360,lockEnd:180,travelEnd:900}
+    destroyer_i_ram:{shape:'ram-one',duration:850,smooth:440,lockEnd:160,travelEnd:420},
+    destroyer_ii_ram:{shape:'ram-two',duration:1000,smooth:440,lockEnd:180,travelEnd:480},
+    pirate_attack:{shape:'cross',duration:900,smooth:440,lockEnd:180,travelEnd:450},
+    motorboat_ram:{shape:'wake',duration:750,smooth:440,lockEnd:140,travelEnd:340},
+    submarine_missile:{shape:'missile',duration:1000,smooth:440,lockEnd:160,travelEnd:520},
+    nuclear_bomb:{shape:'nuclear',duration:1400,smooth:520,lockEnd:220,travelEnd:620},
+    shock_bomb:{shape:'emp',duration:1000,smooth:440,lockEnd:160,travelEnd:600},
+    detection_bomb:{shape:'sonar',duration:1200,smooth:440,lockEnd:160,travelEnd:850},
+    radar_scan:{shape:'radar',duration:1300,smooth:520,lockEnd:160,travelEnd:1000},
+    helicopter_strafe:{shape:'strafe',duration:1400,smooth:520,lockEnd:180,travelEnd:900}
   });
   const motionRuntime={key:null,started:0,map:null,context:null,consumed:new Map(),timer:null,
     hidden:false,animations:new Set(),raf:0,slow:0,samples:[],sampleAt:0,autoDegraded:false,previousFrame:0,watermark:-1,micro:new Map(),uiFacts:[],lastTarget:null,activeUi:new Map(),uiAnimations:new Set(),uiPage:null,localSignatures:new Map(),localContext:null,localSequence:0};
@@ -119,7 +119,7 @@
     const prevSalvo=previous?.battle?.match?.finalSalvo,nextSalvo=next.battle?.match?.finalSalvo;
     if(next.roomPhase==='FINAL_SALVO'&&(nextSalvo?.completedShots??0)>(prevSalvo?.completedShots??0))
       motionRuntime.uiFacts.push({key:key+':salvo',selector:'.final-salvo-stage__emblem',duration:1100,kind:'salvo',sound:'final_salvo'});
-    if(next.roomPhase==='FINISHED'&&previous?.roomPhase!=='FINISHED')motionRuntime.uiFacts.push({key:key+':result',selector:'#result-title',duration:900,kind:'result',sound:next.battle?.match?.result?.winnerId===next.own.playerId?'victory':next.battle?.match?.result?.winnerId===null?'unknown':'defeat'});
+    if(next.roomPhase==='FINISHED'&&previous?.roomPhase!=='FINISHED')motionRuntime.uiFacts.push({key:key+':result',selector:'.result-emblem',duration:1100,smooth:320,kind:'result',sound:next.battle?.match?.result?.winnerId===next.own.playerId?'victory':['draw','canceled'].includes(next.battle?.match?.result?.outcome)?'unknown':'defeat'});
     if(next.roomPhase==='ROLLING'&&JSON.stringify(previous?.rolling)!==JSON.stringify(next.rolling))motionRuntime.uiFacts.push({key:key+':dice',selector:'.die--revealed',duration:420,smooth:160,kind:'dice'});
   }
   // Observe semantic local changes, never hover coordinates or repeated DOM renders.
@@ -182,6 +182,7 @@
       const elapsed=performance.now()-cue.start;
       if(!node||typeof node.animate!=='function'||elapsed>=duration){motionRuntime.activeUi.delete(key);continue;}
       const frames=cue.kind==='salvo'?[{opacity:.3,transform:'scale(.75)'},{opacity:1,transform:'scale(1)'},{opacity:1,transform:'scale(1)'}]
+        :cue.kind==='result'?[{opacity:0,transform:'scale(1.12)',filter:'brightness(1.5)'},{opacity:1,transform:'scale(1)',filter:'brightness(1)'}]
         :cue.kind==='dice'?[{transform:'rotate(-14deg)',opacity:.5},{transform:'rotate(0deg)',opacity:1}]
         :cue.kind==='sunk'?[{opacity:.75},{opacity:.42}]
         :['paralysis','restore','own-hit','decoy','lock'].includes(cue.kind)?[{boxShadow:'inset 0 0 0 2px var(--accent-primary)',opacity:.65},{boxShadow:'inset 0 0 0 0px transparent',opacity:1}]

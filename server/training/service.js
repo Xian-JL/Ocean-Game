@@ -3,6 +3,8 @@ const {randomBytes,randomUUID,createHash}=require('node:crypto');
 const R=require('../game/rules');
 const {catalog,makeScenario,intentFor,runAction,chooseTarget,layout,ids}=require('./scenarios');
 const {FixedWindowRateLimiter}=require('../operations/rate-limiter');
+const {playerCatalog,findLesson,lessonView,freeRoom}=require('./course');
+const {createBotActionIntent,chooseBotFinalSalvo}=require('../game/bot-strategy');
 const clone=x=>structuredClone(x);
 function operationFingerprint(event,payload){const {expectedVersion,trainingGeneration,trainingEvidence,...meaning}=payload;return createHash('sha256').update(JSON.stringify([event,meaning])).digest('hex');}
 function fail(code,message){const e=new Error(message);e.code=code;throw e;}
@@ -26,6 +28,39 @@ class TrainingService{
   s.initial=clone(s.room);s.initialViewer=s.viewer;s.running=false;s.tickAt=this.now();s.entryErrors=new Set();s.entryValidated=false;s.joinRejected=false;s.simulatedExpiry=false;s.clientEvidence=[];s.clientSettings={};s.taskEvents=[];
   this.sessions.set(s.id,s);return this.response(s,true);
  }
+ createPlayer(mode,lessonId){
+  if(!['course','weapon','free'].includes(mode))fail('INVALID_TRAINING_MODE','请选择一种练习方式。');
+  const lesson=findLesson(mode,lessonId);if(!lesson)fail('LESSON_NOT_FOUND','这项练习不存在。');
+  const created=this.create(lesson.scene??'CAMP-W01',{mapSize:12,players:2}),s=this.get(created.id,created.token);
+  s.playerMode=mode;s.playerLesson=lesson;this.preparePlayer(s);return this.response(s,true);
+ }
+ preparePlayer(s){
+  if(s.playerMode==='free'){s.room=freeRoom();s.action=null;s.target=null;s.completed=false;}
+  for(const seat of s.room.seats){seat.nickname=seat.playerId===s.viewer?'你':'陪练舰队';}
+  s.initial=clone(s.room);s.running=false;s.revealed=false;
+ }
+ advancePlayer(s){
+  if(!s.playerMode)return;
+  if(s.playerMode!=='free'&&s.completed)return;
+  for(let step=0;step<8;step++){
+   if(s.room.roomPhase==='FINAL_SALVO'){
+    const actor=s.room.seats.find(x=>x.playerId!==s.viewer).playerId;
+    const view=R.createRoomView(s.room,actor,s.now),f=view.battle?.match?.finalSalvo;
+    if(f?.status==='selecting'&&!f.ownSubmitted){
+     const decoy=chooseBotFinalSalvo(view,{difficulty:'beginner'});
+     if(decoy)s.room=R.submitFinalSalvoSelection(s.room,actor,decoy,s.now);
+    }
+    break;
+   }
+   if(s.room.roomPhase!=='PLAYING')break;
+   if(s.room.turnPhase==='AUTO_SKIPPING'){s.room=R.completeAutomaticTurnSkip(s.room,s.now);continue;}
+   if(s.room.turnPhase==='RESOLVING'){s.room=R.completePlayerAction(s.room,s.now);continue;}
+   if(s.room.currentPlayerId===s.viewer)break;
+   const actor=s.room.currentPlayerId,view=R.createRoomView(s.room,actor,s.now);
+   const intent=createBotActionIntent(view,{difficulty:'beginner',actionId:randomUUID()});
+   s.room=R.completePlayerAction(R.beginPlayerAction(s.room,actor,intent,s.now),s.now+1);
+  }
+ }
  get(id,token){
   this.prune();const s=this.sessions.get(id);
   if(!s||!token||s.token!==token)fail('TRAINING_EXPIRED','训练已过期或凭证不匹配，请重新进入。');
@@ -43,6 +78,12 @@ class TrainingService{
     revealed:s.revealed,events:s.taskEvents.slice(-16)},roles:s.room.seats.map(x=>({id:x.playerId,name:x.nickname})),
     replayEffect:s.replayEffect??false,award:s.award??null,expiresIn:1800};
   s.replayEffect=false;s.award=null;
+  if(s.playerMode){
+   data.playerMode=s.playerMode;data.lesson=lessonView(s.playerMode,s.playerLesson);
+   data.scene={id:s.playerMode+':'+s.playerLesson.id,title:s.playerLesson.title,version:'core-1'};
+   data.task={completed:s.completed,clock:s.now,running:false,remaining:null,revealed:false};
+   data.roles=[];
+  }
   if(credential)data.token=s.token;
   return data;
  }
@@ -104,6 +145,7 @@ class TrainingService{
   }
   const fingerprint=operationFingerprint(event,payload);
   const controls=event==='training:control';
+  if(s.playerMode&&controls&&payload.control!=='reset')fail('TRAINING_EVENT_NOT_ALLOWED','这项操作不属于战斗练习。');
   if(s.transport.missing&&!controls)fail('ROOM_NOT_FOUND','训练模拟：原房间不存在，请重置场景。');
   if(payload.trainingGeneration && payload.trainingGeneration!==s.generation)fail('STATE_VERSION_CONFLICT','这是旧训练检查点，请先同步。');
   if(event!=='room:sync'&&!(controls&&payload.control==='reset')&&payload.expectedVersion!==undefined&&payload.expectedVersion!==s.room.stateVersion)
@@ -113,6 +155,7 @@ class TrainingService{
    if(event!=='room:sync'&&(!controls||!['undo','role','reveal','conceal','replay'].includes(payload.control)))this.saveCheckpoint(s);s.steps++;
    if(event==='room:sync'){
      s.taskEvents.push('synced');if(s.transport.needsSync){s.transport.needsSync=false;s.completed=true;s.notes.push('同步确认了已接受的指令，没有重复结算。');}
+   }else if(event==='training:advance'&&s.playerMode){this.advancePlayer(s);
    }else if(event==='deployment:submit'){
      s.room=R.submitDeployment(s.room,s.viewer,payload.deployment,s.now);s.taskEvents.push('deployed');
    }else if(event==='deployment:ready'){
@@ -168,6 +211,11 @@ class TrainingService{
    else fail('TRAINING_EVENT_NOT_ALLOWED','训练营不支持此操作。');
    if(s.room.roomPhase==='FINAL_SALVO'&&s.room.battleState.match.status==='finished')s.room=R.completeFinalSalvo(s.room,s.now);
    this.evaluate(s);
+   if(s.playerMode){
+    if(s.playerMode==='free')s.completed=s.room.roomPhase==='FINISHED';
+    else if(event==='action:submit'&&payload.intent?.actionType===s.playerLesson.action)s.completed=true;
+    else if(event==='final-salvo:submit')s.completed=true;
+   }
    R.assertMatchRoomState(s.room);
    const data=this.response(s);
    if(s.simulatedExpiry)this.sessions.delete(s.id);
@@ -184,6 +232,7 @@ class TrainingService{
     const recovered=Boolean(s.transport.missing);const fresh=makeScenario(s.scene,s.preset);Object.assign(s,fresh);
     s.award=recovered?{id:s.scene.id,version:s.scene.version}:null;
     s.generation=randomUUID();s.initial=clone(s.room);s.history=[];s.operations.clear();s.revealed=false;s.transport={};s.taskEvents=[];s.notes=[];s.paralysisSeen=false;s.markerVerified=new Set();s.running=false;s.tickAt=this.now();s.entryErrors=new Set();s.entryValidated=false;s.joinRejected=false;s.simulatedExpiry=false;s.clientEvidence=[];s.clientSettings={};
+    if(s.playerMode)this.preparePlayer(s);
   }else if(control==='undo'){
     const last=s.history.pop();if(!last)fail('NO_CHECKPOINT','没有可重来的步骤。');
     Object.assign(s,last);s.generation=randomUUID();
@@ -308,7 +357,7 @@ class TrainingService{
   }
  }
  reveal(id,token){
-  const s=this.get(id,token);if(!s.revealed)fail('REVEAL_REQUIRED','请先主动查看教官解析。');
+  const s=this.get(id,token);if(s.playerMode)fail('REVEAL_NOT_AVAILABLE','战斗练习不提供敌方部署解析。');if(!s.revealed)fail('REVEAL_REQUIRED','请先主动查看教官解析。');
   const b=s.room.battleState;
   const lessons=[];
   for(const record of (b?.actionLog??[]).slice(-8)){
@@ -346,8 +395,9 @@ function mountTraining(app,options={}){
   catch(e){res.status(429).json({ok:false,error:{code:e.code,message:e.message}});}
  });
  const wrap=fn=>(req,res)=>{try{res.json({ok:true,data:fn(req)});}catch(e){res.status(e.code==='TRAINING_EXPIRED'?401:400).json({ok:false,error:{code:e.code??'TRAINING_ERROR',message:e.message,details:e.details??{}}});}};
- app.get('/api/training/catalog',wrap(()=>({version:'1.5.0',ruleVersion:'1.8',scenarios:catalog})));
- app.post('/api/training/sessions',wrap(req=>service.create(req.body.scenarioId,{mapSize:req.body.mapSize,players:req.body.players,action:req.body.action,targetKind:req.body.targetKind,sourceState:req.body.sourceState})));
+ app.get('/api/training/course',wrap(()=>playerCatalog()));
+ if(options.debug===true)app.get('/api/training/catalog',wrap(()=>({version:'1.5.0',ruleVersion:'1.8',scenarios:catalog})));
+ app.post('/api/training/sessions',wrap(req=>{if(req.body.mode)return service.createPlayer(req.body.mode,req.body.lessonId);if(options.debug!==true)fail('LESSON_REQUIRED','请选择快速上手、武器体验或自由练习。');return service.create(req.body.scenarioId,{mapSize:req.body.mapSize,players:req.body.players,action:req.body.action,targetKind:req.body.targetKind,sourceState:req.body.sourceState});}));
  const token=req=>req.headers['x-training-token'];
  app.get('/api/training/sessions/:id',wrap(req=>service.response(service.get(req.params.id,token(req)))));
  app.post('/api/training/sessions/:id/commands',wrap(req=>{
@@ -355,7 +405,7 @@ function mountTraining(app,options={}){
   if(typeof req.body.payload?.trainingGeneration!=='string')fail('STATE_VERSION_CONFLICT','请使用当前训练检查点。');
   return service.command(req.params.id,token(req),req.body.event,req.body.payload,req.body.operationId);
  }));
- app.get('/api/training/sessions/:id/reveal',wrap(req=>service.reveal(req.params.id,token(req))));
+ if(options.debug===true)app.get('/api/training/sessions/:id/reveal',wrap(req=>service.reveal(req.params.id,token(req))));
  app.delete('/api/training/sessions/:id',wrap(req=>{service.destroy(req.params.id,token(req));return {destroyed:true};}));
  const sweep=setInterval(()=>service.prune(),60000);sweep.unref();
  return {service,close:()=>clearInterval(sweep)};

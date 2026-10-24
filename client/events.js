@@ -176,6 +176,7 @@
       return;
     }
     if (action === "open-audio-settings") {
+      if(personalizeDialog.open)personalizeDialog.close();
       if(rulesDialog.open) rulesDialog.close();
       openAudioSettings(control.dataset.audioFocus);
       return;
@@ -185,6 +186,7 @@
       return;
     }
     if (action === "open-rules") {
+      if(personalizeDialog.open)personalizeDialog.close();
       reduceMotionToggle.checked = state.reduceMotion;
       syncAudioControls();
       if (!rulesDialog.open) rulesDialog.showModal();
@@ -203,10 +205,13 @@
       personalizeDialog.close();
       return;
     }
+    if(action === "toggle-map-zoom"){rememberBattleMapView();cancelMotion();state.battle.mapZoom=!state.battle.mapZoom;render();restoreBattleMapView();return;}
+    if (action === "home-tab") { if(state.tutorial.active)exitTutorial();else if(state.training?.active){void exitTrainingSession();state.training.active=false;history.replaceState(null,"","/");render();}return; }
     if (action === "select-theme") {
       applyTheme(control.dataset.themeValue);
       return;
     }
+    if (action === "armory-preference") { applyArmoryPreference(control.dataset.preference,control.dataset.value);return; }
     if (action === "select-accent") {
       applyAccent(control.dataset.accentValue);
       return;
@@ -217,10 +222,11 @@
       return;
     }
     if (action === "reset-personalization") {
-      applyTheme("ocean-dark");
-      applyAccent("cyan");
+      applyTheme("armory-ember");
+      applyAccent();
+      applyArmoryPreference("crest","keel");applyArmoryPreference("density","comfortable");applyArmoryPreference("textSize","default");
       applyQualityMode("auto");
-      showToast("已恢复默认主题、强调色与自动画质。", "success");
+      showToast("已恢复炉火、龙骨战徽、舒适密度、默认字号与自动画质。", "success");
       return;
     }
     if (action === "reload") {

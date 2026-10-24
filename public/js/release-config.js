@@ -2,11 +2,11 @@
 
 (function initializeOceanReleaseConfig(root) {
   const config = Object.freeze({
-    version: "1.6.2",
-    stage: "Ocean-v1.6.2",
+    version: "1.6.3",
+    stage: "Ocean-v1.6.3",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.1",
-    assetVersion: "1.6.2-ui2.604da58b80",
+    assetVersion: "1.6.3-ui2.e62a6a762b",
   });
   if (typeof module === "object" && module.exports) {
     module.exports = config;

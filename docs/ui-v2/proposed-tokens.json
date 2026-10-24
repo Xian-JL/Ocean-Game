@@ -1,0 +1,131 @@
+{
+  "status": "specification proposal; not applied to runtime",
+  "version": "2.0",
+  "themes": {
+    "armory-ember": {
+      "label": "炉火",
+      "colors": {
+        "void": "#080B0D",
+        "steel-deep": "#11171B",
+        "steel-panel": "#1C2429",
+        "steel-raised": "#29343B",
+        "steel-edge": "#49585F",
+        "control-edge": "#819099",
+        "text-primary": "#F0E7D7",
+        "text-secondary": "#BBC5C8",
+        "text-muted": "#8D999E",
+        "ember": "#E58A4C",
+        "ember-hot": "#FFC087",
+        "bronze": "#AA8154",
+        "on-accent": "#080B0D",
+        "ally": "#63C5CF",
+        "opponent-a": "#E77876",
+        "opponent-b": "#BDA0EA",
+        "success": "#84C6A3",
+        "warning": "#F2CA72",
+        "danger": "#F28C86",
+        "sea": "#102F3A"
+      }
+    },
+    "armory-cast": {
+      "label": "冷铸",
+      "colors": {
+        "void": "#080B0D",
+        "steel-deep": "#11171B",
+        "steel-panel": "#1C2429",
+        "steel-raised": "#29343B",
+        "steel-edge": "#49585F",
+        "control-edge": "#8798A3",
+        "text-primary": "#F0E7D7",
+        "text-secondary": "#BBC5C8",
+        "text-muted": "#8D999E",
+        "ember": "#91B3C7",
+        "ember-hot": "#C6DDE8",
+        "bronze": "#8B969C",
+        "on-accent": "#080B0D",
+        "ally": "#63C5CF",
+        "opponent-a": "#E77876",
+        "opponent-b": "#BDA0EA",
+        "success": "#84C6A3",
+        "warning": "#F2CA72",
+        "danger": "#F28C86",
+        "sea": "#102F3A"
+      }
+    },
+    "armory-ivory": {
+      "label": "铸白",
+      "colors": {
+        "void": "#D7D0C2",
+        "steel-deep": "#ECE7DB",
+        "steel-panel": "#F4F0E6",
+        "steel-raised": "#FFFDF7",
+        "steel-edge": "#8C8173",
+        "control-edge": "#817568",
+        "text-primary": "#20292F",
+        "text-secondary": "#48555E",
+        "text-muted": "#5E6971",
+        "ember": "#8D4A20",
+        "ember-hot": "#6D3414",
+        "bronze": "#7D5932",
+        "on-accent": "#FFF6E6",
+        "ally": "#176E79",
+        "opponent-a": "#A73E3B",
+        "opponent-b": "#69499C",
+        "success": "#256B46",
+        "warning": "#775000",
+        "danger": "#A12E2B",
+        "sea": "#C1D0D1"
+      }
+    }
+  },
+  "geometry": {
+    "spaceUnit": 4,
+    "controlRadius": [
+      2,
+      4
+    ],
+    "overlayRadiusMax": 8,
+    "signatureCutTopLeft": 12,
+    "signatureCutBottomRight": 4,
+    "touchControlMin": 44,
+    "denseMapCellMin": 36,
+    "denseMapZoomAtLeast": 44,
+    "desktopMapCell": [
+      26,
+      64
+    ],
+    "axis": [
+      24,
+      28
+    ]
+  },
+  "motionMs": {
+    "controls": [
+      100,
+      180
+    ],
+    "panel": [
+      180,
+      260
+    ],
+    "page": [
+      220,
+      350
+    ],
+    "target": [
+      180,
+      260
+    ],
+    "weaponHigh": [
+      700,
+      1500
+    ],
+    "weaponSmooth": [
+      360,
+      550
+    ],
+    "mainDeadline": 1800,
+    "cleanupDeadline": 2000
+  },
+  "semanticRoles": "Team/status meanings remain fixed; light values change contrast, not meaning. No faction mechanics."
+}

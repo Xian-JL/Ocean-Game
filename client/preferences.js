@@ -245,40 +245,30 @@
     warmBattleArt(state.room);
   }
 
-  const THEME_OPTIONS = Object.freeze({
-    "ocean-dark": "深海暗夜",
-    "ocean-light": "极地寒光",
-    "ocean-dusk": "黄昏余晖",
-  });
-  const ACCENT_OPTIONS = Object.freeze({
-    cyan: ["#63ddf5", "#1ec6eb", "rgba(64, 204, 236, 0.12)", "99, 221, 245"],
-    gold: ["#f4c25a", "#d9a02e", "rgba(244, 194, 90, 0.14)", "244, 194, 90"],
-    jade: ["#59e0ac", "#2fbf85", "rgba(89, 224, 172, 0.14)", "89, 224, 172"],
-    crimson: ["#ff6b77", "#e23b4c", "rgba(255, 107, 119, 0.14)", "255, 107, 119"],
-    violet: ["#bc8cff", "#9660e8", "rgba(188, 140, 255, 0.14)", "188, 140, 255"],
-  });
-
+  const THEME_OPTIONS = Object.freeze({"armory-ember":"炉火","armory-cast":"冷铸","armory-ivory":"铸白"});
+  const LEGACY_THEMES = {"ocean-dark":"armory-ember","ocean-dusk":"armory-ember","ocean-light":"armory-ivory"};
   function applyTheme(theme) {
-    if (!Object.hasOwn(THEME_OPTIONS, theme)) theme = "ocean-dark";
-    state.theme = theme;
-    document.documentElement.dataset.theme = theme;
-    writeStringPreference(THEME_STORAGE_KEY, theme);
+    if(LEGACY_THEMES[theme]) {
+      const oldAccent=readStringPreference(ACCENT_STORAGE_KEY,"cyan");
+      theme=theme==="ocean-light"?"armory-ivory":["cyan","jade","violet"].includes(oldAccent)?"armory-cast":"armory-ember";
+    }
+    if(!Object.hasOwn(THEME_OPTIONS,theme))theme="armory-ember";
+    state.theme=theme;document.documentElement.dataset.theme=theme;
+    writeStringPreference(THEME_STORAGE_KEY,theme);syncPersonalizeControls();
+  }
+  function applyAccent() {
+    for(const key of ["--accent-primary","--accent-strong","--accent-soft","--accent-primary-rgb"])document.documentElement.style.removeProperty(key);
+    for(const [kind,allowed,fallback] of [["crest",["keel","wave","anchor"],"keel"],["density",["comfortable","compact"],"comfortable"],["textSize",["default","large"],"default"]]){
+      const value=readStringPreference("ocean.ui2."+kind,fallback);document.documentElement.dataset[kind]=allowed.includes(value)?value:fallback;
+    }
     syncPersonalizeControls();
   }
-
-  function applyAccent(accent) {
-    if (!Object.hasOwn(ACCENT_OPTIONS, accent)) accent = "cyan";
-    state.accent = accent;
-    const parts = ACCENT_OPTIONS[accent];
-    const style = document.documentElement.style;
-    style.setProperty("--accent-primary", parts[0]);
-    style.setProperty("--accent-strong", parts[1]);
-    style.setProperty("--accent-soft", parts[2]);
-    style.setProperty("--accent-primary-rgb", parts[3]);
-    writeStringPreference(ACCENT_STORAGE_KEY, accent);
-    syncPersonalizeControls();
+  function applyArmoryPreference(kind,value){
+    const allowed={crest:["keel","wave","anchor"],density:["comfortable","compact"],textSize:["default","large"]};
+    if(!allowed[kind]?.includes(value))return;
+    writeStringPreference("ocean.ui2."+kind,value);document.documentElement.dataset[kind]=value;
+    syncPersonalizeControls();cancelMotion();render();
   }
-
   function syncPersonalizeControls() {
     if (!personalizeDialog) return;
     const themeControls = personalizeDialog.querySelectorAll(
@@ -308,6 +298,10 @@
       if (detail && control.dataset.qualityMode === "auto") {
         detail.textContent = `当前：${state.effectiveQuality === "smooth" ? "流畅" : "高画质"}`;
       }
+    }
+    for(const control of personalizeDialog.querySelectorAll('[data-action="armory-preference"]')){
+      const active=document.documentElement.dataset[control.dataset.preference]===control.dataset.value;
+      control.classList.toggle("is-active",active);control.setAttribute("aria-checked",String(active));
     }
     updateChoiceSemantics();
   }

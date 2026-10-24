@@ -488,6 +488,7 @@
       showToast(`${Model.nicknameFor(nextRoom, playerId)} 已淘汰`, "warning", 4_500, false);
     }
     const opponentIds = battleOpponentIds(nextRoom.battle);
+    for(const id of state.battle.identityTones.keys())if(!opponentIds.includes(id))state.battle.identityTones.delete(id);
     const activeTargets = activeBattleOpponentIds(nextRoom);
     if (!opponentIds.includes(state.battle.targetPlayerId)) {
       state.battle.targetPlayerId = activeTargets[0] ?? opponentIds[0] ?? null;
@@ -594,7 +595,7 @@
   function render() {
     const viewMemory = captureViewMemory();
     headerRoomCode.hidden = !state.room?.roomCode && !state.tutorial.active;
-    headerRoomCode.textContent = state.training?.session ? "训练营 · 合成局面" : state.tutorial.active
+    headerRoomCode.textContent = state.training?.session ? "训练营 · 核心战斗" : state.tutorial.active
       ? "交互教程 · 本地训练"
       : state.room?.roomCode
       ? `${state.room.roomCode} · ${state.room.maxPlayers ?? 2}P · ${state.room.mapSize ?? 12}×${state.room.mapSize ?? 12}${state.room.roomMode === "bot_duel" ? ` · ${botDifficultyLabel(state.room.botDifficulty)} AI` : ""}`

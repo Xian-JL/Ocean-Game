@@ -1,8 +1,8 @@
 {
   "name": "ocean-game",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "private": true,
-  "description": "海战 OCEAN v1.6.2：舰队控制台、训练营与特效恢复增强",
+  "description": "海战 OCEAN v1.6.3：黑潮军械库 UI 2.0、核心战斗训练与特效增强",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

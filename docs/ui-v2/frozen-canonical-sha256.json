@@ -1,0 +1,29 @@
+{
+  "note": "Canonical LF hashes verified against original UI2 raw baseline and pre-release Git parent; only CRLF/LF differences are ignored. No game/protocol content changed.",
+  "files": {
+    "server/game/action-resolution.js": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400",
+    "server/game/action-state.js": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29",
+    "server/game/action-validation.js": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6",
+    "server/game/actions.js": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646",
+    "server/game/battle-state.js": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90",
+    "server/game/bot-difficulty.js": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835",
+    "server/game/bot-strategy.js": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7",
+    "server/game/connection.js": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c",
+    "server/game/coordinates.js": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7",
+    "server/game/deployment.js": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15",
+    "server/game/endgame.js": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418",
+    "server/game/errors.js": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab",
+    "server/game/information-projection.js": "34865d39ca0625a87a0e5a4cca5bb69ba6607558a9d91a202d1dff804a94fdaf",
+    "server/game/lifecycle.js": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8",
+    "server/game/map-rules.js": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7",
+    "server/game/match-resolution.js": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f",
+    "server/game/match.js": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523",
+    "server/game/random-deployment.js": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430",
+    "server/game/ranges.js": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374",
+    "server/game/room-service.js": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30",
+    "server/game/room.js": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d",
+    "server/game/rules.js": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682",
+    "server/game/timing.js": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a",
+    "server/game/units.js": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9"
+  }
+}

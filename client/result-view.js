@@ -191,7 +191,7 @@
         </header>
 
         ${renderResultPlayers(room, result, replay)}
-        ${renderRematchPanel(room)}
+        ${state.training?.session ? renderTrainingFinishActions() : renderRematchPanel(room)}
 
         <div class="replay-layout replay-layout--v075" id="match-replay" tabindex="-1">
           <section class="replay-map-panel">

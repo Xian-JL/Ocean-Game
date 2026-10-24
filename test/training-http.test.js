@@ -5,7 +5,7 @@ const {createOceanServer}=require('../server/app');
 const {InMemoryRoomService}=require('../server/game/room-service');
 test('真实HTTP训练会话与正式房间隔离，凭证/版本/幂等/教官接口正确',async t=>{
  const formal=new InMemoryRoomService();
- const runtime=createOceanServer({roomService:formal});
+ const runtime=createOceanServer({roomService:formal,training:{debug:true}});
  runtime.httpServer.listen(0,'127.0.0.1');await once(runtime.httpServer,'listening');
  t.after(()=>new Promise(resolve=>runtime.io.close(resolve)));
  const base='http://127.0.0.1:'+runtime.httpServer.address().port;

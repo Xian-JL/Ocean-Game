@@ -8,9 +8,9 @@
     />
     <meta
       name="description"
-      content="《海战 OCEAN》v1.6.2 舰队控制台、训练营与动态特效增强版"
+      content="《海战 OCEAN》v1.6.3 黑潮军械库 · 回合制海域对抗"
     />
-    <meta name="theme-color" content="#06131f" />
+    <meta name="theme-color" content="#080B0D" />
     <title>海战 OCEAN</title>
     <link rel="stylesheet" href="/css/ocean.css?v=__OCEAN_ASSET_VERSION__" />
     <script src="/js/theme-bootstrap.js?v=__OCEAN_ASSET_VERSION__"></script>
@@ -37,6 +37,7 @@
           </span>
         </a>
 
+        <nav class="global-header__nav" aria-label="主导航"><button data-action="home-tab">作战</button><button data-action="training-open">训练</button><button data-action="open-personalize">设置</button></nav>
         <div class="global-header__tools">
           <span id="header-room-code" class="header-room" hidden></span>
           <div class="connection-pill" role="status" aria-live="polite" data-tooltip="实时连接状态">
@@ -72,7 +73,7 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.6.2</span>
+          <span id="footer-release">Ocean-v1.6.3</span>
           <span aria-hidden="true">·</span>
           <span id="footer-protocol">Rule 1.8 · Socket 2.1</span>
         </span>
@@ -250,7 +251,7 @@
         <div>
           <p class="eyebrow">OCEAN PERSONALIZE</p>
           <h2 id="personalize-title">个性化设置</h2>
-          <p>选择界面主题、强调色与2.5D画质；只保存在当前浏览器，不影响对局与服务器。</p>
+          <p>选择主题、战徽与阅读方式。外观保存在本机，不改变对战规则。</p>
         </div>
         <button class="icon-button" type="button" data-action="close-personalize" aria-label="关闭个性化设置">×</button>
       </div>
@@ -262,50 +263,24 @@
             <small>主题仅改变本机外观</small>
           </div>
           <div class="theme-options" role="radiogroup" aria-label="界面主题">
-            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="ocean-dark" aria-checked="true">
+            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="armory-ember" aria-checked="true">
               <span class="theme-swatch theme-swatch--dark" aria-hidden="true"></span>
-              <span>深海暗夜</span>
+              <span>炉火</span>
             </button>
-            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="ocean-light" aria-checked="false">
+            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="armory-ivory" aria-checked="false">
               <span class="theme-swatch theme-swatch--light" aria-hidden="true"></span>
-              <span>极地寒光</span>
+              <span>铸白</span>
             </button>
-            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="ocean-dusk" aria-checked="false">
+            <button class="theme-option" type="button" data-action="select-theme" data-theme-value="armory-cast" aria-checked="false">
               <span class="theme-swatch theme-swatch--dusk" aria-hidden="true"></span>
-              <span>黄昏余晖</span>
+              <span>冷铸</span>
             </button>
           </div>
         </section>
 
-        <section class="personalize-group">
-          <div class="personalize-group__heading">
-            <strong>强调色</strong>
-            <small>作用于边框、图标与激活状态</small>
-          </div>
-          <div class="accent-options" role="radiogroup" aria-label="强调色">
-            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="cyan" aria-checked="true">
-              <span class="accent-swatch accent-swatch--cyan" aria-hidden="true"></span>
-              <span>离子青</span>
-            </button>
-            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="gold" aria-checked="false">
-              <span class="accent-swatch accent-swatch--gold" aria-hidden="true"></span>
-              <span>荣耀金</span>
-            </button>
-            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="jade" aria-checked="false">
-              <span class="accent-swatch accent-swatch--jade" aria-hidden="true"></span>
-              <span>翡翠绿</span>
-            </button>
-            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="crimson" aria-checked="false">
-              <span class="accent-swatch accent-swatch--crimson" aria-hidden="true"></span>
-              <span>赤焰红</span>
-            </button>
-            <button class="accent-option" type="button" data-action="select-accent" data-accent-value="violet" aria-checked="false">
-              <span class="accent-swatch accent-swatch--violet" aria-hidden="true"></span>
-              <span>极光紫</span>
-            </button>
-          </div>
-        </section>
-
+        <section class="personalize-group"><div class="personalize-group__heading"><strong>本机战徽</strong><small>仅装饰，不代表阵营或成就</small></div><div class="crest-options" role="radiogroup" aria-label="本机战徽"><button role="radio" data-action="armory-preference" data-preference="crest" data-value="keel" aria-checked="false"><img src="/assets/icons/armory-crest.svg?v=__OCEAN_ASSET_VERSION__" alt=""><span>龙骨</span></button><button role="radio" data-action="armory-preference" data-preference="crest" data-value="wave" aria-checked="false"><img src="/assets/icons/armory-wave.svg?v=__OCEAN_ASSET_VERSION__" alt=""><span>破浪</span></button><button role="radio" data-action="armory-preference" data-preference="crest" data-value="anchor" aria-checked="false"><img src="/assets/icons/armory-anchor.svg?v=__OCEAN_ASSET_VERSION__" alt=""><span>锚刃</span></button></div></section>
+        <section class="personalize-group"><div class="personalize-group__heading"><strong>阅读方式</strong></div><div class="reading-options" role="radiogroup" aria-label="信息密度"><button role="radio" data-action="armory-preference" data-preference="density" data-value="comfortable" aria-checked="false">舒适</button><button role="radio" data-action="armory-preference" data-preference="density" data-value="compact" aria-checked="false">紧凑</button></div><div class="reading-options" role="radiogroup" aria-label="字号"><button role="radio" data-action="armory-preference" data-preference="textSize" data-value="default" aria-checked="false">默认文字</button><button role="radio" data-action="armory-preference" data-preference="textSize" data-value="large" aria-checked="false">大号文字</button></div></section>
+        <section class="personalize-preview" aria-label="外观预览"><span class="status-kicker">来源舰 · 示例</span><strong>驱逐舰Ⅰ · 1.5 / 2 HP</strong><div class="hp-track"><i></i></div><button class="button button--primary" type="button" disabled>确认执行 · 状态样例</button><small>此处为合成样例，不发出指令。</small></section>
         <section class="personalize-group personalize-group--quality">
           <div class="personalize-group__heading">
             <strong>2.5D画质</strong>
@@ -325,6 +300,7 @@
         </section>
       </div>
 
+      <nav class="settings-links" aria-label="其他设置"><button type="button" data-action="open-audio-settings">声音设置</button><button type="button" data-action="open-rules">规则与动画</button></nav>
       <div class="modal__actions">
         <button class="button button--secondary" type="button" data-action="reset-personalization">恢复默认</button>
         <button class="button button--primary" type="button" data-action="close-personalize">完成</button>

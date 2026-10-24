@@ -196,6 +196,7 @@
       markers: new Map(),
       markerContext: null,
       mobileMap: "enemy",
+      identityTones: new Map(),
       actionDrawerOpen: false,
       fleetOpen: false,
       commandNotice: "",
@@ -228,7 +229,7 @@
     },
     replayPlayerId: null,
     reduceMotion: readBooleanPreference(MOTION_STORAGE_KEY),
-    theme: readStringPreference(THEME_STORAGE_KEY, "ocean-dark"),
+    theme: readStringPreference(THEME_STORAGE_KEY, "armory-ember"),
     accent: readStringPreference(ACCENT_STORAGE_KEY, "cyan"),
     qualityMode: readStringPreference(QUALITY_STORAGE_KEY, "auto"),
     effectiveQuality: "high",
@@ -253,16 +254,16 @@
 // Module: motion.js
   // Input is the existing role-filtered effect model, never raw outcomes.
   const motionDefinitions = Object.freeze({
-    destroyer_i_ram:{shape:'ram-one',duration:850,smooth:320,lockEnd:160,travelEnd:420},
-    destroyer_ii_ram:{shape:'ram-two',duration:1000,smooth:320,lockEnd:180,travelEnd:480},
-    pirate_attack:{shape:'cross',duration:900,smooth:320,lockEnd:180,travelEnd:450},
-    motorboat_ram:{shape:'wake',duration:750,smooth:320,lockEnd:140,travelEnd:340},
-    submarine_missile:{shape:'missile',duration:1000,smooth:320,lockEnd:160,travelEnd:520},
-    nuclear_bomb:{shape:'nuclear',duration:1400,smooth:360,lockEnd:220,travelEnd:620},
-    shock_bomb:{shape:'emp',duration:1000,smooth:320,lockEnd:160,travelEnd:600},
-    detection_bomb:{shape:'sonar',duration:1200,smooth:320,lockEnd:160,travelEnd:850},
-    radar_scan:{shape:'radar',duration:1300,smooth:360,lockEnd:160,travelEnd:1000},
-    helicopter_strafe:{shape:'strafe',duration:1400,smooth:360,lockEnd:180,travelEnd:900}
+    destroyer_i_ram:{shape:'ram-one',duration:850,smooth:440,lockEnd:160,travelEnd:420},
+    destroyer_ii_ram:{shape:'ram-two',duration:1000,smooth:440,lockEnd:180,travelEnd:480},
+    pirate_attack:{shape:'cross',duration:900,smooth:440,lockEnd:180,travelEnd:450},
+    motorboat_ram:{shape:'wake',duration:750,smooth:440,lockEnd:140,travelEnd:340},
+    submarine_missile:{shape:'missile',duration:1000,smooth:440,lockEnd:160,travelEnd:520},
+    nuclear_bomb:{shape:'nuclear',duration:1400,smooth:520,lockEnd:220,travelEnd:620},
+    shock_bomb:{shape:'emp',duration:1000,smooth:440,lockEnd:160,travelEnd:600},
+    detection_bomb:{shape:'sonar',duration:1200,smooth:440,lockEnd:160,travelEnd:850},
+    radar_scan:{shape:'radar',duration:1300,smooth:520,lockEnd:160,travelEnd:1000},
+    helicopter_strafe:{shape:'strafe',duration:1400,smooth:520,lockEnd:180,travelEnd:900}
   });
   const motionRuntime={key:null,started:0,map:null,context:null,consumed:new Map(),timer:null,
     hidden:false,animations:new Set(),raf:0,slow:0,samples:[],sampleAt:0,autoDegraded:false,previousFrame:0,watermark:-1,micro:new Map(),uiFacts:[],lastTarget:null,activeUi:new Map(),uiAnimations:new Set(),uiPage:null,localSignatures:new Map(),localContext:null,localSequence:0};
@@ -372,7 +373,7 @@
     const prevSalvo=previous?.battle?.match?.finalSalvo,nextSalvo=next.battle?.match?.finalSalvo;
     if(next.roomPhase==='FINAL_SALVO'&&(nextSalvo?.completedShots??0)>(prevSalvo?.completedShots??0))
       motionRuntime.uiFacts.push({key:key+':salvo',selector:'.final-salvo-stage__emblem',duration:1100,kind:'salvo',sound:'final_salvo'});
-    if(next.roomPhase==='FINISHED'&&previous?.roomPhase!=='FINISHED')motionRuntime.uiFacts.push({key:key+':result',selector:'#result-title',duration:900,kind:'result',sound:next.battle?.match?.result?.winnerId===next.own.playerId?'victory':next.battle?.match?.result?.winnerId===null?'unknown':'defeat'});
+    if(next.roomPhase==='FINISHED'&&previous?.roomPhase!=='FINISHED')motionRuntime.uiFacts.push({key:key+':result',selector:'.result-emblem',duration:1100,smooth:320,kind:'result',sound:next.battle?.match?.result?.winnerId===next.own.playerId?'victory':['draw','canceled'].includes(next.battle?.match?.result?.outcome)?'unknown':'defeat'});
     if(next.roomPhase==='ROLLING'&&JSON.stringify(previous?.rolling)!==JSON.stringify(next.rolling))motionRuntime.uiFacts.push({key:key+':dice',selector:'.die--revealed',duration:420,smooth:160,kind:'dice'});
   }
   // Observe semantic local changes, never hover coordinates or repeated DOM renders.
@@ -435,6 +436,7 @@
       const elapsed=performance.now()-cue.start;
       if(!node||typeof node.animate!=='function'||elapsed>=duration){motionRuntime.activeUi.delete(key);continue;}
       const frames=cue.kind==='salvo'?[{opacity:.3,transform:'scale(.75)'},{opacity:1,transform:'scale(1)'},{opacity:1,transform:'scale(1)'}]
+        :cue.kind==='result'?[{opacity:0,transform:'scale(1.12)',filter:'brightness(1.5)'},{opacity:1,transform:'scale(1)',filter:'brightness(1)'}]
         :cue.kind==='dice'?[{transform:'rotate(-14deg)',opacity:.5},{transform:'rotate(0deg)',opacity:1}]
         :cue.kind==='sunk'?[{opacity:.75},{opacity:.42}]
         :['paralysis','restore','own-hit','decoy','lock'].includes(cue.kind)?[{boxShadow:'inset 0 0 0 2px var(--accent-primary)',opacity:.65},{boxShadow:'inset 0 0 0 0px transparent',opacity:1}]
@@ -456,202 +458,107 @@
 
 
 // Module: training.js
-  const TRAINING_PROGRESS='ocean.training-progress.v1',TRAINING_SESSION='ocean.training-session.v1';
-  function readTrainingProgress(){try{const p=JSON.parse(localStorage.getItem(TRAINING_PROGRESS));return p&&typeof p.completed==='object'&&p.completed&&typeof p.revealed==='object'&&p.revealed?p:{completed:{},revealed:{}};}catch(_){return {completed:{},revealed:{}};}}
-  state.training={active:false,catalog:[],session:null,task:null,roles:[],applying:false,busy:false,error:'',group:'',query:'',actionFilter:'',kindFilter:'',mapFilter:0,playersFilter:0,map:12,players:2,coach:null,taskOpen:false,progress:readTrainingProgress()};
+  const TRAINING_PROGRESS='ocean.training-progress.v1',TRAINING_SESSION='ocean.core-training-session.v1';
+  function readTrainingProgress(){try{const p=JSON.parse(localStorage.getItem(TRAINING_PROGRESS));return p&&p.completed&&typeof p.completed==='object'?p:{completed:{},revealed:{}};}catch(_){return {completed:{},revealed:{}};}}
+  state.training={active:false,session:null,task:null,lesson:null,mode:null,course:[],weapons:[],applying:false,busy:false,loading:false,error:'',notice:'',progress:readTrainingProgress(),operation:0,opponentTimer:null,advancing:null};
   async function trainingHttp(path,options={}){
     const headers={'Content-Type':'application/json',...(state.training.session?.token?{'X-Training-Token':state.training.session.token}:{}),...options.headers};
-    const res=await fetch('/api/training/'+path,{...options,headers,cache:'no-store'});
-    const result=await res.json();if(!result.ok){
-      if(result.error?.code==='TRAINING_EXPIRED'){
-        const recent=state.training.scene??state.training.catalog.find(c=>c.id===state.training.progress.recent);
-        if(recent?.code==='X12')state.training.expiredTraining={id:recent.id,version:recent.version};
-      }
-      throw result.error??{message:'训练服务没有返回有效结果。'};}
-    return result.data;
+    const response=await fetch('/api/training/'+path,{...options,headers,cache:'no-store'}),result=await response.json();
+    if(!result.ok)throw result.error??{message:'练习暂时无法连接，请重试。'};return result.data;
   }
-  function rememberTraining(){
-    try{
-      localStorage.setItem(TRAINING_PROGRESS,JSON.stringify(state.training.progress));
-      if(state.training.session)sessionStorage.setItem(TRAINING_SESSION,JSON.stringify(state.training.session));
-      else sessionStorage.removeItem(TRAINING_SESSION);
-    }catch(_){}
-  }
+  function rememberTraining(){try{localStorage.setItem(TRAINING_PROGRESS,JSON.stringify(state.training.progress));if(state.training.session)sessionStorage.setItem(TRAINING_SESSION,JSON.stringify(state.training.session));else sessionStorage.removeItem(TRAINING_SESSION);}catch(_){}}
+  function clearTrainingAutomation(){clearTimeout(state.training.opponentTimer);state.training.opponentTimer=null;state.training.advancing=null;}
+  function sameTrainingOrigin(origin){return Boolean(state.training.active&&state.training.session?.id===origin.id&&state.training.session?.generation===origin.generation);}
   function applyTraining(data){
     const t=state.training,changed=t.session?.generation!==data.generation||state.room?.own?.playerId!==data.view.own.playerId;
-    if(changed){cancelMotion();state.room=null;state.pendingRequest=null;state.replayPlayerId=null;clearBattleDraft();Object.assign(state.battle,{mobileMap:'own',targetPlayerId:null,fleetOpen:false,actionDrawerOpen:false,logOpen:false,ownMapAlert:false,finalDecoyId:null,mapViewPositions:new Map()});t.coach=null;t.markerStore=new Map();}
-    t.session={id:data.id,token:data.token??t.session?.token,generation:data.generation};t.task=data.task;t.syncedAt=Date.now();t.scene=data.scene;t.roles=data.roles;t.error='';
-    if(data.award)t.progress.completed[data.award.id]=data.award.version;
-    if(t.expiredTraining?.id===data.scene.id){t.progress.completed[data.scene.id]=data.scene.version;t.expiredTraining=null;}
+    if(changed){clearTrainingAutomation();cancelMotion();state.room=null;state.pendingRequest=null;state.replayPlayerId=null;clearBattleDraft();Object.assign(state.battle,{mobileMap:'own',targetPlayerId:null,fleetOpen:false,actionDrawerOpen:false,logOpen:false,ownMapAlert:false,finalDecoyId:null,mapViewPositions:new Map()});t.markerStore=new Map();}
+    t.session={id:data.id,token:data.token??t.session?.token,generation:data.generation};t.mode=data.playerMode;t.lesson=data.lesson;t.task=data.task;t.scene=data.scene;t.syncedAt=Date.now();t.error='';
     if(data.task.completed)t.progress.completed[data.scene.id]=data.scene.version;
-    if(data.task.revealed)t.progress.revealed[data.scene.id]=true;
-    t.progress.recent=data.scene.id;t.progress.ruleVersion='1.8';t.progress.tutorialCompleted=readTutorialProgress();
-    t.applying=true;state.connected=true;setConnectionPhase('online','训练会话已同步','online','训练服务在线');
-    if(data.replayEffect){
-      state.battle.lastResolutionKey=null;motionRuntime.consumed.clear();motionRuntime.watermark=-1;
-    }
-    acceptRoomState(data.view);t.applying=false;rememberTraining();scheduleTrainingClock();
+    t.progress.recent={mode:t.mode,id:t.lesson.id};t.progress.ruleVersion='1.8';
+    t.applying=true;state.connected=true;setConnectionPhase('online','练习已就绪','online','练习在线');acceptRoomState(data.view);t.applying=false;
+    if(changed&&state.room.roomPhase==='PLAYING'){const opponent=activeBattleOpponentIds(state.room)[0];if(opponent){state.battle.targetPlayerId=opponent;state.battle.mobileMap=opponent;}}
+    rememberTraining();scheduleTrainingOpponent();
   }
   async function enterTraining(){
     if(state.pendingRequest||state.restoring){showToast('当前操作尚未结束，请稍后进入训练营。','warning');return;}
     if(state.room&&!state.training.active){showToast('请先完成或离开正式房间，再进入训练营。','warning');return;}
     if(readStoredSession()){showToast('本机有正式对局恢复记录，请先检查或返回该房间。','warning');return;}
-    state.training.active=true;state.training.error='';state.tutorial.active=false;
-    history.replaceState(null,'','/training');render();
+    const t=state.training;t.active=true;t.loading=true;t.error='';state.tutorial.active=false;history.replaceState(null,'','/training');render();
     try{
-      const data=await trainingHttp('catalog');state.training.catalog=data.scenarios;
+      const data=await trainingHttp('course');t.course=data.course;t.weapons=data.weapons;
       let stored=null;try{stored=JSON.parse(sessionStorage.getItem(TRAINING_SESSION));}catch(_){}
-      if(stored?.id){state.training.session=stored;try{applyTraining(await trainingHttp('sessions/'+stored.id));}catch(_){state.training.session=null;state.training.notice='上次训练会话已过期，将从初始检查点重新练习；已体验进度仍保留。';sessionStorage.removeItem(TRAINING_SESSION);}}
-      if(!state.training.session){
-        const id=location.pathname.startsWith('/training/scenarios/')?decodeURIComponent(location.pathname.slice('/training/scenarios/'.length)):null;
-        if(id&&state.training.catalog.some(c=>c.id===id))await startTrainingScenario(id);
-      }
-      render();
-    }catch(e){state.training.error=e.message;render();}
+      if(stored?.id){t.session=stored;try{const resumed=await trainingHttp('sessions/'+stored.id);if(!resumed.playerMode)throw Error('旧练习');applyTraining(resumed);}catch(_){t.session=null;t.notice='上次练习已结束，可以重新开始；已完成的学习进度仍保留。';sessionStorage.removeItem(TRAINING_SESSION);}}
+    }catch(e){t.error=e.message;}finally{t.loading=false;render();}
   }
-  async function startTrainingScenario(id,preset={}){
-    if(id.startsWith('LAB:')){const parts=id.split(':');preset={action:parts[1],targetKind:parts[2],sourceState:parts[3]};id='free-practice';}
-    const t=state.training;if(t.busy)return;t.busy=true;t.error='';render();
+  async function startTrainingScenario(id='fire',preset={}){
+    const t=state.training;if(t.busy)return;const operation=++t.operation,mode=preset.mode??'course';t.busy=true;t.error='';clearTrainingAutomation();render();
     try{
       if(t.session)await trainingHttp('sessions/'+t.session.id,{method:'DELETE'}).catch(()=>{});
-      t.session=null;state.room=null;t.coach=null;t.taskOpen=false;t.localEvents=[];cancelMotion();
-      const data=await trainingHttp('sessions',{method:'POST',body:JSON.stringify({scenarioId:id,mapSize:t.map,players:t.players===3?3:undefined,...preset})});
-      applyTraining(data);history.replaceState(null,'','/training/scenarios/'+encodeURIComponent(id));
-    }catch(e){t.error=e.message;}finally{t.busy=false;render();}
+      t.session=null;state.room=null;t.lesson=null;t.localEvents=[];cancelMotion();
+      const data=await trainingHttp('sessions',{method:'POST',body:JSON.stringify({mode,lessonId:id})});
+      if(operation===t.operation){applyTraining(data);history.replaceState(null,'','/training');}
+    }catch(e){if(operation===t.operation)t.error=e.message;}finally{if(operation===t.operation){t.busy=false;render();}}
   }
   async function trainingEmit(event,payload={}){
-    const t=state.training;
-    if(event==='room:leave'){await exitTrainingSession();return {stateVersion:0};}
-    if(!t.session)throw {message:'训练会话尚未载入。'};
-    const origin={...t.session};
-    const data=await trainingHttp('sessions/'+t.session.id+'/commands',{method:'POST',
-      body:JSON.stringify({event,payload:{...payload,expectedVersion:payload.expectedVersion??state.room?.stateVersion,trainingGeneration:t.session.generation,trainingEvidence:t.localEvents??[],trainingSettings:{quality:state.effectiveQuality,reduced:state.reduceMotion,muted:!state.audio.effectsEnabled,theme:state.theme,viewport:window.innerWidth}},operationId:payload.intent?.actionId??createActionId()})});
-    if(t.session?.id!==origin.id||t.session?.generation!==origin.generation)throw {code:'STALE_TRAINING_RESPONSE',message:'旧训练应答已忽略，请以当前场景为准。'};
-    state.suppressNextSync=event==='room:sync';applyTraining(data);
-    return {stateVersion:data.view.stateVersion,view:data.view,training:data};
+    const t=state.training;if(event==='room:leave'){await exitTrainingSession();return {stateVersion:0};}
+    if(!t.session)throw {message:'练习尚未准备好。'};const origin={...t.session};
+    const data=await trainingHttp('sessions/'+origin.id+'/commands',{method:'POST',body:JSON.stringify({event,payload:{...payload,expectedVersion:payload.expectedVersion??state.room?.stateVersion,trainingGeneration:origin.generation},operationId:payload.intent?.actionId??createActionId()})});
+    if(!sameTrainingOrigin(origin))throw {code:'STALE_TRAINING_RESPONSE',message:'练习已切换。'};
+    state.suppressNextSync=event==='room:sync';applyTraining(data);return {stateVersion:data.view.stateVersion,view:data.view,training:data};
   }
-  async function trainingControl(control,extra={}){
-    const t=state.training;if(t.busy)return;t.busy=true;
-    if(control==='reveal')cancelMotion();
-    try{
-      const markers=control==='markers'?[...(state.battle.markers??new Map()).entries()]:undefined;
-      await trainingEmit('training:control',{control,markers,targetPlayerId:state.battle.targetPlayerId,...extra});
-      if(control==='reveal'){t.coach=await trainingHttp('sessions/'+t.session.id+'/reveal');t.taskOpen=true;}
-      if(control==='conceal')t.coach=null;
-    }catch(e){t.error=e.message;}finally{t.busy=false;render();}
+  async function trainingControl(control){
+    if(control!=='reset')return;const t=state.training;if(t.busy)return;const operation=++t.operation;t.busy=true;clearTrainingAutomation();
+    try{await trainingEmit('training:control',{control:'reset'});}catch(e){if(operation===t.operation)t.error=e.message;}finally{if(operation===t.operation){t.busy=false;render();}}
   }
   async function exitTrainingSession(){
-    const t=state.training;cancelMotion();clearTimeout(t.clockTimer);t.clockTimer=null;
-    if(t.session)await trainingHttp('sessions/'+t.session.id,{method:'DELETE'}).catch(()=>{});
-    t.session=null;t.task=null;t.coach=null;state.room=null;state.pendingRequest=null;rememberTraining();render();
-    history.replaceState(null,'','/training');
+    const t=state.training;++t.operation;clearTrainingAutomation();cancelMotion();const session=t.session;
+    t.session=null;t.task=null;t.lesson=null;t.mode=null;t.busy=false;t.error='';state.room=null;state.pendingRequest=null;rememberTraining();render();history.replaceState(null,'','/training');
+    if(session)await trainingHttp('sessions/'+session.id,{method:'DELETE',headers:{'X-Training-Token':session.token}}).catch(()=>{});
   }
-  function trainingButton(action,label,extra=''){
-    return '<button type="button" data-action="'+action+'" '+extra+(state.training.busy?' disabled':'')+'>'+label+'</button>';
-  }
+  function trainingButton(action,label,extra=''){return '<button type="button" data-action="'+action+'" '+extra+((state.training.busy||state.training.loading)?' disabled':'')+'>'+label+'</button>';}
   function renderTrainingCatalog(){
-    const t=state.training,query=t.query.toLowerCase();
-    const visible=t.catalog.filter(c=>(!t.group||c.group===t.group)&&(!t.actionFilter||c.action===t.actionFilter)&&(!t.kindFilter||c.kind===t.kindFilter)&&(!t.mapFilter||c.maps.includes(t.mapFilter))&&(!t.playersFilter||c.players===t.playersFilter)&&(!query||(c.title+c.objective+c.id+c.groupName).toLowerCase().includes(query)));
-    const done=Object.keys(t.progress.completed??{}).filter(id=>t.catalog.some(c=>c.id===id&&c.version===t.progress.completed[id])).length;
-    return '<section class="training-catalog page-enter"><header><span class="eyebrow">OCEAN · 训练营</span><h1>每一种局面，都可以练习。</h1><p>在隔离的合成局面中亲手操作，比较实战可见信息与教官解析。需训练服务在线；进度仅保存在本机。</p><p>'+done+' / '+t.catalog.length+' 个变体已体验 · '+new Set(t.catalog.map(c=>c.parentId)).size+'个主题场景</p></header>'+
-      '<nav class="training-top">'+trainingButton('training-home','返回首页')+trainingButton('start-tutorial','五章本地入门')+trainingButton('training-clear-progress','重置训练进度')+
-      (t.progress.recent?trainingButton('training-start','继续最近练习','data-scenario="'+escapeHtml(t.progress.recent)+'"'):'')+'</nav>'+
-      '<form id="training-filter" class="training-filters"><label>查找场景<input name="query" value="'+escapeHtml(t.query)+'" placeholder="例如：摩托艇、断线、保密"></label><label>主题<select name="group"><option value="">全部主题</option>'+
-      [['D','部署与开局'],['W','伤害与资源'],['I','侦察与标记'],['F','三人模式'],['E','齐射与终局'],['X','限制与恢复'],['R','房间与阶段']].map(([id,name])=>'<option value="'+id+'" '+(t.group===id?'selected':'')+'>'+name+'</option>').join('')+
-      '</select></label><details class="training-filter-extra"><summary>按行动、阶段、地图、人数筛选</summary><div><label>行动<select name="actionFilter"><option value="">全部行动</option>'+Data.ACTION_DEFINITIONS.map(d=>'<option value="'+d.type+'" '+(t.actionFilter===d.type?'selected':'')+'>'+escapeHtml(d.name)+'</option>').join('')+'</select></label><label>阶段<select name="kindFilter"><option value="">全部阶段</option>'+[['lobby','等待房间'],['deployment','部署'],['rolling','掷骰'],['opening','首回合'],['battle','对战'],['markers','私人标记'],['salvo','最终齐射'],['recovery','异常恢复']].map(([v,n])=>'<option value="'+v+'" '+(t.kindFilter===v?'selected':'')+'>'+n+'</option>').join('')+'</select></label><label>地图筛选<select name="mapFilter"><option value="0">全部地图</option>'+[10,12,15].map(v=>'<option '+(t.mapFilter===v?'selected':'')+'>'+v+'</option>').join('')+'</select></label><label>人数筛选<select name="playersFilter">'+[[0,'全部人数'],[2,'2人'],[3,'3人']].map(([v,n])=>'<option value="'+v+'" '+(t.playersFilter===v?'selected':'')+'>'+n+'</option>').join('')+'</select></label></div></details><label>自由试验 · 地图<select name="map">'+[10,12,15].map(n=>'<option '+(t.map===n?'selected':'')+'>'+n+'</option>').join('')+'</select></label><label>合成席位<select name="players"><option value="2">按场景默认</option><option value="3" '+(t.players===3?'selected':'')+'>3人试验</option></select></label><button type="submit">应用筛选</button>'+trainingButton('training-filter-clear','清空筛选')+'</form>'+
-      (t.error?'<p role="alert" class="form-error">'+escapeHtml(t.error)+' '+trainingButton('training-open','重试连接')+'</p>':'')+
-      '<details class="training-lab"><summary>自由演练 · 自选行动、目标与来源状态</summary><form id="training-lab"><label>行动<select name="action">'+Data.ACTION_DEFINITIONS.map(d=>'<option value="'+d.type+'">'+escapeHtml(d.name)+'</option>').join('')+'</select></label><label>目标<select name="targetKind">'+[['unit','完整单位'],['surface','水面单位'],['underwater','水下单位'],['carrier','航母'],['empty','空海域'],['decoy','有效鱼雷'],['old','已受击格'],['wreck','残骸'],['destroyed-decoy','已毁鱼雷'],['positive','区域有信号'],['negative','区域无信号']].map(([v,n])=>'<option value="'+v+'">'+n+'</option>').join('')+'</select></label><label>来源<select name="sourceState">'+[['normal','正常'],['sunk','已沉没'],['paralyzed','瘫痪'],['exhausted','资源耗尽']].map(([v,n])=>'<option value="'+v+'">'+n+'</option>').join('')+'</select></label><button type="submit">创建自由局面</button><p>地图与席位沿用上方选择。无效组合会解释原因；不会修改正式房间。</p></form></details>'+
-      (!t.catalog.length?'<p role="status">正在获取训练目录…</p>':'<div class="training-cards">'+visible.map(c=>'<article><small>'+escapeHtml(c.groupName)+' · '+escapeHtml(c.id)+'</small><h2>'+escapeHtml(c.title)+'</h2><p>'+escapeHtml(c.objective)+'</p><span>'+((t.progress.completed??{})[c.id]===c.version?'已体验':((t.progress.completed??{})[c.id]?'旧版已体验 · 当前版本待练':'未练习'))+((t.progress.revealed??{})[c.id]?' · 已看解析':'')+'</span>'+trainingButton('training-start','进入练习','data-scenario="'+escapeHtml(c.id)+'"')+'</article>').join('')+'</div>')+'</section>';
+    const t=state.training,done=t.course.filter(x=>t.progress.completed['course:'+x.id]==='core-1').length;
+    return '<section class="training-catalog page-enter"><header><span class="eyebrow">OCEAN · TRAINING</span><h1>上手海战，从开火开始。</h1><p>舰队已经就位。练习瞄准、侦察和武器运用，陪练会自动回应。</p>'+trainingButton('training-home','返回首页')+'</header>'+
+      (t.notice?'<p class="training-notice" role="status">'+escapeHtml(t.notice)+'</p>':'')+(t.error?'<p class="form-error" role="alert">'+escapeHtml(t.error)+' '+trainingButton('training-open','重新连接')+'</p>':'')+
+      '<div class="training-modes"><article><span class="eyebrow">4 步上手</span><h2>快速上手</h2><p>开火、雷达、潜射导弹、最终齐射。跟随四个简短练习，熟悉战斗操作。</p><small>'+done+' / 4 步已完成</small>'+trainingButton('training-start','开始训练','class="button button--primary" data-mode="course" data-lesson="fire"')+'</article>'+
+      '<article><span class="eyebrow">不计时 · 随时重来</span><h2>自由练习</h2><p>直接与陪练交战，自己选择行动和目标。无需部署，也没有倒计时压力。</p><small>12×12 海域 · 自动陪练</small>'+trainingButton('training-start','进入练习','class="button button--secondary" data-mode="free" data-lesson="free"')+'</article></div>'+
+      '<section class="training-weapons" aria-labelledby="training-weapons-title"><h2 id="training-weapons-title">试试不同武器</h2><p>选择一种行动，立即进入对应的战斗练习。</p>'+(t.loading?'<p role="status">正在准备训练营…</p>':'<div class="training-weapon-grid">'+t.weapons.map(w=>trainingButton('training-start',uiIcon(actionVisualMeta(Data.getActionDefinition(w.action)).icon)+'<span>'+escapeHtml(w.title)+'</span>','data-mode="weapon" data-lesson="'+escapeHtml(w.id)+'"')).join('')+'</div>')+'</section></section>';
   }
   function renderTrainingTask(){
-    const t=state.training;if(!t.session)return '';
-    const task=t.task??{};
-    const buttons=trainingButton('training-control','重置场景','data-control="reset"')+
-      trainingButton('training-control','重来上一步','data-control="undo"')+
-      trainingButton('training-exit-session','场景库')+
-      trainingButton('training-control','查看教官解析','data-control="reveal"')+
-      trainingButton('training-control','重播本例效果','data-control="replay"')+trainingButton('training-next','下一场景')+
-      '<details class="training-advanced"><summary>训练环境与时间控制</summary>'+trainingButton('training-control','推进合成席位','data-control="script"')+
-      trainingButton('training-control','推进至截止前5秒','data-control="clock-before"')+
-      trainingButton('training-control','推进至截止之后','data-control="clock"')+
-      trainingButton('training-control',task.running?'暂停计时':'继续计时','data-control="run-clock"')+
-      trainingButton('training-control','模拟断线','data-control="disconnect"')+trainingButton('training-control','模拟席位加入','data-control="join-seat"')+trainingButton('training-control','模拟另一方赛后离开','data-control="leave-other"')+
-      trainingButton('training-control','恢复合成座位','data-control="resume"')+trainingButton('training-control','模拟回到前台','data-control="foreground"')+trainingButton('training-control','同步训练状态','data-control="sync"')+trainingButton('training-control','模拟训练服务重启','data-control="expire"')+
-      (task.restriction?trainingButton('training-control','验证受限条件','data-control="restriction"')+trainingButton('training-control','重建可操作检查点','data-control="recover-checkpoint"'):'')+
-      (t.scene?.kind==='markers'?trainingButton('training-control','验证本机标记','data-control="markers"'):'')+'</details>';
-    return '<aside class="training-task" aria-label="训练任务"><p class="training-current">'+escapeHtml(task.hint??'')+'</p>'+(t.notice?'<p class="training-current" role="status">'+escapeHtml(t.notice)+'</p>':'')+(!t.taskOpen?'<div class="training-quick">'+trainingButton('training-exit-session','场景库')+trainingButton('training-control','重来','data-control="reset"')+trainingButton('training-next','下一场景')+trainingButton('training-control','教官解析','data-control="reveal"')+'</div>':'')+'<details '+(t.taskOpen?'open':'')+'><summary>训练营 · 合成局面 · 任务与控制 <strong>'+(task.completed?'本例已体验':'当前任务')+'</strong> '+escapeHtml(t.scene?.id??'')+'</summary>'+
-      '<div class="training-task-body"><h2>'+escapeHtml(t.scene?.title??'')+'</h2>'+(t.scene?.code==='R05'?'<form id="training-entry"><label>训练昵称<input id="training-nickname-input" name="nickname" value="'+escapeHtml(t.entryDraft?.nickname??'')+'" autocomplete="off"></label><label>训练房间码<input id="training-room-code-input" name="roomCode" value="'+escapeHtml(t.entryDraft?.roomCode??'')+'" placeholder="例如 ABCDEF" autocomplete="off"></label><button type="submit">验证训练字段</button></form>':'')+'<p>'+escapeHtml(task.hint??'')+'</p><p>'+escapeHtml(t.scene?.objective??'')+'</p><p role="status">'+(task.completed?'已体验；可以重来比较其他选择。':'尚未完成目标。')+' · '+(task.running?'虚拟时钟运行中':'虚拟时钟已暂停')+(task.remaining!==null?' · 剩余 '+task.remaining+' 秒':'')+'</p><div class="training-controls">'+buttons+'</div><div class="training-roles">'+t.roles.map(role=>trainingButton('training-role',escapeHtml(role.name),'data-role="'+escapeHtml(role.id)+'"')).join('')+'</div>'+
-      (t.error?'<p class="form-error" role="alert">'+escapeHtml(t.error)+'</p>':'')+'<ul>'+ (task.notes??[]).map(n=>'<li>'+escapeHtml(n)+'</li>').join('')+'</ul>'+
-      (t.coach?'<section class="training-coach"><h3>教官视角 · 已揭示</h3><p>'+escapeHtml(t.coach.explanation)+'</p>'+trainingButton('training-control','收起教官解析','data-control="conceal"')+(t.coach.lessons??[]).map(line=>'<p>'+escapeHtml(line)+'</p>').join('')+Object.entries(t.coach.players).map(([id,p])=>'<h4>'+escapeHtml(id)+'</h4><p>'+p.units.map(u=>escapeHtml((Data.getUnitDefinitionById(u.id)??{}).name??u.id)+' '+u.hp+'HP ['+u.cells.map(escapeHtml).join('、')+']').join('；')+'</p>').join('')+'<p>实际记录 '+(t.coach.actionLog?.length??0)+' 次行动；这些真实部署不会写入玩家情报。</p></section>':'')+'</div></details></aside>';
+    const t=state.training;if(!t.session||!t.lesson)return '';const lesson=t.lesson,complete=t.task?.completed;
+    const label=t.mode==='course'?'快速上手 · '+(lesson.index+1)+' / '+lesson.total:t.mode==='weapon'?'武器体验':'自由练习',text=complete&&t.mode!=='free'?lesson.explanation:lesson.description;
+    const next=complete&&t.mode!=='free'?(lesson.next?trainingButton('training-next','下一步','class="button button--primary"'):trainingButton('training-start',t.mode==='course'?'完成训练 · 自由练习':'进入自由练习','class="button button--primary" data-mode="free" data-lesson="free"')):'';
+    return '<aside class="training-task" aria-label="战斗练习"><div><span class="eyebrow">'+label+(complete&&t.mode!=='free'?' · 已完成':'')+'</span><h2>'+escapeHtml(lesson.title)+'</h2><p class="training-current" role="status">'+escapeHtml(text)+'</p>'+(t.error?'<p class="form-error" role="alert">'+escapeHtml(t.error)+' '+trainingButton('training-retry','重试')+'</p>':'')+'</div><nav aria-label="练习操作">'+next+trainingButton('training-restart','重来')+trainingButton('training-exit-session','退出练习')+'</nav></aside>';
   }
-  document.addEventListener('toggle',e=>{if(e.target.isConnected&&e.target.matches?.('.training-task > details'))state.training.taskOpen=e.target.open;},true);
+  function renderTrainingFinishActions(){return '<section class="training-finish"><h2>本次练习结束</h2><p>可以重新开局，再试一种战术。</p>'+trainingButton('training-restart','再练一次','class="button button--primary"')+trainingButton('training-exit-session','返回训练营')+'</section>';}
   async function handleTrainingAction(action,control){
     if(action==='training-open'){await enterTraining();return;}
-    if(action==='training-next'){const i=state.training.catalog.findIndex(c=>c.id===state.training.scene.id);await startTrainingScenario(state.training.catalog[(i+1)%state.training.catalog.length].id);return;}
-    if(action==='training-start'){await startTrainingScenario(control.dataset.scenario);return;}
+    if(action==='training-start'){await startTrainingScenario(control.dataset.lesson,{mode:control.dataset.mode});return;}
+    if(action==='training-next'){if(state.training.task?.completed&&state.training.lesson?.next)await startTrainingScenario(state.training.lesson.next,{mode:'course'});return;}
+    if(action==='training-restart'){await trainingControl('reset');return;}
+    if(action==='training-retry'){try{await trainingEmit('room:sync',{});}catch(e){state.training.error=e.message;render();}return;}
     if(action==='training-exit-session'){await exitTrainingSession();return;}
-    if(action==='training-home'){await exitTrainingSession();state.training.active=false;history.replaceState(null,'','/');render();return;}
-    if(action==='training-filter-clear'){Object.assign(state.training,{group:'',query:'',actionFilter:'',kindFilter:'',mapFilter:0,playersFilter:0});render();return;}
-    if(action==='training-control'){
-      let c=control.dataset.control;const extra={};
-      if(c==='clock-before'){c='clock';extra.before=true;}
-      if(c==='sync'){try{await trainingEmit('room:sync',{});}catch(e){state.training.error=e.message;render();}return;}
-      await trainingControl(c,extra);return;
-    }
-    if(action==='training-role'){await trainingControl('role',{role:control.dataset.role});return;}
-    if(action==='training-clear-progress')openConfirm({title:'重置训练进度？',paragraphs:['只清除此设备的训练营体验记录，不影响正式房间、五章入门或个性化设置。'],onConfirm:()=>{state.training.progress={completed:{},revealed:{}};rememberTraining();render();}});
+    if(action==='training-home'){await exitTrainingSession();state.training.active=false;history.replaceState(null,'','/');render();}
   }
-  document.addEventListener('submit',e=>{
-    if(e.target.id==='training-entry'){e.preventDefault();const f=new FormData(e.target);state.training.entryDraft={nickname:String(f.get('nickname')??''),roomCode:String(f.get('roomCode')??'')};void trainingControl('validate-entry',state.training.entryDraft);return;}
-    if(e.target.id==='training-lab'){
-      e.preventDefault();const form=new FormData(e.target);
-      void startTrainingScenario('free-practice',{action:form.get('action'),targetKind:form.get('targetKind'),sourceState:form.get('sourceState')});return;
-    }
-    if(e.target.id!=='training-filter')return;e.preventDefault();
-    const form=new FormData(e.target),t=state.training;
-    t.query=String(form.get('query')??'');t.group=String(form.get('group')??'');t.map=Number(form.get('map'));t.players=Number(form.get('players'));t.actionFilter=String(form.get('actionFilter')??'');t.kindFilter=String(form.get('kindFilter')??'');t.mapFilter=Number(form.get('mapFilter'));t.playersFilter=Number(form.get('playersFilter'));render();
-  });
-
-  document.addEventListener('click',e=>{
-    if(!state.training.session)return;
-    const c=e.target.closest('[data-action]');if(!c||c.disabled)return;
-    const local={action:c.dataset.action,unitId:c.dataset.unitId??c.dataset.placementId??c.dataset.id??null,coordinate:c.dataset.coordinate??null};
-    state.training.localEvents??=[];state.training.localEvents.push(local);
-    if(state.training.localEvents.length>128)state.training.localEvents.shift();
-  },true);
-
-  function scheduleTrainingClock(){
-    const t=state.training;
-    if(!t.task?.running||!t.session||!t.active){clearTimeout(t.clockTimer);t.clockTimer=null;return;}
-    if(t.clockTimer)return;
-    t.clockTimer=setTimeout(async()=>{
-      t.clockTimer=null;
-      if(t.task?.running&&t.session&&!t.busy&&!state.pendingRequest){
-        try{await trainingEmit('room:sync',{});}catch(e){t.error=e.message;t.task.running=false;render();}
-      }
-      scheduleTrainingClock();
-    },1000);
+  function scheduleTrainingOpponent(){
+    const t=state.training,r=state.room,needed=t.active&&t.session&&!t.error&&!document.hidden&&r&&((r.roomPhase==='PLAYING'&&(!r.turn?.canAct||r.turnPhase==='AUTO_SKIPPING'))||(r.roomPhase==='FINAL_SALVO'&&r.battle?.match?.finalSalvo?.ownSubmitted));
+    if(!needed||(t.mode!=='free'&&t.task?.completed)){clearTimeout(t.opponentTimer);t.opponentTimer=null;return;}
+    if(t.opponentTimer||t.advancing)return;const origin={...t.session,version:r.stateVersion};
+    t.opponentTimer=setTimeout(async()=>{
+      t.opponentTimer=null;if(!sameTrainingOrigin(origin)||document.hidden)return;
+      if(t.busy||state.pendingRequest||state.room?.stateVersion!==origin.version){scheduleTrainingOpponent();return;}
+      t.advancing=origin;
+      try{await trainingEmit('training:advance');}catch(e){if(sameTrainingOrigin(origin)){t.error='陪练暂时没有回应，请重试。';render();}}
+      finally{if(t.advancing===origin){t.advancing=null;scheduleTrainingOpponent();}}
+    },1500);
   }
-
-  function recordTrainingLocal(event){
-    if(!state.training?.session)return;
-    state.training.localEvents??=[];state.training.localEvents.push(event);
-    if(state.training.localEvents.length>128)state.training.localEvents.shift();
-  }
-  document.addEventListener('keydown',e=>{
-    if(state.training?.session&&e.target.closest?.('.ocean-board')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','Enter','Delete'].includes(e.key))recordTrainingLocal({action:'keyboard',key:e.key});
-  });
-  document.addEventListener('scroll',e=>{
-    if(state.training?.session&&e.target.matches?.('.board-frame'))recordTrainingLocal({action:'map-scrolled'});
-  },true);
-
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){clearTimeout(state.training.opponentTimer);state.training.opponentTimer=null;}else scheduleTrainingOpponent();});
+  function recordTrainingLocal(){}
   let trainingSizeObserver=null;
   function hydrateTrainingHeight(){
-    trainingSizeObserver?.disconnect();trainingSizeObserver=null;
-    const task=document.querySelector('.training-task');
+    trainingSizeObserver?.disconnect();trainingSizeObserver=null;const task=document.querySelector('.training-task');
     if(!state.training?.session||!task){document.body.style.removeProperty('--training-height');return;}
-    const measure=()=>document.body.style.setProperty('--training-height',(Math.ceil(task.getBoundingClientRect().height)+16)+'px');
-    measure();
+    const measure=()=>document.body.style.setProperty('--training-height',(Math.ceil(task.getBoundingClientRect().height))+'px');measure();
     if(typeof ResizeObserver==='function'){trainingSizeObserver=new ResizeObserver(measure);trainingSizeObserver.observe(task);}
   }
 
@@ -667,7 +574,7 @@
   }
 
   function uiIcon(name, className = "") {
-    return `<svg class="ui-svg-icon ${escapeHtml(className)}" aria-hidden="true" focusable="false"><use href="/assets/icons/ocean-ui.svg#${escapeHtml(name)}"></use></svg>`;
+    return `<svg class="ui-svg-icon ${escapeHtml(className)}" aria-hidden="true" focusable="false"><use href="/assets/icons/ocean-ui.svg?v=${encodeURIComponent(Data.ASSET_VERSION)}#${escapeHtml(name)}"></use></svg>`;
   }
 
   function unitIconName(unitType) {
@@ -1036,6 +943,12 @@
       : "";
   }
 
+  function armorySourceProjection(unit){
+    const folder=UNIT_ART_FOLDERS[unit.type],key=folder+"/east.webp";
+    if(!folder)return uiIcon(unitIconName(unit.type));
+    return `<svg viewBox="${UNIT_ART_VIEWBOXES[key]}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><image href="${versionedArtUrl('/assets/images/ocean-2.5d/units/'+key)}" width="512" height="512"/></svg>`;
+  }
+
   function actionArtIcon(definition) {
     const file = ACTION_ART_FILES[definition?.type];
     return file
@@ -1292,40 +1205,30 @@
     warmBattleArt(state.room);
   }
 
-  const THEME_OPTIONS = Object.freeze({
-    "ocean-dark": "深海暗夜",
-    "ocean-light": "极地寒光",
-    "ocean-dusk": "黄昏余晖",
-  });
-  const ACCENT_OPTIONS = Object.freeze({
-    cyan: ["#63ddf5", "#1ec6eb", "rgba(64, 204, 236, 0.12)", "99, 221, 245"],
-    gold: ["#f4c25a", "#d9a02e", "rgba(244, 194, 90, 0.14)", "244, 194, 90"],
-    jade: ["#59e0ac", "#2fbf85", "rgba(89, 224, 172, 0.14)", "89, 224, 172"],
-    crimson: ["#ff6b77", "#e23b4c", "rgba(255, 107, 119, 0.14)", "255, 107, 119"],
-    violet: ["#bc8cff", "#9660e8", "rgba(188, 140, 255, 0.14)", "188, 140, 255"],
-  });
-
+  const THEME_OPTIONS = Object.freeze({"armory-ember":"炉火","armory-cast":"冷铸","armory-ivory":"铸白"});
+  const LEGACY_THEMES = {"ocean-dark":"armory-ember","ocean-dusk":"armory-ember","ocean-light":"armory-ivory"};
   function applyTheme(theme) {
-    if (!Object.hasOwn(THEME_OPTIONS, theme)) theme = "ocean-dark";
-    state.theme = theme;
-    document.documentElement.dataset.theme = theme;
-    writeStringPreference(THEME_STORAGE_KEY, theme);
+    if(LEGACY_THEMES[theme]) {
+      const oldAccent=readStringPreference(ACCENT_STORAGE_KEY,"cyan");
+      theme=theme==="ocean-light"?"armory-ivory":["cyan","jade","violet"].includes(oldAccent)?"armory-cast":"armory-ember";
+    }
+    if(!Object.hasOwn(THEME_OPTIONS,theme))theme="armory-ember";
+    state.theme=theme;document.documentElement.dataset.theme=theme;
+    writeStringPreference(THEME_STORAGE_KEY,theme);syncPersonalizeControls();
+  }
+  function applyAccent() {
+    for(const key of ["--accent-primary","--accent-strong","--accent-soft","--accent-primary-rgb"])document.documentElement.style.removeProperty(key);
+    for(const [kind,allowed,fallback] of [["crest",["keel","wave","anchor"],"keel"],["density",["comfortable","compact"],"comfortable"],["textSize",["default","large"],"default"]]){
+      const value=readStringPreference("ocean.ui2."+kind,fallback);document.documentElement.dataset[kind]=allowed.includes(value)?value:fallback;
+    }
     syncPersonalizeControls();
   }
-
-  function applyAccent(accent) {
-    if (!Object.hasOwn(ACCENT_OPTIONS, accent)) accent = "cyan";
-    state.accent = accent;
-    const parts = ACCENT_OPTIONS[accent];
-    const style = document.documentElement.style;
-    style.setProperty("--accent-primary", parts[0]);
-    style.setProperty("--accent-strong", parts[1]);
-    style.setProperty("--accent-soft", parts[2]);
-    style.setProperty("--accent-primary-rgb", parts[3]);
-    writeStringPreference(ACCENT_STORAGE_KEY, accent);
-    syncPersonalizeControls();
+  function applyArmoryPreference(kind,value){
+    const allowed={crest:["keel","wave","anchor"],density:["comfortable","compact"],textSize:["default","large"]};
+    if(!allowed[kind]?.includes(value))return;
+    writeStringPreference("ocean.ui2."+kind,value);document.documentElement.dataset[kind]=value;
+    syncPersonalizeControls();cancelMotion();render();
   }
-
   function syncPersonalizeControls() {
     if (!personalizeDialog) return;
     const themeControls = personalizeDialog.querySelectorAll(
@@ -1355,6 +1258,10 @@
       if (detail && control.dataset.qualityMode === "auto") {
         detail.textContent = `当前：${state.effectiveQuality === "smooth" ? "流畅" : "高画质"}`;
       }
+    }
+    for(const control of personalizeDialog.querySelectorAll('[data-action="armory-preference"]')){
+      const active=document.documentElement.dataset[control.dataset.preference]===control.dataset.value;
+      control.classList.toggle("is-active",active);control.setAttribute("aria-checked",String(active));
     }
     updateChoiceSemantics();
   }
@@ -2018,6 +1925,7 @@
       showToast(`${Model.nicknameFor(nextRoom, playerId)} 已淘汰`, "warning", 4_500, false);
     }
     const opponentIds = battleOpponentIds(nextRoom.battle);
+    for(const id of state.battle.identityTones.keys())if(!opponentIds.includes(id))state.battle.identityTones.delete(id);
     const activeTargets = activeBattleOpponentIds(nextRoom);
     if (!opponentIds.includes(state.battle.targetPlayerId)) {
       state.battle.targetPlayerId = activeTargets[0] ?? opponentIds[0] ?? null;
@@ -2124,7 +2032,7 @@
   function render() {
     const viewMemory = captureViewMemory();
     headerRoomCode.hidden = !state.room?.roomCode && !state.tutorial.active;
-    headerRoomCode.textContent = state.training?.session ? "训练营 · 合成局面" : state.tutorial.active
+    headerRoomCode.textContent = state.training?.session ? "训练营 · 核心战斗" : state.tutorial.active
       ? "交互教程 · 本地训练"
       : state.room?.roomCode
       ? `${state.room.roomCode} · ${state.room.maxPlayers ?? 2}P · ${state.room.mapSize ?? 12}×${state.room.mapSize ?? 12}${state.room.roomMode === "bot_duel" ? ` · ${botDifficultyLabel(state.room.botDifficulty)} AI` : ""}`
@@ -2495,24 +2403,9 @@
     const roomCode = escapeHtml(state.entry.roomCode);
     const online = state.connection.phase === "online";
     return `
-      <section class="entry-page entry-page--v07 page-enter" aria-labelledby="entry-title">
-        <div class="entry-hero entry-hero--v07">
-          <div class="entry-hero__badge"><span></span> 回合制海域对抗</div>
-          <h1 id="entry-title">OCEAN</h1>
-          <p class="entry-hero__tagline">静默海域。<br>精确指挥。</p><p class="entry-hero__description">部署你的舰队，解读有限的情报。<br>每一次行动，都由你决定。</p>
-          <div class="entry-hero__visual" aria-hidden="true">
-            <span class="hero-sonar hero-sonar--one"></span>
-            <span class="hero-sonar hero-sonar--two"></span>
-            <span class="hero-sonar hero-sonar--three"></span>
-            <i></i>
-          </div>
-          <div class="entry-facts entry-facts--v07" aria-label="游戏特征">
-            <span><strong>10–15</strong> 海域</span>
-            <span><strong>2–3</strong> 玩家</span>
-            <span><strong>90s</strong> 回合</span>
-          </div>
-        </div>
-
+      <section class="entry-page entry-page--armory page-enter" aria-labelledby="entry-title">
+        <picture class="drydock-art" aria-hidden="true"><source media="(max-width:700px)" srcset="/assets/images/armory/drydock-mobile-480.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 480w, /assets/images/armory/drydock-mobile-720.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 720w, /assets/images/armory/drydock-mobile.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 900w" sizes="100vw"><img src="/assets/images/armory/drydock-desktop.webp?v=${encodeURIComponent(Data.ASSET_VERSION)}" srcset="/assets/images/armory/drydock-desktop-960.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 960w, /assets/images/armory/drydock-desktop-1440.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 1440w, /assets/images/armory/drydock-desktop.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 1920w" sizes="100vw" alt="" fetchpriority="high" width="1920" height="1080"></picture>
+        <div class="entry-hero"><div class="entry-hero__badge">回合制海域对抗</div><h1 id="entry-title"><img src="/assets/icons/armory-wordmark.svg?v=${encodeURIComponent(Data.ASSET_VERSION)}" alt="" width="440" height="96"><span class="sr-only">OCEAN</span></h1><p class="entry-hero__tagline">静海之下，战意已铸。</p><p class="entry-hero__description">秘密部署 · 回合指令 · 情报博弈</p><div class="entry-keel" aria-hidden="true"><span></span>黑潮军械库</div></div>
         <div class="entry-console entry-console--v07">
           <p class="entry-volatile-notice" role="note">服务器维护或重启会中断正在进行的房间；当前对局暂不支持跨重启恢复。</p>
           ${!online ? `
@@ -2543,8 +2436,8 @@
           <div class="entry-form-card entry-form-card--v07">
             <div class="entry-form-card__header entry-form-card__header--v07">
               <div>
-                <span class="status-kicker">进入战场</span>
-                <h2>建立作战连线</h2>
+                <span class="status-kicker">舰坞 · 作战</span>
+                <h2>出征整备</h2>
               </div>
               <button class="icon-button icon-button--small" type="button" data-action="open-rules" aria-label="打开游戏说明" data-tooltip="游戏说明">?</button>
             </div>
@@ -2567,7 +2460,7 @@
 
             ${state.entry.error ? `<p id="entry-error" class="form-error" role="alert">${escapeHtml(state.entry.error)}</p>` : ""}
 
-            <button class="button button--secondary" type="button" data-action="training-open">训练营 · 全情况练习</button>\n            <form id="create-form" class="create-room-panel">
+            <form id="create-form" class="create-room-panel">
               <div class="mode-switch" role="radiogroup" aria-label="对战模式">
                 <button
                   type="button"
@@ -2643,14 +2536,11 @@
                 </div>
               </div>
               <button class="button button--primary button--large" type="submit" ${!state.connected || pending ? "disabled" : ""}>
-                ${pending === "create" ? '<span class="button-spinner" aria-hidden="true"></span> 创建中…' : '创建房间 <span aria-hidden="true">→</span>'}
-              </button>
-              <button class="button button--secondary tutorial-entry-button" type="button" data-action="start-tutorial" ${pending ? "disabled" : ""}>
-                <span aria-hidden="true">◇</span><span><strong>完整交互教程</strong><small>${readTutorialProgress().length === Tutorial.LESSONS.length ? "已完成，可随时复习" : "五章训练 · 无需创建房间"}</small></span>
+                ${pending === "create" ? '<span class="button-spinner" aria-hidden="true"></span> 创建中…' : '创建战局 <span aria-hidden="true">→</span>'}
               </button>
             </form>
 
-            <div class="entry-divider entry-divider--clean"><span>加入已有房间</span></div>
+            <details class="join-disclosure" ${roomCode ? "open" : ""}><summary>加入已有战局</summary>
 
             <form id="join-form" class="join-form join-form--v07">
               <label class="field field--code field--modern">
@@ -2670,7 +2560,8 @@
               <button class="button button--secondary" type="submit" ${!state.connected || pending ? "disabled" : ""}>
                 ${pending === "join" ? '<span class="button-spinner" aria-hidden="true"></span> 加入中…' : "加入"}
               </button>
-            </form>
+            </form></details>
+            <div class="entry-secondary-actions"><button type="button" data-action="training-open">核心战斗训练 <span aria-hidden="true">↗</span></button><button type="button" data-action="start-tutorial">五章交互教程</button></div>
           </div>
         </div>
       </section>`;
@@ -2682,7 +2573,7 @@
     return `
       <header class="room-topbar">
         <div>
-          <p class="eyebrow">${escapeHtml(options.kicker ?? "PRIVATE MATCH")}</p>
+          <p class="eyebrow">${escapeHtml(options.kicker ?? "舰坞 · 私人战局")}</p>
           <h1>${escapeHtml(title)}</h1>
           <p>${escapeHtml(subtitle)}</p>
         </div>
@@ -2709,7 +2600,7 @@
           if (!seat) {
             return `
               <article class="seat-card seat-card--empty">
-                <span class="seat-card__number">0${index + 1}</span>
+                <span class="seat-card__number">0${index + 1}</span><span class="seat-crest" aria-hidden="true"></span>
                 <div><strong>等待玩家</strong><small>席位尚未占用</small></div>
                 <span class="seat-status">空闲</span>
               </article>`;
@@ -2717,7 +2608,7 @@
           const own = seat.playerId === room.own.playerId;
           return `
             <article class="seat-card ${own ? "seat-card--own" : ""}">
-              <span class="seat-card__number">0${index + 1}</span>
+              <span class="seat-card__number">0${index + 1}</span><span class="seat-crest" aria-hidden="true"></span>
               <div>
                 <strong>${escapeHtml(seat.nickname)} ${own ? "<em>你</em>" : ""}</strong>
                 <small>${seat.ready ? (seat.autoPrepared ? "服务器已自动准备" : "舰队已准备") : "尚未准备"}</small>
@@ -2738,7 +2629,7 @@
     return `
       <section class="waiting-page waiting-page--v07 page-enter" aria-labelledby="waiting-title">
         ${renderRoomTop("等待玩家", `${occupied} / ${capacity} 已加入`, {
-          kicker: `${capacity === 3 ? "3 PLAYER FFA" : "2 PLAYER MATCH"}`,
+          kicker: `${capacity === 3 ? "三人自由战" : "双人对战"}`,
         })}
 
         <div class="waiting-layout waiting-layout--v07">
@@ -3936,10 +3827,19 @@
   }
 
 
+  const ARMORY_ORDER = Object.freeze(["destroyer_i_ram","destroyer_ii_ram","pirate_attack","motorboat_ram","submarine_missile","nuclear_bomb","shock_bomb","detection_bomb","radar_scan","helicopter_strafe"]);
   function renderActionCard(room, definition) {
-    const status = Model.deriveActionStatus(room, definition);
-    const selected = definition.type === state.battle.selectedAction;
-    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected ? 'action-card--selected' : ''}" data-action="select-action" data-action-type="${definition.type}" aria-pressed="${selected}" ${status.enabled ? '' : 'disabled'}><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${escapeHtml(definition.name)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>${!status.enabled ? `<p class="action-disabled-reason">${escapeHtml(status.label)}</p>` : ''}</div>`;
+    const status=Model.deriveActionStatus(room,definition),selected=definition.type===state.battle.selectedAction;
+    const slot=(ARMORY_ORDER.indexOf(definition.type)+1)%10;
+    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected?'action-card--selected':''}" data-action="select-action" data-action-type="${definition.type}" aria-pressed="${selected}" aria-describedby="armory-reason-${definition.type}" ${status.enabled?'':'disabled'}><span class="action-slot-number" aria-hidden="true">${slot}</span><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${escapeHtml(definition.name)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected?'<span class="action-selected-mark" aria-hidden="true">✓</span>':''}</button><p id="armory-reason-${definition.type}" class="action-disabled-reason">${status.enabled?'可用':escapeHtml(status.label)}</p></div>`;
+  }
+  function renderArmorySource(room){
+    const def=Data.getActionDefinition(state.battle.selectedAction);
+    const units=room.battle.own.units;
+    const source=def?units.find(u=>u.type===def.sourceType&&u.hp>0&&!u.paralyzed)??units.find(u=>u.type===def.sourceType):null;
+    if(!source)return `<section class="armory-source" aria-label="行动来源"><span class="armory-source__crest" aria-hidden="true"></span><span class="status-kicker">舰队待命</span><strong>选择你的武器</strong><small>先选行动，再指定海图目标</small><button data-action="toggle-fleet">查看己方舰队</button></section>`;
+    const unit=Data.getUnitDefinitionById(source.id)??Data.getUnitDefinitionByType(source.type);
+    return `<section class="armory-source" aria-label="行动来源"><span class="source-projection" aria-hidden="true">${armorySourceProjection(source)}</span><span class="status-kicker">行动来源</span><strong>${escapeHtml(unit.name)}</strong><span class="source-hp">${Model.formatHp(source.hp)} <small>/ ${unit.initialHp} HP · ${escapeHtml(unitStatusText(source,unit))}</small></span><div class="hp-track"><i data-hp-percent="${Math.round(source.hp/unit.initialHp*100)}"></i></div><button data-action="toggle-fleet">己方舰队详情</button></section>`;
   }
 
   function renderActionGroups(room) {
@@ -4071,17 +3971,8 @@
 
 
   function renderActionPanel(room) {
-    const definition = Data.getActionDefinition(state.battle.selectedAction);
-    const available = Data.ACTION_DEFINITIONS.filter(item => Model.deriveActionStatus(room, item).enabled);
-    const restricted = Data.ACTION_DEFINITIONS.filter(item => !Model.deriveActionStatus(room, item).enabled);
-    return `<aside class="action-rail ${state.battle.actionDrawerOpen ? 'action-rail--open' : ''}" aria-label="行动与单位状态" data-scroll-key="actions">
-      <header class="console-panel-heading"><div><span class="eyebrow">指令编排</span><h2>${openingRadarRequired(room) ? '首次雷达扫描' : room.turn?.canAct ? '选择行动' : '等待行动'}</h2></div><button class="drawer-close icon-button" data-action="close-battle-drawers" aria-label="关闭行动面板">×</button></header>
-      <div class="action-rail__content" data-scroll-key="action-content">
-        ${openingRadarRequired(room) ? `<p class="opening-radar-task">首个行动回合先扫描海域。选择 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 区域的左上起始格。</p>` : ''}
-        <div class="action-list" aria-label="可用行动">${available.map(item => renderActionCard(room,item)).join('') || '<p class="empty-state">当前没有可提交的行动。</p>'}</div>
-        <details class="restricted-actions" ${available.length === 0 ? 'open' : ''}><summary>受限或已耗尽 · ${restricted.length}</summary><div class="action-list">${restricted.map(item => renderActionCard(room,item)).join('')}</div></details>
-        ${definition ? `<section class="action-detail"><h3>${escapeHtml(definition.name)}</h3><p>${escapeHtml(definition.warning)}</p>${definition.targetMode === 'line' ? `<div class="axis-switch" role="group" aria-label="直升机扫射方向"><button data-action="set-helicopter-axis" data-axis="row" aria-pressed="${state.battle.helicopterAxis === 'row'}">按行</button><button data-action="set-helicopter-axis" data-axis="column" aria-pressed="${state.battle.helicopterAxis === 'column'}">按列</button></div>` : ''}</section>` : '<p class="action-guidance">选择行动，再到海图选择目标。确认执行前，你可以随时调整。</p>'}
-      </div></aside>`;
+    const definition=Data.getActionDefinition(state.battle.selectedAction);
+    return `<aside class="action-rail ${state.battle.actionDrawerOpen?'action-rail--open':''}" aria-label="军械武器基座" data-scroll-key="actions"><header class="console-panel-heading"><div><span class="eyebrow">军械武器座</span><h2>${openingRadarRequired(room)?'首轮先扫描 · 左上起始格':'十项行动'}</h2></div><button class="drawer-close icon-button" data-action="close-battle-drawers" aria-label="关闭武器面板">×</button></header><div class="action-rail__content" data-scroll-key="action-content"><div class="action-list armory-slots" aria-label="十行动固定槽位">${ARMORY_ORDER.map(type=>Data.getActionDefinition(type)).map(d=>renderActionCard(room,d)).join('')}</div>${definition?.targetMode==='line'?`<div class="axis-switch" role="group" aria-label="直升机扫射方向"><button data-action="set-helicopter-axis" data-axis="row" aria-pressed="${state.battle.helicopterAxis==='row'}">按行扫射</button><button data-action="set-helicopter-axis" data-axis="column" aria-pressed="${state.battle.helicopterAxis==='column'}">按列扫射</button></div>`:''}</div></aside>`;
   }
 
   function renderTurnProgress(room) {
@@ -4112,10 +4003,11 @@
 
   function renderBattleHeader(room) {
     const final = room.roomPhase === 'FINAL_SALVO';
-    const label = final ? '最终齐射' : room.turnPhase === 'RESOLVING' ? '正在结算' : room.turnPhase === 'AUTO_SKIPPING' ? '自动跳过' : room.turn?.canAct ? '你的回合' : `等待 ${Model.nicknameFor(room,room.turn?.currentPlayerId)}`;
+    const lessonFinished=state.training?.session&&state.training.mode!=='free'&&state.training.task?.completed;
+    const label = lessonFinished ? '练习完成' : final ? '最终齐射' : room.turnPhase === 'RESOLVING' ? '正在结算' : room.turnPhase === 'AUTO_SKIPPING' ? '自动跳过' : room.turn?.canAct ? '你的回合' : `等待 ${Model.nicknameFor(room,room.turn?.currentPlayerId)}`;
     const online = state.connected && state.connection.phase === 'online';
     const connectionLabel = online ? '实时在线' : state.connected ? '同步中' : '连接中断';
-    return `<header class="battle-header"><a class="brand" href="/" aria-label="海战 OCEAN 首页"><span class="brand__mark" aria-hidden="true"></span><strong>OCEAN</strong></a><div class="battle-header__room"><small>${escapeHtml(state.training?.session?"训练营":room.roomCode)} · ${room.mapSize}×${room.mapSize}</small><small>${room.maxPlayers} 人对局 · 连续超时 ${room.own.consecutiveActionTimeouts}/3</small></div><div class="battle-header__turn" data-own-turn="${Boolean(room.turn?.canAct)}"><small>${final ? '终局阶段' : `回合 ${String(room.turn?.turnNumber ?? room.matchSummary.turnCount).padStart(2,'0')}`}</small><strong>${escapeHtml(label)}</strong></div><div class="battle-header__timer"><small>${final ? '同时结算' : '剩余时间'}</small>${!final && room.deadlines.actionDeadlineAt ? `<strong data-deadline="${room.deadlines.actionDeadlineAt}">—</strong>` : '<strong>—</strong>'}</div><span class="battle-header__connection" data-state="${online ? 'online' : state.connected ? 'syncing' : 'offline'}"><i></i><span>${connectionLabel}</span></span><button class="icon-button" data-action="open-battle-menu" aria-label="打开舰桥菜单">☰</button></header>`;
+    return `<header class="battle-header"><a class="brand" href="/" aria-label="海战 OCEAN 首页"><span class="brand__mark" aria-hidden="true"></span><strong>OCEAN</strong></a><div class="battle-header__room"><small>${escapeHtml(state.training?.session?"训练营":room.roomCode)} · ${room.mapSize}×${room.mapSize}</small><small>${state.training?.session ? "陪练对战 · 不计时" : room.maxPlayers+" 人对局 · 连续超时 "+room.own.consecutiveActionTimeouts+"/3"}</small></div><div class="battle-header__turn" data-own-turn="${Boolean(room.turn?.canAct)}"><small>${final ? '终局阶段' : `回合 ${String(room.turn?.turnNumber ?? room.matchSummary.turnCount).padStart(2,'0')}`}</small><strong>${escapeHtml(label)}</strong></div><div class="battle-header__timer"><small>${final ? '同时结算' : '剩余时间'}</small>${state.training?.session ? '<strong>不限时</strong>' : !final && room.deadlines.actionDeadlineAt ? `<strong data-deadline="${room.deadlines.actionDeadlineAt}">—</strong>` : '<strong>—</strong>'}</div><span class="battle-header__connection" data-state="${online ? 'online' : state.connected ? 'syncing' : 'offline'}"><i></i><span>${connectionLabel}</span></span><button class="icon-button" data-action="open-battle-menu" aria-label="打开舰桥菜单">☰</button></header>`;
   }
 
   function resolutionVisualState(room) {
@@ -4593,6 +4485,7 @@
 
   function renderBattleMapTabs(room) {
     const opponents = battleOpponentIds(room.battle);
+    for(const id of [...opponents].sort())if(!state.battle.identityTones.has(id))state.battle.identityTones.set(id,state.battle.identityTones.size%2===0?"a":"b");
     const tabs = [
       { id: "own", label: "己方", own: true },
       ...opponents.map((playerId) => {
@@ -4614,7 +4507,7 @@
     return `
       <div class="mobile-map-tabs mobile-map-tabs--v072 battle-map-tabs--v158" data-tab-count="${tabs.length}" role="tablist" aria-label="地图切换">
         ${tabs.map((tab) => `
-          <button role="tab" aria-selected="${state.battle.mobileMap === tab.id}" class="${state.battle.mobileMap === tab.id ? "is-active" : ""} ${tab.playerState?.code === "eliminated" ? "is-eliminated" : ""}" data-action="switch-map" data-map="${escapeHtml(tab.id)}" data-player-state="${tab.playerState?.code ?? "own"}" data-affected="${Boolean(tab.affected)}" data-unread-result="${Boolean(tab.unread)}">
+          <button role="tab" aria-selected="${state.battle.mobileMap === tab.id}" class="${state.battle.mobileMap === tab.id ? "is-active" : ""} ${tab.playerState?.code === "eliminated" ? "is-eliminated" : ""}" data-action="switch-map" data-map="${escapeHtml(tab.id)}" data-identity-tone="${tab.own ? "own" : state.battle.identityTones.get(tab.id)}" data-player-state="${tab.playerState?.code ?? "own"}" data-affected="${Boolean(tab.affected)}" data-unread-result="${Boolean(tab.unread)}">
             <span class="battle-map-tab__identity"><i aria-hidden="true"></i><strong>${escapeHtml(tab.label)}</strong><small>${tab.own ? "己方完整情报" : tab.playerState.label}</small></span>
             ${tab.own
               ? state.battle.ownMapAlert ? '<b class="battle-map-tab__result" data-result-state="hit">本方有新受击信息</b>' : '<b class="battle-map-tab__result">舰队状态</b>'
@@ -4768,7 +4661,7 @@
     const targets = activeBattleOpponentIds(room);
     const remaining = definition?.initialUses == null ? null : room.battle.own.remainingUses[definition.type];
     const instruction = definition ? definition.rangeMode === 'radar' ? '选择扫描区左上起始格' : definition.targetMode === 'area' ? '选择完整范围的中心格' : definition.targetMode === 'line' ? '选择整行或整列' : '选择目标坐标' : '选择行动';
-    return `<section class="command-dock" aria-label="统一指令台"><div class="command-utilities"><div class="layer-switch" role="group" aria-label="己方沙盘显示层">${[['all','综合'],['surface','水面'],['underwater','潜层']].map(([id,label])=>`<button data-action="set-tactical-layer" data-layer="${id}" aria-pressed="${state.battle.tacticalLayer===id}" ${state.battle.mobileMap!=='own'?'disabled':''} title="仅改变己方海域显示">${label}</button>`).join('')}</div><button data-action="toggle-marker-mode" data-target-player-id="${escapeHtml(state.battle.targetPlayerId)}" aria-pressed="${state.battle.markerMode}">私人标记</button></div><div class="command-summary" role="status"><strong>${state.battle.markerMode ? '私人标记模式' : definition ? escapeHtml(definition.name) : room.turn?.canAct ? '等待你的指令' : '等待当前玩家行动'}</strong><span>${state.battle.target ? escapeHtml(targetLabel) : state.battle.markerMode ? '注记仅你可见，不消耗回合' : instruction}</span>${definition ? `<small>来源 ${escapeHtml(sourceName)} · ${targets.map(id=>escapeHtml(Model.nicknameFor(room,id))).join('、')} · ${remaining === null ? '不限次数' : `消耗 1，执行后剩余 ${Math.max(0,remaining-1)}`}${targets.length>1?' · 同步两方':''}${HIDDEN_RESULT_ACTIONS.includes(definition.type)?' · 结果保密':''}</small>`:''}${definition && ['destroyer_i_ram','destroyer_ii_ram','pirate_attack','motorboat_ram'].includes(definition.type) ? `<small class="command-risk">${escapeHtml(definition.warning)}</small>`:''}${state.battle.commandNotice?`<small class="command-notice">${escapeHtml(state.battle.commandNotice)}</small>`:''}${state.battle.awaitingSync ? '<button data-action="sync-command">同步对局</button>':''}</div><div class="command-controls"><button data-action="cancel-action-selection" ${state.pendingRequest || (!definition && !state.battle.markerMode) ? 'disabled':''}>取消</button><button class="command-execute" data-action="execute-command" ${ready ? '' : 'disabled'}>${state.pendingRequest === 'action' ? '正在提交…' : '确认执行'}</button></div></section>`;
+    return `<section class="command-dock" aria-label="统一指令台"><div class="command-summary" role="status"><strong>${state.battle.markerMode ? '私人标记模式' : definition ? escapeHtml(definition.name) : room.turn?.canAct ? '等待你的指令' : '等待当前玩家行动'}</strong><span>${state.battle.target ? escapeHtml(targetLabel) : state.battle.markerMode ? '注记仅你可见，不消耗回合' : instruction}</span>${definition ? `<small>来源 ${escapeHtml(sourceName)} · ${targets.map(id=>escapeHtml(Model.nicknameFor(room,id))).join('、')} · ${remaining === null ? '不限次数' : `消耗 1，执行后剩余 ${Math.max(0,remaining-1)}`}${targets.length>1?' · 同步两方':''}${HIDDEN_RESULT_ACTIONS.includes(definition.type)?' · 结果保密':''}</small>`:''}${definition && ['destroyer_i_ram','destroyer_ii_ram','pirate_attack','motorboat_ram'].includes(definition.type) ? `<small class="command-risk">${escapeHtml(definition.warning)}</small>`:''}${state.battle.commandNotice?`<small class="command-notice">${escapeHtml(state.battle.commandNotice)}</small>`:''}${state.battle.awaitingSync ? '<button data-action="sync-command">同步对局</button>':''}</div>${definition?.targetMode === "line" ? `<div class="command-axis"><button data-action="set-helicopter-axis" data-axis="row" aria-pressed="${state.battle.helicopterAxis === "row"}">行</button><button data-action="set-helicopter-axis" data-axis="column" aria-pressed="${state.battle.helicopterAxis === "column"}">列</button></div>` : ""}<div class="command-controls"><button data-action="cancel-action-selection" ${state.pendingRequest || (!definition && !state.battle.markerMode) ? 'disabled':''}>取消</button><button class="command-execute" data-action="execute-command" ${ready ? '' : 'disabled'}>${state.pendingRequest === 'action' ? '正在提交…' : '确认执行'}</button></div></section>`;
   }
 
   function renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) {
@@ -4840,9 +4733,9 @@
     const available = (room.battle.own.decoys ?? []).filter(d => salvo?.availableDecoyIds?.includes(d.id));
     const opponents = battleOpponentIds(room.battle);
     const compact = window.innerWidth < 1024 || window.innerHeight < 600;
-    const drawer = state.battle.logOpen ? 'messages' : state.battle.actionDrawerOpen && compact ? 'actions' : state.battle.fleetOpen && window.innerWidth < 1280 ? 'fleet' : 'none';
+    const drawer = state.battle.logOpen ? 'messages' : state.battle.actionDrawerOpen && compact ? 'actions' : state.battle.fleetOpen ? 'fleet' : 'none';
     void Sound?.preloadGroup?.('battle');
-    return `<section class="battle-page ocean-console ${final ? 'ocean-console--salvo' : ''}" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${state.battle.tacticalLayer}" data-drawer-open="${drawer}" ${state.battle.tacticalLayerTransition ? `data-layer-transition="${state.battle.tacticalLayerTransition}"` : ''} aria-labelledby="battle-page-title"><h1 id="battle-page-title" class="sr-only">${state.training?.session?"训练营 · 合成局面":"正式对战"}</h1>${renderBattleHeader(room)}<div class="console-workspace">${renderFleetPanel(room)}<div class="battle-main-column"><div class="map-navigation">${renderBattleMapTabs(room)}<div class="map-tools"><button data-action="toggle-marker-mode" data-target-player-id="${escapeHtml(state.battle.targetPlayerId)}" aria-pressed="${state.battle.markerMode}">标记</button><button data-action="cycle-tactical-layer" ${state.battle.mobileMap !== "own" ? "disabled" : ""}>${tacticalLayerMeta().label.replace("视层","")}</button><button data-action="center-battle-map" aria-label="地图居中">居中</button>${state.battle.target ? '<button data-action="focus-selected-target">回到目标</button>' : ''}</div></div>${room.maxPlayers === 3 ? `<p class="sync-note">${activeBattleOpponentIds(room).length > 1 ? '一次行动，同步两方 · 成本只算一次' : '唯一有效目标'}</p>` : ''}${final ? renderFinalSalvoStage(room,salvo,available) : ''}<div class="battle-maps" data-map-count="${1+opponents.length}">${renderOwnMapCard(room)}${opponents.map(id=>renderEnemyMapCard(room,id)).join('')}</div><div class="feedback-slot">${renderLatestFeedback(room) || '<p class="feedback-empty">海域已同步。行动结果将显示在这里。</p>'}</div></div>${final ? '' : renderActionPanel(room)}</div>${final ? '' : renderBridgeCommandDeck(room)}${drawer !== 'none' ? '<button class="battle-drawer-scrim" data-action="close-battle-drawers" aria-label="关闭战术侧边栏"></button>' : ''}${renderPublicLog(room)}<nav class="mobile-console-nav" aria-label="战术导航"><button data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}">${uiIcon('action-radar')}<span>行动</span></button><button data-action="toggle-fleet" aria-expanded="${state.battle.fleetOpen}">${uiIcon('ship-aircraft-carrier')}<span>舰队${state.battle.ownMapAlert ? ' · 新' : ''}</span></button><button data-action="set-event-channel" data-channel="private">${uiIcon('status-private')}<span>情报</span></button><button data-action="set-event-channel" data-channel="combat">${uiIcon('status-hit')}<span>日志</span></button></nav></section>`;
+    return `<section class="battle-page ocean-console ${final ? 'ocean-console--salvo' : ''}" data-map-zoom="${Boolean(state.battle.mapZoom)}" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${state.battle.tacticalLayer}" data-drawer-open="${drawer}" ${state.battle.tacticalLayerTransition ? `data-layer-transition="${state.battle.tacticalLayerTransition}"` : ''} aria-labelledby="battle-page-title"><h1 id="battle-page-title" class="sr-only">${state.training?.session?"训练营 · 核心战斗":"正式对战"}</h1>${renderBattleHeader(room)}<div class="console-workspace">${renderFleetPanel(room)}<div class="battle-main-column"><div class="map-navigation">${renderBattleMapTabs(room)}<div class="map-tools"><button data-action="toggle-marker-mode" data-target-player-id="${escapeHtml(state.battle.targetPlayerId)}" aria-pressed="${state.battle.markerMode}">标记</button><button data-action="cycle-tactical-layer" ${state.battle.mobileMap !== "own" ? "disabled" : ""}>${tacticalLayerMeta().label.replace("视层","")}</button><button data-action="center-battle-map" aria-label="地图居中">居中</button><button data-action="toggle-map-zoom" aria-pressed="${Boolean(state.battle.mapZoom)}">${state.battle.mapZoom?"标准格":"放大格"}</button>${state.battle.target ? '<button data-action="focus-selected-target">回到目标</button>' : ''}</div></div>${room.maxPlayers === 3 ? `<p class="sync-note">${activeBattleOpponentIds(room).length > 1 ? '一次行动，同步两方 · 成本只算一次' : '唯一有效目标'}</p>` : ''}${final ? renderFinalSalvoStage(room,salvo,available) : ''}<div class="battle-maps" data-map-count="${1+opponents.length}">${renderOwnMapCard(room)}${opponents.map(id=>renderEnemyMapCard(room,id)).join('')}</div><div class="feedback-slot">${renderLatestFeedback(room) || '<p class="feedback-empty">海域已同步。行动结果将显示在这里。</p>'}</div></div></div>${final ? '' : `<div class="armory-plinth">${renderArmorySource(room)}${renderActionPanel(room)}${renderBridgeCommandDeck(room)}</div>`}${drawer !== 'none' ? '<button class="battle-drawer-scrim" data-action="close-battle-drawers" aria-label="关闭战术侧边栏"></button>' : ''}${renderPublicLog(room)}<nav class="mobile-console-nav" aria-label="战术导航"><button data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}">${uiIcon('action-radar')}<span>行动</span></button><button data-action="toggle-fleet" aria-expanded="${state.battle.fleetOpen}">${uiIcon('ship-aircraft-carrier')}<span>舰队${state.battle.ownMapAlert ? ' · 新' : ''}</span></button><button data-action="set-event-channel" data-channel="private">${uiIcon('status-private')}<span>情报</span></button><button data-action="set-event-channel" data-channel="combat">${uiIcon('status-hit')}<span>日志</span></button></nav></section>`;
   }
 
   function renderFleetPanel(room) {
@@ -5046,7 +4939,7 @@
         </header>
 
         ${renderResultPlayers(room, result, replay)}
-        ${renderRematchPanel(room)}
+        ${state.training?.session ? renderTrainingFinishActions() : renderRematchPanel(room)}
 
         <div class="replay-layout replay-layout--v075" id="match-replay" tabindex="-1">
           <section class="replay-map-panel">
@@ -6226,6 +6119,7 @@
       return;
     }
     if (action === "open-audio-settings") {
+      if(personalizeDialog.open)personalizeDialog.close();
       if(rulesDialog.open) rulesDialog.close();
       openAudioSettings(control.dataset.audioFocus);
       return;
@@ -6235,6 +6129,7 @@
       return;
     }
     if (action === "open-rules") {
+      if(personalizeDialog.open)personalizeDialog.close();
       reduceMotionToggle.checked = state.reduceMotion;
       syncAudioControls();
       if (!rulesDialog.open) rulesDialog.showModal();
@@ -6253,10 +6148,13 @@
       personalizeDialog.close();
       return;
     }
+    if(action === "toggle-map-zoom"){rememberBattleMapView();cancelMotion();state.battle.mapZoom=!state.battle.mapZoom;render();restoreBattleMapView();return;}
+    if (action === "home-tab") { if(state.tutorial.active)exitTutorial();else if(state.training?.active){void exitTrainingSession();state.training.active=false;history.replaceState(null,"","/");render();}return; }
     if (action === "select-theme") {
       applyTheme(control.dataset.themeValue);
       return;
     }
+    if (action === "armory-preference") { applyArmoryPreference(control.dataset.preference,control.dataset.value);return; }
     if (action === "select-accent") {
       applyAccent(control.dataset.accentValue);
       return;
@@ -6267,10 +6165,11 @@
       return;
     }
     if (action === "reset-personalization") {
-      applyTheme("ocean-dark");
-      applyAccent("cyan");
+      applyTheme("armory-ember");
+      applyAccent();
+      applyArmoryPreference("crest","keel");applyArmoryPreference("density","comfortable");applyArmoryPreference("textSize","default");
       applyQualityMode("auto");
-      showToast("已恢复默认主题、强调色与自动画质。", "success");
+      showToast("已恢复炉火、龙骨战徽、舒适密度、默认字号与自动画质。", "success");
       return;
     }
     if (action === "reload") {

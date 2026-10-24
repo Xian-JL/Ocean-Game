@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-24",
+  "tool": "built-in image_gen.imagegen (not CLI)",
+  "source": "Original project art generated for OCEAN; no third-party game assets",
+  "processing": "Pillow: deterministic resize and WebP encoding only; no generative editing outside imagegen",
+  "prompts": {
+    "desktop": "Original cinematic 16:9 game background: imposing modern naval warship bow on the RIGHT in a vast underground drydock. Black steel, etched copper, warm amber furnace reflections, cold overhead beams, mist above dark water. Premium restrained military epic chiaroscuro. LEFT THIRD quiet almost black negative space for live HTML text. No people, text, numbers, logos, UI, fantasy or spaceships. 2560x1440.",
+    "mobile": "Use case: stylized-concept. Original vertical 3:4 mobile game homepage background. A massive modern naval warship bow seen low in a vast underground drydock, bow in the UPPER RIGHT half, full recognizable sharp prow and superstructure. BLACK STEEL, etched copper, subtle warm amber furnace reflections, cool overhead light beams and sea mist. Lower half very dark quiet water with low detail as negative space for live HTML controls. Restrained premium military epic chiaroscuro, matching dark naval drydock concept art. No text, numbers, UI, logos, people, fantasy or spaceships. 900x1200 portrait."
+  },
+  "files": [
+    {
+      "path": "docs/ui-v2/source-art/drydock-desktop.png",
+      "width": 1672,
+      "height": 941,
+      "alpha": false,
+      "bytes": 2205248,
+      "sha256": "368ca07717585ec380bfe720208e9cae98976a8fabd295c34084a0119e384d7f"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-desktop-1440.webp",
+      "width": 1440,
+      "height": 810,
+      "alpha": false,
+      "bytes": 114778,
+      "sha256": "7094137b68b262da2a68f8601853b70938d3da452e18fa06324d34dfdee981eb"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-desktop-960.webp",
+      "width": 960,
+      "height": 540,
+      "alpha": false,
+      "bytes": 58398,
+      "sha256": "c906f6792d99a311eeb2403df27499f47971f8a5bbbfafa87ddf6da498329dce"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-desktop.webp",
+      "width": 1920,
+      "height": 1081,
+      "alpha": false,
+      "bytes": 165836,
+      "sha256": "5ef4d075b4d3797bb35c0b3622495500d8fb6261e768509c1bbb3aaf23d9e2ea"
+    },
+    {
+      "path": "docs/ui-v2/source-art/drydock-mobile.png",
+      "width": 1086,
+      "height": 1448,
+      "alpha": false,
+      "bytes": 2118420,
+      "sha256": "32b53bbfc0cd63efaa0051dfcbd1840a051849d382877b35afbc45672d5f9a9a"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-mobile-480.webp",
+      "width": 480,
+      "height": 640,
+      "alpha": false,
+      "bytes": 30762,
+      "sha256": "64f11fd1f007520e7402e79990de55c743ba16c3057e87648e2e032466f969e0"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-mobile-720.webp",
+      "width": 720,
+      "height": 960,
+      "alpha": false,
+      "bytes": 62492,
+      "sha256": "dc3389029bc4a5b69fb193f657916903c053ba3a9b28b8709f16aab13884a640"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-mobile.webp",
+      "width": 900,
+      "height": 1200,
+      "alpha": false,
+      "bytes": 89016,
+      "sha256": "387858c51824d723dc4e8cca17f3fcaa4c7699cf275f345c09b5e1ff6822bf81"
+    }
+  ]
+}

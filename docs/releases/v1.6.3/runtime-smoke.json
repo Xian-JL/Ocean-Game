@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "version": "1.6.3",
+  "assetVersion": "1.6.3-ui2.e62a6a762b",
+  "node": "v24.19.0",
+  "isolatedDirectory": true,
+  "install": "npm ci --omit=dev: 89 production packages, audit 0",
+  "checks": [
+    "health version 1.6.3 / protocol 2.1",
+    "homepage actual asset fingerprint",
+    "JS / CSS / Socket client / SVG / desktop-mobile art / component lab",
+    "4 player lessons / 10 weapons / debug catalog closed",
+    "session credential isolation / instructor endpoint closed",
+    "real legal core-combat action completes lesson"
+  ]
+}

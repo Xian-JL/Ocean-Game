@@ -11,7 +11,7 @@ function harness(){
 test('十行动具备独立形态和预算，保密附加信息不改变输出',()=>{
  const {api,state}=harness();assert.equal(Object.keys(api.motionDefinitions).length,10);
  assert.equal(new Set(Object.values(api.motionDefinitions).map(x=>x.shape)).size,10);
- for(const [type,d]of Object.entries(api.motionDefinitions)){assert.ok(d.duration<=1400);assert.ok(d.smooth<=360);assert.ok(api.renderMotionArt({actionType:type}));}
+ for(const [type,d]of Object.entries(api.motionDefinitions)){assert.ok(d.duration<=1400);assert.ok(d.smooth>=360&&d.smooth<=550);assert.ok(api.renderMotionArt({actionType:type}));}
  for(const actionType of ['submarine_missile','nuclear_bomb','shock_bomb'])
   assert.equal(api.renderMotionArt({actionType,actualResult:'hit',hiddenCells:['A1']}),api.renderMotionArt({actionType,actualResult:'miss',hiddenCells:['L12']}));
  state.reduceMotion=true;assert.equal(api.renderMotionArt({actionType:'nuclear_bomb'}),'');

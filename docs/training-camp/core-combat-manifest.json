@@ -1,0 +1,131 @@
+{
+  "date": "2026-10-22",
+  "status": "local working tree; published v1.6.2 remains historical",
+  "baseCommit": "bd2c7f84035559fc5126edf5b304c54d1a22b6b7",
+  "assetVersion": "1.6.2-ui2.0f4600d125",
+  "courseSteps": 4,
+  "weaponTrials": 10,
+  "freePractice": {
+    "players": 2,
+    "mapSize": 12,
+    "randomDeployment": true,
+    "timed": false,
+    "automaticOpponent": true
+  },
+  "debugUi": false,
+  "debugHttpDefault": false,
+  "automatedTests": {
+    "tests": 732,
+    "pass": 732,
+    "fail": 0,
+    "skipped": 0,
+    "log": "core-combat-acceptance.log",
+    "sha256": "c58506e150ca24f8e614db6229374cba95faeafc4219e204a66ca4cb14fb2c43"
+  },
+  "browserChecks": {
+    "engine": "Codex in-app Chromium; exact engine version unavailable",
+    "fourStepCourse": "all four actual actions completed",
+    "freePractice": "opponent turn followed automatically by player turn",
+    "phoneEmulation": {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 390,
+      "debugControls": 0,
+      "confirmAndContinue": "passed"
+    },
+    "consoleWarningsAndErrors": [],
+    "remaining": "True devices, full browser/theme matrix and formal performance are not signed off"
+  },
+  "screenshots": {
+    "core-combat-home.jpg": {
+      "width": 718,
+      "height": 749,
+      "format": "JPEG",
+      "sha256": "1ef2f1ac4bf1dd88d9c6154305ccffbedaabd2488c4e567fdfc6f21edefd5c8d",
+      "build": "1.6.2-ui2.0f4600d125"
+    },
+    "core-combat-battle.jpg": {
+      "width": 718,
+      "height": 749,
+      "format": "JPEG",
+      "sha256": "1c89c0d42101939e53968a81a80edd3dd4c0ebe1145879d00143063e16fb207d",
+      "build": "1.6.2-ui2.0f4600d125"
+    },
+    "core-combat-free.jpg": {
+      "width": 1280,
+      "height": 720,
+      "format": "JPEG",
+      "sha256": "a869b645e0e97b1697df8bab1f8c42e76b5a7188ba0927d06085cb2bc8a581bd",
+      "build": "1.6.2-ui2.d45ab07f26"
+    },
+    "core-combat-mobile.jpg": {
+      "width": 390,
+      "height": 844,
+      "format": "JPEG",
+      "sha256": "b0853e4ab037ca9505e165319105d1df8b0557cdc3dc66bd7af8216e8ebf49ec",
+      "build": "1.6.2-ui2.d45ab07f26"
+    }
+  },
+  "files": {
+    "client/training.js": {
+      "bytes": 12934,
+      "sha256": "bbd12c196eddf344a658d68b090c34c26b09bc22d850d4fb2b8866d60bf75b24"
+    },
+    "client/styles/training.css": {
+      "bytes": 2856,
+      "sha256": "83b56a2a853cc4a5b0e00e3a07cef68b8d89200a6b1157d415ae7ae9c6d5fa50"
+    },
+    "client/battle-view.js": {
+      "bytes": 53165,
+      "sha256": "4deb163fbcfdb20dde7b8fc52fd168a761897cc7afb8c81bd48dfb8e502690eb"
+    },
+    "client/entry-view.js": {
+      "bytes": 15252,
+      "sha256": "5c072869116150ff9e8a4d3d88729135e5c736f3130607a064217c7a9802e079"
+    },
+    "client/result-view.js": {
+      "bytes": 16620,
+      "sha256": "d1d2ccbbcfdeacc86c9225e56b0a5a46a5d250fdf5042b45584c9deb557f8230"
+    },
+    "client/transport.js": {
+      "bytes": 28089,
+      "sha256": "b019262fb5dc4cd0327ae86de727d9ae9285b6489d2ec7b28bafc9be10ed46cc"
+    },
+    "server/training/course.js": {
+      "bytes": 3795,
+      "sha256": "934f7c366947dd2fc7617f0b1e743e87b96696b893615adbe9616eaaeff4f0de"
+    },
+    "server/training/service.js": {
+      "bytes": 32454,
+      "sha256": "a67070ca1086073208dcbd1d7c6fc636983c8a69ee20d3ba6e9fb6caf617e7c9"
+    },
+    "public/js/app.js": {
+      "bytes": 353478,
+      "sha256": "52ba494e4f8ce3193050bbbe0d4fe814259c2bc033cde1c65997b41c20cfce3d"
+    },
+    "public/css/ocean.css": {
+      "bytes": 72942,
+      "sha256": "b54cc966851215a90e497e61fc6f487b75999aaff0369cad825bff0deb33bedb"
+    },
+    "public/js/release-config.js": {
+      "bytes": 454,
+      "sha256": "5defeeaeda821ec673da51b8ceff7bcb571d741992e735cdc3c212bf024a01ee"
+    },
+    "spec.md": {
+      "bytes": 106664,
+      "sha256": "347140b03a9eddf10c335c6b624af4a708f12ac410c97694a0535336ed891ee0"
+    },
+    "test/training-ui.test.js": {
+      "bytes": 9070,
+      "sha256": "bf878cdacd4ca26974bbc78329f00fe4f097cb7f1f6e9e7eeca2b56d76e71144"
+    },
+    "test/training-player.test.js": {
+      "bytes": 4641,
+      "sha256": "4854dc52ad9188060ed173aae12b5c6dc27870367d6269d75562c4c683d0a0fd"
+    },
+    "test/training-http.test.js": {
+      "bytes": 3866,
+      "sha256": "58e6ec773066545eda93bc6780b56c4b81910fe60b4fc2114c24ca66185d1702"
+    }
+  }
+}

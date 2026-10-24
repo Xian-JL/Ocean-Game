@@ -74,7 +74,7 @@ test("v0.7.5 本地 SVG sprite 覆盖舰船、十项行动和主要状态且正�
   ]);
   includesAll(app, [
     "function uiIcon(name, className = \"\")",
-    "/assets/icons/ocean-ui.svg#",
+    "/assets/icons/ocean-ui.svg?v=",
     "unitIconName(unit.type)",
     "uiIcon(meta.icon)",
   ]);

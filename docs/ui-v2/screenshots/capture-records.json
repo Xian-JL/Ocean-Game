@@ -1,0 +1,239 @@
+[
+  {
+    "file": "home-desktop.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:03:44.068Z",
+    "art": "http://127.0.0.1:3000/assets/images/armory/drydock-desktop-1440.webp?v=1.6.2-ui2.fb9497ca88",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P01",
+    "quality": "high",
+    "theme": "armory-ember",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "file": "home-mobile.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:03:44.133Z",
+    "art": "http://127.0.0.1:3000/assets/images/armory/drydock-mobile-480.webp?v=1.6.2-ui2.fb9497ca88",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P01",
+    "quality": "high",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "training-desktop.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:03:44.409Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "TCAMP",
+    "quality": "high",
+    "theme": "armory-ember",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "file": "battle-desktop-target.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:03:45.319Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "high",
+    "theme": "armory-ember",
+    "viewport": [
+      1440,
+      900
+    ]
+  },
+  {
+    "file": "battle-mobile-target.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:03:45.665Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "fire-mobile-frame-0.png",
+    "kind": "真实训练开火连续帧",
+    "time": "2026-10-24T02:03:54.410Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "fire-mobile-frame-1.png",
+    "kind": "真实训练开火连续帧",
+    "time": "2026-10-24T02:03:54.456Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "fire-mobile-frame-2.png",
+    "kind": "真实训练开火连续帧",
+    "time": "2026-10-24T02:03:54.496Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "fire-mobile-frame-3.png",
+    "kind": "真实训练开火连续帧",
+    "time": "2026-10-24T02:03:54.535Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "weapons-low-height.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:03:55.153Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      568,
+      320
+    ]
+  },
+  {
+    "file": "battle-low-height.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:03:55.735Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      568,
+      320
+    ]
+  },
+  {
+    "file": "weapons-mobile.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:04:21.411Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "nuclear-mobile-before.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:04:21.986Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "nuclear-mobile-frame-0.png",
+    "kind": "真实核弹试射连续帧，结果保密",
+    "time": "2026-10-24T02:04:22.301Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "nuclear-mobile-frame-1.png",
+    "kind": "真实核弹试射连续帧，结果保密",
+    "time": "2026-10-24T02:04:22.338Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "nuclear-mobile-frame-2.png",
+    "kind": "真实核弹试射连续帧，结果保密",
+    "time": "2026-10-24T02:04:22.377Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "nuclear-mobile-frame-3.png",
+    "kind": "真实核弹试射连续帧，结果保密",
+    "time": "2026-10-24T02:04:22.422Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "home-desktop.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:05:22.369Z",
+    "art": "http://127.0.0.1:3000/assets/images/armory/drydock-desktop-1440.webp?v=1.6.2-ui2.fb9497ca88",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P01",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      1440,
+      900
+    ]
+  }
+]

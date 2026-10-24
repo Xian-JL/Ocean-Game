@@ -4,24 +4,9 @@
     const roomCode = escapeHtml(state.entry.roomCode);
     const online = state.connection.phase === "online";
     return `
-      <section class="entry-page entry-page--v07 page-enter" aria-labelledby="entry-title">
-        <div class="entry-hero entry-hero--v07">
-          <div class="entry-hero__badge"><span></span> 回合制海域对抗</div>
-          <h1 id="entry-title">OCEAN</h1>
-          <p class="entry-hero__tagline">静默海域。<br>精确指挥。</p><p class="entry-hero__description">部署你的舰队，解读有限的情报。<br>每一次行动，都由你决定。</p>
-          <div class="entry-hero__visual" aria-hidden="true">
-            <span class="hero-sonar hero-sonar--one"></span>
-            <span class="hero-sonar hero-sonar--two"></span>
-            <span class="hero-sonar hero-sonar--three"></span>
-            <i></i>
-          </div>
-          <div class="entry-facts entry-facts--v07" aria-label="游戏特征">
-            <span><strong>10–15</strong> 海域</span>
-            <span><strong>2–3</strong> 玩家</span>
-            <span><strong>90s</strong> 回合</span>
-          </div>
-        </div>
-
+      <section class="entry-page entry-page--armory page-enter" aria-labelledby="entry-title">
+        <picture class="drydock-art" aria-hidden="true"><source media="(max-width:700px)" srcset="/assets/images/armory/drydock-mobile-480.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 480w, /assets/images/armory/drydock-mobile-720.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 720w, /assets/images/armory/drydock-mobile.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 900w" sizes="100vw"><img src="/assets/images/armory/drydock-desktop.webp?v=${encodeURIComponent(Data.ASSET_VERSION)}" srcset="/assets/images/armory/drydock-desktop-960.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 960w, /assets/images/armory/drydock-desktop-1440.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 1440w, /assets/images/armory/drydock-desktop.webp?v=${encodeURIComponent(Data.ASSET_VERSION)} 1920w" sizes="100vw" alt="" fetchpriority="high" width="1920" height="1080"></picture>
+        <div class="entry-hero"><div class="entry-hero__badge">回合制海域对抗</div><h1 id="entry-title"><img src="/assets/icons/armory-wordmark.svg?v=${encodeURIComponent(Data.ASSET_VERSION)}" alt="" width="440" height="96"><span class="sr-only">OCEAN</span></h1><p class="entry-hero__tagline">静海之下，战意已铸。</p><p class="entry-hero__description">秘密部署 · 回合指令 · 情报博弈</p><div class="entry-keel" aria-hidden="true"><span></span>黑潮军械库</div></div>
         <div class="entry-console entry-console--v07">
           <p class="entry-volatile-notice" role="note">服务器维护或重启会中断正在进行的房间；当前对局暂不支持跨重启恢复。</p>
           ${!online ? `
@@ -52,8 +37,8 @@
           <div class="entry-form-card entry-form-card--v07">
             <div class="entry-form-card__header entry-form-card__header--v07">
               <div>
-                <span class="status-kicker">进入战场</span>
-                <h2>建立作战连线</h2>
+                <span class="status-kicker">舰坞 · 作战</span>
+                <h2>出征整备</h2>
               </div>
               <button class="icon-button icon-button--small" type="button" data-action="open-rules" aria-label="打开游戏说明" data-tooltip="游戏说明">?</button>
             </div>
@@ -76,7 +61,7 @@
 
             ${state.entry.error ? `<p id="entry-error" class="form-error" role="alert">${escapeHtml(state.entry.error)}</p>` : ""}
 
-            <button class="button button--secondary" type="button" data-action="training-open">训练营 · 全情况练习</button>\n            <form id="create-form" class="create-room-panel">
+            <form id="create-form" class="create-room-panel">
               <div class="mode-switch" role="radiogroup" aria-label="对战模式">
                 <button
                   type="button"
@@ -152,14 +137,11 @@
                 </div>
               </div>
               <button class="button button--primary button--large" type="submit" ${!state.connected || pending ? "disabled" : ""}>
-                ${pending === "create" ? '<span class="button-spinner" aria-hidden="true"></span> 创建中…' : '创建房间 <span aria-hidden="true">→</span>'}
-              </button>
-              <button class="button button--secondary tutorial-entry-button" type="button" data-action="start-tutorial" ${pending ? "disabled" : ""}>
-                <span aria-hidden="true">◇</span><span><strong>完整交互教程</strong><small>${readTutorialProgress().length === Tutorial.LESSONS.length ? "已完成，可随时复习" : "五章训练 · 无需创建房间"}</small></span>
+                ${pending === "create" ? '<span class="button-spinner" aria-hidden="true"></span> 创建中…' : '创建战局 <span aria-hidden="true">→</span>'}
               </button>
             </form>
 
-            <div class="entry-divider entry-divider--clean"><span>加入已有房间</span></div>
+            <details class="join-disclosure" ${roomCode ? "open" : ""}><summary>加入已有战局</summary>
 
             <form id="join-form" class="join-form join-form--v07">
               <label class="field field--code field--modern">
@@ -179,7 +161,8 @@
               <button class="button button--secondary" type="submit" ${!state.connected || pending ? "disabled" : ""}>
                 ${pending === "join" ? '<span class="button-spinner" aria-hidden="true"></span> 加入中…' : "加入"}
               </button>
-            </form>
+            </form></details>
+            <div class="entry-secondary-actions"><button type="button" data-action="training-open">核心战斗训练 <span aria-hidden="true">↗</span></button><button type="button" data-action="start-tutorial">五章交互教程</button></div>
           </div>
         </div>
       </section>`;
@@ -191,7 +174,7 @@
     return `
       <header class="room-topbar">
         <div>
-          <p class="eyebrow">${escapeHtml(options.kicker ?? "PRIVATE MATCH")}</p>
+          <p class="eyebrow">${escapeHtml(options.kicker ?? "舰坞 · 私人战局")}</p>
           <h1>${escapeHtml(title)}</h1>
           <p>${escapeHtml(subtitle)}</p>
         </div>
@@ -218,7 +201,7 @@
           if (!seat) {
             return `
               <article class="seat-card seat-card--empty">
-                <span class="seat-card__number">0${index + 1}</span>
+                <span class="seat-card__number">0${index + 1}</span><span class="seat-crest" aria-hidden="true"></span>
                 <div><strong>等待玩家</strong><small>席位尚未占用</small></div>
                 <span class="seat-status">空闲</span>
               </article>`;
@@ -226,7 +209,7 @@
           const own = seat.playerId === room.own.playerId;
           return `
             <article class="seat-card ${own ? "seat-card--own" : ""}">
-              <span class="seat-card__number">0${index + 1}</span>
+              <span class="seat-card__number">0${index + 1}</span><span class="seat-crest" aria-hidden="true"></span>
               <div>
                 <strong>${escapeHtml(seat.nickname)} ${own ? "<em>你</em>" : ""}</strong>
                 <small>${seat.ready ? (seat.autoPrepared ? "服务器已自动准备" : "舰队已准备") : "尚未准备"}</small>
@@ -247,7 +230,7 @@
     return `
       <section class="waiting-page waiting-page--v07 page-enter" aria-labelledby="waiting-title">
         ${renderRoomTop("等待玩家", `${occupied} / ${capacity} 已加入`, {
-          kicker: `${capacity === 3 ? "3 PLAYER FFA" : "2 PLAYER MATCH"}`,
+          kicker: `${capacity === 3 ? "三人自由战" : "双人对战"}`,
         })}
 
         <div class="waiting-layout waiting-layout--v07">

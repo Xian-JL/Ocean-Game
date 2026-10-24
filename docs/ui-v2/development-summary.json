@@ -1,0 +1,15 @@
+{
+  "assetVersion": "1.6.2-ui2.fb9497ca88",
+  "requirements": 194,
+  "basicPassed": 73,
+  "awaitingIndependent": 121,
+  "tests": {
+    "tests": 738,
+    "pass": 738,
+    "fail": 0,
+    "skipped": 0,
+    "log": "development-acceptance.log"
+  },
+  "status": "开发完成，待独立验收",
+  "complexReviewAgents": 0
+}

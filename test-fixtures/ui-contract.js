@@ -25,14 +25,16 @@ function verifyUiContract(kind) {
     assert.match(battle,/console-workspace/);
     assert.doesNotMatch(css,/\.battle-page--v\d/);
     assert.match(css,/container-type:size/);
-    assert.match(css,/grid-template-columns:240px minmax\(0,1fr\) 304px/);
+    assert.match(css,/\.armory-plinth\{[^}]*grid-template-columns:190px minmax\(0,1fr\) 264px/);
+    assert.match(css,/\.console-workspace\{display:block/);
+    assert.doesNotMatch(css,/grid-template-columns:240px minmax\(0,1fr\) 304px/);
   } else if(kind==="responsive") {
-    for(const text of ["max-width:1023px","max-width:700px","max-height:599px","safe-area-inset-bottom","prefers-reduced-motion","forced-colors","42px"])
+    for(const text of ["max-width:1023px","max-width:700px","max-height:599px","safe-area-inset-bottom","prefers-reduced-motion","forced-colors","--map-cell:40px"])
       assert.ok(css.includes(text),text);
     assert.match(css,/\.battle-map-card\.is-mobile-active/);
     assert.match(css,/\.mobile-console-nav/);
   } else if(kind==="theme") {
-    for(const theme of ["ocean-light","ocean-dusk"]) assert.ok(css.includes(`data-theme=${theme}`)||css.includes(`data-theme="${theme}"`));
+    for(const theme of ["armory-ember","armory-cast","armory-ivory"]) assert.ok(css.includes(`data-theme=${theme}`)||css.includes(`data-theme="${theme}"`));
     for(const token of ["--surface-panel","--text-primary","--accent-ink","--line"]) assert.ok(css.includes(token));
     assert.match(css,/color-mix/);
   } else if(kind==="privacy") {
@@ -58,8 +60,9 @@ function verifyUiContract(kind) {
     assert.match(commands,/Data\.targetKey/);
   } else if(kind==="availability") {
     const view=read("client/command-view.js");
-    assert.match(view,/Model\.deriveActionStatus\(room, item\)\.enabled/);
-    assert.match(view,/restricted-actions/);
+    assert.match(view,/Model\.deriveActionStatus\(room,definition\)/);
+    assert.match(view,/ARMORY_ORDER\.map/);
+    assert.match(view,/aria-describedby="armory-reason-/);
     assert.match(view,/action-disabled-reason/);
     assert.match(battle,/fleet-unit/);
   } else if(kind==="connection") {
@@ -67,7 +70,7 @@ function verifyUiContract(kind) {
     assert.match(battle,/room\.deadlines\.actionDeadlineAt/);
     assert.match(battle,/battlePlayerState/);
   } else if(kind==="salvo") {
-    assert.match(battle,/final \? '' : renderActionPanel\(room\)/);
+    assert.match(battle,/final \? '' : `[\s\S]*armory-plinth[\s\S]*renderActionPanel\(room\)/);
     assert.match(battle,/confirm-final-salvo/);
     assert.match(battle,/ownSelectedDecoyId/);
     assert.match(commands,/ownSubmitted/);

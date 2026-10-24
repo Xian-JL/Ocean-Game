@@ -34,10 +34,19 @@
   }
 
 
+  const ARMORY_ORDER = Object.freeze(["destroyer_i_ram","destroyer_ii_ram","pirate_attack","motorboat_ram","submarine_missile","nuclear_bomb","shock_bomb","detection_bomb","radar_scan","helicopter_strafe"]);
   function renderActionCard(room, definition) {
-    const status = Model.deriveActionStatus(room, definition);
-    const selected = definition.type === state.battle.selectedAction;
-    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected ? 'action-card--selected' : ''}" data-action="select-action" data-action-type="${definition.type}" aria-pressed="${selected}" ${status.enabled ? '' : 'disabled'}><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${escapeHtml(definition.name)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected ? '<span aria-hidden="true">✓</span>' : ''}</button>${!status.enabled ? `<p class="action-disabled-reason">${escapeHtml(status.label)}</p>` : ''}</div>`;
+    const status=Model.deriveActionStatus(room,definition),selected=definition.type===state.battle.selectedAction;
+    const slot=(ARMORY_ORDER.indexOf(definition.type)+1)%10;
+    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected?'action-card--selected':''}" data-action="select-action" data-action-type="${definition.type}" aria-pressed="${selected}" aria-describedby="armory-reason-${definition.type}" ${status.enabled?'':'disabled'}><span class="action-slot-number" aria-hidden="true">${slot}</span><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${escapeHtml(definition.name)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected?'<span class="action-selected-mark" aria-hidden="true">✓</span>':''}</button><p id="armory-reason-${definition.type}" class="action-disabled-reason">${status.enabled?'可用':escapeHtml(status.label)}</p></div>`;
+  }
+  function renderArmorySource(room){
+    const def=Data.getActionDefinition(state.battle.selectedAction);
+    const units=room.battle.own.units;
+    const source=def?units.find(u=>u.type===def.sourceType&&u.hp>0&&!u.paralyzed)??units.find(u=>u.type===def.sourceType):null;
+    if(!source)return `<section class="armory-source" aria-label="行动来源"><span class="armory-source__crest" aria-hidden="true"></span><span class="status-kicker">舰队待命</span><strong>选择你的武器</strong><small>先选行动，再指定海图目标</small><button data-action="toggle-fleet">查看己方舰队</button></section>`;
+    const unit=Data.getUnitDefinitionById(source.id)??Data.getUnitDefinitionByType(source.type);
+    return `<section class="armory-source" aria-label="行动来源"><span class="source-projection" aria-hidden="true">${armorySourceProjection(source)}</span><span class="status-kicker">行动来源</span><strong>${escapeHtml(unit.name)}</strong><span class="source-hp">${Model.formatHp(source.hp)} <small>/ ${unit.initialHp} HP · ${escapeHtml(unitStatusText(source,unit))}</small></span><div class="hp-track"><i data-hp-percent="${Math.round(source.hp/unit.initialHp*100)}"></i></div><button data-action="toggle-fleet">己方舰队详情</button></section>`;
   }
 
   function renderActionGroups(room) {
@@ -169,17 +178,8 @@
 
 
   function renderActionPanel(room) {
-    const definition = Data.getActionDefinition(state.battle.selectedAction);
-    const available = Data.ACTION_DEFINITIONS.filter(item => Model.deriveActionStatus(room, item).enabled);
-    const restricted = Data.ACTION_DEFINITIONS.filter(item => !Model.deriveActionStatus(room, item).enabled);
-    return `<aside class="action-rail ${state.battle.actionDrawerOpen ? 'action-rail--open' : ''}" aria-label="行动与单位状态" data-scroll-key="actions">
-      <header class="console-panel-heading"><div><span class="eyebrow">指令编排</span><h2>${openingRadarRequired(room) ? '首次雷达扫描' : room.turn?.canAct ? '选择行动' : '等待行动'}</h2></div><button class="drawer-close icon-button" data-action="close-battle-drawers" aria-label="关闭行动面板">×</button></header>
-      <div class="action-rail__content" data-scroll-key="action-content">
-        ${openingRadarRequired(room) ? `<p class="opening-radar-task">首个行动回合先扫描海域。选择 ${room.mapRules.radarSize}×${room.mapRules.radarSize} 区域的左上起始格。</p>` : ''}
-        <div class="action-list" aria-label="可用行动">${available.map(item => renderActionCard(room,item)).join('') || '<p class="empty-state">当前没有可提交的行动。</p>'}</div>
-        <details class="restricted-actions" ${available.length === 0 ? 'open' : ''}><summary>受限或已耗尽 · ${restricted.length}</summary><div class="action-list">${restricted.map(item => renderActionCard(room,item)).join('')}</div></details>
-        ${definition ? `<section class="action-detail"><h3>${escapeHtml(definition.name)}</h3><p>${escapeHtml(definition.warning)}</p>${definition.targetMode === 'line' ? `<div class="axis-switch" role="group" aria-label="直升机扫射方向"><button data-action="set-helicopter-axis" data-axis="row" aria-pressed="${state.battle.helicopterAxis === 'row'}">按行</button><button data-action="set-helicopter-axis" data-axis="column" aria-pressed="${state.battle.helicopterAxis === 'column'}">按列</button></div>` : ''}</section>` : '<p class="action-guidance">选择行动，再到海图选择目标。确认执行前，你可以随时调整。</p>'}
-      </div></aside>`;
+    const definition=Data.getActionDefinition(state.battle.selectedAction);
+    return `<aside class="action-rail ${state.battle.actionDrawerOpen?'action-rail--open':''}" aria-label="军械武器基座" data-scroll-key="actions"><header class="console-panel-heading"><div><span class="eyebrow">军械武器座</span><h2>${openingRadarRequired(room)?'首轮先扫描 · 左上起始格':'十项行动'}</h2></div><button class="drawer-close icon-button" data-action="close-battle-drawers" aria-label="关闭武器面板">×</button></header><div class="action-rail__content" data-scroll-key="action-content"><div class="action-list armory-slots" aria-label="十行动固定槽位">${ARMORY_ORDER.map(type=>Data.getActionDefinition(type)).map(d=>renderActionCard(room,d)).join('')}</div>${definition?.targetMode==='line'?`<div class="axis-switch" role="group" aria-label="直升机扫射方向"><button data-action="set-helicopter-axis" data-axis="row" aria-pressed="${state.battle.helicopterAxis==='row'}">按行扫射</button><button data-action="set-helicopter-axis" data-axis="column" aria-pressed="${state.battle.helicopterAxis==='column'}">按列扫射</button></div>`:''}</div></aside>`;
   }
 
   function renderTurnProgress(room) {

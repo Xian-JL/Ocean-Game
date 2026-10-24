@@ -1,0 +1,54 @@
+[
+  {
+    "file": "fire-mobile-frame-0.png",
+    "kind": "真实训练开火连续帧",
+    "time": "2026-10-24T02:03:54.410Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "fire-mobile-frame-1.png",
+    "kind": "真实训练开火连续帧",
+    "time": "2026-10-24T02:03:54.456Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "fire-mobile-frame-2.png",
+    "kind": "真实训练开火连续帧",
+    "time": "2026-10-24T02:03:54.496Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  {
+    "file": "fire-mobile-frame-3.png",
+    "kind": "真实训练开火连续帧",
+    "time": "2026-10-24T02:03:54.535Z",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P05",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      390,
+      844
+    ]
+  }
+]

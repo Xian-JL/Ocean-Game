@@ -22,15 +22,15 @@ function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 }
 
-test("Ocean-v1.6.2 前后端正式发布元数据使用同一基线", () => {
-  assert.equal(pkg.version, "1.6.2");
-  assert.equal(RELEASE_VERSION, "1.6.2");
-  assert.equal(RELEASE_STAGE, "Ocean-v1.6.2");
+test("Ocean-v1.6.3 前后端正式发布元数据使用同一基线", () => {
+  assert.equal(pkg.version, "1.6.3");
+  assert.equal(RELEASE_VERSION, "1.6.3");
+  assert.equal(RELEASE_STAGE, "Ocean-v1.6.3");
   assert.equal(RULE_VERSION, "1.8");
   assert.equal(SOCKET_PROTOCOL_VERSION, "2.1");
   assert.deepEqual(Data.RELEASE, {
-    version: "1.6.2",
-    stage: "Ocean-v1.6.2",
+    version: "1.6.3",
+    stage: "Ocean-v1.6.3",
     ruleVersion: "1.8",
     socketProtocolVersion: "2.1",
   });
@@ -68,7 +68,7 @@ test("当前文档冻结 v1.4 战术海面、v1.3 教程、人机边界与真实
   }
 
   for (const current of [
-    "Ocean-v1.6.2",
+    "Ocean-v1.6.3",
     "rule-v1.8",
     "page-flow-v2.1",
     "10×10",
@@ -122,7 +122,7 @@ test("独立声音设置、个性化弹窗、CSP 兼容动态地图与分角色�
   assert.match(html, /id="personalize-dialog"/);
   assert.match(html, /data-action="open-personalize"/);
   assert.match(html, /data-action="select-theme"/);
-  assert.match(html, /data-action="select-accent"/);
+  assert.match(html, /data-action="armory-preference"/);
   const rulesStart = html.indexOf('id="rules-dialog"');
   const rulesEnd = html.indexOf("</dialog>", rulesStart);
   assert.ok(rulesStart >= 0 && rulesEnd > rulesStart);

@@ -1,0 +1,260 @@
+{
+  "date": "2026-10-23",
+  "productVersion": "1.6.2",
+  "ruleVersion": "1.8",
+  "socketProtocol": "2.1",
+  "head": "bd2c7f84035559fc5126edf5b304c54d1a22b6b7",
+  "assetVersion": "1.6.2-ui2.0f4600d125",
+  "pendingFeature": "Core combat training changes after published v1.6.2 must be preserved",
+  "tests": {
+    "tests": 732,
+    "pass": 732,
+    "fail": 0,
+    "skipped": 0,
+    "log": "core-combat-acceptance.log",
+    "sha256": "c58506e150ca24f8e614db6229374cba95faeafc4219e204a66ca4cb14fb2c43"
+  },
+  "note": "These are implementation baseline facts, not UI SPEC 2.0 validation results. No runtime source changed while authoring this spec.",
+  "files": {
+    "package.json": {
+      "bytes": 1483,
+      "sha256": "f7a3b4a3447c1605cd1244998bc1becd7b2f5bb27cbbf520a1dba6fa9130829e"
+    },
+    "package-lock.json": {
+      "bytes": 62126,
+      "sha256": "b7ba2a9842ad32a1dbbe8506d798c0fabc707788f9b6cf16f9981ee748b5218d"
+    },
+    "public/js/release-config.js": {
+      "bytes": 454,
+      "sha256": "5defeeaeda821ec673da51b8ceff7bcb571d741992e735cdc3c212bf024a01ee"
+    },
+    "public/js/app.js": {
+      "bytes": 353478,
+      "sha256": "52ba494e4f8ce3193050bbbe0d4fe814259c2bc033cde1c65997b41c20cfce3d"
+    },
+    "public/css/ocean.css": {
+      "bytes": 72942,
+      "sha256": "b54cc966851215a90e497e61fc6f487b75999aaff0369cad825bff0deb33bedb"
+    },
+    "server/app.js": {
+      "bytes": 8609,
+      "sha256": "6df632954d42ee6a06a04c77de4b0b06862570983b86f1e4ecdac4a3dc1fd7f6"
+    },
+    "server/training/course.js": {
+      "bytes": 3795,
+      "sha256": "934f7c366947dd2fc7617f0b1e743e87b96696b893615adbe9616eaaeff4f0de"
+    },
+    "server/training/service.js": {
+      "bytes": 32454,
+      "sha256": "a67070ca1086073208dcbd1d7c6fc636983c8a69ee20d3ba6e9fb6caf617e7c9"
+    },
+    "client/runtime.js": {
+      "bytes": 9208,
+      "sha256": "e1a1c100c94937aab719135a81105a119899778f50db453646e271d1459cd1cb"
+    },
+    "client/motion.js": {
+      "bytes": 15718,
+      "sha256": "49525c31702eb9f2cb220ce9af1f36f49560240e0659dc4da89e278f75809a17"
+    },
+    "client/training.js": {
+      "bytes": 12934,
+      "sha256": "bbd12c196eddf344a658d68b090c34c26b09bc22d850d4fb2b8866d60bf75b24"
+    },
+    "client/artwork.js": {
+      "bytes": 19038,
+      "sha256": "8dbf00716135264048e59651492a05cf1c4f9802e1bcee95a3d603f2e5e9004e"
+    },
+    "client/preferences.js": {
+      "bytes": 18304,
+      "sha256": "1caaa06165b6392613ecb41f63c95c901f2fe9fb8a07de36055c8d64fdc6d6d2"
+    },
+    "client/transport.js": {
+      "bytes": 28089,
+      "sha256": "b019262fb5dc4cd0327ae86de727d9ae9285b6489d2ec7b28bafc9be10ed46cc"
+    },
+    "client/tutorial-view.js": {
+      "bytes": 15417,
+      "sha256": "3b33581735aab804b92aa0840562ef1cc282dc8895501d1f84857d68a1c98ad9"
+    },
+    "client/entry-view.js": {
+      "bytes": 15252,
+      "sha256": "5c072869116150ff9e8a4d3d88729135e5c736f3130607a064217c7a9802e079"
+    },
+    "client/deployment-view.js": {
+      "bytes": 27225,
+      "sha256": "fbd94be65bf1be479e44e3f1d50669f54270913f5803148d6b6e4440b8adacd9"
+    },
+    "client/battle-map.js": {
+      "bytes": 25767,
+      "sha256": "9dadb5906d8e7605658f52f0e4e7bf78d9e5ab8f6cc9111157e9f9cb15731fbd"
+    },
+    "client/command-view.js": {
+      "bytes": 15315,
+      "sha256": "059cb05eb47f8ec562bedf712612d20751d9a095797158b0d22119216cf879a4"
+    },
+    "client/battle-view.js": {
+      "bytes": 53165,
+      "sha256": "4deb163fbcfdb20dde7b8fc52fd168a761897cc7afb8c81bd48dfb8e502690eb"
+    },
+    "client/result-view.js": {
+      "bytes": 16620,
+      "sha256": "d1d2ccbbcfdeacc86c9225e56b0a5a46a5d250fdf5042b45584c9deb557f8230"
+    },
+    "client/deployment-input.js": {
+      "bytes": 8233,
+      "sha256": "1a0f008186cc25958c181d94c01137f789822aff88b4ac656ed9b8e15f5881e5"
+    },
+    "client/commands.js": {
+      "bytes": 19933,
+      "sha256": "fae8c74f9644b2999207199a95cb6f6c9cf19be8f441239c9c9acd466f81c5dd"
+    },
+    "client/connection.js": {
+      "bytes": 5218,
+      "sha256": "89867abda9e94e582c5d232a96385feaf6db121f14c6624d494e71cd4f1e41fa"
+    },
+    "client/events.js": {
+      "bytes": 23190,
+      "sha256": "f80f8661507a8ecbb9765567f81a6b99d67572c174a5cce731645b2f000824f8"
+    },
+    "client/input.js": {
+      "bytes": 11123,
+      "sha256": "f2bd38df731ca0b657e260adc7cbd690bedec14b4f4e3dd4ffaf7765c48e4b83"
+    },
+    "client/accessibility.js": {
+      "bytes": 9542,
+      "sha256": "189330b38f69fcc12cd618cefdefe38b0ec4478aaf60b4ec6699d6259507f882"
+    },
+    "client/bootstrap.js": {
+      "bytes": 3561,
+      "sha256": "3f66f91880485ad31aa980fcb751fea81399373392c67ebd6153d880e75025d0"
+    },
+    "client/styles/base.css": {
+      "bytes": 9423,
+      "sha256": "de085de081a87b452c33cc4fa3c0fa218c5cbf0d5617b4eac793e8e4f5369e78"
+    },
+    "client/styles/battle.css": {
+      "bytes": 10356,
+      "sha256": "533dd7697caea6842c94f4cee8fac7974accef6840daa7818dc86064a030804e"
+    },
+    "client/styles/map.css": {
+      "bytes": 10127,
+      "sha256": "1cef3b284372af494facff88d606a556983fd689e139dbbd2e3309a21bf10607"
+    },
+    "client/styles/motion.css": {
+      "bytes": 12655,
+      "sha256": "63eb42217ecbe853f2c16cc97c93464204910a4b7e02b67f34b70c39cac2292a"
+    },
+    "client/styles/pages.css": {
+      "bytes": 13354,
+      "sha256": "bd754e0119df0c27f0dbf14176ee838d10da523a3c383bc46074af5617fcbe7f"
+    },
+    "client/styles/responsive.css": {
+      "bytes": 12404,
+      "sha256": "02e8dff5530631d441fccde1387b0276846a6ea853eb895dca306d6e9b3afb00"
+    },
+    "client/styles/tokens.css": {
+      "bytes": 1561,
+      "sha256": "e0db7b652755307277757c55176174cbc6dae10e2c6b33d082263c9379619c5d"
+    },
+    "client/styles/training.css": {
+      "bytes": 2856,
+      "sha256": "83b56a2a853cc4a5b0e00e3a07cef68b8d89200a6b1157d415ae7ae9c6d5fa50"
+    },
+    "server/game/action-resolution.js": {
+      "bytes": 20225,
+      "sha256": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400"
+    },
+    "server/game/action-state.js": {
+      "bytes": 7559,
+      "sha256": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29"
+    },
+    "server/game/action-validation.js": {
+      "bytes": 17909,
+      "sha256": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6"
+    },
+    "server/game/actions.js": {
+      "bytes": 6090,
+      "sha256": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646"
+    },
+    "server/game/battle-state.js": {
+      "bytes": 15942,
+      "sha256": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90"
+    },
+    "server/game/bot-difficulty.js": {
+      "bytes": 1054,
+      "sha256": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835"
+    },
+    "server/game/bot-strategy.js": {
+      "bytes": 19986,
+      "sha256": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7"
+    },
+    "server/game/connection.js": {
+      "bytes": 13392,
+      "sha256": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c"
+    },
+    "server/game/coordinates.js": {
+      "bytes": 3617,
+      "sha256": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7"
+    },
+    "server/game/deployment.js": {
+      "bytes": 9479,
+      "sha256": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15"
+    },
+    "server/game/endgame.js": {
+      "bytes": 22005,
+      "sha256": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418"
+    },
+    "server/game/errors.js": {
+      "bytes": 396,
+      "sha256": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab"
+    },
+    "server/game/information-projection.js": {
+      "bytes": 18133,
+      "sha256": "1e5bd7a769944b2f71e2d1405841a9c18fe5a4b8139dd5f18e48e4b8540ecb69"
+    },
+    "server/game/lifecycle.js": {
+      "bytes": 9163,
+      "sha256": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8"
+    },
+    "server/game/map-rules.js": {
+      "bytes": 2844,
+      "sha256": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7"
+    },
+    "server/game/match-resolution.js": {
+      "bytes": 989,
+      "sha256": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f"
+    },
+    "server/game/match.js": {
+      "bytes": 34203,
+      "sha256": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523"
+    },
+    "server/game/random-deployment.js": {
+      "bytes": 6319,
+      "sha256": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430"
+    },
+    "server/game/ranges.js": {
+      "bytes": 7039,
+      "sha256": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374"
+    },
+    "server/game/room-service.js": {
+      "bytes": 23373,
+      "sha256": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30"
+    },
+    "server/game/room.js": {
+      "bytes": 27265,
+      "sha256": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d"
+    },
+    "server/game/rules.js": {
+      "bytes": 890,
+      "sha256": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682"
+    },
+    "server/game/timing.js": {
+      "bytes": 1334,
+      "sha256": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a"
+    },
+    "server/game/units.js": {
+      "bytes": 5410,
+      "sha256": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9"
+    }
+  }
+}

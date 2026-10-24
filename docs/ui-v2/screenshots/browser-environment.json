@@ -1,0 +1,22 @@
+{
+  "browser": {
+    "result": {
+      "type": "string",
+      "value": "{\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36\",\"dpr\":1}"
+    }
+  },
+  "capture": {
+    "file": "home-desktop.png",
+    "kind": "真实页面",
+    "time": "2026-10-24T02:05:22.369Z",
+    "art": "http://127.0.0.1:3000/assets/images/armory/drydock-desktop-1440.webp?v=1.6.2-ui2.fb9497ca88",
+    "css": "http://127.0.0.1:3000/css/ocean.css?v=1.6.2-ui2.fb9497ca88",
+    "page": "P01",
+    "quality": "smooth",
+    "theme": "armory-ember",
+    "viewport": [
+      1440,
+      900
+    ]
+  }
+}

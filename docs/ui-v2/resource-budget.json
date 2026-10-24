@@ -1,0 +1,63 @@
+{
+  "assetVersion": "1.6.2-ui2.fb9497ca88",
+  "method": "Static file sizes and gzip level 9, not actual cold network or LCP measurements",
+  "criticalFiles": [
+    {
+      "path": "public/js/app.js",
+      "bytes": 356742,
+      "gzipBytes": 86010
+    },
+    {
+      "path": "public/js/game-data.js",
+      "bytes": 32017,
+      "gzipBytes": 7708
+    },
+    {
+      "path": "public/js/ui-model.js",
+      "bytes": 10942,
+      "gzipBytes": 3721
+    },
+    {
+      "path": "public/js/audio-system.js",
+      "bytes": 24603,
+      "gzipBytes": 6517
+    },
+    {
+      "path": "public/js/tutorial-system.js",
+      "bytes": 18340,
+      "gzipBytes": 5239
+    },
+    {
+      "path": "public/js/theme-bootstrap.js",
+      "bytes": 843,
+      "gzipBytes": 445
+    },
+    {
+      "path": "public/js/release-config.js",
+      "bytes": 454,
+      "gzipBytes": 270
+    },
+    {
+      "path": "public/css/ocean.css",
+      "bytes": 99043,
+      "gzipBytes": 20652
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 20439,
+      "gzipBytes": 5499
+    }
+  ],
+  "criticalRawBytes": 563423,
+  "criticalGzipBytes": 136061,
+  "newArtBytes": 523132,
+  "fontBytes": 0,
+  "environment": {
+    "node": "v24.19.0",
+    "os": "win32",
+    "arch": "x64",
+    "cpu": "Intel(R) Core(TM) Ultra 7 155H",
+    "memoryGiB": 32
+  },
+  "formalPerformance": "未测"
+}
