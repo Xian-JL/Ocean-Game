@@ -1,0 +1,23 @@
+{
+  "asset": "http://127.0.0.1:3001/css/ocean.css?v=1.6.4-ui2.b2737ca469",
+  "scope": "Formal 15x15 bot duel; final release bytes; 3 minutes visible P05; manual high quality; host workload not isolated; not a physical phone",
+  "activeMs": 180006.8,
+  "frameCount": 21413,
+  "averageFps": 118.95661719446154,
+  "frameP95Ms": 8.400000000023283,
+  "frameMaxMs": 66.70000000000073,
+  "longTaskCount": 1,
+  "hiddenTicks": 0,
+  "viewport": [
+    1440,
+    900
+  ],
+  "dpr": 1,
+  "quality": "high",
+  "theme": "armory-ember",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
+  "inputSampleCount": 3,
+  "inputMetric": "pointerdown to next rAF scheduling proxy, not complete interaction response",
+  "physicalMobile": "not tested",
+  "formalLcp": "not tested"
+}

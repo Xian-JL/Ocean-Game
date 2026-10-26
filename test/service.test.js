@@ -6,7 +6,7 @@ const test = require("node:test");
 const { createOceanServer } = require("../server/app");
 const { ASSET_VERSION } = require("../server/release");
 
-test("运行监控 Ocean-v1.6.3 提供健康检查、游戏入口和 Socket.IO 协议入口", async (context) => {
+test("运行监控 Ocean-v1.6.4 提供健康检查、游戏入口和 Socket.IO 协议入口", async (context) => {
   const fixedTime = "2026-08-07T00:00:00.000Z";
   const { httpServer, io } = createOceanServer({
     now: () => fixedTime,
@@ -31,7 +31,7 @@ test("运行监控 Ocean-v1.6.3 提供健康检查、游戏入口和 Socket.IO �
   assert.deepEqual(await healthResponse.json(), {
     status: "ok",
     service: "ocean",
-    stage: "Ocean-v1.6.3",
+    stage: "Ocean-v1.6.4",
     socketProtocol: "2.1",
     roomStatePersistence: "in-memory",
     timestamp: fixedTime,

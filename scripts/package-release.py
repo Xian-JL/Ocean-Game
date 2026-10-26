@@ -52,6 +52,14 @@ manifest = {"productVersion": VERSION, "tag": "v" + VERSION,
             "runtimeFiles": [fingerprint(p) for p in runtime],
             "independentAcceptance": "Not complete; see docs/ui-v2/acceptance.md",
             "sourceArchives": "GitHub provides tag source archives; runtime excludes node_modules, Git, original art and development screenshots."}
+scope_path = DOCS / "frozen-scope.json"
+if scope_path.exists():
+    scope = json.loads(scope_path.read_text(encoding="utf-8"))
+    for name, meta in scope["files"].items():
+        normalized = (ROOT / name).read_bytes().replace(b"\r\n", b"\n")
+        if hashlib.sha256(normalized).hexdigest() != meta["canonicalLfSha256"]:
+            raise RuntimeError("Release scope changed a frozen file: " + name)
+    manifest["frozenScope"] = scope
 (DOCS / "build-manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 with zipfile.ZipFile(DEST / (PREFIX + "-runtime.zip"), "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:

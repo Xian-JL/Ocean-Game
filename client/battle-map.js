@@ -186,6 +186,7 @@
         class="battle-effect-art battle-effect-art--${escapeHtml(model.visualState)}"
         data-effect-action="${escapeHtml(model.actionType)}"
         data-effect-scope="${cells.length === 1 ? "cell" : "area"}"
+        data-effect-axis="${bounds.rowSpan>bounds.columnSpan?"column":"row"}"
         data-effect-result="${escapeHtml(model.visualState)}"
         data-grid-row="${bounds.row}"
         data-grid-column="${bounds.column}"

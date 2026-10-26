@@ -147,7 +147,7 @@
     const selectedFile = ACTION_ART_FILES[state.battle.selectedAction];
     if (selectedFile) urls.push(`/assets/images/ocean-2.5d/actions/${selectedFile}`);
     if (state.effectiveQuality === "high") {
-      urls.push(...Object.values(ACTION_ART_FILES).map((file) => `/assets/images/ocean-2.5d/actions/${file}`));
+      // Warm only selected illustrations; shared impact assets remain cached.
       urls.push(
         feedbackArtPath("vfx", "vfx_small_explosion"),
         feedbackArtPath("vfx", "vfx_small_water_splash"),
@@ -378,6 +378,13 @@
   }
 
   function armorySourceProjection(unit){
+    if(unit.type===Data.UNIT_TYPES.AIRCRAFT_CARRIER){
+      const cells=(unit.cells??[]).map(c=>({coordinate:c,point:Data.parseCoordinate(c)})).filter(c=>c.point);
+      if(!cells.length)return uiIcon(unitIconName(unit.type));
+      const row=Math.min(...cells.map(c=>c.point.row)),col=Math.min(...cells.map(c=>c.point.column));
+      const rows=Math.max(...cells.map(c=>c.point.row))-row+1,cols=Math.max(...cells.map(c=>c.point.column))-col+1;
+      return `<svg viewBox="0 0 ${Math.max(cols,rows)*32} ${Math.min(cols,rows)*32}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><g transform="${rows>cols?`translate(${rows*32} 0) rotate(90)`:""}">${cells.map(c=>`<image x="${(c.point.column-col)*32}" y="${(c.point.row-row)*32}" width="32" height="32" href="${versionedArtUrl('/assets/images/ocean-2.5d/units/carrier/'+carrierModuleName(c.coordinate,unit.cells))}"/>`).join('')}</g></svg>`;
+    }
     const folder=UNIT_ART_FOLDERS[unit.type],key=folder+"/east.webp";
     if(!folder)return uiIcon(unitIconName(unit.type));
     return `<svg viewBox="${UNIT_ART_VIEWBOXES[key]}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><image href="${versionedArtUrl('/assets/images/ocean-2.5d/units/'+key)}" width="512" height="512"/></svg>`;

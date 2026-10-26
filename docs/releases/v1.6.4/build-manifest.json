@@ -1,0 +1,2304 @@
+{
+  "productVersion": "1.6.4",
+  "tag": "v1.6.4",
+  "assetVersion": "1.6.4-ui2.b2737ca469",
+  "uiSpec": "2.0",
+  "ruleVersion": "1.8",
+  "socketProtocol": "2.1",
+  "gitParent": "272291ed10c2973b4d9288442fa750cdf24a77a2",
+  "tests": {
+    "tests": 748,
+    "pass": 748,
+    "fail": 0,
+    "skipped": 0
+  },
+  "frozenFiles": [
+    {
+      "path": "server/game/action-resolution.js",
+      "originalSha256": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400",
+      "canonicalLfSha256": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/action-state.js",
+      "originalSha256": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29",
+      "canonicalLfSha256": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/action-validation.js",
+      "originalSha256": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6",
+      "canonicalLfSha256": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/actions.js",
+      "originalSha256": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646",
+      "canonicalLfSha256": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/battle-state.js",
+      "originalSha256": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90",
+      "canonicalLfSha256": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/bot-difficulty.js",
+      "originalSha256": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835",
+      "canonicalLfSha256": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/bot-strategy.js",
+      "originalSha256": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7",
+      "canonicalLfSha256": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/connection.js",
+      "originalSha256": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c",
+      "canonicalLfSha256": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/coordinates.js",
+      "originalSha256": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7",
+      "canonicalLfSha256": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/deployment.js",
+      "originalSha256": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15",
+      "canonicalLfSha256": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/endgame.js",
+      "originalSha256": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418",
+      "canonicalLfSha256": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/errors.js",
+      "originalSha256": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab",
+      "canonicalLfSha256": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/information-projection.js",
+      "originalSha256": "1e5bd7a769944b2f71e2d1405841a9c18fe5a4b8139dd5f18e48e4b8540ecb69",
+      "canonicalLfSha256": "34865d39ca0625a87a0e5a4cca5bb69ba6607558a9d91a202d1dff804a94fdaf",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/lifecycle.js",
+      "originalSha256": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8",
+      "canonicalLfSha256": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/map-rules.js",
+      "originalSha256": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7",
+      "canonicalLfSha256": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/match-resolution.js",
+      "originalSha256": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f",
+      "canonicalLfSha256": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/match.js",
+      "originalSha256": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523",
+      "canonicalLfSha256": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/random-deployment.js",
+      "originalSha256": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430",
+      "canonicalLfSha256": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/ranges.js",
+      "originalSha256": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374",
+      "canonicalLfSha256": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/room-service.js",
+      "originalSha256": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30",
+      "canonicalLfSha256": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/room.js",
+      "originalSha256": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d",
+      "canonicalLfSha256": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/rules.js",
+      "originalSha256": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682",
+      "canonicalLfSha256": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/timing.js",
+      "originalSha256": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a",
+      "canonicalLfSha256": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a",
+      "unchanged": true
+    },
+    {
+      "path": "server/game/units.js",
+      "originalSha256": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9",
+      "canonicalLfSha256": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9",
+      "unchanged": true
+    }
+  ],
+  "runtimeFiles": [
+    {
+      "path": ".node-version",
+      "bytes": 8,
+      "sha256": "7e8a2fa94951112b894a3dbe3d05efef5e9263741fa49125f0a70f40fedab4cc"
+    },
+    {
+      "path": "client/accessibility.js",
+      "bytes": 9557,
+      "sha256": "46cedb2cf49d2932c743e47bb411fb96d22225689c1015f1e5d130b399fcd7af"
+    },
+    {
+      "path": "client/artwork.js",
+      "bytes": 20389,
+      "sha256": "964c3f17ed9cbb4e8f0d84f8a53b4c4509f8f9e36abc79b907b6d179f4378609"
+    },
+    {
+      "path": "client/battle-map.js",
+      "bytes": 25846,
+      "sha256": "ea002a15e2a9b83b4ef4ae4669f0601537ab3f77bff3b793d4aebb3aefd78190"
+    },
+    {
+      "path": "client/battle-view.js",
+      "bytes": 53756,
+      "sha256": "c956c9f075ef9c10155b20f5394aeb6603a63edc8d32765cb4e3f93ed8b8dd31"
+    },
+    {
+      "path": "client/bootstrap.js",
+      "bytes": 3561,
+      "sha256": "3f66f91880485ad31aa980fcb751fea81399373392c67ebd6153d880e75025d0"
+    },
+    {
+      "path": "client/combat-polish.js",
+      "bytes": 9102,
+      "sha256": "92f4dcd7b3c2e3d90cbd45129d362eb787a40736cc65041d210278626748af8c"
+    },
+    {
+      "path": "client/command-view.js",
+      "bytes": 16947,
+      "sha256": "a9dea2875cacd135d452e3f61149eafa16901a82240507270aee077bda9ff945"
+    },
+    {
+      "path": "client/commands.js",
+      "bytes": 19933,
+      "sha256": "fae8c74f9644b2999207199a95cb6f6c9cf19be8f441239c9c9acd466f81c5dd"
+    },
+    {
+      "path": "client/connection.js",
+      "bytes": 5218,
+      "sha256": "89867abda9e94e582c5d232a96385feaf6db121f14c6624d494e71cd4f1e41fa"
+    },
+    {
+      "path": "client/deployment-input.js",
+      "bytes": 8233,
+      "sha256": "1a0f008186cc25958c181d94c01137f789822aff88b4ac656ed9b8e15f5881e5"
+    },
+    {
+      "path": "client/deployment-view.js",
+      "bytes": 27225,
+      "sha256": "fbd94be65bf1be479e44e3f1d50669f54270913f5803148d6b6e4440b8adacd9"
+    },
+    {
+      "path": "client/entry-view.js",
+      "bytes": 15500,
+      "sha256": "ea8809031db97630e1bd304b8280a6b5b66792b66204fed8e10c2715f555bac2"
+    },
+    {
+      "path": "client/events.js",
+      "bytes": 24120,
+      "sha256": "5b87e6b228c6019c18c6b4af83d99b537f5c5154c043be0018142ba78aeda31b"
+    },
+    {
+      "path": "client/input.js",
+      "bytes": 11123,
+      "sha256": "f2bd38df731ca0b657e260adc7cbd690bedec14b4f4e3dd4ffaf7765c48e4b83"
+    },
+    {
+      "path": "client/modules.json",
+      "bytes": 425,
+      "sha256": "c5362c83c598c34e71671b640cd1f34c4a15de2aea18ed1d78ebb3dbcb8fb1c0"
+    },
+    {
+      "path": "client/motion.js",
+      "bytes": 15902,
+      "sha256": "8a9690eef6e2703ccfda26e6b29562839b01e2049805e4f0e9c0884460b4fd13"
+    },
+    {
+      "path": "client/preferences.js",
+      "bytes": 18845,
+      "sha256": "7cec5033e9754880360f6b18c5f8875227951e15f1279386128cb1d6ab48a34b"
+    },
+    {
+      "path": "client/result-view.js",
+      "bytes": 16620,
+      "sha256": "d1d2ccbbcfdeacc86c9225e56b0a5a46a5d250fdf5042b45584c9deb557f8230"
+    },
+    {
+      "path": "client/runtime.js",
+      "bytes": 9243,
+      "sha256": "bf16eefbe4ea4f802435b7d494e6ceb8d5f6bb2689f4a1a68e695e41c7f55929"
+    },
+    {
+      "path": "client/styles/base.css",
+      "bytes": 12081,
+      "sha256": "cd2abb93a94bb43f8be9ff0ab25f219ffa93c5e25f67b63a85f8c44f76dde06b"
+    },
+    {
+      "path": "client/styles/battle.css",
+      "bytes": 14592,
+      "sha256": "437aa52fe079dd6076c8f567431281cf20d431cafd30f8f01250ad780b06a721"
+    },
+    {
+      "path": "client/styles/combat-polish.css",
+      "bytes": 14543,
+      "sha256": "e043fe319406955dca0c8d69e8fa49c1ff159bf558b28b283062032bd255ea45"
+    },
+    {
+      "path": "client/styles/map.css",
+      "bytes": 11345,
+      "sha256": "0bb3fbd49f65eddef1e58348b244cf716b1b0f0a3a431ffdf4173f7b91b11d87"
+    },
+    {
+      "path": "client/styles/motion.css",
+      "bytes": 12724,
+      "sha256": "e2f70c8e42f443286dbcbcaacff5cae10889d0fb6399541e90045affa1f3bb8a"
+    },
+    {
+      "path": "client/styles/pages.css",
+      "bytes": 21358,
+      "sha256": "e2d25df631ca3f64c81decd7b707fcc5758ad360471a39e390f1895bcb91e661"
+    },
+    {
+      "path": "client/styles/responsive.css",
+      "bytes": 18216,
+      "sha256": "ecf7af54c51e3ad6d3895a571193c940e349a041379435d7db124f511d766a4d"
+    },
+    {
+      "path": "client/styles/tokens.css",
+      "bytes": 2722,
+      "sha256": "a9e7486a0ca5aef6fa5e080b32c443ff45ba20de159b04673ff79b56520fbd11"
+    },
+    {
+      "path": "client/styles/training.css",
+      "bytes": 5270,
+      "sha256": "0ef6bfad44f16251302388f5c0f6206a6690bf16716d7afcb5bd828090449abd"
+    },
+    {
+      "path": "client/training.js",
+      "bytes": 12931,
+      "sha256": "261572da7d0702541ac27f08eba0c9b39576ebf2db55a5a9a4856baaa0d1e326"
+    },
+    {
+      "path": "client/transport.js",
+      "bytes": 28244,
+      "sha256": "b80926cf072b9b2bd044b926d61338fb66b890c6bc287c9468c133f810d26d78"
+    },
+    {
+      "path": "client/tutorial-view.js",
+      "bytes": 15417,
+      "sha256": "3b33581735aab804b92aa0840562ef1cc282dc8895501d1f84857d68a1c98ad9"
+    },
+    {
+      "path": "docs/rule-v1.8.md",
+      "bytes": 43240,
+      "sha256": "03da1d1564c0c8a7dda1cd11e0373a0844859f3a72b3d3697943790ff7633e9a"
+    },
+    {
+      "path": "docs/socket-protocol-v2.1.md",
+      "bytes": 3956,
+      "sha256": "8d513dfabeff77d15667776a7180c865f974878c7fb97489dd91a9d4cbc8da28"
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 62126,
+      "sha256": "e7b8401b513d261c5dcbd7968fd7f7c47bc5d998615f502eee70b52d7325a6da"
+    },
+    {
+      "path": "package.json",
+      "bytes": 1492,
+      "sha256": "2e02b73c45eb54da278acf44d8c0615ecd575ea6c935fdd1ca2c089f3b9ccec7"
+    },
+    {
+      "path": "public/armory-lab.html",
+      "bytes": 2610,
+      "sha256": "2aa2fd787f8d312770ec017afb90a9e3ffebadd940457e38dba9592bd842802e"
+    },
+    {
+      "path": "public/assets/audio/effects/audio-manifest.json",
+      "bytes": 9720,
+      "sha256": "921f4ecc88f72f1b277f66107659f3a698095620bbede485d55ac5b9b71cee8f"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/01.mp3",
+      "bytes": 37485,
+      "sha256": "10676b2cafc4c8f9bc78f2734caec266063097679aa0076a2be775f23cdeb6d4"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/01.ogg",
+      "bytes": 98474,
+      "sha256": "0259a9f6011d094f68483d59b92a59a5cdfc6936607d93b9b91507c952aab7d1"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/1.mp3",
+      "bytes": 29325,
+      "sha256": "6c53d72529437db20325c94795872bd4e52b2b2ff9d27febbfe664a9659b670c"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/1.ogg",
+      "bytes": 33218,
+      "sha256": "98bbb53ce8f4566417b56efbc81dacdf07978518c0899d22aec47832174fc334"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/beep-confirmation-ok.mp3",
+      "bytes": 3693,
+      "sha256": "0fca8c0e4d4a2fc1d97b6063ca376698fe7b9710410b07384f0b3a224d293546"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/beep-confirmation-ok.ogg",
+      "bytes": 6785,
+      "sha256": "9d9553391df25df4e83f01119f8050235ff760c1bbb8e7124ba76a3f57325e28"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/beep.mp3",
+      "bytes": 3765,
+      "sha256": "742a812ffd926a90d927e0aabefe0afcf957d300631c5c6c76b96bc88493bff9"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/beep.ogg",
+      "bytes": 7766,
+      "sha256": "695feca5a9cd39f5a3864af0a9e545786a393044c61df33ba270ae2f5b012b63"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/boat-engine-on-water-sound-effect.mp3",
+      "bytes": 33517,
+      "sha256": "678495da0a05e09732bccb4e744e13ebf9408b919205ec4724eea7d1cf80f8c8"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/boat-engine-on-water-sound-effect.ogg",
+      "bytes": 35834,
+      "sha256": "694ba3b208f8c0bd1a2a63a09ce155694c31e953c080c1a9476aff81660045aa"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/c-ram-warning-sound-loops.mp3",
+      "bytes": 15823,
+      "sha256": "e7599392e990ec29ce8854178f43d0e1ce6ba89a0546e6a16bf39f5be34c171e"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/c-ram-warning-sound-loops.ogg",
+      "bytes": 20581,
+      "sha256": "f5e3f11a07a0035231f9c338a487dc5da2fc6dc12b40e0324c82b84af1d91bf6"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/charged-laser.mp3",
+      "bytes": 147582,
+      "sha256": "0c136d08f9ec1ce5f31471c459ee60d933b038b0d18c66d8943a7e039467c7a6"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/charged-laser.ogg",
+      "bytes": 160365,
+      "sha256": "505d211e1f48fcff30d61f81a3e472098a8bdb8940f627cc41a6b3897208d0b1"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/dice-rolling-dungeon-and-dragons.mp3",
+      "bytes": 49935,
+      "sha256": "7db0a2f9b0338d120b977804660f5f4adac0302ea97b154eac100da214573d70"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/dice-rolling-dungeon-and-dragons.ogg",
+      "bytes": 52824,
+      "sha256": "65d76acbf6b0f359357abb371ac33dc3ebc3cd0ecf98b2744c2a3680155630af"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/electric-shock-3-hit.mp3",
+      "bytes": 21357,
+      "sha256": "f71db8b8271b20f0836c6b1edbf6433672ffc9bad288a07206462b186235c408"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/electric-shock-3-hit.ogg",
+      "bytes": 22000,
+      "sha256": "89f78b13682bacd6abfa113518bc94b7a9d2ccca4905601e513ec656e672e46d"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/electrical-shock-zap.mp3",
+      "bytes": 40173,
+      "sha256": "df66cfe25f5467bd5957d3dda25a17d594ed4055b22d64434be5a3c1eed654c7"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/electrical-shock-zap.ogg",
+      "bytes": 44194,
+      "sha256": "d19f5ab1b3958a464bf3d32134a12a17d263326144f71d6fa7d96b142d0a940a"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/fanfare-3-rpg.mp3",
+      "bytes": 82893,
+      "sha256": "c35c1b1d685fcf2a362f60b16c0c8da4671d1c1bd35a76ab2e1627986b87a1ae"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/fanfare-3-rpg.ogg",
+      "bytes": 115238,
+      "sha256": "82f2516f5de3d5af2fc9ba050037542fbdd7f20af6770fb0d99d7d312d14541d"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/fanfare-rpg.mp3",
+      "bytes": 18237,
+      "sha256": "70107ca0bf91e85fa7d754f3bbe7c1b89698ed7610491f16608f11daf7d44a0b"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/fanfare-rpg.ogg",
+      "bytes": 21393,
+      "sha256": "66cfae005c9b81f168dc8d92a362f1b31d08dc57d6aeb9fed3d0bd97b32ce998"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/helicopter-rotor-loop.mp3",
+      "bytes": 73503,
+      "sha256": "c7e1f07f14d9507e0e431c602595c76b3c8dc73cebb827f3c04765fe74745283"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/helicopter-rotor-loop.ogg",
+      "bytes": 82230,
+      "sha256": "b10c29e0cf9a908c994e65ce4a518bb992709caa3a550146bdbae56232f64fd0"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/k-55-artillery.mp3",
+      "bytes": 222087,
+      "sha256": "f9160438895e1e01f11d24d57686d78038f0cbfffad5ba5743fb8d1aae68fd9f"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/k-55-artillery.ogg",
+      "bytes": 248293,
+      "sha256": "fd67e9260617866c3b809fe5ece6028e5246681c1afaed043198ad91eeb78cfb"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-back-002.mp3",
+      "bytes": 2397,
+      "sha256": "ed300d5cc4e16cade6d5630a6fc7751f4b5ba0c47a2eb46518790fa2069b487c"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-back-002.ogg",
+      "bytes": 5244,
+      "sha256": "d24a7a22fa5f95b240e27964cbd073b6a397f022759666ce5896836aaf9842cd"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-back-003.mp3",
+      "bytes": 2493,
+      "sha256": "d2208286840496418cb7dde0f2077cd2ff42deb4fb3d20afc487fa8d8c92b187"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-back-003.ogg",
+      "bytes": 5384,
+      "sha256": "3c0c4f307a47358435907b434417b0692b331902a2bfec93cebac92b172b0ca4"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-close-002.mp3",
+      "bytes": 4653,
+      "sha256": "bf6e6182345dab81f702dc5cb096085ce7850307f9dcbd921d11a8ce90827eff"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-close-002.ogg",
+      "bytes": 7617,
+      "sha256": "279b2b0aa96c7aa914974f90a3ca18aef34d28824c7ab7750e3d68ff0cbcaa8a"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-confirmation-001.mp3",
+      "bytes": 2949,
+      "sha256": "438112c9f0d066553f2511346b00f3bd2f147fa21901739f5daa2a74ef0f5598"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-confirmation-001.ogg",
+      "bytes": 5393,
+      "sha256": "1707faf446cefe01aa632da64592288c641a60daa58951df71cc81f6b17dda65"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-confirmation-002.mp3",
+      "bytes": 5277,
+      "sha256": "1544f4b8927198ba1aedbb146fcbbb94514a388f40cf425487e652e825dd3c0f"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-confirmation-002.ogg",
+      "bytes": 8280,
+      "sha256": "bffb7d21624d43dcc0f6d3395a3f3366658d10fff0940388fce34bdd8c4c6960"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-confirmation-003.mp3",
+      "bytes": 3549,
+      "sha256": "db9dd780c471851c72b4d317a2fbc4d923c83acea3b527fa8533015d4908ea30"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-confirmation-003.ogg",
+      "bytes": 6357,
+      "sha256": "276ef434f1ae801aecaaf64c2924030c9c0c27e89577e4b44dbccf69590a8660"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-drop-001.mp3",
+      "bytes": 2037,
+      "sha256": "c6a87147bc7677fff94567ffab1baa7899dfa1dbccb0824a475beb5888e25dc7"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-drop-001.ogg",
+      "bytes": 6191,
+      "sha256": "bc086077a6b22a7a9a2bde346f26a9453324b39ba82eb240fd54476929d225d5"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-drop-003.mp3",
+      "bytes": 1917,
+      "sha256": "5cea4b2974e906b5f17b6a222b04ad435ee6ab31e5e10a8032773486066a8c8b"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-drop-003.ogg",
+      "bytes": 6437,
+      "sha256": "94e684252b621d96c49d61fcfe05929dffc1d1d1a566eadca98a3bea0b22d366"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-error-003.mp3",
+      "bytes": 6285,
+      "sha256": "90dda2b0864be4ab74cd0f4e4954d6d71a44be1e0fc479d8134852ee4ca70452"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-error-003.ogg",
+      "bytes": 12512,
+      "sha256": "0d4b72b28a9ac40f4cc410fc57d7b012e8ef6f2b22955e9a83077cd4698e64eb"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-error-007.mp3",
+      "bytes": 3117,
+      "sha256": "19ea6944f8616010049ba551b5a25d50a14f8583df3542fcaa17a67ca01ae619"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-error-007.ogg",
+      "bytes": 6764,
+      "sha256": "f58c0af3cf3ebaaa0fa62123e4f224fbca155e4cca4c238313a6c7356204cc70"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-error-008.mp3",
+      "bytes": 3789,
+      "sha256": "3160ddd493606068519d49b65dee098b4259c34f136104a8c1a757bacd717d6f"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-error-008.ogg",
+      "bytes": 6327,
+      "sha256": "082f68e38985771a9d546ca25564554d0ca992ed0f71bd3468109a2a57351a35"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-glass-003.mp3",
+      "bytes": 2253,
+      "sha256": "3c4f9884c2cbb51bb5db74f312265aebadc65973e232a681cb13990a266c2fc5"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-glass-003.ogg",
+      "bytes": 5797,
+      "sha256": "db282586dbfdc9cda00fab91f076c7600ae4be9e2eaa2deaf20e81dd3220ae1c"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-glitch-002.mp3",
+      "bytes": 1773,
+      "sha256": "f345cecd7b3fb195ee6741722575ade937f01359fb7617b2495dfe6568900028"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-glitch-002.ogg",
+      "bytes": 5357,
+      "sha256": "578cd4db70253509475dbfca8bdfd11935a2bc045e142e8f25d4c5ba3ec96f49"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-maximize-004.mp3",
+      "bytes": 6765,
+      "sha256": "d76fccda511c3067cd860f0c69d5c49b92a8c5f3a4e8db9bfd68a5520f6bc6ff"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-maximize-004.ogg",
+      "bytes": 9016,
+      "sha256": "f501b03673f6cde60fbe75c6df7043fd4ba69d29828a48eb42b07d17f2cd92d8"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-minimize-004.mp3",
+      "bytes": 6789,
+      "sha256": "3459f768650473a02cdb5a0d384e0edaae45b7afa8db052c95fc02c1f386896f"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-minimize-004.ogg",
+      "bytes": 9749,
+      "sha256": "0b778ccca367fbf80b1c654a62e5fccc3f7bc5f722a08125d77c213fe7e24cd9"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-minimize-006.mp3",
+      "bytes": 3117,
+      "sha256": "7b8f76585fbf3497daaa7d905ff0051dc7e5a5bd6279a9321ff9e7c06af99817"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-minimize-006.ogg",
+      "bytes": 6279,
+      "sha256": "0d6c4b3c95bb6f7d0842de6f17c8e085f4266530841f2e31d0ce7161c9cb7ad9"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-open-002.mp3",
+      "bytes": 5229,
+      "sha256": "f5e22e426a695e2600050d7d7ba84a878a687cd12c8da0e4f59f7c934aee097a"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-open-002.ogg",
+      "bytes": 7777,
+      "sha256": "6fef596bae8f7a13f0eb36781ca4cda13c03fb7f8b19ed2a419ef122a313cb54"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-open-003.mp3",
+      "bytes": 5133,
+      "sha256": "9efbd2b93c75885a6eac0d2cd859dfbc5e3be6245e2a4160a22ec6fb642da756"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-open-003.ogg",
+      "bytes": 8098,
+      "sha256": "75068620ebde621bd392e0319011cd3a3cc414797f08d1c7fc1f79c6625865dc"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-question-002.mp3",
+      "bytes": 2589,
+      "sha256": "63169ac278c22da2bc9f79a9b2742f43ff679135ab13c59bd60fc95769b871bd"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-question-002.ogg",
+      "bytes": 5581,
+      "sha256": "ee19fa570d72961d1c3ddac72c56bc2dd30eaa926aff798d5200987952b05756"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-scroll-002.mp3",
+      "bytes": 10341,
+      "sha256": "01b4ecf8970e0b8a1c0071dce0cfe584485eb9176cadfc1417d46be2b16fb2c9"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-scroll-002.ogg",
+      "bytes": 12587,
+      "sha256": "a8b4c0189d6026024efbbb5576d124e285030b2cfb2b75329cc4ced60061e607"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-scroll-004.mp3",
+      "bytes": 13773,
+      "sha256": "0134c6980280ef6f8f3e70a9a22ee9e1dde3b8576dd4acf0767dc20d828f542d"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-scroll-004.ogg",
+      "bytes": 15328,
+      "sha256": "ff53560c404438c7990e8ddd1421853a62ab27d74d7bf08c207eb37166c54b67"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-select-003.mp3",
+      "bytes": 4269,
+      "sha256": "71f3d640a1417e2c25dcad6ce0e5d4ec99b9f7e94bc130ddfef137b634af9d70"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-select-003.ogg",
+      "bytes": 7057,
+      "sha256": "1aa917770babde54b55117638298180dee04c5a7fa325319478491deba6265dd"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-switch-003.mp3",
+      "bytes": 4125,
+      "sha256": "3cc67fffc153e4cbee16bbf6d27141ab38a7965b8548608d3bcb1528b520eb38"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-switch-003.ogg",
+      "bytes": 7573,
+      "sha256": "9917f35f34f9bf7723ea6b736b1eacafab3153ab5b1c9a9672929939323f8962"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-switch-006.mp3",
+      "bytes": 5013,
+      "sha256": "38b775f7da15b6df44d0f6b34368a4a72a419bb2a4ae8a9744ccd0d37d8a309c"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-switch-006.ogg",
+      "bytes": 6565,
+      "sha256": "69ee06b39d0206630f9200bd040aad7d389ff0066589ad3d068dab219f13fa8a"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-tick-004.mp3",
+      "bytes": 1965,
+      "sha256": "78aac6c92393c452f9b1505a2786498b64d4fa37aee19e28a9f8934fd7c1ce17"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/kenney-tick-004.ogg",
+      "bytes": 5051,
+      "sha256": "374e8248f5e9aa8cbd5374d09318db4910a5d65a2c6b4cb4773eb3697fe66e1c"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/metallic-clunk.mp3",
+      "bytes": 15621,
+      "sha256": "6f22dd24474290656ec1fe502f1db72d5a34b78789d6a79b50c781dbdc9b9e0a"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/metallic-clunk.ogg",
+      "bytes": 23388,
+      "sha256": "12092a2ce5a78849d87a363d9919005005996cbced1ae872e74842cb5f700699"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/missile-launcher-explosion-only.mp3",
+      "bytes": 9202,
+      "sha256": "847aca483db76200bc4fa22e47baae297af9d9996aebe54977dc74aee8988d24"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/missile-launcher-explosion-only.ogg",
+      "bytes": 12858,
+      "sha256": "f354956445bcbd9631b3001126b5c4840bf100165ef4fa04beefdb54f18449d5"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/normal-click.mp3",
+      "bytes": 1965,
+      "sha256": "329f83dec2418c797d788f1776f97507c835e81f69791a338dc66c3203897b57"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/normal-click.ogg",
+      "bytes": 5509,
+      "sha256": "bcacf92a0f39e087261cd1ea7b86495de535d083215fb874b304aae722db31fd"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/pencil-scribble-on-paper.mp3",
+      "bytes": 19923,
+      "sha256": "5d8739c13b95aacca7cdf5f0c577a2a3db314d5ca9a35514f25debc27a0d857f"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/pencil-scribble-on-paper.ogg",
+      "bytes": 21350,
+      "sha256": "447205952c54eda4ee1ba15636ff2072bdf92b377252339f97c0d713fb5230ef"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/pencil-writing-on-paper.mp3",
+      "bytes": 11157,
+      "sha256": "a9b6b9ef635706df47944d9bf752bb5b151bd5da67c1209bdf65969976ba35cc"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/pencil-writing-on-paper.ogg",
+      "bytes": 14314,
+      "sha256": "a8d01c71313fc11918bc7fda60ce85760b4359a48592672b9c8e887ad10e581e"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/retro-pirate-cannon-shot.mp3",
+      "bytes": 16770,
+      "sha256": "bf68b1263ff15c560f736be74692e9c2697b2ecb17807d04fdfb000adaadfab6"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/retro-pirate-cannon-shot.ogg",
+      "bytes": 21657,
+      "sha256": "639d6bf8e9754441dd2bbcb6249229b1af7a2448cce360c791ec25d0e7e1b706"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/sonar-ping.mp3",
+      "bytes": 17757,
+      "sha256": "eb3eadc26cefd682ac2811a403ce61c908f61eb3af4aed1985ecaa5e234ec1d5"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/sonar-ping.ogg",
+      "bytes": 31715,
+      "sha256": "d162d89299c349a5c49dc7c99526fd88dd8fd12f0acace6933df03b1191efa80"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/sonar-sweep-beep.mp3",
+      "bytes": 15021,
+      "sha256": "01a1c13cbbfeb90b9b5b77d2fda1bbb2e9d99dd60df34e3fb137a6920acab691"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/sonar-sweep-beep.ogg",
+      "bytes": 18228,
+      "sha256": "34b4b4781393cbc87dead4c3b7729fb38a928fc698fc00d26425c4c96767819e"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/speedboat-loop.mp3",
+      "bytes": 57190,
+      "sha256": "f201124e2593cbd4224ee4570513bc1661e991fb9ac7142cf6c347639b36433b"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/speedboat-loop.ogg",
+      "bytes": 57024,
+      "sha256": "2788a9becd5dea6ac2d1e1fe46094fd4e65cbf81eb41c24dce15a76f13baa775"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/submarine-sonar.mp3",
+      "bytes": 46965,
+      "sha256": "1422cc7250c19d151df87a2f58ff036b10beaee7b5a333f204fdec8636b6e393"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/submarine-sonar.ogg",
+      "bytes": 112239,
+      "sha256": "2232db906006c79c717b44c3af51b1cb8bc2bef28fa4990c541edfb694072fb9"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/tic-toc-click.mp3",
+      "bytes": 1677,
+      "sha256": "f980cbd546d742e9461ca6a668e4c1ab4dde8de345e3b2ae0c3302e30cc413c9"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/tic-toc-click.ogg",
+      "bytes": 5225,
+      "sha256": "64ad1a7e20c330ea9f2ad53b912becd1b175694e127cd679c1264a0f74a3ce4d"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/underwater-explosion.mp3",
+      "bytes": 76545,
+      "sha256": "e80b2eff9a85d25bec992a542c1cde47963c3e2362782d668d74d1507a0496ea"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/underwater-explosion.ogg",
+      "bytes": 91119,
+      "sha256": "9357110e29f29a81ea0d3f4c16ec79e76451330b0ebea2b2a077146cfdd80550"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/water-splash-1.mp3",
+      "bytes": 43455,
+      "sha256": "0913a872577f53ff8030a823343679ebb2c2ac42e9d5daa55649fb955f66dc2a"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/water-splash-1.ogg",
+      "bytes": 47567,
+      "sha256": "af3321229eb1812ea2354619a28076b9f2f6e10dd916c35546a739b4b14ba550"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/water-splash-2.mp3",
+      "bytes": 22359,
+      "sha256": "c64f89757610e7dd8936eef63e6d6d7979cd20e69dcc00e1b24574827f0d36ed"
+    },
+    {
+      "path": "public/assets/audio/effects/runtime/water-splash-2.ogg",
+      "bytes": 24592,
+      "sha256": "55fa5792f48f0b1bf22063ed15be38acfd930a997b6ebfbdf686c99009a76ebb"
+    },
+    {
+      "path": "public/assets/audio/effects/SOURCES.md",
+      "bytes": 1190,
+      "sha256": "17ed351c8374793b2fdd7753e0ae8117e7cb2bc10faaaacedbf62eb0aa8eb03f"
+    },
+    {
+      "path": "public/assets/audio/music/ocean-theme.mp3",
+      "bytes": 1449035,
+      "sha256": "4225a628d48323afb35caebd4e7b7c8067c4b954a0485c188b6914f541b9cdcb"
+    },
+    {
+      "path": "public/assets/audio/music/README.txt",
+      "bytes": 517,
+      "sha256": "5034dcfe806b3cfaff293f0f54cec4d596718b39d9988fadcde2e64aaabe0233"
+    },
+    {
+      "path": "public/assets/icons/armory-anchor.svg",
+      "bytes": 265,
+      "sha256": "156914b2c4d39d7ec10a5ae62bf4a3e20a76ff7520bfdf3992a38cc414d066ba"
+    },
+    {
+      "path": "public/assets/icons/armory-crest.svg",
+      "bytes": 221,
+      "sha256": "80b4dbae971dd94f03dcce8888312f000196390d9a326ec353a97954d0525e35"
+    },
+    {
+      "path": "public/assets/icons/armory-seal-canceled.svg",
+      "bytes": 176,
+      "sha256": "8219f3da612813ec99f7ec67291bbaaace38f6add87b984da46d9f4faf87f4d0"
+    },
+    {
+      "path": "public/assets/icons/armory-seal-draw.svg",
+      "bytes": 215,
+      "sha256": "471cc46d804dddb60220e46a9223f8034aae29bfe85e929284f49fe03cd6f85e"
+    },
+    {
+      "path": "public/assets/icons/armory-seal-loss.svg",
+      "bytes": 204,
+      "sha256": "6d60f9e69fedbee8965e99a82794507676bd675b407a843a08dca723c85bcccc"
+    },
+    {
+      "path": "public/assets/icons/armory-seal-win.svg",
+      "bytes": 201,
+      "sha256": "96bdb28f3ec8a107f942934ca103202494760ed0003b28147e8bf3c5ccc33f40"
+    },
+    {
+      "path": "public/assets/icons/armory-wave.svg",
+      "bytes": 230,
+      "sha256": "7e92768b1192af3de51b36727381e6e88b47a88e5509f87d57c0af7a2b7978a9"
+    },
+    {
+      "path": "public/assets/icons/armory-wordmark.svg",
+      "bytes": 338,
+      "sha256": "fef78c6118733090a49456a1736ad2dc2ccc5a25da5c4cffa6669690cff2c59b"
+    },
+    {
+      "path": "public/assets/icons/ocean-ui.svg",
+      "bytes": 5100,
+      "sha256": "0138805668b5f7e6e646024e9942203fce3885f1098d7be7e2db1e0942703432"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-desktop-1440.webp",
+      "bytes": 114778,
+      "sha256": "7094137b68b262da2a68f8601853b70938d3da452e18fa06324d34dfdee981eb"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-desktop-960.webp",
+      "bytes": 58398,
+      "sha256": "c906f6792d99a311eeb2403df27499f47971f8a5bbbfafa87ddf6da498329dce"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-desktop.webp",
+      "bytes": 165836,
+      "sha256": "5ef4d075b4d3797bb35c0b3622495500d8fb6261e768509c1bbb3aaf23d9e2ea"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-mobile-480.webp",
+      "bytes": 30762,
+      "sha256": "64f11fd1f007520e7402e79990de55c743ba16c3057e87648e2e032466f969e0"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-mobile-720.webp",
+      "bytes": 62492,
+      "sha256": "dc3389029bc4a5b69fb193f657916903c053ba3a9b28b8709f16aab13884a640"
+    },
+    {
+      "path": "public/assets/images/armory/drydock-mobile.webp",
+      "bytes": 89016,
+      "sha256": "387858c51824d723dc4e8cca17f3fcaa4c7699cf275f345c09b5e1ff6822bf81"
+    },
+    {
+      "path": "public/assets/images/battle/carrier-bridge-ocean-mobile.webp",
+      "bytes": 39274,
+      "sha256": "cfee168da0b8f429de87d0f0067829fbf5d155d56d8d99e9494a3ab91f65ade1"
+    },
+    {
+      "path": "public/assets/images/battle/carrier-bridge-ocean.webp",
+      "bytes": 99528,
+      "sha256": "bdf75eb0c8024cffc8b763d9334a34c4c608967cf7dc4fc7d3d1f60b3ed5d288"
+    },
+    {
+      "path": "public/assets/images/battle/tactical-ocean-v1.4.webp",
+      "bytes": 105536,
+      "sha256": "2aafca7b2fc23c0c3f21ab7c410a9868527a861f2337a6ef656615a5912d9f2c"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_destroyer_1_ram.webp",
+      "bytes": 24668,
+      "sha256": "ff39e60f1fc4a2dba7c4b8e09262c42a48c23308c53abfe0716c0fa3d03166cc"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_destroyer_2_ram.webp",
+      "bytes": 24778,
+      "sha256": "a659a139ebcf5e93233d45694ed9cb0214f4a16544390818331703d690108a76"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_detection_bomb.webp",
+      "bytes": 29726,
+      "sha256": "915bc1028d71a929a30273e9372d38b42e240ba197ae36d1abc4467fcdcc4a51"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_helicopter_strafe.webp",
+      "bytes": 33028,
+      "sha256": "2f5edc7eb006e1075af818d452ba0d84787370f1f40b9c5344daac0970aaf80b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_motorboat_ram.webp",
+      "bytes": 28580,
+      "sha256": "45c3b7c022c40b0dc63e9c79dbc6d98adaa960c325596e4cd34608b76cc1ce55"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_nuclear_bomb.webp",
+      "bytes": 16700,
+      "sha256": "13e5078d2dd9031ef4f732e0e11484e3b6c2f7216c2b8f9b2c742e3cfd34f896"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_pirate_raid.webp",
+      "bytes": 27928,
+      "sha256": "0084e43a914ed9dceac7607592dfda78a27a3afa2c1b11a3efdf73c65c8ef60b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_radar_scan.webp",
+      "bytes": 29564,
+      "sha256": "1fd3b5bec78733f39da5037f60a8bfe0b3c5417c2877ce33bafff6cd11f63cbe"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_shock_bomb.webp",
+      "bytes": 36606,
+      "sha256": "fc72897283e2aecb3d0b0b52f47f1acfbb4d76a0f72737432f24df2135700913"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/actions/action_submarine_missile.webp",
+      "bytes": 18884,
+      "sha256": "e82ac4e700a09a3395db35beb8a8a0b86a4e3ecb3ed9a9707914552456dd1cd5"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_ping_beacon.webp",
+      "bytes": 36750,
+      "sha256": "979591f4629353e35bae8644623edcfa79e7177e6434ef5f81688262e6367618"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_shadow_large.webp",
+      "bytes": 3958,
+      "sha256": "1e768a325dcbdd805dd40010ff4bbceae1e22f80b45e9dbbf3397e7efa4405ca"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_shadow_medium.webp",
+      "bytes": 3958,
+      "sha256": "1e768a325dcbdd805dd40010ff4bbceae1e22f80b45e9dbbf3397e7efa4405ca"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_shadow_small.webp",
+      "bytes": 3958,
+      "sha256": "1e768a325dcbdd805dd40010ff4bbceae1e22f80b45e9dbbf3397e7efa4405ca"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_target_arrow.webp",
+      "bytes": 22184,
+      "sha256": "c485edcd617871fb351e2819488afc64073138ab0f5d1d735f979a7dc7166758"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_wake_large.webp",
+      "bytes": 55158,
+      "sha256": "128f265b6bdfbc1c0672f079b86376262402c70fdc1ee2d960b4bc092e179ac6"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_wake_medium.webp",
+      "bytes": 68142,
+      "sha256": "63e0b67920afaf1c0fc19086bbcb10c478f2369cc68934e65e6c7989055c97fe"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/props/prop_wake_small.webp",
+      "bytes": 43912,
+      "sha256": "163e0e57c3f50d18943b5626afe44abf13c650c27e9178bd8b7ad88b80eb5035"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_burning.webp",
+      "bytes": 62592,
+      "sha256": "ad49e5b20dae570210855838f4f7fe2628f711ed9e09507e8b7a54af77794c6f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_damaged_heavy.webp",
+      "bytes": 45166,
+      "sha256": "207a70957db951a17e16a5dfca8a864192d0b37551e96fbb89d49d0355f81494"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_damaged_light.webp",
+      "bytes": 100094,
+      "sha256": "246941dc143da6a2e5202d75396716dd4c8bf70575af7cb4ab1d242fd558ceff"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_decoy_active.webp",
+      "bytes": 74670,
+      "sha256": "e5ba12549efa3456a9a886df0d2177ab3eb414c84909886f07079c8ff9816fce"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_destroyed_marker.webp",
+      "bytes": 69364,
+      "sha256": "d495a355f25e95d8c9d60f8a93ac868055c960d0a50fd24cf067b5757fdc1ecf"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_emp_disabled.webp",
+      "bytes": 95510,
+      "sha256": "6860a566f3b61b359838aad0a8a6ef4e5cd2460c5754eccbdc0fdaab94da5014"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_flooding.webp",
+      "bytes": 47776,
+      "sha256": "9a2081ab0d7b01914a11df06214bda985707273ea84fd662a9185f4da38afccf"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_low_hp_warning.webp",
+      "bytes": 55956,
+      "sha256": "8a827a90a3726effbd2ad0c6cd864dc8ffc25ef10551c42369c6e9f8e594f674"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_revealed_radar.webp",
+      "bytes": 83784,
+      "sha256": "1a6bc75eb6ba1a96c747abac6bfc2b97a3e4b83a12f500140b90710864e9c603"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_revealed_sonar.webp",
+      "bytes": 82260,
+      "sha256": "2f755388fec1fd7781fd3395d9d0d39c30aad61aa0f3ce5ba4400598f7233fab"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_sinking.webp",
+      "bytes": 75098,
+      "sha256": "f49c357ae9e6a64d4f44d3b6f17e470f2e115c2faa3ebadc3c6f5c2de2c6b897"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/status/status_target_locked.webp",
+      "bytes": 91636,
+      "sha256": "0c98f326ec55318961757d71f798ab93be66a5bf35f4c9cfdac3726551c10669"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_attack_range_red.webp",
+      "bytes": 36186,
+      "sha256": "f423db3c146e331423d043dec2ccd72ac72023187738267f916021e73db2bc92"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_attack_target_red.webp",
+      "bytes": 77030,
+      "sha256": "85f4720fce392b74f37f67b764735540de3fbd18f180576c83707b9103dae5eb"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_enemy_mark_red.webp",
+      "bytes": 69816,
+      "sha256": "4c93c1d1b4b5d3fe59c9392814167980b6e072c14145b53b51d7babef33072f4"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_forbidden_dark.webp",
+      "bytes": 67484,
+      "sha256": "1083347a4cc624c38cdb3c8da4b2a6c28d9a96c71c50f0cb2659fbc7bfb83c2e"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_hit_confirm_orange.webp",
+      "bytes": 70226,
+      "sha256": "082c3e13257359fdc9fc6bc267a64488dddf9aca8e28cea21b9b8757046c7799"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_miss_confirm_white.webp",
+      "bytes": 79086,
+      "sha256": "f137c17b375a4a0d0ee79862f712514cf1487a4e5e96bc43557afa46205724e3"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_move_hover.webp",
+      "bytes": 62718,
+      "sha256": "a83899e5ddfd1028c122da16a43430166b6bd6367a72082ce434b9e0152b6a27"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_move_valid.webp",
+      "bytes": 40978,
+      "sha256": "2867dbbeff1747f540e6a5371a83f31690e2c048d9f55d569015965e0290a380"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_radar_range_green.webp",
+      "bytes": 75046,
+      "sha256": "f9bb15200ae938677914f64d9d0b3d29d8d64a58e4272ec7741f85259d2bccf7"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_scan_range_cyan.webp",
+      "bytes": 102792,
+      "sha256": "0cff6299bae7442d06aa1a1c248ad8fada1dff8f4a2ecb6f785332292b721612"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_selected_blue.webp",
+      "bytes": 62260,
+      "sha256": "338c2dac8cbfb6e66a0d20522b2ba14d25a7de01409c16ba8119514d926f0a0e"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_self_mark_blue.webp",
+      "bytes": 102392,
+      "sha256": "001da0b247e1acc55cf680f3eba9a220da6699a8ac648d9dddb2bda0a9bc3943"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_shock_range_purple.webp",
+      "bytes": 105672,
+      "sha256": "e86858dd933f1c929739ea489791893dfd7801b7aa07e668abd31d1ce0de4013"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/tiles/tile_warning_yellow.webp",
+      "bytes": 100834,
+      "sha256": "d14225800bf99dde3d9ed174b9de425c6c959f5ca24b91a8f12c7fd228a9f32b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_debris_sparks.webp",
+      "bytes": 62592,
+      "sha256": "ad49e5b20dae570210855838f4f7fe2628f711ed9e09507e8b7a54af77794c6f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_emp_impact.webp",
+      "bytes": 69364,
+      "sha256": "d495a355f25e95d8c9d60f8a93ac868055c960d0a50fd24cf067b5757fdc1ecf"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_emp_pulse.webp",
+      "bytes": 105672,
+      "sha256": "e86858dd933f1c929739ea489791893dfd7801b7aa07e668abd31d1ce0de4013"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_helicopter_trace.webp",
+      "bytes": 40216,
+      "sha256": "18ba1b3e393bfd9903652eaac5a8ef0b80667e01c4448fdc76361b7b13b6cb22"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_large_explosion.webp",
+      "bytes": 62592,
+      "sha256": "ad49e5b20dae570210855838f4f7fe2628f711ed9e09507e8b7a54af77794c6f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_large_water_splash.webp",
+      "bytes": 85916,
+      "sha256": "bf3ed6606e1cb0c48ccc1d66989e8646fa2948e64deaa084d32ab1c24ba56e81"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_missile_launch.webp",
+      "bytes": 55956,
+      "sha256": "8a827a90a3726effbd2ad0c6cd864dc8ffc25ef10551c42369c6e9f8e594f674"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_nuclear_flash_core.webp",
+      "bytes": 75098,
+      "sha256": "f49c357ae9e6a64d4f44d3b6f17e470f2e115c2faa3ebadc3c6f5c2de2c6b897"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_nuclear_shock_ring.webp",
+      "bytes": 95112,
+      "sha256": "038d9b1e8520dc58731314c0f7ea4749a548341018d892512c03b3335c5742a3"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_radar_sweep.webp",
+      "bytes": 27430,
+      "sha256": "8aca1565c3e123ccacf1c07cf54dc86caf0d45fd4d18fdb6175ec070e281aa3e"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_small_explosion.webp",
+      "bytes": 100094,
+      "sha256": "246941dc143da6a2e5202d75396716dd4c8bf70575af7cb4ab1d242fd558ceff"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_small_water_splash.webp",
+      "bytes": 47776,
+      "sha256": "9a2081ab0d7b01914a11df06214bda985707273ea84fd662a9185f4da38afccf"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_sonar_ping.webp",
+      "bytes": 74670,
+      "sha256": "e5ba12549efa3456a9a886df0d2177ab3eb414c84909886f07079c8ff9816fce"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/feedback/vfx/vfx_torpedo_trail.webp",
+      "bytes": 40216,
+      "sha256": "18ba1b3e393bfd9903652eaac5a8ef0b80667e01c4448fdc76361b7b13b6cb22"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/surface/surface_foam_overlay.webp",
+      "bytes": 481124,
+      "sha256": "326a3d1321f6c9b2b2252b344281d2e26a8db66727bbce386ab63d93561136bc"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/surface/surface_specular_seamless.webp",
+      "bytes": 733852,
+      "sha256": "3fd0dbcb9a7b6a7bb6433574b4fef1db18a1267495af95c15ef84f383a9be180"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/transitions/emerge_surface_wake.webp",
+      "bytes": 265862,
+      "sha256": "88d1f1ba5624bf58abf1cbcf6927bbd7ab1161e41d48f8a8732305692da97b0b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/transitions/sonar_scan_ring_sheet.webp",
+      "bytes": 88310,
+      "sha256": "2e124fca28f6b5e64a7f5e404302422b96930547cd54c4ee5ba29a4f8cfd3eb2"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/transitions/submerge_surface_wake.webp",
+      "bytes": 238078,
+      "sha256": "64530d16215e4d4ad3539964834024681a4896f167dbf527bb1dca7c0154d1b5"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/underwater/underwater_caustics_seamless.webp",
+      "bytes": 100090,
+      "sha256": "f2e07268c4130b644be50d738a8f8629761695f37c6ce6f50c95d9c292d5f54e"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/underwater/underwater_depth_haze.webp",
+      "bytes": 613478,
+      "sha256": "ec53fc39d2e332a86cec2e1037f23ff7a4bf3b489edf9277d8f6032cebe3a5a3"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/underwater/underwater_particles.webp",
+      "bytes": 84098,
+      "sha256": "11818028aa71f1200a68de16cac02c5fe1770e9836b0c1a5f07f849546ea102b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/layers/underwater/underwater_refraction_noise.webp",
+      "bytes": 32694,
+      "sha256": "33504e2d8b80f0013370d7302833b6acee42af8ce36b5b713f6c151def22274a"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ocean/ocean_deep_active.webp",
+      "bytes": 226446,
+      "sha256": "437c1739a344fbbea9e02434e61ae7f8e31fbb05b33ae57d65c01af8f03bf847"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ocean/ocean_deep_calm.webp",
+      "bytes": 177960,
+      "sha256": "1edca213f0a83193350a1674f5c5c82e92407b022b92c2d4daabc4320b00da76"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ocean/ocean_deep_subtle.webp",
+      "bytes": 89236,
+      "sha256": "86e6efa813a05963292455779cb97c155a56c830c0700e6362b9cdc740ca5098"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/source-asset-manifest.json",
+      "bytes": 21185,
+      "sha256": "8bffe53aae3addb98cd06901e650484cc455ad63bcc0ab2eaf83e81b65d09a9b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/animations/button_glow_pulse_sheet.webp",
+      "bytes": 85768,
+      "sha256": "515af1615d8967e0562483a7d2e99b9f08450a11eebf5249568b6aaa8b359433"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/animations/radar_ping_anim_sheet.webp",
+      "bytes": 98746,
+      "sha256": "55ee75f2522c0fb77e1caecfe021653cc884385f4b543c7012c02298997a03f7"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/animations/target_lock_anim_sheet.webp",
+      "bytes": 100574,
+      "sha256": "1064eaa5e640a1761d4b66114d042527842470432e64f68ac0e221b8f475e4ca"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/animations/warning_flash_anim_sheet.webp",
+      "bytes": 79924,
+      "sha256": "edf87e7d7e135a9069bca40f9a8d8b21ee241d8204af194f8fb98b45a51a749f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/buttons/btn_attack_red.webp",
+      "bytes": 9746,
+      "sha256": "33bfe3b8e466eb99659b416a533c76a4e44c060c46f6ee2e43810458d33f9c33"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/buttons/btn_confirm_green.webp",
+      "bytes": 9452,
+      "sha256": "4e3cde5a966284183710244f6389d4e5a442e53833bc44e5473d64aeb5174d9c"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/buttons/btn_disabled_dark.webp",
+      "bytes": 8960,
+      "sha256": "30c9f6c9abbfdff73c63a53900c87ad30fd77f2e097a09aa50d49edd08136576"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/buttons/btn_hover_glow.webp",
+      "bytes": 7644,
+      "sha256": "7005c80b69da02433465d8f8d64db4261e6ab306912805a76f13d54986b3e534"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/buttons/btn_pressed_overlay.webp",
+      "bytes": 8048,
+      "sha256": "ead64369de7a6b56931c3c1ab498ed58da8c475c08360dfc7fb50ce17ad0098b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/buttons/btn_primary_blue.webp",
+      "bytes": 9702,
+      "sha256": "de069c173398b4c2183946933bd6fdfb2388bbdae999a85964c6f757e326b578"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/buttons/btn_secondary_dark.webp",
+      "bytes": 9348,
+      "sha256": "06cce331aa909d2ca7ad4abc4df36388a429c483d3e7b3900f24d96986d699e3"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/buttons/btn_warning_orange.webp",
+      "bytes": 8864,
+      "sha256": "c02ac0286702bc8b420fcd702ea852e73932d78e7f0fde3736d80971fc7dd72b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_attack_main.webp",
+      "bytes": 20582,
+      "sha256": "a28b157a8e264fbd3166004055dd0abaa005b79f6dfa6301fcba0d52c1aec4e0"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_cancel_action.webp",
+      "bytes": 17428,
+      "sha256": "ffa19d427cd99f478a88387d54c68925dd769a306b803273ee6b7c3b1fb80c36"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_confirm_target.webp",
+      "bytes": 18358,
+      "sha256": "82bcc8d0ffe5b076e423581cb0fbf89a976a86e1a5bd983b3fef607546d10f0b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_decoy.webp",
+      "bytes": 17996,
+      "sha256": "b9970a7623b89d2aecfcc58e9b9af8362ea430340028990c64a9b7987d902b97"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_emerge.webp",
+      "bytes": 17440,
+      "sha256": "5ecf7edd81888d79383ab39e1720b7ebd4d122853c5bf61845a1af7a053ed379"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_emp_shock.webp",
+      "bytes": 18640,
+      "sha256": "869b04821c82084b841cb2067df013acb0caa77cfdf839cff6d3f9ad498b29db"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_end_turn.webp",
+      "bytes": 17778,
+      "sha256": "514d9078b842b178e359ff1f20e96dd55a629d0f9d69908799b66434dd410a12"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_lock_target.webp",
+      "bytes": 16576,
+      "sha256": "5e7293377d4ec291153aedcc82365a4cf1a04ce5cc5924a5d39b47a6dfea6408"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_missile.webp",
+      "bytes": 17108,
+      "sha256": "e9232e3712840c79f427383f40df564c7852b92abefe98e462d76407e6192904"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_move.webp",
+      "bytes": 18904,
+      "sha256": "3af7f98b305a2351f31214177b90cf76ee250524f2645ce90aa57c2bc3ced5e6"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_nuclear_strike.webp",
+      "bytes": 18326,
+      "sha256": "2da9b7c9dfc3d09a5886102a40c130bc09835d6c49363919de1c0729327aeb02"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_patrol.webp",
+      "bytes": 17980,
+      "sha256": "b22e37b2d8fa464f2aaa93dbec461b9ea0f44022091fff0deb1c04c468176ab6"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_radar_scan.webp",
+      "bytes": 20282,
+      "sha256": "2f4055bb78b8b3726421bf61a23f40e6eb794d18b714217eab3844996a8c3419"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_sonar_scan.webp",
+      "bytes": 20728,
+      "sha256": "d44e451e53b66a5881619b4a5eadcf6e99b1736284207d34a2d8fa7f721749a2"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_submerge.webp",
+      "bytes": 17500,
+      "sha256": "778a2c3310cb1e3e2957f6ad4e8d44e568165a05c81582c230c31730585f876e"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/icons-actions/icon_torpedo.webp",
+      "bytes": 17590,
+      "sha256": "697e9039b18a588813f5280395012b4d4501722ac1b855414c65336324befbb8"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/arrow_collapse.webp",
+      "bytes": 5526,
+      "sha256": "c939b17f7590a3666d9b7d0fa45397f9dd3021ac45a9a21970b3b11e1b250bdd"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/arrow_expand.webp",
+      "bytes": 5434,
+      "sha256": "076cf050b5c97dc4781f64b91e696a6d37f985c35883919cf68308171085a852"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/cursor_move.webp",
+      "bytes": 5650,
+      "sha256": "232e6d2c3a040d5d8ddabae46ea2f9a976f3a12d8fa6eac0c18ab247884cf5c1"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/cursor_target.webp",
+      "bytes": 6002,
+      "sha256": "7cf18ef837fc19bacde61262efd03db4cf0b7ee3ec64a0a11433f9dc7c32573d"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/divider_line_blue.webp",
+      "bytes": 2242,
+      "sha256": "1c0192e2debb97e85ef9291241595a074e8fe860294d290a183a42e759e34d01"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/divider_line_warning.webp",
+      "bytes": 2196,
+      "sha256": "3b8e6610232d0e11db0e893647469b19690423e8a835a37580588c444c247bef"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/highlight_corner_frame.webp",
+      "bytes": 8946,
+      "sha256": "3d518b6163307b929c85342a190b1cfcdb69646ab2a4df819010e41f69b9392a"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/loading_spinner_tactical.webp",
+      "bytes": 9516,
+      "sha256": "f8ed103013cc7da2385b87d35d96018cec8ba0a62f5d333dbfc951a3e1d4f60f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/marker_blue_ping.webp",
+      "bytes": 6416,
+      "sha256": "b7202328a8bfcc0a538fe5c1ff8494de844a81de20dbbafab19de720ab0b43ef"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/misc/marker_red_ping.webp",
+      "bytes": 5858,
+      "sha256": "91278c85fe80cd7f675b0732a0a18c8afc766cce13fb45c2c05b9d8fee578d24"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_alert_frame.webp",
+      "bytes": 10168,
+      "sha256": "27ac1cd7a48080811f26749ddd3fa224a030decbc85f8f16138d73b9086e254f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_bottom_action_bar.webp",
+      "bytes": 7678,
+      "sha256": "87eabf9bd1919f672fa9f494b7284375facec7b78ba929cafb8bd61f17a5a2dd"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_compact_popup.webp",
+      "bytes": 11744,
+      "sha256": "ca2dc8037f857ad6477db4744ef02bb772cb969d4025a40b42866cbea2afd139"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_match_result.webp",
+      "bytes": 14794,
+      "sha256": "6bfa67171e96754a9b2ff9e84469960625f5edc0e60f8bd39c71547a8b0c9bc6"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_player_tag_blue.webp",
+      "bytes": 6346,
+      "sha256": "63d5bb0d648788ae616c601e4170be8a77068e14dc94c64b89cfe0937097772c"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_player_tag_red.webp",
+      "bytes": 5714,
+      "sha256": "5e3c863295bcecbde83cf16b439c8c1bf603c83a25c399f0cd90ceae9c7d570a"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_room_card.webp",
+      "bytes": 19362,
+      "sha256": "9cbf553b34b678f4dfd4e2a69b0a2fc18c5cc277254976588f88d199a282d62c"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_round_banner.webp",
+      "bytes": 11678,
+      "sha256": "7e6f21a875345ea8595cf27a5147cdf18849a2af990cd12ad6887e4790725e2a"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_side_status_card.webp",
+      "bytes": 15290,
+      "sha256": "5b4242bf33fbbb911ba3eeb4ca85b4e742a021f6c413c03cb40e9366ba045693"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/panels/panel_top_info_bar.webp",
+      "bytes": 6310,
+      "sha256": "d048f963107d3e1389e81791c0721dcc05387863d9592376b850a812b996ce7d"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_burning.webp",
+      "bytes": 7318,
+      "sha256": "3886926ec2ec012034b6417c9ef21c700ecc6a4dd11babc8feac478a1a14b0f8"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_damaged.webp",
+      "bytes": 8072,
+      "sha256": "80800fdce7d587561daabf66e57af50f5694371f9b1956ed8e8d09519037a208"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_decoy_active.webp",
+      "bytes": 7188,
+      "sha256": "b8399a3576871cb1ba7a769ef7df691ff9c4b8510671bdfb45832eaf6e6e516e"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_destroyed.webp",
+      "bytes": 7722,
+      "sha256": "08bcc4a7c3791d8cbfeebdfe90731f496d188c3af7bc24591ffbffa877d1e712"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_detected_radar.webp",
+      "bytes": 8196,
+      "sha256": "15f970acf861ac870e9e5ed16e5f22b6c66a6b2edb7a39419dfeef2572a5c5ca"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_detected_sonar.webp",
+      "bytes": 8482,
+      "sha256": "4fae2d2458b91c60072be3ea1fe761b359152c567280522df6b4389df8d751cc"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_emp_disabled.webp",
+      "bytes": 7198,
+      "sha256": "ab36d0ffca948d26d428ca9bbf83c34a03ca9f53f25c191702559da1a336a2de"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_flooding.webp",
+      "bytes": 7102,
+      "sha256": "c46597f76a1feba3d13d46dcdf9bfb9bb97edce5b372fb7c13e59e7fa1e2708f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_hidden.webp",
+      "bytes": 7480,
+      "sha256": "ebbd29876cda610603a5de007533d7fe1841fbb84bb04c102f873050133aa433"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_locked.webp",
+      "bytes": 7924,
+      "sha256": "ca98774e7def4f47f0133921b6a54583b58751cee24e3654293003ccb269bd8f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_low_hp.webp",
+      "bytes": 6784,
+      "sha256": "9fc6a8e3fbda1884bbc57350bfef1d51b498f9bedd8036f45d5c71b8b8f28edf"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/ui/status-badges/badge_warning.webp",
+      "bytes": 7396,
+      "sha256": "1e4169a8d9dd0ddcf66b42cef3ede0fcb8bdfcec5ba42b0395b05a806d4155cd"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n0e0s0w0.webp",
+      "bytes": 17314,
+      "sha256": "bde4a8cf33fb9c6eda7720af211f8dd6d5152bb3f7f2e0e989a196b786565339"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n0e0s0w1.webp",
+      "bytes": 17072,
+      "sha256": "0437c7f83eccbae99a40d0ce0f0b41a6a5f777f510b9977bfbfe5c7be76dd748"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n0e0s1w0.webp",
+      "bytes": 14050,
+      "sha256": "c969f9f6676ba7c885c92601c6ef57f6dd8f9433d8af283339b57cd0736f40dc"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n0e0s1w1.webp",
+      "bytes": 15464,
+      "sha256": "779ef36dc59e03cb7adc87599ba7e7ce1a207ea1fe2750828c6e4126ec81d578"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n0e1s0w0.webp",
+      "bytes": 13146,
+      "sha256": "6489df3834d2121460a4e2671928847d320d2bf64da31b0ae285de4ea6b86827"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n0e1s0w1.webp",
+      "bytes": 15538,
+      "sha256": "52741b7ec9b734d4a493f8acc009a1b73b5deb7503b30df74c8340db7038e0f0"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n0e1s1w0.webp",
+      "bytes": 15612,
+      "sha256": "9a62a2d7a5c459f395c6518bfe27de9d5af7a8df6c7a0a587df057bba6d7e593"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n0e1s1w1.webp",
+      "bytes": 14464,
+      "sha256": "1e3fe7fe794d076cc7aad8dbe7b0ae19c2bff0fa570acc3f63611afd254f4d2c"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n1e0s0w0.webp",
+      "bytes": 17324,
+      "sha256": "a568b60629b4a24f655981dc9c27ad8e95a803e465f035bca3786dc2ee1bbb1f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n1e0s0w1.webp",
+      "bytes": 14132,
+      "sha256": "171ad502f847373242fc51dea3a7165cde16a97a34fe71c9b356e8768ecd4e12"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n1e0s1w0.webp",
+      "bytes": 14420,
+      "sha256": "7eee165331204cd12df8f1a9b2c935ff416cce3a0d2891ddcce31f0cf46f8078"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n1e0s1w1.webp",
+      "bytes": 13954,
+      "sha256": "751b71e5a3146a1cdc84a5582760ee04e802384ab14a3d1c84f2664537ea7635"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n1e1s0w0.webp",
+      "bytes": 14550,
+      "sha256": "5f01231330784adf39271b0d4571d4c5d19e1f8c4903e6af94f7f3f7d9d24ea6"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n1e1s0w1.webp",
+      "bytes": 15776,
+      "sha256": "f4781fe36f9bf0e4a5760c9385dd8b6f9500cae2634dfa6d2708423e4a3ae4cc"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n1e1s1w0.webp",
+      "bytes": 14414,
+      "sha256": "427b074510472a77d53b292123e0ba7e318242e9c4649614767c701307e3bd1c"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/carrier/carrier_n1e1s1w1.webp",
+      "bytes": 15560,
+      "sha256": "3b739a4ccd9bd451482469c54fc0a265993c11159fa6d95670092d4181024f21"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/decoy/east.webp",
+      "bytes": 12134,
+      "sha256": "3cc81a37f9b544e513451721f72dd001ebe895ab709b8333d4c0dbb843692bf8"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/decoy/north.webp",
+      "bytes": 11576,
+      "sha256": "573b909dc7e43794c50cf074dde4c7edcb8731f6a29159f043625164fd1dec14"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/decoy/south.webp",
+      "bytes": 11618,
+      "sha256": "c05589f291a8d367cd1274f6e11141d1cc824798fa8bc5e3607fab09c286e3cd"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/decoy/west.webp",
+      "bytes": 12722,
+      "sha256": "b8a57404454feafd935f65a5f0c627e3c8855b73c12387152cbfbced32a6ac42"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/destroyer-1/east.webp",
+      "bytes": 12290,
+      "sha256": "b74efd9360f0b3f7e310d61393cfe6547c83795ea1a34e62bf137b55316a352f"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/destroyer-1/north.webp",
+      "bytes": 14420,
+      "sha256": "318f924c8cf92682abb3c0fce73b3f9d86e16601837048438045664953b37aae"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/destroyer-1/south.webp",
+      "bytes": 16376,
+      "sha256": "dc9735ecadd36ce3defb07ced412058888beac74c9f8ecb882dd6513cd7dd16d"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/destroyer-1/west.webp",
+      "bytes": 12634,
+      "sha256": "05c98f468865da45abcef591e30741e46bfca144de00aadf5511eea22f080f0b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/destroyer-2/east.webp",
+      "bytes": 12880,
+      "sha256": "637ece335265223d39835c5c1ed013753700f9a2931a357de6e08def93461c66"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/destroyer-2/north.webp",
+      "bytes": 11452,
+      "sha256": "15fa8b6b5319e195e323c4f420deb05a544e938ad7433d4cb979bc5ab9fddee1"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/destroyer-2/south.webp",
+      "bytes": 11774,
+      "sha256": "ad0d9d3a1bf61779aed3a612e3d365e33232422c6617fcb558ffcc23ebc1f70c"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/destroyer-2/west.webp",
+      "bytes": 11698,
+      "sha256": "8654a83db6d6293ef725924d627423d43d3623eb708522f3a05ffd245b979c1e"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/motorboat/east.webp",
+      "bytes": 13000,
+      "sha256": "64d1469a7f51a758756c2c163ec06360440f29f31e5c14b20d67ecd40f95eed7"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/motorboat/north.webp",
+      "bytes": 12618,
+      "sha256": "db7ea795dd20edc5bb958445e3527f29a38bffb737d3a8843d04ac7e8b708f01"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/motorboat/south.webp",
+      "bytes": 12682,
+      "sha256": "239ecd243db0cf3d5b0ea282a0d67fe007d2d8ae237ee49c94bb9cdeecbab026"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/motorboat/west.webp",
+      "bytes": 13092,
+      "sha256": "b0609b2abc76a8ad9e5e6b7234d2a9abc39c80fa19a59d8578346f4ec8f3ebf2"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/nuclear-submarine/east.webp",
+      "bytes": 9782,
+      "sha256": "bc1e8ddc4b39d9451141ddacc5ea478338e660e5f133d37e23c3cc4387aef586"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/nuclear-submarine/north.webp",
+      "bytes": 10526,
+      "sha256": "82fa815c3bcc969624217f13f81388ce6d04a0729540c42f1891f0366af01318"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/nuclear-submarine/south.webp",
+      "bytes": 11132,
+      "sha256": "3d2d018977a72bfd00c2be2a5392eb4ae7c64d830f1bf6c92a3a3469efbc5f45"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/nuclear-submarine/west.webp",
+      "bytes": 9500,
+      "sha256": "ef7165b314406c9bbd935b93db35b2b72183f843118326ff0b4c7010984c4545"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/pirate/east.webp",
+      "bytes": 24308,
+      "sha256": "ef3067bdf58707a8f4353bbe27bc4c103c46d1ee6e64d03587c6f26e61099e7b"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/pirate/north.webp",
+      "bytes": 27106,
+      "sha256": "65f74cc62b5ac8091e78efa7544f7c51decc9cab3ec03f63cd7e8cdf2590b492"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/pirate/south.webp",
+      "bytes": 25310,
+      "sha256": "ffb4388ce0b5234c2d99762902e30339009f65231b3730c09e4cfa2c65c3bae3"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/pirate/west.webp",
+      "bytes": 23930,
+      "sha256": "ddb0f05fadcf479bd562d9c5e1c009e7944c1b970f42216cd493480a3ddd1f43"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/submarine/east.webp",
+      "bytes": 9458,
+      "sha256": "a904832e0f2c1b918a9297951aa689acc43cdf8b218ac84bd56171a9c248c950"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/submarine/north.webp",
+      "bytes": 8966,
+      "sha256": "3d0547697a022b9ec852521579c5a9a674b945c76974875421bd576474f732ae"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/submarine/south.webp",
+      "bytes": 9042,
+      "sha256": "3c05b0a5ec7092f71c6bd370784c24c73282eac2effca983e787b2e1331623ac"
+    },
+    {
+      "path": "public/assets/images/ocean-2.5d/units/submarine/west.webp",
+      "bytes": 9596,
+      "sha256": "2381f20a4adc057a8f4defb7ab346819ef210a63bb1d139eb149207cdeb10b85"
+    },
+    {
+      "path": "public/css/armory-lab.css",
+      "bytes": 1738,
+      "sha256": "355be12d316a8410f7aa820b5bfe8641d2a4a7fde683c49362f5ae2dd1d9bcaa"
+    },
+    {
+      "path": "public/css/main.css",
+      "bytes": 327329,
+      "sha256": "84c7f641b766fb196c55469fc5bd6c6f20c193bfbeaed8a68cc2a7fffa8d2431"
+    },
+    {
+      "path": "public/css/ocean.css",
+      "bytes": 113612,
+      "sha256": "7ca0df5ca4cbd2cf610a9df24ea847147ba3e6e4e66ddc51129efabf9d26816e"
+    },
+    {
+      "path": "public/css/v1.6.0.css",
+      "bytes": 7355,
+      "sha256": "8982efed79efa81f7b9dab3eb53bd86731fd428be2d5b5930e017a41dbd6ebb5"
+    },
+    {
+      "path": "public/css/v1.6.1.css",
+      "bytes": 25825,
+      "sha256": "66f25bebfcb0ce293ae7f9b0a5e9a09a0c7449339b5796e93e570efb6ddb87c9"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 20811,
+      "sha256": "af483a4c0842eaaee84ef5f3b4fa4ad3deeddd64be4c88039fbb84531d0a9596"
+    },
+    {
+      "path": "public/js/app.js",
+      "bytes": 368368,
+      "sha256": "2b9dfc92958e8b91b8ece2859030674a2c17ae15b6149bd9beb1bafac703af08"
+    },
+    {
+      "path": "public/js/armory-lab-config.js",
+      "bytes": 940,
+      "sha256": "bb721d225dc3333527b68d2c62917a3b7e138b735704b43e0a61caa2905510f1"
+    },
+    {
+      "path": "public/js/armory-lab.js",
+      "bytes": 3425,
+      "sha256": "031f22ceb3b4eac3fe6b8803db068e064d4ca49b5a5c5c344000553a448c11d2"
+    },
+    {
+      "path": "public/js/audio-system.js",
+      "bytes": 24603,
+      "sha256": "cb132501d269057284aa74f5ec4bd4513a9b04cfaef738f77cf0611b6cbfb35b"
+    },
+    {
+      "path": "public/js/game-data.js",
+      "bytes": 32017,
+      "sha256": "5d40e8412ab177f09a4c4a6c37c0d291710b69512b8d5b250a3eead2e1b07943"
+    },
+    {
+      "path": "public/js/release-config.js",
+      "bytes": 454,
+      "sha256": "9ed149b9c197c3c271ec5a969cd468e517b1910fd73ed64ef38cf4a329e4c4ad"
+    },
+    {
+      "path": "public/js/theme-bootstrap.js",
+      "bytes": 843,
+      "sha256": "ab1d28881a1d6175ba8e254f58466b9745a0da25df10352ebd165cd35d6f540e"
+    },
+    {
+      "path": "public/js/tutorial-system.js",
+      "bytes": 18340,
+      "sha256": "8b86fa8139ca4e1d1e35978b1cdab7b276f58cd96e790a06bedd9662fab010df"
+    },
+    {
+      "path": "public/js/ui-model.js",
+      "bytes": 10942,
+      "sha256": "ae652eb377dfbf3d02e6b060fd4884d797e7b519e75444e681f9a74db579b13e"
+    },
+    {
+      "path": "public/robots.txt",
+      "bytes": 26,
+      "sha256": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1"
+    },
+    {
+      "path": "scripts/build-ui.js",
+      "bytes": 3401,
+      "sha256": "bfc5d2ac4e1311f23ecc2525459ed02c06b7c9fb976a408e346f35c2042dab38"
+    },
+    {
+      "path": "server/app.js",
+      "bytes": 8609,
+      "sha256": "6df632954d42ee6a06a04c77de4b0b06862570983b86f1e4ecdac4a3dc1fd7f6"
+    },
+    {
+      "path": "server/game/action-resolution.js",
+      "bytes": 20225,
+      "sha256": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400"
+    },
+    {
+      "path": "server/game/action-state.js",
+      "bytes": 7559,
+      "sha256": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29"
+    },
+    {
+      "path": "server/game/action-validation.js",
+      "bytes": 17909,
+      "sha256": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6"
+    },
+    {
+      "path": "server/game/actions.js",
+      "bytes": 6090,
+      "sha256": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646"
+    },
+    {
+      "path": "server/game/battle-state.js",
+      "bytes": 15942,
+      "sha256": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90"
+    },
+    {
+      "path": "server/game/bot-difficulty.js",
+      "bytes": 1054,
+      "sha256": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835"
+    },
+    {
+      "path": "server/game/bot-strategy.js",
+      "bytes": 19986,
+      "sha256": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7"
+    },
+    {
+      "path": "server/game/connection.js",
+      "bytes": 13392,
+      "sha256": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c"
+    },
+    {
+      "path": "server/game/coordinates.js",
+      "bytes": 3617,
+      "sha256": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7"
+    },
+    {
+      "path": "server/game/deployment.js",
+      "bytes": 9479,
+      "sha256": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15"
+    },
+    {
+      "path": "server/game/endgame.js",
+      "bytes": 22005,
+      "sha256": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418"
+    },
+    {
+      "path": "server/game/errors.js",
+      "bytes": 396,
+      "sha256": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab"
+    },
+    {
+      "path": "server/game/information-projection.js",
+      "bytes": 18133,
+      "sha256": "1e5bd7a769944b2f71e2d1405841a9c18fe5a4b8139dd5f18e48e4b8540ecb69"
+    },
+    {
+      "path": "server/game/lifecycle.js",
+      "bytes": 9163,
+      "sha256": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8"
+    },
+    {
+      "path": "server/game/map-rules.js",
+      "bytes": 2844,
+      "sha256": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7"
+    },
+    {
+      "path": "server/game/match-resolution.js",
+      "bytes": 989,
+      "sha256": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f"
+    },
+    {
+      "path": "server/game/match.js",
+      "bytes": 34203,
+      "sha256": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523"
+    },
+    {
+      "path": "server/game/random-deployment.js",
+      "bytes": 6319,
+      "sha256": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430"
+    },
+    {
+      "path": "server/game/ranges.js",
+      "bytes": 7039,
+      "sha256": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374"
+    },
+    {
+      "path": "server/game/room-service.js",
+      "bytes": 23373,
+      "sha256": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30"
+    },
+    {
+      "path": "server/game/room.js",
+      "bytes": 27265,
+      "sha256": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d"
+    },
+    {
+      "path": "server/game/rules.js",
+      "bytes": 890,
+      "sha256": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682"
+    },
+    {
+      "path": "server/game/timing.js",
+      "bytes": 1334,
+      "sha256": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a"
+    },
+    {
+      "path": "server/game/units.js",
+      "bytes": 5410,
+      "sha256": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9"
+    },
+    {
+      "path": "server/operations/rate-limiter.js",
+      "bytes": 1573,
+      "sha256": "e8ed016b80d0dbbef3eb1e6d2116b48007074a8a92fddcd52b0b6143c07941df"
+    },
+    {
+      "path": "server/operations/telemetry.js",
+      "bytes": 1487,
+      "sha256": "6c85a84ef80cff8a1e4cfe1d39abc3981234a2de98a9416a4e239bd9c741e36e"
+    },
+    {
+      "path": "server/release.js",
+      "bytes": 405,
+      "sha256": "65de753c498d64b4c2b08807e37119350817d38e8350e6128ba48df96f883a71"
+    },
+    {
+      "path": "server/server.js",
+      "bytes": 4794,
+      "sha256": "9a0a5a56e5092d83200bac997ed075dd668929b0f25c98c57127955609dc4c3c"
+    },
+    {
+      "path": "server/socket/game-gateway.js",
+      "bytes": 35070,
+      "sha256": "2d6b536ffa0bb0790134c8e533753b57397ae04a486c1d72591e9423fa3eff0c"
+    },
+    {
+      "path": "server/socket/protocol.js",
+      "bytes": 2264,
+      "sha256": "2b68f95471aabc7da7293b2ee0b9e82cb5a6e6c693a9a4fab649613eb6d7209e"
+    },
+    {
+      "path": "server/training/catalog.json",
+      "bytes": 89018,
+      "sha256": "19b52bd70a93336f1ccea66f4ed1ca3c7e04e39e8ae822ed223dd5609e211c8f"
+    },
+    {
+      "path": "server/training/course.js",
+      "bytes": 3795,
+      "sha256": "934f7c366947dd2fc7617f0b1e743e87b96696b893615adbe9616eaaeff4f0de"
+    },
+    {
+      "path": "server/training/scenarios.js",
+      "bytes": 17876,
+      "sha256": "51d1465f0b84be8f6ecf59fb7ee465b9c4b5c9807477cfcbfb3047abb48c52d4"
+    },
+    {
+      "path": "server/training/service.js",
+      "bytes": 32454,
+      "sha256": "a67070ca1086073208dcbd1d7c6fc636983c8a69ee20d3ba6e9fb6caf617e7c9"
+    },
+    {
+      "path": "start.cmd",
+      "bytes": 151,
+      "sha256": "6d3c5ea34e05737c72bb58bdd35194b77d7dc64c0f887218926d9589717ca549"
+    }
+  ],
+  "independentAcceptance": "Not complete; see docs/ui-v2/acceptance.md",
+  "sourceArchives": "GitHub provides tag source archives; runtime excludes node_modules, Git, original art and development screenshots.",
+  "frozenScope": {
+    "base": "272291ed10c2973b4d9288442fa750cdf24a77a2",
+    "scope": "Freeze every server file, client rules/safe model/audio implementation, training and result/tutorial views; shared battle presentation may improve.",
+    "files": {
+      "client/result-view.js": {
+        "sha256": "d1d2ccbbcfdeacc86c9225e56b0a5a46a5d250fdf5042b45584c9deb557f8230",
+        "canonicalLfSha256": "254d14e56a9f3346b54e1e4b129e10a0b5d029ef1e91f19204e763d9e24c0b61"
+      },
+      "client/styles/training.css": {
+        "sha256": "0ef6bfad44f16251302388f5c0f6206a6690bf16716d7afcb5bd828090449abd",
+        "canonicalLfSha256": "ddeb97da5293aaab1ca7d9f3aa9afa2c7243da7d8035b4acf7ad0989ccaae33a"
+      },
+      "client/training.js": {
+        "sha256": "261572da7d0702541ac27f08eba0c9b39576ebf2db55a5a9a4856baaa0d1e326",
+        "canonicalLfSha256": "ab6f470d25c8518edbc64b4dab0f2cd01422e4c8f6a752420c602e56a87ec6cc"
+      },
+      "client/tutorial-view.js": {
+        "sha256": "3b33581735aab804b92aa0840562ef1cc282dc8895501d1f84857d68a1c98ad9",
+        "canonicalLfSha256": "3178535bc764f965005b604c3bcffb195c384d6cef62eaff313152fd56ff8fa4"
+      },
+      "public/js/audio-system.js": {
+        "sha256": "cb132501d269057284aa74f5ec4bd4513a9b04cfaef738f77cf0611b6cbfb35b",
+        "canonicalLfSha256": "77c040c24d954025ea5a1e4015ca68c9e7037d7227e71c903bc8bb34773c7ed9"
+      },
+      "public/js/game-data.js": {
+        "sha256": "5d40e8412ab177f09a4c4a6c37c0d291710b69512b8d5b250a3eead2e1b07943",
+        "canonicalLfSha256": "5d40e8412ab177f09a4c4a6c37c0d291710b69512b8d5b250a3eead2e1b07943"
+      },
+      "public/js/ui-model.js": {
+        "sha256": "ae652eb377dfbf3d02e6b060fd4884d797e7b519e75444e681f9a74db579b13e",
+        "canonicalLfSha256": "ae652eb377dfbf3d02e6b060fd4884d797e7b519e75444e681f9a74db579b13e"
+      },
+      "server/app.js": {
+        "sha256": "6df632954d42ee6a06a04c77de4b0b06862570983b86f1e4ecdac4a3dc1fd7f6",
+        "canonicalLfSha256": "834f48912037a788ec119fd2b90868625f8f61ac85f38e3ce1c84dc756efe344"
+      },
+      "server/game/action-resolution.js": {
+        "sha256": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400",
+        "canonicalLfSha256": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400"
+      },
+      "server/game/action-state.js": {
+        "sha256": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29",
+        "canonicalLfSha256": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29"
+      },
+      "server/game/action-validation.js": {
+        "sha256": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6",
+        "canonicalLfSha256": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6"
+      },
+      "server/game/actions.js": {
+        "sha256": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646",
+        "canonicalLfSha256": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646"
+      },
+      "server/game/battle-state.js": {
+        "sha256": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90",
+        "canonicalLfSha256": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90"
+      },
+      "server/game/bot-difficulty.js": {
+        "sha256": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835",
+        "canonicalLfSha256": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835"
+      },
+      "server/game/bot-strategy.js": {
+        "sha256": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7",
+        "canonicalLfSha256": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7"
+      },
+      "server/game/connection.js": {
+        "sha256": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c",
+        "canonicalLfSha256": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c"
+      },
+      "server/game/coordinates.js": {
+        "sha256": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7",
+        "canonicalLfSha256": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7"
+      },
+      "server/game/deployment.js": {
+        "sha256": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15",
+        "canonicalLfSha256": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15"
+      },
+      "server/game/endgame.js": {
+        "sha256": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418",
+        "canonicalLfSha256": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418"
+      },
+      "server/game/errors.js": {
+        "sha256": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab",
+        "canonicalLfSha256": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab"
+      },
+      "server/game/information-projection.js": {
+        "sha256": "1e5bd7a769944b2f71e2d1405841a9c18fe5a4b8139dd5f18e48e4b8540ecb69",
+        "canonicalLfSha256": "34865d39ca0625a87a0e5a4cca5bb69ba6607558a9d91a202d1dff804a94fdaf"
+      },
+      "server/game/lifecycle.js": {
+        "sha256": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8",
+        "canonicalLfSha256": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8"
+      },
+      "server/game/map-rules.js": {
+        "sha256": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7",
+        "canonicalLfSha256": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7"
+      },
+      "server/game/match-resolution.js": {
+        "sha256": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f",
+        "canonicalLfSha256": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f"
+      },
+      "server/game/match.js": {
+        "sha256": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523",
+        "canonicalLfSha256": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523"
+      },
+      "server/game/random-deployment.js": {
+        "sha256": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430",
+        "canonicalLfSha256": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430"
+      },
+      "server/game/ranges.js": {
+        "sha256": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374",
+        "canonicalLfSha256": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374"
+      },
+      "server/game/room-service.js": {
+        "sha256": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30",
+        "canonicalLfSha256": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30"
+      },
+      "server/game/room.js": {
+        "sha256": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d",
+        "canonicalLfSha256": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d"
+      },
+      "server/game/rules.js": {
+        "sha256": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682",
+        "canonicalLfSha256": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682"
+      },
+      "server/game/timing.js": {
+        "sha256": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a",
+        "canonicalLfSha256": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a"
+      },
+      "server/game/units.js": {
+        "sha256": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9",
+        "canonicalLfSha256": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9"
+      },
+      "server/operations/rate-limiter.js": {
+        "sha256": "e8ed016b80d0dbbef3eb1e6d2116b48007074a8a92fddcd52b0b6143c07941df",
+        "canonicalLfSha256": "e8ed016b80d0dbbef3eb1e6d2116b48007074a8a92fddcd52b0b6143c07941df"
+      },
+      "server/operations/telemetry.js": {
+        "sha256": "6c85a84ef80cff8a1e4cfe1d39abc3981234a2de98a9416a4e239bd9c741e36e",
+        "canonicalLfSha256": "6c85a84ef80cff8a1e4cfe1d39abc3981234a2de98a9416a4e239bd9c741e36e"
+      },
+      "server/release.js": {
+        "sha256": "65de753c498d64b4c2b08807e37119350817d38e8350e6128ba48df96f883a71",
+        "canonicalLfSha256": "65de753c498d64b4c2b08807e37119350817d38e8350e6128ba48df96f883a71"
+      },
+      "server/server.js": {
+        "sha256": "9a0a5a56e5092d83200bac997ed075dd668929b0f25c98c57127955609dc4c3c",
+        "canonicalLfSha256": "9a0a5a56e5092d83200bac997ed075dd668929b0f25c98c57127955609dc4c3c"
+      },
+      "server/socket/game-gateway.js": {
+        "sha256": "2d6b536ffa0bb0790134c8e533753b57397ae04a486c1d72591e9423fa3eff0c",
+        "canonicalLfSha256": "2d6b536ffa0bb0790134c8e533753b57397ae04a486c1d72591e9423fa3eff0c"
+      },
+      "server/socket/protocol.js": {
+        "sha256": "2b68f95471aabc7da7293b2ee0b9e82cb5a6e6c693a9a4fab649613eb6d7209e",
+        "canonicalLfSha256": "2b68f95471aabc7da7293b2ee0b9e82cb5a6e6c693a9a4fab649613eb6d7209e"
+      },
+      "server/training/catalog.json": {
+        "sha256": "19b52bd70a93336f1ccea66f4ed1ca3c7e04e39e8ae822ed223dd5609e211c8f",
+        "canonicalLfSha256": "9aa763ad4b3c56c0611b4445117995a51aa06ae3752a5180d8e6bd16dd2cb1ba"
+      },
+      "server/training/course.js": {
+        "sha256": "934f7c366947dd2fc7617f0b1e743e87b96696b893615adbe9616eaaeff4f0de",
+        "canonicalLfSha256": "934f7c366947dd2fc7617f0b1e743e87b96696b893615adbe9616eaaeff4f0de"
+      },
+      "server/training/scenarios.js": {
+        "sha256": "51d1465f0b84be8f6ecf59fb7ee465b9c4b5c9807477cfcbfb3047abb48c52d4",
+        "canonicalLfSha256": "fa70990fc2bd6172e88338fd985d219893d5d24ce53db25a925a1ec8e14b5b2c"
+      },
+      "server/training/service.js": {
+        "sha256": "a67070ca1086073208dcbd1d7c6fc636983c8a69ee20d3ba6e9fb6caf617e7c9",
+        "canonicalLfSha256": "d504cba295894c4ae2b46bc30a8499ab83aaacb0cd2e67642062a8d8a4ef1800"
+      }
+    }
+  }
+}

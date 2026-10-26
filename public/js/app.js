@@ -713,7 +713,7 @@
     const selectedFile = ACTION_ART_FILES[state.battle.selectedAction];
     if (selectedFile) urls.push(`/assets/images/ocean-2.5d/actions/${selectedFile}`);
     if (state.effectiveQuality === "high") {
-      urls.push(...Object.values(ACTION_ART_FILES).map((file) => `/assets/images/ocean-2.5d/actions/${file}`));
+      // Warm only selected illustrations; shared impact assets remain cached.
       urls.push(
         feedbackArtPath("vfx", "vfx_small_explosion"),
         feedbackArtPath("vfx", "vfx_small_water_splash"),
@@ -944,6 +944,13 @@
   }
 
   function armorySourceProjection(unit){
+    if(unit.type===Data.UNIT_TYPES.AIRCRAFT_CARRIER){
+      const cells=(unit.cells??[]).map(c=>({coordinate:c,point:Data.parseCoordinate(c)})).filter(c=>c.point);
+      if(!cells.length)return uiIcon(unitIconName(unit.type));
+      const row=Math.min(...cells.map(c=>c.point.row)),col=Math.min(...cells.map(c=>c.point.column));
+      const rows=Math.max(...cells.map(c=>c.point.row))-row+1,cols=Math.max(...cells.map(c=>c.point.column))-col+1;
+      return `<svg viewBox="0 0 ${Math.max(cols,rows)*32} ${Math.min(cols,rows)*32}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><g transform="${rows>cols?`translate(${rows*32} 0) rotate(90)`:""}">${cells.map(c=>`<image x="${(c.point.column-col)*32}" y="${(c.point.row-row)*32}" width="32" height="32" href="${versionedArtUrl('/assets/images/ocean-2.5d/units/carrier/'+carrierModuleName(c.coordinate,unit.cells))}"/>`).join('')}</g></svg>`;
+    }
     const folder=UNIT_ART_FOLDERS[unit.type],key=folder+"/east.webp";
     if(!folder)return uiIcon(unitIconName(unit.type));
     return `<svg viewBox="${UNIT_ART_VIEWBOXES[key]}" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false"><image href="${versionedArtUrl('/assets/images/ocean-2.5d/units/'+key)}" width="512" height="512"/></svg>`;
@@ -2068,6 +2075,7 @@
       state.renderedPage = page;
       document.body.dataset.page = page;
       hydrateInterface(samePage ? viewMemory : null);
+      hydrateCombatViewport();
       if (page === "P05") restoreBattleMapView();
       if (!samePage) {
         const scrollingElement = document.scrollingElement ?? document.documentElement;
@@ -3427,6 +3435,7 @@
         class="battle-effect-art battle-effect-art--${escapeHtml(model.visualState)}"
         data-effect-action="${escapeHtml(model.actionType)}"
         data-effect-scope="${cells.length === 1 ? "cell" : "area"}"
+        data-effect-axis="${bounds.rowSpan>bounds.columnSpan?"column":"row"}"
         data-effect-result="${escapeHtml(model.visualState)}"
         data-grid-row="${bounds.row}"
         data-grid-column="${bounds.column}"
@@ -3828,10 +3837,14 @@
 
 
   const ARMORY_ORDER = Object.freeze(["destroyer_i_ram","destroyer_ii_ram","pirate_attack","motorboat_ram","submarine_missile","nuclear_bomb","shock_bomb","detection_bomb","radar_scan","helicopter_strafe"]);
+  function actionNameMarkup(definition){
+    const words={destroyer_i_ram:['驱逐舰Ⅰ','冲撞'],destroyer_ii_ram:['驱逐舰Ⅱ','冲撞'],pirate_attack:['海盗船','攻击'],motorboat_ram:['摩托艇','冲撞'],submarine_missile:['潜射','导弹'],helicopter_strafe:['直升机','扫射'],radar_scan:['雷达','扫描']};
+    return (words[definition.type]??[definition.name]).map(word=>'<span>'+escapeHtml(word)+'</span>').join('');
+  }
   function renderActionCard(room, definition) {
     const status=Model.deriveActionStatus(room,definition),selected=definition.type===state.battle.selectedAction;
     const slot=(ARMORY_ORDER.indexOf(definition.type)+1)%10;
-    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected?'action-card--selected':''}" data-action="select-action" data-action-type="${definition.type}" aria-pressed="${selected}" aria-describedby="armory-reason-${definition.type}" ${status.enabled?'':'disabled'}><span class="action-slot-number" aria-hidden="true">${slot}</span><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${escapeHtml(definition.name)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected?'<span class="action-selected-mark" aria-hidden="true">✓</span>':''}</button><p id="armory-reason-${definition.type}" class="action-disabled-reason">${status.enabled?'可用':escapeHtml(status.label)}</p></div>`;
+    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected?'action-card--selected':''}" data-action="select-action" data-action-type="${definition.type}" aria-label="${escapeHtml(definition.name+'，'+Model.actionResourceLabel(room,definition))}" aria-pressed="${selected}" aria-describedby="armory-reason-${definition.type}" ${status.enabled?'':'disabled'}><span class="action-slot-number" aria-hidden="true">${slot}</span><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${actionNameMarkup(definition)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected?'<span class="action-selected-mark" aria-hidden="true">✓</span>':''}</button><button id="armory-reason-${definition.type}" class="action-disabled-reason action-info" type="button" data-action="inspect-action" data-action-type="${definition.type}" aria-label="查看${escapeHtml(definition.name)}完整说明：${escapeHtml(status.label)}"><span aria-hidden="true">${escapeHtml(compactActionStatus(status))} ⓘ</span><span class="sr-only">${escapeHtml(status.label)}</span></button></div>`;
   }
   function renderArmorySource(room){
     const def=Data.getActionDefinition(state.battle.selectedAction);
@@ -3839,7 +3852,7 @@
     const source=def?units.find(u=>u.type===def.sourceType&&u.hp>0&&!u.paralyzed)??units.find(u=>u.type===def.sourceType):null;
     if(!source)return `<section class="armory-source" aria-label="行动来源"><span class="armory-source__crest" aria-hidden="true"></span><span class="status-kicker">舰队待命</span><strong>选择你的武器</strong><small>先选行动，再指定海图目标</small><button data-action="toggle-fleet">查看己方舰队</button></section>`;
     const unit=Data.getUnitDefinitionById(source.id)??Data.getUnitDefinitionByType(source.type);
-    return `<section class="armory-source" aria-label="行动来源"><span class="source-projection" aria-hidden="true">${armorySourceProjection(source)}</span><span class="status-kicker">行动来源</span><strong>${escapeHtml(unit.name)}</strong><span class="source-hp">${Model.formatHp(source.hp)} <small>/ ${unit.initialHp} HP · ${escapeHtml(unitStatusText(source,unit))}</small></span><div class="hp-track"><i data-hp-percent="${Math.round(source.hp/unit.initialHp*100)}"></i></div><button data-action="toggle-fleet">己方舰队详情</button></section>`;
+    return `<section class="armory-source armory-source--active" data-source-state="${source.hp<=0?'sunk':source.paralyzed?'paralyzed':'active'}" aria-label="行动来源"><span class="source-projection" aria-hidden="true">${armorySourceProjection(source)}</span><strong class="source-name">${escapeHtml(unit.name)}</strong><span class="source-hp">${Model.formatHp(source.hp)} <small>/ ${unit.initialHp} HP</small><small class="source-condition">${escapeHtml(unitStatusText(source,unit))}</small></span><div class="hp-track"><i data-hp-percent="${Math.round(source.hp/unit.initialHp*100)}"></i></div><button data-action="toggle-fleet">己方舰队详情</button></section>`;
   }
 
   function renderActionGroups(room) {
@@ -4661,7 +4674,7 @@
     const targets = activeBattleOpponentIds(room);
     const remaining = definition?.initialUses == null ? null : room.battle.own.remainingUses[definition.type];
     const instruction = definition ? definition.rangeMode === 'radar' ? '选择扫描区左上起始格' : definition.targetMode === 'area' ? '选择完整范围的中心格' : definition.targetMode === 'line' ? '选择整行或整列' : '选择目标坐标' : '选择行动';
-    return `<section class="command-dock" aria-label="统一指令台"><div class="command-summary" role="status"><strong>${state.battle.markerMode ? '私人标记模式' : definition ? escapeHtml(definition.name) : room.turn?.canAct ? '等待你的指令' : '等待当前玩家行动'}</strong><span>${state.battle.target ? escapeHtml(targetLabel) : state.battle.markerMode ? '注记仅你可见，不消耗回合' : instruction}</span>${definition ? `<small>来源 ${escapeHtml(sourceName)} · ${targets.map(id=>escapeHtml(Model.nicknameFor(room,id))).join('、')} · ${remaining === null ? '不限次数' : `消耗 1，执行后剩余 ${Math.max(0,remaining-1)}`}${targets.length>1?' · 同步两方':''}${HIDDEN_RESULT_ACTIONS.includes(definition.type)?' · 结果保密':''}</small>`:''}${definition && ['destroyer_i_ram','destroyer_ii_ram','pirate_attack','motorboat_ram'].includes(definition.type) ? `<small class="command-risk">${escapeHtml(definition.warning)}</small>`:''}${state.battle.commandNotice?`<small class="command-notice">${escapeHtml(state.battle.commandNotice)}</small>`:''}${state.battle.awaitingSync ? '<button data-action="sync-command">同步对局</button>':''}</div>${definition?.targetMode === "line" ? `<div class="command-axis"><button data-action="set-helicopter-axis" data-axis="row" aria-pressed="${state.battle.helicopterAxis === "row"}">行</button><button data-action="set-helicopter-axis" data-axis="column" aria-pressed="${state.battle.helicopterAxis === "column"}">列</button></div>` : ""}<div class="command-controls"><button data-action="cancel-action-selection" ${state.pendingRequest || (!definition && !state.battle.markerMode) ? 'disabled':''}>取消</button><button class="command-execute" data-action="execute-command" ${ready ? '' : 'disabled'}>${state.pendingRequest === 'action' ? '正在提交…' : '确认执行'}</button></div></section>`;
+    return `<section class="command-dock" aria-label="统一指令台"><div class="command-summary" role="status"><strong class="command-action-name">${state.battle.markerMode ? '私人标记模式' : definition ? escapeHtml(definition.name) : room.turn?.canAct ? '等待你的指令' : '等待当前玩家行动'}</strong><span class="command-target">${state.battle.target ? escapeHtml(targetLabel) : state.battle.markerMode ? '注记仅你可见，不消耗回合' : instruction}</span>${definition ? `<small class="command-source-cost">来源 ${escapeHtml(sourceName)}${source?` · ${Model.formatHp(source.hp)} HP`:""} · ${targets.map(id=>escapeHtml(Model.nicknameFor(room,id))).join('、')} · ${remaining === null ? '不限次数' : `消耗 1，执行后剩余 ${Math.max(0,remaining-1)}`}${targets.length>1?' · 同步两方':''}${HIDDEN_RESULT_ACTIONS.includes(definition.type)?' · 结果保密':''}</small>`:''}${definition && ['destroyer_i_ram','destroyer_ii_ram','pirate_attack','motorboat_ram'].includes(definition.type) ? `<small class="command-risk">可能造成己方损失</small>`:''}${state.battle.commandNotice?`<small class="command-notice">${escapeHtml(state.battle.commandNotice)}</small>`:''}${state.battle.awaitingSync ? '<button data-action="sync-command">同步对局</button>':''}</div>${definition?.targetMode === "line" ? `<div class="command-axis"><button data-action="set-helicopter-axis" data-axis="row" aria-pressed="${state.battle.helicopterAxis === "row"}">行</button><button data-action="set-helicopter-axis" data-axis="column" aria-pressed="${state.battle.helicopterAxis === "column"}">列</button></div>` : ""}<div class="command-controls">${definition ? `<button class="command-info" data-action="inspect-action" data-action-type="${definition.type}" aria-label="查看当前行动完整说明">详情</button>` : ""}<button data-action="cancel-action-selection" ${state.pendingRequest || (!definition && !state.battle.markerMode) ? 'disabled':''}>取消</button><button class="command-execute" data-action="execute-command" ${ready ? '' : 'disabled'}>${state.pendingRequest === 'action' ? '正在提交…' : '确认执行'}</button></div></section>`;
   }
 
   function renderFinalSalvoStage(room, finalSalvoState, availableFinalDecoys) {
@@ -4732,10 +4745,10 @@
     const salvo = room.battle.match?.finalSalvo;
     const available = (room.battle.own.decoys ?? []).filter(d => salvo?.availableDecoyIds?.includes(d.id));
     const opponents = battleOpponentIds(room.battle);
-    const compact = window.innerWidth < 1024 || window.innerHeight < 600;
+    const compact = window.innerWidth < 1024 || window.innerHeight < 600 || document.documentElement.dataset.textSize === "large";
     const drawer = state.battle.logOpen ? 'messages' : state.battle.actionDrawerOpen && compact ? 'actions' : state.battle.fleetOpen ? 'fleet' : 'none';
     void Sound?.preloadGroup?.('battle');
-    return `<section class="battle-page ocean-console ${final ? 'ocean-console--salvo' : ''}" data-map-zoom="${Boolean(state.battle.mapZoom)}" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${state.battle.tacticalLayer}" data-drawer-open="${drawer}" ${state.battle.tacticalLayerTransition ? `data-layer-transition="${state.battle.tacticalLayerTransition}"` : ''} aria-labelledby="battle-page-title"><h1 id="battle-page-title" class="sr-only">${state.training?.session?"训练营 · 核心战斗":"正式对战"}</h1>${renderBattleHeader(room)}<div class="console-workspace">${renderFleetPanel(room)}<div class="battle-main-column"><div class="map-navigation">${renderBattleMapTabs(room)}<div class="map-tools"><button data-action="toggle-marker-mode" data-target-player-id="${escapeHtml(state.battle.targetPlayerId)}" aria-pressed="${state.battle.markerMode}">标记</button><button data-action="cycle-tactical-layer" ${state.battle.mobileMap !== "own" ? "disabled" : ""}>${tacticalLayerMeta().label.replace("视层","")}</button><button data-action="center-battle-map" aria-label="地图居中">居中</button><button data-action="toggle-map-zoom" aria-pressed="${Boolean(state.battle.mapZoom)}">${state.battle.mapZoom?"标准格":"放大格"}</button>${state.battle.target ? '<button data-action="focus-selected-target">回到目标</button>' : ''}</div></div>${room.maxPlayers === 3 ? `<p class="sync-note">${activeBattleOpponentIds(room).length > 1 ? '一次行动，同步两方 · 成本只算一次' : '唯一有效目标'}</p>` : ''}${final ? renderFinalSalvoStage(room,salvo,available) : ''}<div class="battle-maps" data-map-count="${1+opponents.length}">${renderOwnMapCard(room)}${opponents.map(id=>renderEnemyMapCard(room,id)).join('')}</div><div class="feedback-slot">${renderLatestFeedback(room) || '<p class="feedback-empty">海域已同步。行动结果将显示在这里。</p>'}</div></div></div>${final ? '' : `<div class="armory-plinth">${renderArmorySource(room)}${renderActionPanel(room)}${renderBridgeCommandDeck(room)}</div>`}${drawer !== 'none' ? '<button class="battle-drawer-scrim" data-action="close-battle-drawers" aria-label="关闭战术侧边栏"></button>' : ''}${renderPublicLog(room)}<nav class="mobile-console-nav" aria-label="战术导航"><button data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}">${uiIcon('action-radar')}<span>行动</span></button><button data-action="toggle-fleet" aria-expanded="${state.battle.fleetOpen}">${uiIcon('ship-aircraft-carrier')}<span>舰队${state.battle.ownMapAlert ? ' · 新' : ''}</span></button><button data-action="set-event-channel" data-channel="private">${uiIcon('status-private')}<span>情报</span></button><button data-action="set-event-channel" data-channel="combat">${uiIcon('status-hit')}<span>日志</span></button></nav></section>`;
+    return `<section class="battle-page ocean-console ${final ? 'ocean-console--salvo' : ''}" data-map-zoom="${Boolean(state.battle.mapZoom)}" data-player-count="${room.maxPlayers}" data-map-size="${room.mapSize}" data-tactical-layer="${state.battle.tacticalLayer}" data-drawer-open="${drawer}" ${state.battle.tacticalLayerTransition ? `data-layer-transition="${state.battle.tacticalLayerTransition}"` : ''} aria-labelledby="battle-page-title"><h1 id="battle-page-title" class="sr-only">${state.training?.session?"训练营 · 核心战斗":"正式对战"}</h1>${renderBattleHeader(room)}<div class="console-workspace">${renderFleetPanel(room)}<div class="battle-main-column"><div class="map-navigation">${renderBattleMapTabs(room)}<div class="map-tools"><button data-action="toggle-marker-mode" data-target-player-id="${escapeHtml(state.battle.targetPlayerId)}" aria-pressed="${state.battle.markerMode}">标记</button><button data-action="cycle-tactical-layer" ${state.battle.mobileMap !== "own" ? "disabled" : ""}>${tacticalLayerMeta().label.replace("视层","")}</button><button data-action="center-battle-map" aria-label="地图居中">居中</button><button data-action="toggle-map-zoom" aria-pressed="${Boolean(state.battle.mapZoom)}">${state.battle.mapZoom?"标准格":"放大格"}</button>${state.battle.target ? '<button data-action="focus-selected-target">回到目标</button>' : ''}</div></div>${final ? "" : renderMapNavigator()}${room.maxPlayers === 3 ? `<p class="sync-note">${activeBattleOpponentIds(room).length > 1 ? '一次行动，同步两方 · 成本只算一次' : '唯一有效目标'}</p>` : ''}${final ? renderFinalSalvoStage(room,salvo,available) : ''}<div class="battle-maps" data-map-count="${1+opponents.length}">${renderOwnMapCard(room)}${opponents.map(id=>renderEnemyMapCard(room,id)).join('')}</div><div class="feedback-slot">${renderLatestFeedback(room) || '<p class="feedback-empty">海域已同步。行动结果将显示在这里。</p>'}</div></div></div>${final ? '' : `<div class="armory-plinth">${renderArmorySource(room)}${renderActionPanel(room)}${renderBridgeCommandDeck(room)}</div>`}${drawer !== 'none' ? '<button class="battle-drawer-scrim" data-action="close-battle-drawers" aria-label="关闭战术侧边栏"></button>' : ''}${renderPublicLog(room)}<nav class="mobile-console-nav" aria-label="战术导航"><button data-action="toggle-action-drawer" aria-expanded="${state.battle.actionDrawerOpen}">${uiIcon('action-radar')}<span>行动</span></button><button data-action="toggle-fleet" aria-expanded="${state.battle.fleetOpen}">${uiIcon('ship-aircraft-carrier')}<span>舰队${state.battle.ownMapAlert ? ' · 新' : ''}</span></button><button data-action="set-event-channel" data-channel="private">${uiIcon('status-private')}<span>情报</span></button><button data-action="set-event-channel" data-channel="combat">${uiIcon('status-hit')}<span>日志</span></button></nav></section>`;
   }
 
   function renderFleetPanel(room) {
@@ -6148,7 +6161,9 @@
       personalizeDialog.close();
       return;
     }
-    if(action === "toggle-map-zoom"){rememberBattleMapView();cancelMotion();state.battle.mapZoom=!state.battle.mapZoom;render();restoreBattleMapView();return;}
+    if(action === "toggle-map-zoom"){changeMapZoom();return;}
+    if(action === "inspect-action"){showWeaponDetails(control.dataset.actionType);return;}
+    if(action === "close-weapon-details"){document.querySelector("#weapon-details-dialog").close();return;}
     if (action === "home-tab") { if(state.tutorial.active)exitTutorial();else if(state.training?.active){void exitTrainingSession();state.training.active=false;history.replaceState(null,"","/");render();}return; }
     if (action === "select-theme") {
       applyTheme(control.dataset.themeValue);
@@ -6476,6 +6491,7 @@
     }
     if (action === "set-helicopter-axis") {
       state.battle.helicopterAxis = control.dataset.axis;
+      state.battle.actionDrawerOpen = false;
       state.battle.target = null;
       state.battle.actionId = null;
       state.battle.actionDrawerOpen = false;
@@ -6912,6 +6928,93 @@
   }
 
 
+// Module: combat-polish.js
+  // Viewport geometry and presentation only; no combat facts or commands are derived here.
+  const combatViewportRuntime={frame:null,observer:null,raf:0,update:null,drafts:new Map()};
+  function viewportMetrics({left,top,width,height,cellWidth,cellHeight,axisX,axisY,size}){
+    const clamp=(v,min,max)=>Math.min(max,Math.max(min,v));
+    const firstColumn=clamp(Math.floor(left/cellWidth),0,size-1),firstRow=clamp(Math.floor(top/cellHeight),0,size-1);
+    const lastColumn=clamp(Math.ceil((left+width-axisX)/cellWidth)-1,firstColumn,size-1),lastRow=clamp(Math.ceil((top+height-axisY)/cellHeight)-1,firstRow,size-1);
+    return {firstColumn,firstRow,lastColumn,lastRow,centerColumn:(left+(width-axisX)/2)/cellWidth,centerRow:(top+(height-axisY)/2)/cellHeight};
+  }
+  function currentViewportGeometry(frame){
+    const board=frame?.querySelector('.ocean-board'),cell=board?.querySelector('[data-coordinate]');
+    const axisColumn=board?.querySelector('.board-axis--column'),axisRow=board?.querySelector('.board-axis--row');
+    if(!board||!cell)return null;
+    const rect=cell.getBoundingClientRect();if(!rect.width||!rect.height)return null;
+    return {left:frame.scrollLeft,top:frame.scrollTop,width:frame.clientWidth,height:frame.clientHeight,cellWidth:rect.width,cellHeight:rect.height,axisX:(axisRow?.getBoundingClientRect().width??26)+board.clientLeft,axisY:(axisColumn?.getBoundingClientRect().height??26)+board.clientTop,size:Number(board.dataset.boardSize)};
+  }
+  function disposeCombatViewport(){
+    if(combatViewportRuntime.frame&&combatViewportRuntime.update)combatViewportRuntime.frame.removeEventListener('scroll',combatViewportRuntime.update);
+    combatViewportRuntime.observer?.disconnect();cancelAnimationFrame(combatViewportRuntime.raf);
+    Object.assign(combatViewportRuntime,{frame:null,observer:null,raf:0,update:null});
+  }
+  function hydrateCombatViewport(){
+    disposeCombatViewport();if(state.renderedPage!=='P05')return;
+    const frame=battleMapPanel()?.querySelector('.board-frame--tactical-sea');if(!frame)return;
+    const paint=()=>{
+      combatViewportRuntime.raf=0;if(!frame.isConnected)return;
+      const geometry=currentViewportGeometry(frame);if(!geometry)return;
+      const m=viewportMetrics(geometry),label=document.querySelector('[data-visible-range]');
+      if(label)label.textContent=Data.formatCoordinate(m.firstRow,m.firstColumn)+'–'+Data.formatCoordinate(m.lastRow,m.lastColumn)+' · '+Math.round(geometry.cellWidth)+'px格';
+      const overview=document.querySelector('[data-map-window]');
+      if(overview){overview.style.left=(100*m.firstColumn/geometry.size)+'%';overview.style.top=(100*m.firstRow/geometry.size)+'%';overview.style.width=(100*(m.lastColumn-m.firstColumn+1)/geometry.size)+'%';overview.style.height=(100*(m.lastRow-m.firstRow+1)/geometry.size)+'%';}
+      frame.dataset.panX=String(frame.scrollWidth>frame.clientWidth+2);frame.dataset.panY=String(frame.scrollHeight>frame.clientHeight+2);
+      const hint=document.querySelector('[data-map-pan-hint]');if(hint)hint.textContent=frame.dataset.panX==='true'||frame.dataset.panY==='true'?'拖动查看海域':'完整海域';
+    };
+    const update=()=>{if(!combatViewportRuntime.raf)combatViewportRuntime.raf=requestAnimationFrame(paint);};
+    Object.assign(combatViewportRuntime,{frame,update});frame.addEventListener('scroll',update,{passive:true});
+    if(typeof ResizeObserver==='function'){combatViewportRuntime.observer=new ResizeObserver(update);combatViewportRuntime.observer.observe(frame);}paint();
+  }
+  function changeMapZoom(){
+    const frame=battleMapPanel()?.querySelector('.board-frame--tactical-sea'),geometry=currentViewportGeometry(frame);
+    const anchor=geometry?viewportMetrics(geometry):null;
+    rememberBattleMapView();cancelMotion();state.battle.mapZoom=!state.battle.mapZoom;render();
+    requestAnimationFrame(()=>{
+      const next=battleMapPanel()?.querySelector('.board-frame--tactical-sea'),g=currentViewportGeometry(next);if(!anchor||!g)return;
+      next.scrollLeft=Math.max(0,anchor.centerColumn*g.cellWidth-(g.width-g.axisX)/2);
+      next.scrollTop=Math.max(0,anchor.centerRow*g.cellHeight-(g.height-g.axisY)/2);rememberBattleMapView();combatViewportRuntime.update?.();
+    });
+  }
+  function locatorDraftKey(){return [state.training?.session?.generation??"live",state.room?.roomCode,state.room?.own?.playerId,state.battle.mobileMap].join(":");}
+  function renderMapNavigator(){
+    return `<div class="map-context" aria-label="海图视窗"><div class="map-overview" aria-hidden="true"><i data-map-window></i></div><span><strong data-visible-range>正在定位海域</strong><small data-map-pan-hint>坐标与海图同步</small></span><form id="map-locate-form" class="map-locate" aria-label="定位海图坐标"><label class="sr-only" for="map-coordinate-input">定位坐标，例如A1；仅移动视窗</label><input id="map-coordinate-input" name="coordinate" value="${escapeHtml(combatViewportRuntime.drafts.get(locatorDraftKey())??'')}" maxlength="3" autocomplete="off" spellcheck="false" placeholder="如 A1" inputmode="text"><button type="submit">定位</button></form><button type="button" data-action="focus-selected-target" ${state.battle.target?'':'disabled'}>回到目标</button></div>`;
+  }
+  function showWeaponDetails(type){
+    const definition=Data.getActionDefinition(type??state.battle.selectedAction);if(!definition||!state.room?.battle)return;
+    const status=Model.deriveActionStatus(state.room,definition),dialog=document.querySelector('#weapon-details-dialog');if(!dialog)return;
+    document.querySelector('#weapon-details-title').textContent=definition.name;
+    document.querySelector('#weapon-details-body').innerHTML=`<p class="weapon-status">${escapeHtml(status.label)} · ${escapeHtml(Model.actionResourceLabel(state.room,definition))}</p><p>${escapeHtml(definition.warning??'按海图合法范围选择目标，确认后执行。')}</p><p>${definition.rangeMode==='radar'?`选择扫描区域的左上起始格；当前为${state.room.mapRules.radarSize}×${state.room.mapRules.radarSize}。`:definition.targetMode==='area'?'选择完整区域的中心格。':definition.targetMode==='line'?'选择行或列，再指定目标。':'选择一个合法目标坐标。'}${HIDDEN_RESULT_ACTIONS.includes(definition.type)?'投放结果保持保密，视觉与声音不暗示是否命中。':''}</p><small>查看说明不改变当前武器、来源、目标或资源。键盘1–0仅选择武器，海图Enter仅瞄准，执行仍需确认。</small>`;
+    dialog.showModal();dialog.querySelector('[data-action="close-weapon-details"]')?.focus();
+  }
+  document.addEventListener('input',event=>{
+    if(event.target.id!=='map-coordinate-input')return;
+    const value=event.target.value.toUpperCase();event.target.value=value;combatViewportRuntime.drafts.set(locatorDraftKey(),value);
+    while(combatViewportRuntime.drafts.size>24)combatViewportRuntime.drafts.delete(combatViewportRuntime.drafts.keys().next().value);
+  });
+  document.addEventListener('submit',event=>{
+    if(event.target.id!=='map-locate-form')return;event.preventDefault();
+    const input=event.target.elements.coordinate,value=input.value.trim().toUpperCase(),parsed=Data.parseCoordinate(value);
+    if(!parsed){input.setAttribute('aria-invalid','true');showToast('请输入当前海图范围内的坐标，例如 A1。','warning');return;}
+    input.removeAttribute('aria-invalid');centerBattleMap(value);
+    requestAnimationFrame(()=>{const cell=battleMapPanel()?.querySelector('[data-coordinate="'+value+'"]');if(cell&&!cell.disabled){cell.closest('[role=grid]')?.querySelectorAll('[role=gridcell]').forEach(c=>c.tabIndex=-1);cell.tabIndex=0;cell.focus({preventScroll:true});}});
+  });
+  document.addEventListener('keydown',event=>{
+    if(state.renderedPage!=='P05'||event.repeat||event.ctrlKey||event.metaKey||event.altKey||event.target.closest?.('input,textarea,select,[contenteditable="true"],dialog')||document.querySelector('dialog[open]')||activeInterfaceOverlay())return;
+    const index='1234567890'.indexOf(event.key);if(index<0||event.key.length!==1)return;
+    event.preventDefault();selectAction(ARMORY_ORDER[index]);
+  });
+  window.addEventListener('resize',()=>{if(state.renderedPage==='P05')cancelMotion();});
+  window.addEventListener('pagehide',disposeCombatViewport);
+
+  document.addEventListener('error',event=>{
+    const image=event.target,unit=image.closest?.('.tactical-unit-art');
+    if(!unit||unit.classList.contains('art-fallback')||!(image.matches?.('.tactical-hull-viewport image')||(image.parentElement===unit&&image.tagName==='IMG'&&!image.classList.contains('tactical-prop')&&!image.classList.contains('tactical-status-art'))))return;
+    const label=document.createElement('span');label.className='hull-fallback';label.setAttribute('aria-hidden','true');
+    label.textContent=Data.getUnitDefinitionById(unit.dataset.artUnitId)?.shortName??'舰';unit.classList.add('art-fallback');unit.append(label);
+  },true);
+
+
 // Module: accessibility.js
   let commandSizeObserver=null;
   let previousOverlay=null;
@@ -7051,7 +7154,7 @@
     }
     previousOverlay=overlay;
     document.querySelector('.site-shell').inert=!blockingOverlay.hidden;
-    for(const panel of app.querySelectorAll('.battle-header,.battle-main-column,.fleet-panel,.action-rail,.command-dock,.mobile-console-nav')) {
+    for(const panel of app.querySelectorAll('.battle-header,.battle-main-column,.fleet-panel,.action-rail,.armory-source,.command-dock,.mobile-console-nav')) {
       panel.inert=Boolean(overlay && panel!==overlay && !panel.contains(overlay));
     }
     for(const panel of app.querySelectorAll('.log-panel,.fleet-panel,.action-rail')) {

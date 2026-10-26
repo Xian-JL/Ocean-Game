@@ -1,0 +1,51 @@
+{
+  "firstAction": "驱逐舰Ⅰ：B2未命中，采样开始时实际执行",
+  "actions": [
+    {
+      "type": "destroyer_ii_ram",
+      "before": "不限次数",
+      "feedback": "驱逐舰Ⅱ冲撞 → 陪练舰队：A1 命中。"
+    },
+    {
+      "type": "pirate_attack",
+      "before": "不限次数",
+      "feedback": "海盗船攻击 → 陪练舰队：A1 命中。"
+    },
+    {
+      "type": "motorboat_ram",
+      "before": "不限次数",
+      "feedback": "摩托艇冲撞 → 陪练舰队：A1 命中。"
+    },
+    {
+      "type": "submarine_missile",
+      "before": "剩余 4/4",
+      "feedback": "潜射导弹已向 陪练舰队 的 A1 发射；命中结果不会向你显示。"
+    },
+    {
+      "type": "nuclear_bomb",
+      "before": "剩余 2/2",
+      "feedback": "核弹已向 陪练舰队 的 A1 投放；命中结果不会向你显示。"
+    },
+    {
+      "type": "shock_bomb",
+      "before": "剩余 1/1",
+      "feedback": "震爆弹已作用于 陪练舰队 地图中以 C3 为中心的 5×5 区域；是否生效不会向你显示。"
+    },
+    {
+      "type": "detection_bomb",
+      "before": "剩余 1/1",
+      "feedback": "探测弹：陪练舰队 的 B2 周围探测到水下信号。"
+    },
+    {
+      "type": "radar_scan",
+      "before": "剩余 1/1",
+      "feedback": "雷达扫描：陪练舰队 的 A1 起始 4×4 区域发现布局。"
+    },
+    {
+      "type": "helicopter_strafe",
+      "before": "剩余 1/1",
+      "feedback": "直升机扫射 → 陪练舰队：命中 3 格，未命中 9 格。"
+    }
+  ],
+  "extra": "直升机列扫射另实操一次"
+}

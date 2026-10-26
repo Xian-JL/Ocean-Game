@@ -8,7 +8,7 @@
     />
     <meta
       name="description"
-      content="《海战 OCEAN》v1.6.3 黑潮军械库 · 回合制海域对抗"
+      content="《海战 OCEAN》v1.6.4 黑潮军械库 · 回合制海域对抗"
     />
     <meta name="theme-color" content="#080B0D" />
     <title>海战 OCEAN</title>
@@ -73,7 +73,7 @@
       <footer class="global-footer">
         <span>OCEAN</span>
         <span class="global-footer__meta">
-          <span id="footer-release">Ocean-v1.6.3</span>
+          <span id="footer-release">Ocean-v1.6.4</span>
           <span aria-hidden="true">·</span>
           <span id="footer-protocol">Rule 1.8 · Socket 2.1</span>
         </span>
@@ -306,6 +306,8 @@
         <button class="button button--primary" type="button" data-action="close-personalize">完成</button>
       </div>
     </dialog>
+
+    <dialog id="weapon-details-dialog" class="modal" aria-labelledby="weapon-details-title"><p class="eyebrow">军械说明</p><h2 id="weapon-details-title">行动说明</h2><div id="weapon-details-body" class="modal__body"></div><div class="modal__actions"><button class="button button--primary" data-action="close-weapon-details">返回海图</button></div></dialog>
 
     <dialog id="battle-menu-dialog" class="modal" aria-labelledby="battle-menu-title"><h2 id="battle-menu-title">作战菜单</h2><div class="menu-actions"><button data-action="open-rules">游戏说明</button><button data-action="open-audio-settings">声音设置</button><button data-action="open-personalize">个性化设置</button></div><div class="menu-danger"><button class="button button--danger-quiet" data-action="surrender">投降</button></div><div class="modal__actions"><button data-action="close-battle-menu">返回战场</button></div></dialog>
     <noscript>

@@ -28,3 +28,5 @@ Thumbs.db
 # Local release packaging and release verification
 .release-output/
 !docs/releases/v1.6.3/acceptance.log
+
+!docs/releases/v1.6.4/acceptance.log

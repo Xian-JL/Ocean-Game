@@ -205,7 +205,9 @@
       personalizeDialog.close();
       return;
     }
-    if(action === "toggle-map-zoom"){rememberBattleMapView();cancelMotion();state.battle.mapZoom=!state.battle.mapZoom;render();restoreBattleMapView();return;}
+    if(action === "toggle-map-zoom"){changeMapZoom();return;}
+    if(action === "inspect-action"){showWeaponDetails(control.dataset.actionType);return;}
+    if(action === "close-weapon-details"){document.querySelector("#weapon-details-dialog").close();return;}
     if (action === "home-tab") { if(state.tutorial.active)exitTutorial();else if(state.training?.active){void exitTrainingSession();state.training.active=false;history.replaceState(null,"","/");render();}return; }
     if (action === "select-theme") {
       applyTheme(control.dataset.themeValue);
@@ -533,6 +535,7 @@
     }
     if (action === "set-helicopter-axis") {
       state.battle.helicopterAxis = control.dataset.axis;
+      state.battle.actionDrawerOpen = false;
       state.battle.target = null;
       state.battle.actionId = null;
       state.battle.actionDrawerOpen = false;

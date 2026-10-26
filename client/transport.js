@@ -631,6 +631,7 @@
       state.renderedPage = page;
       document.body.dataset.page = page;
       hydrateInterface(samePage ? viewMemory : null);
+      hydrateCombatViewport();
       if (page === "P05") restoreBattleMapView();
       if (!samePage) {
         const scrollingElement = document.scrollingElement ?? document.documentElement;

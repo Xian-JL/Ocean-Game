@@ -1,0 +1,18 @@
+{
+  "zoomBefore": {
+    "cell": 40,
+    "centerX": 4.575,
+    "centerY": 3.8375,
+    "target": "D4",
+    "viewport": 390,
+    "width": 390
+  },
+  "zoomAfter": {
+    "cell": 48,
+    "centerX": 4.572916666666667,
+    "centerY": 3.8333333333333335,
+    "target": "D4",
+    "viewport": 390,
+    "width": 390
+  }
+}

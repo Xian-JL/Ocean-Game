@@ -17,6 +17,7 @@
   "connection.js",
   "events.js",
   "input.js",
+  "combat-polish.js",
   "accessibility.js",
   "bootstrap.js"
 ]

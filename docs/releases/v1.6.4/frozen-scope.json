@@ -1,0 +1,174 @@
+{
+  "base": "272291ed10c2973b4d9288442fa750cdf24a77a2",
+  "scope": "Freeze every server file, client rules/safe model/audio implementation, training and result/tutorial views; shared battle presentation may improve.",
+  "files": {
+    "client/result-view.js": {
+      "sha256": "d1d2ccbbcfdeacc86c9225e56b0a5a46a5d250fdf5042b45584c9deb557f8230",
+      "canonicalLfSha256": "254d14e56a9f3346b54e1e4b129e10a0b5d029ef1e91f19204e763d9e24c0b61"
+    },
+    "client/styles/training.css": {
+      "sha256": "0ef6bfad44f16251302388f5c0f6206a6690bf16716d7afcb5bd828090449abd",
+      "canonicalLfSha256": "ddeb97da5293aaab1ca7d9f3aa9afa2c7243da7d8035b4acf7ad0989ccaae33a"
+    },
+    "client/training.js": {
+      "sha256": "261572da7d0702541ac27f08eba0c9b39576ebf2db55a5a9a4856baaa0d1e326",
+      "canonicalLfSha256": "ab6f470d25c8518edbc64b4dab0f2cd01422e4c8f6a752420c602e56a87ec6cc"
+    },
+    "client/tutorial-view.js": {
+      "sha256": "3b33581735aab804b92aa0840562ef1cc282dc8895501d1f84857d68a1c98ad9",
+      "canonicalLfSha256": "3178535bc764f965005b604c3bcffb195c384d6cef62eaff313152fd56ff8fa4"
+    },
+    "public/js/audio-system.js": {
+      "sha256": "cb132501d269057284aa74f5ec4bd4513a9b04cfaef738f77cf0611b6cbfb35b",
+      "canonicalLfSha256": "77c040c24d954025ea5a1e4015ca68c9e7037d7227e71c903bc8bb34773c7ed9"
+    },
+    "public/js/game-data.js": {
+      "sha256": "5d40e8412ab177f09a4c4a6c37c0d291710b69512b8d5b250a3eead2e1b07943",
+      "canonicalLfSha256": "5d40e8412ab177f09a4c4a6c37c0d291710b69512b8d5b250a3eead2e1b07943"
+    },
+    "public/js/ui-model.js": {
+      "sha256": "ae652eb377dfbf3d02e6b060fd4884d797e7b519e75444e681f9a74db579b13e",
+      "canonicalLfSha256": "ae652eb377dfbf3d02e6b060fd4884d797e7b519e75444e681f9a74db579b13e"
+    },
+    "server/app.js": {
+      "sha256": "6df632954d42ee6a06a04c77de4b0b06862570983b86f1e4ecdac4a3dc1fd7f6",
+      "canonicalLfSha256": "834f48912037a788ec119fd2b90868625f8f61ac85f38e3ce1c84dc756efe344"
+    },
+    "server/game/action-resolution.js": {
+      "sha256": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400",
+      "canonicalLfSha256": "4c879cec2ce0916ea25c5e47100ee91235b6a33d125cd5aeedf29f5095eec400"
+    },
+    "server/game/action-state.js": {
+      "sha256": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29",
+      "canonicalLfSha256": "45ea9fd37d3546792ad9e255bba8981abad3eaa6e122799e903998884f87ab29"
+    },
+    "server/game/action-validation.js": {
+      "sha256": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6",
+      "canonicalLfSha256": "5b8721be88e5c48c003ce1d2f1ec727c3fc12fb40d12c157f87385e3d73e71d6"
+    },
+    "server/game/actions.js": {
+      "sha256": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646",
+      "canonicalLfSha256": "aaf5eabf21dbe3cd121f01dd4c7344ef8ca8cce0a97c4e3bc4b04594d9ab2646"
+    },
+    "server/game/battle-state.js": {
+      "sha256": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90",
+      "canonicalLfSha256": "3a61b7fee5362dd048edec3e84404cc468091fdc96ae458860c91c2c20a55b90"
+    },
+    "server/game/bot-difficulty.js": {
+      "sha256": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835",
+      "canonicalLfSha256": "7baada5bd0a384025b3a51485fc354010c57dd0f135b94534f8f58cae62ce835"
+    },
+    "server/game/bot-strategy.js": {
+      "sha256": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7",
+      "canonicalLfSha256": "d7d8c0586ebffe8bfeae6fb977e16a765a4757ef8c0476b7d0571688344d4bd7"
+    },
+    "server/game/connection.js": {
+      "sha256": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c",
+      "canonicalLfSha256": "ab77b0de7f5bb0c760ca2d46e11155e189958ba1b689033e3da3d1979597b86c"
+    },
+    "server/game/coordinates.js": {
+      "sha256": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7",
+      "canonicalLfSha256": "85fd73f35ead405cfcf6fef30c11c2c0e97c6925232a616ecda80858f4d1c3e7"
+    },
+    "server/game/deployment.js": {
+      "sha256": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15",
+      "canonicalLfSha256": "2fde4314ef593495e4d2bdfcfa28649c11df3c635c12399eef71eaa75ee7df15"
+    },
+    "server/game/endgame.js": {
+      "sha256": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418",
+      "canonicalLfSha256": "443b63327c86c272c8623e4ca130e76f9d79b17e5137c7674e592cb2b3f92418"
+    },
+    "server/game/errors.js": {
+      "sha256": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab",
+      "canonicalLfSha256": "02b319b8b7c745d0ed6c8b35e0914707919765482de48805ff51418fbe807eab"
+    },
+    "server/game/information-projection.js": {
+      "sha256": "1e5bd7a769944b2f71e2d1405841a9c18fe5a4b8139dd5f18e48e4b8540ecb69",
+      "canonicalLfSha256": "34865d39ca0625a87a0e5a4cca5bb69ba6607558a9d91a202d1dff804a94fdaf"
+    },
+    "server/game/lifecycle.js": {
+      "sha256": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8",
+      "canonicalLfSha256": "2bc3daad4b4ce6d8ca185386600fad44e29b086fbfa53ed94eabc368da48f7c8"
+    },
+    "server/game/map-rules.js": {
+      "sha256": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7",
+      "canonicalLfSha256": "deb2e32293cedaf75e7309d0a888de836c165c94b15dadcd0904200cf515b0a7"
+    },
+    "server/game/match-resolution.js": {
+      "sha256": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f",
+      "canonicalLfSha256": "5900c9ef14fd2a87a10d58a8938361fe91a33d81d2c0d51a8050cf8a8bdec84f"
+    },
+    "server/game/match.js": {
+      "sha256": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523",
+      "canonicalLfSha256": "415dc8f48c2808f56bf3e6c9f9b618ce6d77b2645bda16a4d586039b151df523"
+    },
+    "server/game/random-deployment.js": {
+      "sha256": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430",
+      "canonicalLfSha256": "2cb54b7cc6f7be8558270f84e5f9277eb673a9e69accad0f17ff869b9dd14430"
+    },
+    "server/game/ranges.js": {
+      "sha256": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374",
+      "canonicalLfSha256": "9f586dbbe5c1f333c4e6fa91e656a2e541e8d81468d7f7ffce64711ebb49a374"
+    },
+    "server/game/room-service.js": {
+      "sha256": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30",
+      "canonicalLfSha256": "34cbc8aac97dc74f45bc11bc2f10993fad05d48551f82cad4bf99fbcd97f3b30"
+    },
+    "server/game/room.js": {
+      "sha256": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d",
+      "canonicalLfSha256": "586ac7c446a0bba1d2716e2e698b62bafa09f8f9606b5e64fbf41f5a6026306d"
+    },
+    "server/game/rules.js": {
+      "sha256": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682",
+      "canonicalLfSha256": "94cd8617c12c7a56fce196dad3ebe2eaec4d3fb90bde8ce6832258db572e5682"
+    },
+    "server/game/timing.js": {
+      "sha256": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a",
+      "canonicalLfSha256": "313eb6092e8220725e40a39a274045579ea9e9e7f5b0baee9398b889573a9c4a"
+    },
+    "server/game/units.js": {
+      "sha256": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9",
+      "canonicalLfSha256": "9f50075c71abbf49751e6a45ac275546429d9c97cb2f0aac50096b5eaf33b2d9"
+    },
+    "server/operations/rate-limiter.js": {
+      "sha256": "e8ed016b80d0dbbef3eb1e6d2116b48007074a8a92fddcd52b0b6143c07941df",
+      "canonicalLfSha256": "e8ed016b80d0dbbef3eb1e6d2116b48007074a8a92fddcd52b0b6143c07941df"
+    },
+    "server/operations/telemetry.js": {
+      "sha256": "6c85a84ef80cff8a1e4cfe1d39abc3981234a2de98a9416a4e239bd9c741e36e",
+      "canonicalLfSha256": "6c85a84ef80cff8a1e4cfe1d39abc3981234a2de98a9416a4e239bd9c741e36e"
+    },
+    "server/release.js": {
+      "sha256": "65de753c498d64b4c2b08807e37119350817d38e8350e6128ba48df96f883a71",
+      "canonicalLfSha256": "65de753c498d64b4c2b08807e37119350817d38e8350e6128ba48df96f883a71"
+    },
+    "server/server.js": {
+      "sha256": "9a0a5a56e5092d83200bac997ed075dd668929b0f25c98c57127955609dc4c3c",
+      "canonicalLfSha256": "9a0a5a56e5092d83200bac997ed075dd668929b0f25c98c57127955609dc4c3c"
+    },
+    "server/socket/game-gateway.js": {
+      "sha256": "2d6b536ffa0bb0790134c8e533753b57397ae04a486c1d72591e9423fa3eff0c",
+      "canonicalLfSha256": "2d6b536ffa0bb0790134c8e533753b57397ae04a486c1d72591e9423fa3eff0c"
+    },
+    "server/socket/protocol.js": {
+      "sha256": "2b68f95471aabc7da7293b2ee0b9e82cb5a6e6c693a9a4fab649613eb6d7209e",
+      "canonicalLfSha256": "2b68f95471aabc7da7293b2ee0b9e82cb5a6e6c693a9a4fab649613eb6d7209e"
+    },
+    "server/training/catalog.json": {
+      "sha256": "19b52bd70a93336f1ccea66f4ed1ca3c7e04e39e8ae822ed223dd5609e211c8f",
+      "canonicalLfSha256": "9aa763ad4b3c56c0611b4445117995a51aa06ae3752a5180d8e6bd16dd2cb1ba"
+    },
+    "server/training/course.js": {
+      "sha256": "934f7c366947dd2fc7617f0b1e743e87b96696b893615adbe9616eaaeff4f0de",
+      "canonicalLfSha256": "934f7c366947dd2fc7617f0b1e743e87b96696b893615adbe9616eaaeff4f0de"
+    },
+    "server/training/scenarios.js": {
+      "sha256": "51d1465f0b84be8f6ecf59fb7ee465b9c4b5c9807477cfcbfb3047abb48c52d4",
+      "canonicalLfSha256": "fa70990fc2bd6172e88338fd985d219893d5d24ce53db25a925a1ec8e14b5b2c"
+    },
+    "server/training/service.js": {
+      "sha256": "a67070ca1086073208dcbd1d7c6fc636983c8a69ee20d3ba6e9fb6caf617e7c9",
+      "canonicalLfSha256": "d504cba295894c4ae2b46bc30a8499ab83aaacb0cd2e67642062a8d8a4ef1800"
+    }
+  }
+}

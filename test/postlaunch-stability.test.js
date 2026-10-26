@@ -63,7 +63,7 @@ test("公开状态接口只返回聚合运行信息，不包含私密对局标�
   });
   assert.equal(response.status, 200);
   const status = await response.json();
-  assert.equal(status.stage, "Ocean-v1.6.3");
+  assert.equal(status.stage, "Ocean-v1.6.4");
   assert.equal(status.uptimeSeconds, 10);
   assert.equal(status.roomCount, 0);
   assert.equal(status.maxRooms, 200);

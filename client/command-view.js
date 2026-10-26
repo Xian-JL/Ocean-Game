@@ -35,10 +35,14 @@
 
 
   const ARMORY_ORDER = Object.freeze(["destroyer_i_ram","destroyer_ii_ram","pirate_attack","motorboat_ram","submarine_missile","nuclear_bomb","shock_bomb","detection_bomb","radar_scan","helicopter_strafe"]);
+  function actionNameMarkup(definition){
+    const words={destroyer_i_ram:['驱逐舰Ⅰ','冲撞'],destroyer_ii_ram:['驱逐舰Ⅱ','冲撞'],pirate_attack:['海盗船','攻击'],motorboat_ram:['摩托艇','冲撞'],submarine_missile:['潜射','导弹'],helicopter_strafe:['直升机','扫射'],radar_scan:['雷达','扫描']};
+    return (words[definition.type]??[definition.name]).map(word=>'<span>'+escapeHtml(word)+'</span>').join('');
+  }
   function renderActionCard(room, definition) {
     const status=Model.deriveActionStatus(room,definition),selected=definition.type===state.battle.selectedAction;
     const slot=(ARMORY_ORDER.indexOf(definition.type)+1)%10;
-    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected?'action-card--selected':''}" data-action="select-action" data-action-type="${definition.type}" aria-pressed="${selected}" aria-describedby="armory-reason-${definition.type}" ${status.enabled?'':'disabled'}><span class="action-slot-number" aria-hidden="true">${slot}</span><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${escapeHtml(definition.name)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected?'<span class="action-selected-mark" aria-hidden="true">✓</span>':''}</button><p id="armory-reason-${definition.type}" class="action-disabled-reason">${status.enabled?'可用':escapeHtml(status.label)}</p></div>`;
+    return `<div class="action-option" data-status="${status.code}"><button type="button" class="action-card ${selected?'action-card--selected':''}" data-action="select-action" data-action-type="${definition.type}" aria-label="${escapeHtml(definition.name+'，'+Model.actionResourceLabel(room,definition))}" aria-pressed="${selected}" aria-describedby="armory-reason-${definition.type}" ${status.enabled?'':'disabled'}><span class="action-slot-number" aria-hidden="true">${slot}</span><span class="action-card__icon" aria-hidden="true">${uiIcon(actionVisualMeta(definition).icon)}</span><span class="action-card__body"><strong>${actionNameMarkup(definition)}</strong><small>${escapeHtml(Model.actionResourceLabel(room,definition))}</small></span>${selected?'<span class="action-selected-mark" aria-hidden="true">✓</span>':''}</button><button id="armory-reason-${definition.type}" class="action-disabled-reason action-info" type="button" data-action="inspect-action" data-action-type="${definition.type}" aria-label="查看${escapeHtml(definition.name)}完整说明：${escapeHtml(status.label)}"><span aria-hidden="true">${escapeHtml(compactActionStatus(status))} ⓘ</span><span class="sr-only">${escapeHtml(status.label)}</span></button></div>`;
   }
   function renderArmorySource(room){
     const def=Data.getActionDefinition(state.battle.selectedAction);
@@ -46,7 +50,7 @@
     const source=def?units.find(u=>u.type===def.sourceType&&u.hp>0&&!u.paralyzed)??units.find(u=>u.type===def.sourceType):null;
     if(!source)return `<section class="armory-source" aria-label="行动来源"><span class="armory-source__crest" aria-hidden="true"></span><span class="status-kicker">舰队待命</span><strong>选择你的武器</strong><small>先选行动，再指定海图目标</small><button data-action="toggle-fleet">查看己方舰队</button></section>`;
     const unit=Data.getUnitDefinitionById(source.id)??Data.getUnitDefinitionByType(source.type);
-    return `<section class="armory-source" aria-label="行动来源"><span class="source-projection" aria-hidden="true">${armorySourceProjection(source)}</span><span class="status-kicker">行动来源</span><strong>${escapeHtml(unit.name)}</strong><span class="source-hp">${Model.formatHp(source.hp)} <small>/ ${unit.initialHp} HP · ${escapeHtml(unitStatusText(source,unit))}</small></span><div class="hp-track"><i data-hp-percent="${Math.round(source.hp/unit.initialHp*100)}"></i></div><button data-action="toggle-fleet">己方舰队详情</button></section>`;
+    return `<section class="armory-source armory-source--active" data-source-state="${source.hp<=0?'sunk':source.paralyzed?'paralyzed':'active'}" aria-label="行动来源"><span class="source-projection" aria-hidden="true">${armorySourceProjection(source)}</span><strong class="source-name">${escapeHtml(unit.name)}</strong><span class="source-hp">${Model.formatHp(source.hp)} <small>/ ${unit.initialHp} HP</small><small class="source-condition">${escapeHtml(unitStatusText(source,unit))}</small></span><div class="hp-track"><i data-hp-percent="${Math.round(source.hp/unit.initialHp*100)}"></i></div><button data-action="toggle-fleet">己方舰队详情</button></section>`;
   }
 
   function renderActionGroups(room) {

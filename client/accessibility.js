@@ -136,7 +136,7 @@
     }
     previousOverlay=overlay;
     document.querySelector('.site-shell').inert=!blockingOverlay.hidden;
-    for(const panel of app.querySelectorAll('.battle-header,.battle-main-column,.fleet-panel,.action-rail,.command-dock,.mobile-console-nav')) {
+    for(const panel of app.querySelectorAll('.battle-header,.battle-main-column,.fleet-panel,.action-rail,.armory-source,.command-dock,.mobile-console-nav')) {
       panel.inert=Boolean(overlay && panel!==overlay && !panel.contains(overlay));
     }
     for(const panel of app.querySelectorAll('.log-panel,.fleet-panel,.action-rail')) {

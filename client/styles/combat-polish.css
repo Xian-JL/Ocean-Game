@@ -1,0 +1,82 @@
+/* v1.6.4: combat presentation. Course, result and replay layouts are untouched. */
+.ocean-console .action-card__body strong{display:flex;flex-wrap:wrap;justify-content:center;column-gap:0;font-size:13px;line-height:1.3;min-height:34px;align-content:center}
+.ocean-console .action-card__body strong>span{white-space:nowrap;display:block;width:100%}
+.ocean-console .action-card{height:104px;min-height:104px;padding:12px 3px 4px;gap:3px}.ocean-console .action-card__icon{display:grid;place-items:center;height:24px;line-height:1}.ocean-console .action-card__icon svg{width:24px;height:24px}.ocean-console .action-card__body{gap:2px}
+.ocean-console .action-card__body small{white-space:nowrap;letter-spacing:-.02em}
+.ocean-console .action-info{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin:0;padding:4px 2px;border:0;border-bottom:1px solid var(--line);font-size:12px;line-height:1.35;color:var(--text-secondary);background:transparent}
+.ocean-console .action-info:hover,.ocean-console .action-info:focus-visible{background:var(--surface-raised);color:var(--text-primary)}
+.ocean-console .armory-slots{align-items:start;gap:6px}
+.ocean-console .armory-source--active{display:grid;grid-template-rows:48px auto auto 4px 44px;gap:3px;align-content:center;padding-right:12px;overflow:hidden}
+.ocean-console .source-projection{position:relative;inset:auto;transform:none;width:100%;height:48px;opacity:1;padding:3px 8px;background:radial-gradient(ellipse,color-mix(in srgb,var(--bronze) 13%,transparent),transparent 70%)}
+.ocean-console .source-projection svg{width:100%;height:100%;filter:drop-shadow(0 3px 3px #0006)}
+.ocean-console .source-name{font-size:15px;white-space:nowrap}
+.ocean-console .source-hp{display:flex;gap:6px;align-items:baseline;font-size:21px;line-height:1.3;white-space:nowrap}
+.ocean-console .source-hp small{font-size:12px}.ocean-console .source-condition{margin-left:auto;color:var(--text-secondary)}
+.ocean-console .armory-source .hp-track{margin:0;height:4px}.ocean-console .armory-source>button{padding:4px 0;line-height:1.3}
+.ocean-console [data-source-state=sunk] .source-projection{filter:grayscale(1);opacity:.6}.ocean-console [data-source-state=paralyzed]{border-right-style:dashed}
+.ocean-console .command-summary{align-content:start;gap:3px}.ocean-console .command-action-name{font-size:15px;line-height:1.3}
+.ocean-console .command-target{font-size:18px;line-height:1.3;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.ocean-console .command-source-cost{font-size:12px;line-height:1.4;overflow-wrap:anywhere}.ocean-console .command-risk{font-size:12px;line-height:1.3;border-left:2px solid var(--warning);padding-left:6px}
+.ocean-console .command-controls{gap:6px}.ocean-console .command-controls>button{min-width:44px;min-height:44px;flex-shrink:0;padding:6px;font-size:13px}.ocean-console .command-execute{min-width:84px;flex:1}
+.map-context{display:flex;align-items:center;gap:12px;flex-shrink:0;min-height:44px;min-width:0;color:var(--text-secondary);font-size:12px;border-bottom:1px solid var(--line);padding-bottom:4px}
+.map-context>span{display:grid;min-width:0}.map-context strong{font-size:12px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}.map-context small{font-size:12px;white-space:nowrap}
+.map-overview{position:relative;width:64px;height:36px;flex:none;border:1px solid var(--control-edge);background:repeating-linear-gradient(90deg,transparent 0 7px,var(--line) 7px 8px),repeating-linear-gradient(0deg,var(--surface-inset) 0 7px,var(--line) 7px 8px);overflow:hidden}
+.map-overview i{position:absolute;border:2px solid var(--accent-ink);background:var(--accent-soft);min-width:4px;min-height:4px}
+.map-locate{display:flex;gap:6px;align-items:center;margin-left:auto}.map-locate input{width:84px;min-height:44px;height:44px;padding:6px 8px;font-size:14px;text-transform:uppercase}.map-context button{min-width:44px;min-height:44px;padding:6px 10px;font-size:12px;white-space:nowrap}
+.battle-map-card .board-axis--column{position:sticky;top:0;z-index:16;background:var(--surface-inset);box-shadow:0 1px var(--control-edge)}
+.battle-map-card .board-axis--row{position:sticky;left:0;z-index:16;background:var(--surface-inset);box-shadow:1px 0 var(--control-edge)}
+.battle-map-card .board-corner{position:sticky;top:0;left:0;z-index:17;background:var(--surface-inset)}
+.battle-map-card .board-frame{scroll-padding:30px;scrollbar-gutter:stable;scrollbar-color:var(--control-edge) var(--surface-inset)}
+.battle-map-card .board-cell:focus-visible{outline:3px solid var(--ember-hot);outline-offset:-3px}
+#weapon-details-dialog{max-width:540px}#weapon-details-body p{line-height:1.7}#weapon-details-body .weapon-status{padding:10px 12px;border-left:3px solid var(--accent-ink);background:var(--surface-inset)}
+.ocean-console button:focus-visible,.map-context input:focus-visible{outline:3px solid var(--ember-hot);outline-offset:2px}
+/* Keep hulls readable: shadows below hulls, restrained wakes, state symbols above. */
+.ocean-console .tactical-unit-art>.tactical-prop--wake{opacity:.34;inset:0;width:100%;height:100%}
+.ocean-console .tactical-unit-art>.tactical-prop--shadow{opacity:.42;inset:0;width:100%;height:100%}
+.ocean-console .tactical-unit-art>.tactical-status-art{opacity:.9;inset:-3%;width:106%;height:106%}
+.ocean-console .tactical-unit-art--carrier-module>.tactical-prop--wake{opacity:.18}
+/* Distinct abstract weapon silhouettes. These consume no hidden outcome fields. */
+.motion-ram-one:after,.motion-ram-two:after{content:"";position:absolute;left:30%;top:26%;width:40%;height:48%;clip-path:polygon(50% 0,100% 75%,50% 58%,0 75%);background:currentColor;animation:prow-contact var(--effect-duration,1000ms) ease-out both;pointer-events:none}
+.motion-ram-two:after{clip-path:polygon(22% 0,48% 48%,74% 0,100% 75%,74% 57%,48% 85%,22% 57%,0 75%)}
+.motion-cross .motion-core{display:block;inset:24%;background:transparent;border:3px solid currentColor;border-right-color:transparent;border-bottom-color:transparent;border-radius:0;rotate:45deg;animation:boarding-hook var(--effect-duration) ease-out both}
+.motion-wake .motion-ring{border-radius:0;clip-path:polygon(0 0,50% 55%,100% 0,100% 40%,50% 100%,0 40%);border:0;background:currentColor}
+.motion-missile .motion-core{display:block;inset:auto;left:42%;top:45%;width:24%;height:8%;border-radius:50% 2px 2px 50%;rotate:-35deg;animation:sealed-flight var(--effect-duration) ease-out both}
+.motion-nuclear .motion-ring{border-style:double;border-width:5px}.motion-nuclear .motion-ring--second{border-style:dashed;border-width:2px;inset:3%}.motion-nuclear .motion-core{inset:37%;border-radius:25%;rotate:45deg}
+.motion-emp .motion-ring{border-radius:20%;border-style:dashed;rotate:45deg}.motion-emp .motion-core{display:block;inset:28%;background:transparent;border-top:3px solid currentColor;border-bottom:3px solid currentColor;animation:emp-cut var(--effect-duration) steps(4,end) both}
+.motion-sonar .motion-ring{border-width:3px}.motion-sonar .motion-ring--second{inset:28%;border-width:2px}
+.motion-radar .motion-scan{width:10%;background:linear-gradient(90deg,transparent,currentColor);opacity:.65}.motion-radar .motion-ring{border-width:2px;border-radius:0}
+.motion-strafe .motion-ray{width:5px;box-shadow:8px 0 0 color-mix(in srgb,currentColor 35%,transparent)}
+.battle-effect-art[data-effect-axis=column] .motion-strafe .motion-ray{top:0;left:0;width:100%;height:4px;animation-name:strafe-column}
+@keyframes prow-contact{0%,10%{opacity:0;transform:translateY(28%) scale(.65)}30%,48%{opacity:.9;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-12%) scale(1.08)}}
+@keyframes boarding-hook{0%{opacity:0;transform:scale(.5) rotate(-25deg)}40%{opacity:.9;transform:scale(1) rotate(0deg)}100%{opacity:0;transform:scale(1.15) rotate(15deg)}}
+@keyframes sealed-flight{0%{opacity:0;transform:translate(-120%,160%)}30%{opacity:1}65%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(40%,-50%)}}
+@keyframes emp-cut{0%,20%{opacity:0;transform:scale(.5)}35%,65%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.25)}}
+@keyframes strafe-column{0%{top:0;opacity:0}15%,85%{opacity:.95}100%{top:100%;opacity:0}}
+@media(min-width:1600px){.ocean-console .action-card{height:126px;min-height:126px}.ocean-console .action-card__body strong{font-size:14px}.ocean-console .armory-source--active{grid-template-rows:58px auto auto 4px 44px}.ocean-console .source-projection{height:58px}}
+@media(min-width:1024px) and (max-width:1439px){.ocean-console .action-card{height:96px;min-height:96px;padding-top:8px}.ocean-console .armory-source--active{grid-template-rows:34px auto auto 4px 44px;gap:2px}.ocean-console .source-projection{height:34px}.ocean-console .source-name{font-size:14px}.ocean-console .source-hp{font-size:18px;gap:3px}.ocean-console .source-condition{font-size:12px}.ocean-console .command-target{font-size:16px}.map-context{gap:8px}}
+@media(min-width:1024px) and (max-width:1300px){.ocean-console .action-card{height:90px;min-height:90px;padding-top:6px}.ocean-console .action-card__body strong{font-size:12.5px;min-height:32px}.ocean-console .action-card__icon{height:22px}.ocean-console .source-hp{flex-wrap:wrap;gap:0 4px}.ocean-console .source-condition{margin-left:0}.ocean-console .armory-source--active{grid-template-rows:26px auto auto 4px 44px}.ocean-console .source-projection{height:26px}.ocean-console .command-controls{gap:4px}}
+@media(max-width:1023px){
+ .map-context{gap:6px;min-height:48px}.map-overview{width:36px;height:28px}.map-context small{display:none}.map-locate{gap:4px}.map-locate input{width:62px;font-size:16px}.map-context button{padding:4px 6px;font-size:12px}.map-context>button{display:none}
+ .ocean-console .action-card{height:auto;min-height:76px;gap:10px;padding:12px 8px 8px 26px}.ocean-console .action-card__body strong{justify-content:flex-start;min-height:0;font-size:14px;gap:0}.ocean-console .action-card__body strong>span{width:auto}.ocean-console .action-card__body small{white-space:normal}.ocean-console .action-info{justify-content:flex-start;padding-left:8px}
+ .ocean-console .armory-source--active{display:none}.ocean-console .command-summary{gap:3px}.ocean-console .command-action-name{font-size:14px}.ocean-console .command-target{font-size:16px}.ocean-console .command-source-cost{font-size:12px}.ocean-console .command-risk{font-size:12px}
+ .ocean-console .action-rail,.ocean-console .fleet-panel,.ocean-console .log-panel{bottom:max(8px,env(safe-area-inset-bottom));left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));max-height:88dvh;max-height:88svh}.ocean-console .action-rail__content{max-height:calc(88dvh - 80px)}
+ .ocean-console .command-controls{align-self:end}.ocean-console .command-controls>button{min-height:48px}.ocean-console .armory-plinth{max-height:40dvh;padding-bottom:calc(64px + env(safe-area-inset-bottom))}
+}
+@media(max-width:380px){.map-overview{display:none}.map-context strong{font-size:12px}.map-locate input{width:58px}.ocean-console .command-controls{gap:4px}.ocean-console .command-controls>button{padding:4px}.ocean-console .command-execute{min-width:76px!important}.ocean-console .command-source-cost{line-height:1.4}}
+@media(max-height:599px){
+ .map-context{display:none}.ocean-console .armory-source--active{display:none}.ocean-console .action-card{min-height:70px}.ocean-console .command-target{font-size:14px}.ocean-console .command-summary{max-height:none;overflow:auto;gap:3px}.ocean-console .command-controls>button{min-height:44px}.ocean-console .action-rail{left:auto;width:min(460px,94vw);max-height:none;top:8px;bottom:8px}.ocean-console .action-rail__content{max-height:none}.ocean-console .armory-plinth{max-height:none;padding:8px 8px 104px}.map-tools button[data-action=focus-selected-target]{display:block}
+}
+@media(min-width:1024px) and (min-height:600px){
+ html[data-text-size=large] .armory-plinth{grid-template-columns:210px minmax(0,1fr)}html[data-text-size=large] .command-dock{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px}html[data-text-size=large] .command-controls{align-self:end}html[data-text-size=large] .command-target{font-size:20px}
+ html[data-text-size=large] .mobile-console-nav button:first-child{display:grid}html[data-text-size=large] .action-rail{display:none;position:fixed;z-index:110;top:80px;bottom:20px;right:20px;width:520px;background:var(--surface-panel);border:1px solid var(--control-edge);padding:12px}html[data-text-size=large] .action-rail--open{display:flex}html[data-text-size=large] .action-rail .console-panel-heading{display:flex}html[data-text-size=large] .action-rail__content{display:block;overflow:auto}html[data-text-size=large] .armory-slots{grid-template-columns:repeat(2,minmax(0,1fr))}html[data-text-size=large] .action-card{min-height:100px}
+}
+@media(forced-colors:active){.map-overview{border-color:CanvasText;background:Canvas}.map-overview i{border-color:Highlight;background:Canvas}.board-axis,.board-corner{background:Canvas!important}.action-info{color:ButtonText!important}.source-projection{display:none}.armory-source--active{grid-template-rows:auto auto 4px 44px!important}}
+
+.hull-fallback{display:grid;place-items:center;position:absolute;inset:6%;font-size:14px;color:var(--text-primary);background:var(--surface-inset);border:1px solid var(--control-edge);z-index:5;pointer-events:none}.art-fallback>.tactical-hull-viewport{visibility:hidden}
+@media(forced-colors:active){.battle-map-card .tactical-unit-art-layer{display:none}.ocean-board .unit-glyph{opacity:1}}
+
+/* The frame, rather than the board, owns scrolling so axes can stick. */
+.battle-map-card .ocean-board{overflow:visible}
+
+html[data-text-size=large] .ocean-console .action-card__body strong{font-size:17px;line-height:1.4;min-height:48px}html[data-text-size=large] .ocean-console .action-card__body small{font-size:15px}html[data-text-size=large] .ocean-console .action-card{height:132px;min-height:132px}html[data-text-size=large] .ocean-console .action-info{font-size:15px}
+@media(min-width:1024px) and (min-height:600px){html[data-text-size=large] .ocean-console .armory-source--active{grid-template-rows:42px auto auto 4px 44px;gap:2px}html[data-text-size=large] .ocean-console .source-projection{height:42px}html[data-text-size=large] .ocean-console .source-name{font-size:17px}html[data-text-size=large] .ocean-console .source-hp{font-size:24px}}

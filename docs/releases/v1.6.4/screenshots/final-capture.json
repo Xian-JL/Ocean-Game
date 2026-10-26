@@ -1,0 +1,11 @@
+{
+  "asset": "http://localhost:3000/css/ocean.css?v=1.6.4-ui2.b2737ca469",
+  "page": "P05",
+  "risk": "可能造成己方损失",
+  "summaryHeight": 105,
+  "summaryScrollHeight": 105,
+  "viewport": [
+    1440,
+    900
+  ]
+}
